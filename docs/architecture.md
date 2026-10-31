@@ -1,6 +1,6 @@
 # Proposed architecture
 
-The stack is undecided. The initial Svelte experiment lives in ignored `prototypes/initial-web-ui/`. Its code, tests, and deployment workflow are not production commitments.
+The approved stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PWA with offline play. Gameplay and design remain open. The initial experiment lives in ignored `prototypes/initial-web-ui/`; its code, tests, interface, and deployment workflow are not approved production work.
 
 ## Module boundaries
 
@@ -26,7 +26,7 @@ The Sudoku API uses plain data and has no dependency on artwork, themes, browser
 
 ## Delivery and validation
 
-GitHub Pages, JavaScript delivery, no required WebAssembly. A PWA is a candidate delivery approach. Verify relative asset paths and offline behavior under a repository subpath if chosen.
+GitHub Pages, PWA, offline play, JavaScript delivery, and no required WebAssembly are approved. Verify relative asset paths and offline behavior under a repository subpath. The first visit requires a connection to cache the app.
 
 Validate engine rules and unique puzzles, session transitions, saved-state recovery, language completeness, theme independence, keyboard operation and responsive layouts. Motorola G31/G32 screens have 1080 by 2400 physical pixels; browser CSS dimensions require measurement. Desktop emulation is not physical-device testing.
 

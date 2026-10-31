@@ -10,6 +10,7 @@
 - Customizable theme colors, backgrounds, motion, and localized text.
 - Separate Sudoku, session, theme, localization, storage, and presentation responsibilities.
 - GitHub Pages hosting, JavaScript delivery, no required WebAssembly.
+- Approved stack: Svelte + TypeScript + Vite, delivered as a PWA with offline play.
 - ImageGen mockups before interface prototypes. Temporary work stays ignored.
 - Keep personal context out of project artifacts.
 
@@ -21,7 +22,6 @@
 | Halloween palette | Pumpkin orange, near-black, purple, and frog green; select exact swatches visually |
 | Controls | Number entry plus overflow; decide contextual access to essential solving tools |
 | Seasonal dates | October 24 through November 7 inclusive, using local dates |
-| Stack | Svelte + TypeScript + Vite; compare vanilla TypeScript and Phaser tradeoffs |
 | Modes | Quick Play plus an optional Pond Journey |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Journey supply | Reviewed stages with randomized practice within difficulty bands |

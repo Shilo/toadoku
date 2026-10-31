@@ -1,6 +1,6 @@
 # Technology research
 
-> Svelte is a research recommendation. The stack remains undecided pending discussion. The temporary implementation is ignored and does not establish approval.
+> Decision update: Svelte + TypeScript + Vite, GitHub Pages, PWA, and offline play are approved. This comparison records the reasoning; the ignored prototype's interface remains unapproved.
 
 Research date: 2026-10-30. This document records recommendations, not completed implementation or device testing.
 
