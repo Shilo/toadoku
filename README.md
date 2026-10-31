@@ -27,6 +27,8 @@ Vite emits relative asset references for repository-subpath hosting. The browser
 
 See [production progress and acceptance](docs/production-ui-progress.md), [asset provenance](docs/production-assets.md) and the [original implementation handoff](docs/production-ui-handoff.md). Final human-made artwork, physical-device validation and final tiny-note typography remain open.
 
+The menu uses the existing rough frog/lily-pad sketch, restored at the user's request as a temporary placeholder. Its fixed responsive slot contains the full image without stretching or cropping. It is not final human-made artwork.
+
 ## Design and product references
 
 - [Complete design handoff](docs/design-handoff.md)

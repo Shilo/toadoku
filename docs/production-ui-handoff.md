@@ -2,6 +2,8 @@
 
 Implementation update, 2026-10-31: the user activated this brief and the first maintained presentation/navigation phase is complete. See [fresh production results and limits](production-ui-progress.md). The preparation-only statements below describe the historical handoff task, not the current tracked root application.
 
+Artwork follow-up, 2026-10-31: the user subsequently requested restoring the current rough frog/lily-pad sketch to the built UI. That narrow temporary-placeholder authorization supersedes this historical handoff's neutral-text-only requirement. See [current asset provenance](production-assets.md#artwork-boundary); final artwork still requires human authorship and suitable rights.
+
 Prepared: 2026-10-31. Prototype review is complete. This task installs project-local official Svelte skills and prepares documentation only. **No production application, root package manifest, UI component, router or infrastructure is implemented by this handoff.** Activate the implementation phase in a subsequent task.
 
 ## 1. Objective, authority and phase boundary

@@ -6,6 +6,30 @@ import { leafShape } from '../../src/lib/leaves/shape';
 const evidence = 'prototypes/production-ui-evidence';
 test.beforeAll(async () => { await mkdir(evidence, { recursive: true }); });
 
+test('frog sketch stays contained and fixed across responsive menu states',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
+  for(const [width,height] of [[320,568],[360,800],[800,360],[393,873],[873,393],[600,600],[720,1000],[1280,720],[1920,1080]]) {
+    await page.setViewportSize({width,height}); await page.goto('/');
+    const art=page.getByRole('img',{name:dictionaries.en.art});
+    await expect.poll(()=>art.evaluate(e=>(e as HTMLImageElement).naturalWidth)).toBe(1254);
+    const bounds=await art.boundingBox(); const slot=await page.locator('.art-slot').boundingBox();
+    expect(bounds).toEqual(slot);
+    expect(bounds!.x).toBeGreaterThanOrEqual(8); expect(bounds!.y).toBeGreaterThanOrEqual(8);
+    expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width-8);
+    expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(height-8);
+    expect(await art.evaluate(e=>getComputedStyle(e).objectFit)).toBe('contain');
+    expect(await art.evaluate(e=>{const img=e as HTMLImageElement;return img.naturalWidth===img.naturalHeight;})).toBe(true);
+    const title=await page.locator('h1').boundingBox();
+    expect(bounds!.x>=title!.x+title!.width || bounds!.y>=title!.y+title!.height).toBe(true);
+    await page.getByRole('button',{name:'Quick Play',exact:true}).click();
+    expect(await art.boundingBox()).toEqual(bounds);
+    await page.getByRole('button',{name:'Back',exact:true}).click();
+    await page.getByRole('button',{name:'Progression',exact:true}).click();
+    expect(await art.boundingBox()).toEqual(bounds);
+    if([360,800,393,873,1280].includes(width))await page.screenshot({path:`${evidence}/sketch-${width}x${height}.png`});
+  }
+});
+
 for (const [width,height] of [[360,800],[800,360],[393,873],[873,393],[1280,720],[720,1000],[600,600]]) {
   test(`layout and selection ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({width,height}); await page.emulateMedia({reducedMotion:'reduce'});

@@ -32,6 +32,8 @@ Current milestone is Pond-only with disabled More and one deliberately rough com
 
 ## Artwork policy
 
+2026-10-31 follow-up: the user explicitly requested the current rough frog/lily-pad sketch in the tracked and built UI. This is a narrow temporary-placeholder exception to the earlier no-promotion rule below. Preserve its rough TEMP treatment and contain sizing; final artwork still requires human authorship and suitable rights. See [current asset provenance](production-assets.md#artwork-boundary).
+
 - Production artwork must be handmade by humans. Free and paid assets are both acceptable; verify the creator, human-authorship evidence, usage license and required attribution before adoption.
 - AI-generated images and illustrations are temporary concept material only. This includes AI-authored SVG illustrations, sprites, icons, backgrounds and textures; vector format is not an exception.
 - Use ImageGen for clearly marked mockups under ignored `/prototypes/`. Those images are references, not production assets or proof of a human-made art style's availability.

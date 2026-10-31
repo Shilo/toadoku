@@ -2,6 +2,8 @@
 
 Implemented 2026-10-31 after explicit activation of the production UI phase. This record applies to fresh tracked source, not to the completed prototype's tests. The prototype remains unchanged under ignored `prototypes/pond-visual-v1/`.
 
+Follow-up, 2026-10-31: the user requested the missing frog/lily-pad sketch and a commit. The current rough transparent PNG is restored in the existing fixed art slot using contain sizing and localized alt text. This explicit temporary exception supersedes the original neutral text fallback described in the phase record below. Two targeted browser tests pass: nine allocations from 320x568 to 1920x1080 with fixed submenu anchors, and the built repository-subpath asset/hash audit. Type checks and the production build pass; the Svelte autofixer reports no issues. Removing the obsolete centering grid prevents the square image's intrinsic minimum height from overflowing a shorter art slot. Codex browser screenshots confirm portrait, landscape and desktop fit. [Provenance and final-art boundary](production-assets.md#artwork-boundary) remain explicit.
+
 ## Scope and structure
 
 The root app uses Svelte 5.57.3, TypeScript 6.0.3, Vite 8.3.5 and official Vite plugin 7.3.1 with a committed lockfile. TypeScript 7 was rejected because the installed Svelte checker supports TypeScript 5/6. Vitest 4.1.12 was chosen for compatibility with the available Node 25 runtime. Node 24 is the recommended maintained baseline. No SvelteKit or prototype imports are present.
@@ -77,4 +79,4 @@ Physical Motorola G31/G32 validation remains pending, including native DPR3, bro
 
 The nine-note specimen uses proportional 0.165D text, about 5.57px at the representative 33.77px anchor. Its full boxes fit geometrically; final optical readability is unapproved. Very small allocations below the tested D=28 envelope are not typography or motion acceptance targets. Grayscale/color-vision fixtures preserve inward grouping and 8px logical group gaps, but the selected water pairs have only 2.17:1 and 1.82:1 adjacent contrast. Final region-recognition/user accessibility evaluation remains open. No silent palette change was made.
 
-One approved human-made menu illustration, with provenance and rights, is still required. The stable contain-sized art slot uses a neutral non-illustrated text fallback. Final art, full solving-state accessibility and later Sudoku/PWA/product systems remain outside this phase.
+One approved human-made menu illustration, with provenance and rights, is still required. The stable contain-sized art slot now uses the user-authorized rough sketch described in the follow-up above. Final art, full solving-state accessibility and later Sudoku/PWA/product systems remain outside this phase.

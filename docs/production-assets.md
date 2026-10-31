@@ -45,13 +45,19 @@ The disabled palette is reserved for genuinely inactive native controls. It uses
 
 Water deep/middle, middle/shallow and deep/shallow contrast ratios are 2.171:1, 1.821:1 and 3.952:1. The palette alone does not establish 3:1 region boundaries for every pair. Inward leaf grouping, fixed 8px group gaps and logical accessible names remain important, and grayscale/color-vision readability needs integrated review. Selected colors are preserved rather than silently redesigned.
 
-Cream title contrast on deep/middle/shallow water is 6.525:1, 3.006:1 and 1.651:1 respectively. The production menu therefore keeps its fixed title rectangle plus the full 1.8px float envelope clear of shallow water and shore. This preserves the selected cream Chewy lettering without extra water colors or an outline. Middle water barely meets the large-text 3:1 threshold; raster and device legibility still require review. The neutral artwork fallback uses dark ink on opaque cream, 10.737:1, and is not interactive.
+Cream title contrast on deep/middle/shallow water is 6.525:1, 3.006:1 and 1.651:1 respectively. The production menu therefore keeps its fixed title rectangle plus the full 1.8px float envelope clear of shallow water and shore. This preserves the selected cream Chewy lettering without extra water colors or an outline. Middle water barely meets the large-text 3:1 threshold; raster and device legibility still require review.
 
 Color contrast does not prove tiny nine-note optical readability. The note scale records 4.5px as a descriptive small-size reference, not a forced minimum. The specimen's actual glyph size is capped proportionally at 0.165 of the leaf anchor diameter, preserving complete glyph boxes inside the protected disk. That is about 4.62px at a 28px anchor and 5.57px at a 33.77px anchor. These tiny specimens are not final typography approval. Hardware, text scaling and final solving-state typography remain later validation work.
 
 ## Artwork boundary
 
-No production illustration has been approved or acquired. The menu has one stable contain-sized slot with a neutral non-illustrated fallback. AI mockups and the prototype's frog/pad bitmap are reference material only and must be absent from the production bundle. No runtime import into `prototypes/` is permitted.
+On 2026-10-31 the user explicitly requested restoring the current rough frog-plus-lily-pad sketch or creating an equally provisional sketch, including the built UI and a commit. This supersedes the earlier neutral-text-only handoff for this one placeholder.
+
+`src/assets/menu-sketch.png` is an unchanged copy of the existing `prototypes/pond-visual-v1/public/menu-placeholder.png`: 1254x1254 transparent PNG, SHA-256 `b4c53b629017faa5f57c9a72d3cb80d182268dd729b93e842ddd6be229ffedf1`. It is the project's AI-generated development sketch, not human-made final art or a newly acquired licensed illustration. Its scribbles, question mark and TEMP label are preserved. The original prototype file is unchanged.
+
+The image is imported from tracked assets with Vite-managed paths, never through a runtime prototype import. It uses the existing fixed title/art geometry and shared float, full-slot `object-fit: contain`, intrinsic square dimensions and localized alt text. It appears only in the menu. The build audit permits exactly this image/hash and continues to reject other artwork or prototype imports.
+
+This explicit temporary exception does not approve AI illustrations as final production art. Replace the sketch with approved human-made art and documented rights before final artwork acceptance. Other AI mockups remain ignored reference material.
 
 ## Primary technical references
 

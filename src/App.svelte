@@ -9,6 +9,7 @@
   import { dictionaries, resolveLocale, type Locale } from './lib/i18n';
   import { example, exampleNotes, noteCell, moveCell } from './lib/fixture';
   import { pond, themeStyle } from './lib/theme/pond';
+  import menuSketch from './assets/menu-sketch.png';
 
   let { locale = resolveLocale(new URLSearchParams(location.search).get('lang') ?? navigator.language) }: { locale?: Locale } = $props();
   const copy = $derived(dictionaries[locale]);
@@ -109,7 +110,7 @@
       <section class="identity" aria-label="Toadodu">
         <h1 style={`${rectStyle(layout.menuTitle)};font-size:${layout.titleFontSize}px;transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>Toadodu</h1>
         <div class="art-slot" style={`${rectStyle(layout.menuArt)};transform:translate(${artFloat.x}px,${artFloat.y}px)`}>
-          <span class="art-fallback">{copy.art}</span>
+          <img class="menu-art" src={menuSketch} alt={copy.art} width="1254" height="1254" draggable="false" decoding="async" />
         </div>
       </section>
       <nav class="menu-panel" aria-label={route === 'quick' ? copy.quick : route === 'progression' ? copy.progression : 'Toadodu'} bind:this={menuElement}

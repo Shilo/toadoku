@@ -64,7 +64,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 - Use ImageGen before new UI experiments.
 - Keep prototypes, AI mockups, dependencies, builds and test artifacts in ignored `prototypes/`. Do not promote them without discussion.
 - Production source, tests and package/lock configuration are tracked normally; experimental source/assets remain ignored. The completed UI phase does not authorize later game systems.
-- Production art must be human-made with provenance and suitable licensing. Never ship AI illustrations. Keep the menu placeholder provisional.
+- Final production art must be human-made with provenance and suitable licensing. The user explicitly authorized the current rough frog/lily-pad sketch as a temporary built-UI placeholder; see [asset provenance](docs/production-assets.md#artwork-boundary). Other AI illustrations remain unapproved. Keep this exception provisional.
 - Keep vendored official skill payloads verbatim. Project-authored wording/punctuation rules do not require rewriting upstream files.
 
 ## Read as needed
