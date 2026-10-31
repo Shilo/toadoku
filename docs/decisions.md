@@ -25,6 +25,9 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 - Visual implementation must prioritize a flat, full-screen, minimal, super-cute frog environment built mainly from HTML/CSS colors, gradients and soft shapes, with only a few human-made sprites.
 - Frog and lily-pad sprites stay unchanged between basic and Halloween themes. Theme changes affect UI colors, gradients, background styling, buttons and font roles, not sprite artwork or accessories.
 - Selected initial visual direction: C, Quiet Flat. Preserve B, Layered Pond, and A, Expressive Gradient, as modular future treatments.
+- Accepted board direction: top-down CSS pond with broad procedural lily-pad faces, rectangular cell hitboxes, no conventional drawn grid/frame, and spatial 3 by 3 grouping.
+- Keep input/action keys a distinct warm cream/ivory color family against green board pads.
+- Water stays visually flat with only a few sparse abstract marks; no large ripple rings or reflective/gradient scene treatment in the current Pond milestone. Apply this to both menu and gameplay.
 - Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
 - Number entry uses a bottom two-row/five-column dock in portrait and a right five-row/two-column dock in landscape. Keep digits upright; recalculate usable bounds rather than assuming literal pixel transposition.
 - Selected control finish: soft-raised pastilles. Selected default board shape: Fill space, with a persistent Square option available through Settings.
@@ -58,7 +61,7 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 | Level revisits | Fresh randomized puzzle required. Preserve furthest advancement; cross-reset unlock access and exact return-to-active-game behavior need confirmation |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
-| New board presentation | Top-down CSS pond and borderless lily-pad cells requested for mockup. Reviewed recommendation: procedural broad pad faces plus spatial 3 by 3 grouping. No final geometry selected |
+| Region cue | Compare two close pad greens alternating by whole 3 by 3 region against uniform pads with alternating flat water undertones. Pad tones recommended; choice and exact colors remain open |
 
 ## Rejected prototype direction
 

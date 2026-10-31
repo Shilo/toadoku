@@ -40,11 +40,11 @@ The earlier direct-tools-plus-Settings proposal remains research, not current fu
 
 Retain the agreed nonblocking start notice and persistent completion results until Continue, rather than a permanent HUD. Do not force timed waits or auto-dismiss earned rewards. Exact duration/presentation remains open. A non-timed session-information surface is required when More/Settings is implemented. Start active timing when the board is visible and interactive, not at the first digit.
 
-## New top-down pond proposal: under review
+## Accepted pond-board direction; region tones under review
 
-Both scenes should feel like a flat pond seen from above, with CSS water color and restrained shapes rather than a painted landscape or horizon. The menu's combined placeholder should use an overhead or slightly oblique top-down game-sprite view. This describes camera direction, not a commitment to pixel-art rendering or a game engine.
+The top-down pond and broad procedural pad-board presentation are accepted as the visual direction. Both scenes use a flat CSS water field with only sparse abstract marks, not large ripple rings, gradients, highlights, reflective water or a painted horizon. Apply the same simplified water treatment to menus and gameplay. The menu's combined placeholder remains an overhead/slightly oblique provisional game image, not a commitment to pixel-art rendering or a game engine.
 
-The board proposal removes the traditional outer panel and drawn grid lines. Each of the 81 logical rectangular cells shows a lily-pad-like face; its complete rectangle remains selectable, including surrounding water. Rows, columns and all nine 3 by 3 regions remain classic Sudoku. Changing presentation does not change rules or remove notes.
+The board removes the traditional outer panel and drawn grid lines. Each of the 81 logical rectangular cells shows a lily-pad-like face; its complete rectangle remains selectable, including surrounding water. Rows, columns and all nine 3 by 3 regions remain classic Sudoku. Changing presentation does not change rules or remove notes. Keep the numeric/action keys a distinct warm cream/ivory family against the green pad faces; this separation was explicitly preferred.
 
 **Reviewed recommendation:** use subtly separated 3 by 3 groups and broad procedural CSS pad-button faces with a small off-center notch. Wider internal water gutters identify regions without drawn lines. Do not rely on alternating colors alone. The face adapts to the cell; upright text uses a quiet, opaque, generous central area.
 
@@ -54,9 +54,20 @@ Implementation-format options for later: CSS control geometry is the simplest ad
 
 Solid high-contrast digits are preferable to outlined text over a busy leaf. Keep candidate positions fixed and inspect all nine notes at phone size. Selection/focus/conflict states need non-color cues without permanent grid borders. Board geometry stays stable while solving; no eighty-one independently bobbing pads.
 
-This new board is a mockup proposal, not an approved replacement interface. Reject or revise it if regions cannot be identified, notes become unreadable, or pad shapes mislead touch selection. See [independent redesign review](research/top-down-pond-board.md).
+The overall visual direction is accepted; exact region tones, dimensions, contrast and actual-size interaction still need review before implementation. Reject or revise details if regions cannot be identified, notes become unreadable, or pad shapes mislead touch selection. See [independent redesign review](research/top-down-pond-board.md).
 
 The latest four-view image and exact ImageGen prompts are under ignored `prototypes/top-down-pond/`. They show the reviewed procedural-pad/region-spacing approach in both orientations, with the rough composite placeholder confined to menus. The render is not an exact spacing or input specification.
+
+## Region-tone comparison
+
+Two proposed cues alternate across whole 3 by 3 regions, never individual cells. Their pattern is `A B A / B A B / A B A` across the nine regions. Preserve the existing wider internal water gutters so color is not the only grouping cue.
+
+- **Recommended: pad tones.** Use two close greens for the region's nine pad faces. Keep the water flat and uniform. This reinforces the objects the player reads without introducing nine background panels.
+- **Alternative: water tones.** Keep every pad the same green and use two quiet water undertones behind the groups. Avoid outlined rectangular panels, separate raised cards, lighting and large ripples. This cue can be weaker because pad faces cover much of it.
+
+Selection, keyboard focus, player entries, givens, notes and conflicts must remain distinguishable on both base tones. Region parity is derived from the existing board regions, not a new Sudoku rule. The chosen tone method is not yet a user setting or an approved theme preference.
+
+The new temporary comparison is `prototypes/flat-water-regions/region-tone-comparison.png`. The separate `flat-water-main-menu.png` shows only the simplified menu background to avoid regenerating all orientations. Its quiet field and sparse abstract marks also apply to gameplay. Exact prompts are alongside. See [region-tone review](research/region-tone-review.md).
 
 ## Preserved comparisons
 

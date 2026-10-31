@@ -28,7 +28,9 @@ An adopted background needs creator/source/license records, sensible file dimens
 
 Shared menu sprites stay outside theme definitions and unchanged. Gameplay frog removal is a scene-layout choice, not a seasonal theme. A tactile CSS lily-pad button is a control finish, not a replacement sprite. See [candidate theme contract](research/theme-structure.md) for the proposed small model and image/performance evidence.
 
-The menu currently uses one combined provisional frog/pad template, not separate finished sprites. The new scene proposal is flat top-down CSS pond water; the new pad-board proposal uses separate quiet opaque control faces rather than one opaque board panel. Treat backdrop, board face and art asset as separate responsibilities. Existing opaque classic-board notes describe the earlier visual baseline, not a requirement to reject the new concept.
+The menu currently uses one combined provisional frog/pad template, not separate finished sprites. The accepted scene is flat top-down CSS pond water, and the accepted pad-board direction uses quiet opaque control faces rather than one opaque board panel. Current water styling is a flat field with sparse abstract marks, not large ripple rings or scene gradients. Treat backdrop, board face and art asset as separate responsibilities. Existing opaque classic-board notes describe the earlier visual baseline.
+
+Region color is a separate presentation choice under review: two close pad fills, or one pad fill with two flat water undertones. Derive the checkerboard from existing region membership. Theme data supplies the paired colors, not region rules. Board-aligned water patches belong to a board-region underlay, not a global background image that could misalign on rotation. Do not recolor the combined art placeholder or final shared illustration to implement region tones. No public region-style selector is approved.
 
 ## Discuss before implementation
 

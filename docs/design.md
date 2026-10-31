@@ -2,7 +2,7 @@
 
 These requirements override earlier visual recommendations in the research notes.
 
-Current milestone is Pond-only with disabled More and one deliberately rough composite menu-art placeholder. See [current UI/UX](ui-ux.md) and [TODO.md](../TODO.md). The new top-down pond/pad board is a proposal under review, not settled by an earlier grid mockup.
+Current milestone is Pond-only with disabled More and one deliberately rough composite menu-art placeholder. The top-down pond and broad procedural pad-board direction are accepted; region-tone method and exact dimensions remain under review. See [current UI/UX](ui-ux.md) and [TODO.md](../TODO.md).
 
 - Feel like an immersive, colorful game.
 - Start with C, Quiet Flat, and preserve B/A as modular alternatives. Build most of the world using HTML/CSS color and sparse organic shapes. Optional human-made PNG/JPEG/WebP backgrounds are a supported theme capability, not a selected asset. Avoid clutter and heavy glass/blur effects.
@@ -16,6 +16,8 @@ Current milestone is Pond-only with disabled More and one deliberately rough com
 - Halloween is deferred. Preserve earlier palette research for later rather than designing or implementing it during the basic Pond milestone.
 - Reuse exactly the same frog and lily-pad artwork across themes. No sprite recoloring, costumes, seasonal replacements or accessories. Themes change UI colors, gradients, fonts, buttons and background styling.
 - Keep digits and notes over quiet opaque surfaces. The proposed pad board can show water between those surfaces instead of an opaque panel. Put theme typography primarily in menus and short labels.
+- Keep action keys warm cream/ivory and distinct from the green pads. Compare whole-region pad-tone alternation with water-tone alternation, reinforced by spatial gutters rather than color alone.
+- Water must remain flat with sparse abstract markings, not a realistic/gradient scene or repeated large ripple rings. The menu background treatment also applies to gameplay.
 - Default to Fill space and offer Square as a persistent setting. Never stretch glyphs or rotate the logical puzzle; preserve the nine-row, nine-column and three-by-three-region structure.
 - Use selected soft-raised CSS buttons while keeping the world quiet and flat. Jelly and lily-pad studies remain alternatives, not additional required styles.
 - No permanent progress HUD is needed. Review brief start status and persistent completion feedback, with information recoverable in a non-timed secondary view.
