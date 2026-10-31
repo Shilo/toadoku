@@ -4,9 +4,12 @@ A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, 
 
 **Status: design discussion. Approved: Svelte + TypeScript + Vite, GitHub Pages, PWA, offline play, Quick Play and randomized Progression, fresh level revisits, score and currency. Selected names: Metamorphosis, Leap, Dewdrops. Scoring balance, repeat schedule and visual design remain open. No store is in scope.**
 
+Production artwork must be human-made. AI-generated art is permitted only for temporary mockups and prototypes.
+
 ## Start here
 
 - [Design constraints](docs/design.md)
+- [Main-menu flow and deferred saves](docs/menu.md)
 - [Discussion workflow](docs/process.md)
 - [Open decisions](docs/decisions.md)
 - [Randomized progression and cycles](docs/progression.md)

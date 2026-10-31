@@ -19,6 +19,8 @@
 - Approved names: Metamorphosis for the repeat counter, Leap for a level, and Dewdrops for the single earned currency. These names add no transformation mechanic or extra progression system.
 - Retain traditional Sudoku's basic layout and functionality. Visual themes must preserve familiar solving interactions.
 - ImageGen mockups before interface prototypes. Temporary work stays ignored.
+- Production artwork must be human-made with suitable licensing and provenance. Free or paid assets are allowed. AI-generated graphics are restricted to temporary mockups/prototypes and must not ship.
+- Main menu shows both modes directly. Quick Play selection reveals difficulty choices in the same scene. Progression selection reveals existing-save/new-game choices. Back returns to mode choices.
 - Keep personal context out of project artifacts.
 
 ## Open proposals
@@ -26,6 +28,9 @@
 | Topic | Proposal requiring discussion |
 | --- | --- |
 | Visual direction | Compare immersive pond, pumpkin habitat, and frog-cell treatments |
+| Human-made artwork | Creator, asset sources, license/attribution, art direction and budget remain open |
+| Save slots | Deferred: three slots is only a suggestion; count and replacement behavior are not selected |
+| PWA install entry | Optional overflow placement when installation is available; visibility and browser fallback remain proposals |
 | Halloween palette | Pumpkin orange, near-black, purple, and frog green; select exact swatches visually |
 | Controls | Number entry plus overflow; decide contextual access to essential solving tools |
 | Seasonal dates | October 24 through November 7 inclusive, using local dates |
