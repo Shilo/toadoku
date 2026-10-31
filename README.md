@@ -2,7 +2,7 @@
 
 A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, hosted on GitHub Pages.
 
-**Status: design discussion. Current milestone: basic flat Pond, procedural lily-pad board, cream soft-raised keys, edge-to-edge Fill space, bottom/right docks, disabled More and one rough combined menu-art placeholder. Region-tone alternatives remain open. Halloween and More functionality are deferred. B/A remain future treatments. No store is in scope.**
+**Status: design discussion. Current milestone: basic flat Pond, procedural lily-pad board, cream soft-raised keys, edge-to-edge Fill space, bottom/right docks, disabled More and one rough combined menu-art placeholder. Four rounded alternate-water regions over a continuous ground are under review; region cues must work without hue. Halloween and More functionality are deferred. B/A remain future treatments. No store is in scope.**
 
 Production artwork must be human-made. AI-generated art is permitted only for temporary mockups and prototypes.
 The world should be flat, minimal and mostly HTML/CSS color, gradients and organic shapes, with a few identical frog/lily-pad sprites shared across themes.

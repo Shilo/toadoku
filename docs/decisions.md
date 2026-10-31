@@ -27,7 +27,8 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 - Selected initial visual direction: C, Quiet Flat. Preserve B, Layered Pond, and A, Expressive Gradient, as modular future treatments.
 - Accepted board direction: top-down CSS pond with broad procedural lily-pad faces, rectangular cell hitboxes, no conventional drawn grid/frame, and spatial 3 by 3 grouping.
 - Keep input/action keys a distinct warm cream/ivory color family against green board pads.
-- Water stays visually flat with only a few sparse abstract marks; no large ripple rings or reflective/gradient scene treatment in the current Pond milestone. Apply this to both menu and gameplay.
+- Water stays flat but expressive: a few broad organic curves suggest connected pond water and shallows. The plain field with small marks was too sparse. No large ripple rings or reflective/gradient scene treatment; protect region legibility in gameplay.
+- Region recognition must survive loss of hue through shape, spacing and lightness. Subtle alternating pad greens were ineffective; rectangular water panels undermined immersion. Neither comparison is selected.
 - Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
 - Number entry uses a bottom two-row/five-column dock in portrait and a right five-row/two-column dock in landscape. Keep digits upright; recalculate usable bounds rather than assuming literal pixel transposition.
 - Selected control finish: soft-raised pastilles. Selected default board shape: Fill space, with a persistent Square option available through Settings.
@@ -61,7 +62,7 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 | Level revisits | Fresh randomized puzzle required. Preserve furthest advancement; cross-reset unlock access and exact return-to-active-game behavior need confirmation |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
-| Region cue | Compare two close pad greens alternating by whole 3 by 3 region against uniform pads with alternating flat water undertones. Pad tones recommended; choice and exact colors remain open |
+| Region cue | Review four rounded lighter-water patches only at regions 2, 4, 6, 8, over one continuous darker-water ground for 1, 3, 5, 7, 9. Uniform pads, spatial gutters, no outlines/cards. Exact geometry, palette and accessibility validation remain open |
 
 ## Rejected prototype direction
 

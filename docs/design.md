@@ -16,8 +16,8 @@ Current milestone is Pond-only with disabled More and one deliberately rough com
 - Halloween is deferred. Preserve earlier palette research for later rather than designing or implementing it during the basic Pond milestone.
 - Reuse exactly the same frog and lily-pad artwork across themes. No sprite recoloring, costumes, seasonal replacements or accessories. Themes change UI colors, gradients, fonts, buttons and background styling.
 - Keep digits and notes over quiet opaque surfaces. The proposed pad board can show water between those surfaces instead of an opaque panel. Put theme typography primarily in menus and short labels.
-- Keep action keys warm cream/ivory and distinct from the green pads. Compare whole-region pad-tone alternation with water-tone alternation, reinforced by spatial gutters rather than color alone.
-- Water must remain flat with sparse abstract markings, not a realistic/gradient scene or repeated large ripple rings. The menu background treatment also applies to gameplay.
+- Keep action keys warm cream/ivory and distinct from the green pads. Current region proposal: uniform pads over four rounded water patches at regions 2, 4, 6, 8, with one continuous base elsewhere. Keep spatial gutters; test shape/lightness in grayscale rather than relying on hue. Earlier subtle pad tones and rectangular water panels were not selected.
+- Flat water should use broad organic curves suggesting pond shallows, not just a plain field or tiny marks. No realistic/gradient scene or large ripple rings. Share the visual language across scenes without putting decorative curves across gameplay region boundaries.
 - Default to Fill space and offer Square as a persistent setting. Never stretch glyphs or rotate the logical puzzle; preserve the nine-row, nine-column and three-by-three-region structure.
 - Use selected soft-raised CSS buttons while keeping the world quiet and flat. Jelly and lily-pad studies remain alternatives, not additional required styles.
 - No permanent progress HUD is needed. Review brief start status and persistent completion feedback, with information recoverable in a non-timed secondary view.

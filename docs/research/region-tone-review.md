@@ -2,6 +2,8 @@
 
 Research date: 2026-10-31. Status: recommendation for visual comparison, not implementation approval. This review follows the broad CSS pad-face proposal in [the board review](top-down-pond-board.md). It adds no interface or production artwork.
 
+**Superseded recommendation:** the subsequent visual review found subtle pad tones ineffective and rectangular water panels insufficiently immersive. Preserve this comparison as history. The current [rounded-region proposal](rounded-region-review.md) uses shape and lightness over a continuous water ground, with broad abstract pond curves.
+
 ## Recommendation
 
 Compare two similar opaque green pad tones first, alternating by whole 3 by 3 region. Keep the wider water gutters after rows and columns 3 and 6 as the independent spatial cue. This reinforces the Sudoku structure directly while leaving the pond background quiet. It is a design inference requiring actual-size review, not a proven usability result.
