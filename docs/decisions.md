@@ -13,7 +13,9 @@
 - Approved stack: Svelte + TypeScript + Vite, delivered as a PWA with offline play.
 - Initial modes: Quick Play and Progression only. Daily challenges and additional rule variants are outside the initial scope.
 - Progression uses randomized selection from a bundled, pre-rated puzzle collection.
-- Progression loops: completing the final level increments the cycle counter, resets the level to 1, and returns to easiest difficulty with another puzzle. Preserve puzzle-use history across cycles. No prestige currencies or upgrades.
+- Progression loops: completing the final level increments a repeat counter, resets the level to 1, and returns to easiest difficulty with another puzzle. Preserve puzzle-use history and currency across repeats. The label Cycle was rejected.
+- Previously completed levels can be revisited, drawing a fresh randomized puzzle for the chosen level.
+- Both modes award a performance score and persistent currency based on difficulty, speed and efficiency. No store, spending, purchases or upgrades are in scope.
 - Retain traditional Sudoku's basic layout and functionality. Visual themes must preserve familiar solving interactions.
 - ImageGen mockups before interface prototypes. Temporary work stays ignored.
 - Keep personal context out of project artifacts.
@@ -26,7 +28,9 @@
 | Halloween palette | Pumpkin orange, near-black, purple, and frog green; select exact swatches visually |
 | Controls | Number entry plus overflow; decide contextual access to essential solving tools |
 | Seasonal dates | October 24 through November 7 inclusive, using local dates |
-| Cycle details | Two counters, Cycle and Level, are recommended labels. Exact cycle length, band schedule and counter presentation remain open. See [approach](progression.md) |
+| Repeat and level names | Ranked terminology research recommends Rebirth and Level; no replacement labels are selected. Exact loop length, band schedule and presentation remain open |
+| Currency and scoring | Dewdrops recommended; name, formula, reward bands, assistance treatment, speed targets and conversion rate await discussion. See [proposal](scoring.md) |
+| Level revisits | Fresh randomized puzzle required. Preserve furthest advancement; cross-reset unlock access and exact return-to-active-game behavior need confirmation |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
 

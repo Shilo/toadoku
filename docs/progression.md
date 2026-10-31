@@ -1,49 +1,51 @@
-# Randomized progression and cycles
+# Randomized progression and repeat runs
 
-## Agreed approach
+## Agreed behavior
 
-Progression selects shuffled puzzles from a bundled, pre-rated collection. Difficulty rises across a defined sequence of levels. After the final level, the next cycle starts at the easiest difficulty with another puzzle. Quick Play remains separate.
+Progression draws shuffled puzzles from a bundled, pre-rated collection. Difficulty rises across a defined sequence of levels. After the final level, the level returns to 1, a second counter increases, and the next puzzle uses the easiest difficulty. Quick Play remains separate.
 
-Use two counters: **Cycle** and **Level**. Both start at 1. A cycle is one complete pass through the difficulty schedule. A level is one puzzle's position within that cycle.
+The label Cycle was rejected. Replacement names, including Rebirth, remain proposals. See [ranked terminology](research/terminology.md). Keep counter wording separate from progression logic, and confirm the initial numbering convention once the name is chosen.
 
 | Event | Outcome |
 | --- | --- |
-| Complete an ordinary level | Same cycle, next level |
-| Complete the final level | Next cycle, Level 1, easiest difficulty |
-| Resume or reload | Restore the same active puzzle and counters |
-| Enter a new cycle | Keep puzzle-use history and settings |
+| Complete an ordinary frontier level | Advance to the next level |
+| Complete the final frontier level | Increment the repeat counter and return to Level 1, easiest difficulty |
+| Resume or reload | Restore the active board, time, assistance history and counters |
+| Revisit a completed level | Draw a fresh puzzle matching that level's difficulty |
+| Begin another repeat | Preserve currency, lifetime earnings, settings and puzzle-use history |
 
-Progress advances only after a valid completed puzzle and must be recorded exactly once. Persist the counter transition together so reload cannot duplicate or lose advancement. Keep the completed board visible until Continue; the new puzzle starts only when the player continues. Do not clear an unfinished puzzle because of a date, theme change, reload, or catalog update.
+Record valid completion and progression once. Keep the completed board visible until Continue; a new puzzle starts only when the player continues. Date, theme, language and catalog changes must not discard an unfinished board.
 
-## Recommended minimal design
+## Recommended replay policy
 
-- Label the system **Cycles**. Exact visible counter placement waits for the interface discussion; do not add a gameplay header.
-- Repeat the same difficulty schedule each cycle. Higher cycle numbers do not raise the difficulty floor or ceiling.
-- Loop automatically after completion. Use the ordinary Continue action, without a separate prestige button or reset confirmation for normal advancement.
-- Add no currencies, upgrades, power bonuses, reward economy, extra prestige layers, or special Sudoku rules.
-- Preserve progress independently of theme, language and Quick Play's active save.
-- Keep cycle length and difficulty breakpoints internal to the game. Their actual values require puzzle sampling and playtesting; no configuration screen is needed.
+Selecting a completed level starts a fresh puzzle attempt, not the original board. Recommend keeping the furthest-progression marker separate from the selected replay level. A replay does not move the frontier backwards or trigger another reset by repeatedly completing an old final level.
 
-The two counters record repeated completed runs. They do not claim that Cycle 2 is harder than Cycle 1, or that every successive puzzle has a greater perceived difficulty.
+Fresh replay attempts use the same score and currency rules as equivalent puzzles in Quick Play and normal progression. Completing replay puzzles rewards play without granting duplicate advancement.
+
+Still open: whether level access survives automatic resets, how a replay is launched while another board is unfinished, and whether replay has a separate active-save slot. Decide the smallest useful behavior before implementation; do not silently overwrite an active puzzle or introduce a map.
+
+## Recommended repeat behavior
+
+- Repeat the same difficulty schedule on each pass. The repeat count does not raise the difficulty floor or ceiling.
+- Loop automatically using the ordinary Continue action. A separate prestige button or power-up system is unnecessary.
+- Keep loop length and difficulty breakpoints internal to the game, with actual values determined through sampling and playtesting.
+- Persist score and currency in both modes. No store, spending, purchases or upgrades are in scope. See [scoring proposal](scoring.md).
+- Counter and currency presentation must preserve the minimal gameplay surface; no top bar or additional action row is approved.
 
 ## Freshness and finite supply
 
-Retain shuffled order/cursors or played-puzzle history across cycles. A cycle reset must not replay the same catalog order from its beginning. Choose unused puzzles within the required difficulty band while available.
+Retain shuffled order/cursors or played-puzzle history across repeats and level revisits. Restarting the difficulty sequence must not restart catalog order. Choose unused puzzles within the required band while available.
 
-If one band is exhausted, reshuffle that band, allowing repeats and avoiding the immediately previous puzzle where possible. This does not reset counters or change difficulty. Finite content cannot guarantee permanently unseen puzzles. Retain catalog version and stable puzzle IDs, preserve active board data, and document update/exhaustion behavior before implementation.
+If a band is exhausted, reshuffle that band, permitting repeats and avoiding the immediate previous puzzle where possible. Exhaustion does not reset progression or change difficulty. Finite content cannot guarantee permanently unseen puzzles. Preserve catalog version, stable puzzle IDs and active board data across updates.
 
-## Challenge to this approach
+## Challenges and boundaries
 
-Automatic return to Easy can become boring after skills improve. This loop offers variety and a repeating challenge arc, not uninterrupted skill advancement. Keep the easy opening proportionate and test it. If returning to Easy repeatedly causes abandonment, revisit automatic cycling before adding skips, unlocks, adaptive grading, or bonuses.
+Returning to Easy may become tedious as skills improve. This loop offers variety and a recurring challenge arc, not uninterrupted skill advancement. Keep the easy section proportionate and test it before adding skips or extra systems.
 
-Optional prestige would preserve the choice to stay at a high difficulty, but adds another decision. Automatic looping is the simpler fit for the requested behavior. Raising difficulty every cycle would eventually reach the same ceiling and contradict the return to easiest, so it is not recommended.
+Paid replays make reward balance important: easier puzzles can pay more per minute even when harder puzzles pay more per completion. Calibrate the scoring proposal before deciding amounts. Do not add farming restrictions, daily limits or prestige multipliers without discussion.
 
-## Research and terminology
-
-Clicker Heroes uses Ascension and Transcendence resets that award persistent resources. Toadodu borrows only the repeating-run idea. With no lasting power or reward system, Cycle describes the proposed behavior more directly than Prestige or Reincarnation. This is a naming recommendation, not a claim that prestige always requires a specific reward. [Official Clicker Heroes developer interview](https://blog.clickerheroes.com/the-evolution-and-success-of-clicker-heroes-interview-with-playsaurus/).
-
-The pre-rated catalog recommendation and tradeoffs remain in [the independent assessment](research/progression-audit.md). A candidate public-domain bank is documented there; no puzzle data has been imported.
+Clicker Heroes uses Ascension and Transcendence resets with lasting resources. Toadodu draws inspiration from reset terminology and persistent earned currency; no power bonuses or additional reset layers are approved. [Official developer interview](https://blog.clickerheroes.com/the-evolution-and-success-of-clicker-heroes-interview-with-playsaurus/).
 
 ## Open decisions
 
-Exact cycle length, difficulty-band boundaries and time spent in each band; final counter wording and placement; catalog selection and size. These require discussion or evidence before implementation. No interface or game code is authorized by this design note.
+Names, repeat-counter starting convention, loop length and difficulty breakpoints, catalog selection, replay unlock scope and save behavior, scoring formula and numerical balance, and visual presentation. No game or interface code is authorized by this note.
