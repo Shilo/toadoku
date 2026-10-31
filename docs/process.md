@@ -1,5 +1,9 @@
 # Discussion and prototyping
 
+Current phase: the prototype is complete. The [production UI handoff](production-ui-handoff.md) and project-local Svelte skills are preparation only; no production source is implemented in this task. When the user activates the next phase, build fresh maintained Svelte framework + TypeScript + Vite source, preserve the selected visual design and implement gameplay More navigation without Sudoku logic. Prototype workflow below remains historical/reference guidance for future visual experiments.
+
+The receiving lead owns project management, core engineering, overall UI/UX and integration. Use an efficient bounded specialist team for theme/scene/leaf/motion responsibilities. Every specialist researches and challenges its task, then the lead challenges material proposals until agreement and critically reviews each resulting implementation. [The handoff's team workflow](production-ui-handoff.md#12-lead-orchestration-and-efficient-specialist-teamwork) defines ownership, decision/revision loops, evidence and integration acceptance. This is not permission to start implementation during the handoff-only task.
+
 1. Report the existing research briefly, with visual references and clear tradeoffs.
 2. Discuss one topic at a time: visual direction, themes, technology, then modes and feature access. Change the order when requested.
 3. Use ImageGen for clearly marked temporary main-menu and gameplay mockups. Refine new directions before interface experiments. Final art must be human-made; asset sourcing is currently deferred in favor of one rough replaceable composite placeholder.

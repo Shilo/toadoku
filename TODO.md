@@ -1,5 +1,16 @@
 # Deferred work
 
+## Production UI handoff and next phase
+
+- [x] Close the prototype phase and write the [full production UI handoff](docs/production-ui-handoff.md), including selected design/prototype links, scope, tokens, navigation, assets and validation.
+- [x] Install all three canonical official Svelte skills and references in this project's `.agents/skills/`, with [pinned provenance](docs/svelte-agent-skills.md) and no global installation.
+- [x] Make the stack explicit: Svelte framework, TypeScript and Vite, without SvelteKit. This task does not implement production code.
+- [ ] After implementation is activated, scaffold fresh tracked production source and a compatible local toolchain. Preserve the ignored prototype as reference.
+- [ ] Use the lead/specialist workflow: lead-owned foundation/contracts/integration, researched and challenged module proposals, agreed direction, critical implementation review and integrated visual/engineering acceptance.
+- [ ] Implement modular Pond tokens, responsive menu/board presentation, localization inputs and safe motion from the selected guidelines.
+- [ ] Enable gameplay More with accessible Resume/Close and Back to main menu, correct browser/keyboard history and no new dock key.
+- [ ] Validate the new implementation independently; do not reuse prototype results as production certification. Keep Sudoku logic and later systems out of scope.
+
 ## Current visual prototype
 
 - [x] Build the fresh ignored `prototypes/pond-visual-v1/` baseline without copying old prototype code.
@@ -16,7 +27,7 @@ See [current scope](docs/design-handoff.md#next-session-visual-prototype-only). 
 
 ## More and settings
 
-- [ ] Keep More visibly disabled in the current menu and tenth gameplay-key position; do not open a placeholder popup.
+- [x] Keep More disabled in the completed prototype reference. The next production UI phase enables the existing tenth gameplay key for real navigation, as specified in the new handoff.
 - [ ] Review one shared menu: regular options in the main menu; regular options plus tools to their right in gameplay. Test narrow-screen stacking before choosing two columns.
 - [ ] Compare that idea against the previous direct-tools-plus-Settings proposal without adding a nested Tools step.
 - [ ] Restore Notes, Undo, Erase and Hint access, sticky Notes state, accessible dismissal/focus and session information.

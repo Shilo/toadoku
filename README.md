@@ -2,9 +2,11 @@
 
 A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, hosted on GitHub Pages.
 
-**Current milestone: visual prototype only.** The fresh ignored `prototypes/pond-visual-v1/` now connects menu/gameplay, static digits, full-cell selection and an animated top-down pond. Its latest refinement adds two-color shore, subtle notched/floating lily pads, natural selection, a playful title and fixed menu identity. Most controls remain inert/disabled. Full gameplay, scoring, progression, saves and production/PWA delivery remain excluded. Read the [findings and measured progress](docs/prototype-progress.md) and [bounded handoff](docs/design-handoff.md#next-session-visual-prototype-only).
+**Prototype complete; production UI handoff prepared.** The current task installs project-local official Svelte skills and documents the next phase only. No production application is implemented yet. The receiving agent should start with the [production UI handoff](docs/production-ui-handoff.md): fresh **Svelte framework + TypeScript + Vite**, responsive theme/presentation, screen transitions and enabled gameplay More with Resume/Back to menu. No SvelteKit or Sudoku logic.
 
-The baseline was built fresh without copying old demo code. Refining that current prototype is authorized. Concept/ImageGen, pond geometry and pad/motion sub-agents had separate ownership from screens/integration; independent browser-image review compared the result with the generated guideline.
+The ignored `prototypes/pond-visual-v1/` remains the selected visual reference: menu/gameplay, static digits, two-color shore, smooth animated water, subtle organic floating leaves, natural selection and fixed menu identity. Read its [findings and measured progress](docs/prototype-progress.md). The implementation phase must be activated separately; this handoff task does not scaffold it.
+
+The baseline was built fresh without copying old demo code and is now preserved as reference for the production UI handoff. Concept/ImageGen, pond geometry and pad/motion sub-agents had separate ownership from screens/integration; independent browser-image review compared the result with the generated guideline.
 
 **Selected design:** basic flat Pond, three shared water colors plus wet/dry ground behind controls, B Winding shallows, inward near-circular procedural leaves, cream soft-raised keys and 4px/8px spacing. Fill space, bottom/right ten-key docks and disabled More remain. The scribbly combined menu image is provisional. Natural leaf selection has no cell/pad outline; bounded leaf/title/art float becomes static under reduced motion. No store is in scope. Halloween, More functionality and alternative scene treatments remain deferred.
 
@@ -14,6 +16,8 @@ Build/type, layout/input, shore coverage, leaf/water envelopes and motion lifecy
 ## Start here
 
 - [Resume here: complete design handoff](docs/design-handoff.md)
+- [Next phase: production UI implementation handoff](docs/production-ui-handoff.md)
+- [Project-local official Svelte agent skills](docs/svelte-agent-skills.md)
 - [Current prototype progress, findings and ImageGen comparison](docs/prototype-progress.md)
 - [Saved visual artifact registry](docs/design-artifacts.json)
 - [Visual refinement and acceptance plan](docs/future-visual-research.md)

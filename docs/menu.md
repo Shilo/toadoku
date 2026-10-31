@@ -1,5 +1,7 @@
 # Main-menu flow
 
+Production UI phase delta: the prototype is complete. The [new handoff](production-ui-handoff.md#7-screen-states-more-and-navigation-behavior) requires an enabled gameplay More popup with Resume/Close and Back to main menu, including touch, keyboard and browser Back behavior. Older disabled-More statements below describe the completed prototype. Main-menu More contents and functional Settings/tools remain outside the specified minimum scope. This handoff-only task does not implement those changes.
+
 ## Agreed interaction
 
 Show both mode choices immediately in the main scene. Quick Play and Progression are working mode labels; final names remain open.

@@ -6,7 +6,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Tech stack
 
-- Svelte, TypeScript, Vite.
+- Svelte framework, TypeScript, Vite. Do not use SvelteKit.
 - GitHub Pages; installable PWA with offline play.
 - JavaScript delivery; no required backend or WebAssembly.
 
@@ -16,12 +16,20 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 - Themes and decorative geometry never change rules, hitboxes or saved progress.
 - Persist language, theme/appearance and puzzle progress. Support English, German and Spanish.
 
-## Current visual prototype
+## Current task and next phase
+
+- The prototype is complete. The latest request is handoff and project-local skill installation only; do not implement production code in this task.
+- Start with [production UI handoff](docs/production-ui-handoff.md). After the user activates implementation, build fresh tracked production source using the Svelte framework, TypeScript and Vite.
+- The next phase is design, responsive presentation and navigation only. Enable gameplay More with Resume/Close and Back to main menu; no Sudoku logic or later product systems.
+- In that implementation phase, the lead acts as project manager, senior engineer and senior UI/UX designer: own the core foundation, contracts and integration; delegate bounded specialist modules efficiently. Specialists research/challenge their briefs, the lead challenges proposals until direction is agreed, and the lead reviews/challenges each implementation before acceptance. Follow the [team workflow](docs/production-ui-handoff.md#12-lead-orchestration-and-efficient-specialist-teamwork).
+- Official Svelte skills are installed for this project only in `.agents/skills/`. Read [provenance and usage](docs/svelte-agent-skills.md), then load the local code-writer and best-practices skills for Svelte component/module work. Upstream SvelteKit examples do not change this project's stack. Installing the feedback skill does not authorize unsolicited external reports.
+
+## Completed visual prototype reference
 
 - Focus on visual design, Pond theming and animated top-down water in both screens.
 - Allow menu/game navigation, static example numbers and full-cell pad selection. Most controls are inert or disabled.
 - No Sudoku engine, number entry, scoring, progression, saves or production/PWA implementation.
-- The fresh baseline is under ignored `prototypes/pond-visual-v1/`. Refining that current prototype is authorized. Older demos remain visual references only; do not copy their code.
+- The completed baseline is under ignored `prototypes/pond-visual-v1/`. Preserve it as a production design reference. Older demos remain visual references only; do not copy their code.
 - Use sub-agents for bounded concept/background work, with screens and integration separately owned. Compare the implementation visually with ImageGen guidelines.
 - Current refinements: two-color ground behind controls, fluid water, varied near-circular notched pads, natural selection, fixed menu identity anchors, title-only display lettering and subtle floating pond objects. Reduced motion stays static; hitboxes stay fixed.
 
@@ -29,7 +37,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
-- More stays disabled. Settings, Halloween and save-slot policy are deferred.
+- More stays disabled in the completed prototype reference. The next production UI phase enables gameplay More for navigation. Settings, Halloween and save-slot policy remain deferred.
 - Water animation exists in the ignored baseline. Pad silhouettes, ground and floating refinements are authorized prototype work; production integration and hardware validation remain deferred. See [progress](docs/prototype-progress.md).
 - No store, purchases or upgrades.
 
@@ -55,11 +63,13 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 - Discuss one decision at a time; keep replies extremely concise.
 - Use ImageGen before new UI experiments.
 - Keep prototypes, AI mockups, dependencies, builds and test artifacts in ignored `prototypes/`. Do not promote them without discussion.
+- Once the production implementation phase is activated, its fresh source, tests and package/lock configuration are tracked normally; experimental source/assets remain ignored. No production scaffolding is authorized by this handoff-only task.
 - Production art must be human-made with provenance and suitable licensing. Never ship AI illustrations. Keep the menu placeholder provisional.
+- Keep vendored official skill payloads verbatim. Project-authored wording/punctuation rules do not require rewriting upstream files.
 
 ## Read as needed
 
-Start with [design handoff](docs/design-handoff.md). Current decisions override historical research. Open the relevant details before changing that area.
+Start with [production UI handoff](docs/production-ui-handoff.md), then [design handoff](docs/design-handoff.md). Current phase instructions override completed-prototype scope restrictions; approved visual decisions override historical research. Open the relevant details before changing that area.
 
 | Task | Read |
 | --- | --- |

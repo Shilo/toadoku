@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "checkedOn": "2026-10-31",
+  "sourceRepository": "https://github.com/sveltejs/ai-tools",
+  "revision": "75a688cd090b7b8326bfc988cf4ed69d5abd38fd",
+  "canonicalDirectory": "tools/skills",
+  "installationScope": "project only",
+  "installationRoot": ".agents/skills",
+  "method": "Codex skill-installer with explicit --dest; immutable copies",
+  "officialSkills": [
+    "svelte-code-writer",
+    "svelte-core-bestpractices",
+    "svelte-mcp-feedback"
+  ],
+  "skillFileCount": 3,
+  "referenceFileCount": 9,
+  "upstreamLicense": "MIT",
+  "licenseFile": "docs/licenses/svelte-ai-tools-MIT.txt",
+  "enumeration": "Complete, non-truncated Git tree; internal repo-maintenance skills and duplicate plugin copies excluded",
+  "files": [
+    {
+      "source": "tools/skills/svelte-code-writer/SKILL.md",
+      "local": ".agents/skills/svelte-code-writer/SKILL.md",
+      "gitBlobSha": "491c425652184a6f37e7154ac73d0d5217dbb0ff",
+      "bytes": 2093,
+      "sha256": "aaa5ef9293b156133fedaf1287a914817eda488e9e4b15e5bb20a56b1d348cb4"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/SKILL.md",
+      "local": ".agents/skills/svelte-core-bestpractices/SKILL.md",
+      "gitBlobSha": "dfd99f64e00a06d714dc28d72ba89b68a281b286",
+      "bytes": 7643,
+      "sha256": "96e025333e54533a31d37f70c7094da8df8b89c3c622a70d7edbf6332b84da47"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/attach.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/attach.md",
+      "gitBlobSha": "64c6cd9478666b1692a2ef86f95a58a111bf842c",
+      "bytes": 4916,
+      "sha256": "3c38d00f0274bda6e869fd53c111ab9929a603c58e6dc86641bdc3762a7abc01"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/await-expressions.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/await-expressions.md",
+      "gitBlobSha": "dd7d8c6e7c7cf8959f7b5fbbe84ab9333ec814f5",
+      "bytes": 6528,
+      "sha256": "ec1790bdf4519c1b7216d8a47938bb63b65bdb5dbe18f537941711f4bf7581fc"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/bind.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/bind.md",
+      "gitBlobSha": "f847cdc2d6859554030d254d2056aa7f6f1be1c7",
+      "bytes": 522,
+      "sha256": "5ced04c7951c6b11bbc4beedd4887e58569f460147aaa348aa83da1ea574c8af"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/each.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/each.md",
+      "gitBlobSha": "283b754f1c759280ddb2cf21907a6f97accfa89d",
+      "bytes": 1197,
+      "sha256": "5ba456d6a1655e361cb37de1575a56e2f04af7be61023e309747ec8a2e1b2c3e"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/hydratable.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/hydratable.md",
+      "gitBlobSha": "acc665eaeb7829f730625996ca95c8e4940e05fc",
+      "bytes": 4169,
+      "sha256": "23b7c39345461671ef5ef2568b37f7bd56c354cb96e5ca20f34480edcd4ff2e6"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/inspect.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/inspect.md",
+      "gitBlobSha": "dfbe3e9c43e781b8835dd8cdb9d14215cdf96606",
+      "bytes": 2241,
+      "sha256": "935945566e3a7d12ca1db345ff8bfc478ae984f5995dd0d34bb9289f12d8e475"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/render.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/render.md",
+      "gitBlobSha": "f8290e9534618eb8076c40aa951d763fb1df7a49",
+      "bytes": 841,
+      "sha256": "372f1ca7ee3205d7d9e4aaa687b1d4a5e71bcc5937e1cce7f3c98a51d8b1f746"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/snippet.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/snippet.md",
+      "gitBlobSha": "4cdece32e52e32fa6404a7383b3030b0475d8917",
+      "bytes": 8388,
+      "sha256": "b7924dc1babe16e5f938ce257041636e21a0eb585015bde3561aabd1bec3d52b"
+    },
+    {
+      "source": "tools/skills/svelte-core-bestpractices/references/svelte-reactivity.md",
+      "local": ".agents/skills/svelte-core-bestpractices/references/svelte-reactivity.md",
+      "gitBlobSha": "7f2cd5a059af608d8da53d61e203234e679f21cf",
+      "bytes": 1820,
+      "sha256": "962d86eca94fc2377b8ffddbe35c556e23a5b3e941ec04d6320e85828c727487"
+    },
+    {
+      "source": "tools/skills/svelte-mcp-feedback/SKILL.md",
+      "local": ".agents/skills/svelte-mcp-feedback/SKILL.md",
+      "gitBlobSha": "8f452e297926ebc0a064ed52d482ff5c68f9ba96",
+      "bytes": 5518,
+      "sha256": "04a4e33ecc9253f2df6ee701f68fac9f3f995567bdfb110b62862c37b8a2fef1"
+    }
+  ]
+}

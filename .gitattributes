@@ -1,0 +1,3 @@
+# Preserve the byte-identical, pinned official Svelte skill payloads.
+/.agents/skills/** -text
+/docs/licenses/svelte-ai-tools-MIT.txt -text

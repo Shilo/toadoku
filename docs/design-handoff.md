@@ -1,14 +1,18 @@
 # Design handoff: resume here
 
+**Phase update, 2026-10-31:** the prototype is complete. The latest task is handoff/tooling only. Read the [production UI handoff](production-ui-handoff.md) for the subsequent fresh Svelte framework + TypeScript + Vite application, with enabled gameplay More navigation and no Sudoku logic. No SvelteKit or production implementation is part of this handoff task. Visual decisions below remain the selected guideline; older prototype-only scope and disabled-More rules describe the reference, not the next activated production phase.
+
 Status: 2026-10-31. **Basic Pond, inward near-circular lily pads and B, Winding shallows, remain selected.** The latest authorized refinement adds two ground colors, varied pad edges/notches, natural selection and subtle floating pond objects. It supersedes the earlier perfect-circle, stationary-pad and full-cell selection-outline rules.
 
 ## Authority and project state
 
 Current user decisions override historical research and incidental generated-image details. Read [current UI/UX](ui-ux.md), [visual constraints](design.md), [decisions](decisions.md) and [prototype progress and findings](prototype-progress.md). The progress record owns final implementation/test status; a requirement or concept is not evidence that it passes.
 
-The repository tracks documentation and guidance. Code, dependencies, builds, test evidence and AI concepts remain under ignored `prototypes/`. No prototype has been promoted to production. The fresh baseline was built in `prototypes/pond-visual-v1/` without copying old prototype code. Refining that current prototype is explicitly authorized. Older demos remain visual references only.
+The repository tracks documentation, guidance and project-local official Svelte skills. Experimental code, dependencies, builds, test evidence and AI concepts remain under ignored `prototypes/`. No prototype has been promoted to production. The fresh baseline was built and refined in `prototypes/pond-visual-v1/` without copying old demo code; it is now complete and preserved as reference. The next activated phase creates fresh tracked production UI source. Older demos remain visual references only.
 
 ## Next session: visual prototype only
+
+This section records the completed prototype's historical scope. The next phase is described in [production UI handoff](production-ui-handoff.md); do not continue prototype experiments or start production implementation solely because this document exists.
 
 Continue the existing current prototype. Allowed interaction remains menu/game navigation, a minimal return path, static example digits/notes, full rectangular cell selection and visible feedback. Mode choices can open the same specimen; number/action keys remain inert and More stays disabled in its tenth position.
 
@@ -144,4 +148,4 @@ Actual Motorola viewport/DPR, browser chrome, safe areas, Android text scaling, 
 
 ## Resume after clearing chat
 
-Start here, then read [prototype progress](prototype-progress.md). Continue the authorized ignored visual prototype and its measured review. Do not restart older design votes, treat generated mockups as exact layouts, promote AI art/code or implement the full game without further authorization.
+Start with [production UI handoff](production-ui-handoff.md), then read this visual guideline and [prototype progress](prototype-progress.md). The prototype is complete. In the next activated implementation phase, rewrite production presentation/navigation from scratch without copying experimental source or shipping AI art. Do not restart selected design votes or implement the full game.
