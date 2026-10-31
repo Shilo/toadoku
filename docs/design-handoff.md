@@ -6,7 +6,17 @@ Status: 2026-10-31. **Inward circular pads and board B, Winding shallows, are se
 
 Read this handoff, [UI/UX](ui-ux.md), [visual constraints](design.md), [decisions](decisions.md) and [TODO](../TODO.md) before relevant research. Accepted requirements override historical research and incidental generated-image details. A research recommendation is not a new approval. Preserve alternatives without reopening selected decisions by default.
 
-The repository currently tracks documentation and guidance. Interface experiments, their dependencies, builds, screenshots and AI concepts remain under ignored `prototypes/`. No prototype has been promoted into production. The latest request is documentation and future research planning, not implementation of cutouts or animation.
+The repository currently tracks documentation and guidance. Interface experiments, their dependencies, builds, screenshots and AI concepts remain under ignored `prototypes/`. No prototype has been promoted into production. The next implementation authorization is the limited visual prototype below, not the eventual game described elsewhere in these documents.
+
+## Next session: visual prototype only
+
+The priority is making the selected design visually functional, especially the Pond theme and convincing animated top-down water in both menu and gameplay. Reuse the existing ignored layout/selection demos as references or a starting point. Do not implement the whole product.
+
+Allowed interaction: main-menu/gameplay navigation, a minimal return path, static example digits on pads, full rectangular cell selection and visible selection feedback. Most buttons should remain inert or disabled. Preserve the ten-key dock and disabled More; temporary navigation must not silently redesign those controls. Mode buttons may reach the same example board without implementing either game mode.
+
+Implement and compare restrained water motion in this prototype. The desired realism is convincing water movement within the existing flat, three-color, top-down Winding shallows B art direction, not a replacement illustrated/photorealistic theme. Simple drift/deformation is a candidate; research a shader only if a simpler approach cannot achieve the effect. Keep the inward pads, labels and hitboxes stationary, every group's visible faces within its water color, and reduced motion static. Test both Motorola emulation orientations and record performance limits honestly.
+
+Excluded: puzzle generation/validation/solving, number entry, functional notes/hints/undo, scoring, currency, progression, save systems, stores, PWA/offline production infrastructure and deployment. Product requirements elsewhere remain the eventual roadmap. Procedural pad cuts are still deferred. Keep prototype code/assets under ignored `prototypes/`; only documentation is committed. This scope correction replaces the earlier inline instruction to begin implementing the agreed product baseline.
 
 Keep user-facing discussion extremely concise and proceed one topic at a time. Use ImageGen to explore new visual directions before interface experiments. Use measured temporary layouts when verifying exact geometry. Never record personal motivation or relationship context.
 
@@ -46,7 +56,7 @@ Preserved board A uses `A B A / C A C / A B A`: four organic bays at regions 2, 
 
 Earlier subtle alternating pad greens were ineffective, rectangular water backings felt like UI panels, and blank water with only small marks lacked the desired pond character. Preserve those studies as history.
 
-**New future requirement:** animate the menu and gameplay water slowly so it feels alive. A simple drift/deformation of the existing shapes is a candidate; a shader is only an option to investigate. Keep the flat palette and readability. Implementation, renderer, motion parameters and performance testing are outstanding. Respect reduced motion with a static rendering. Do not move pads, labels, hitboxes or the dock with the water. See [future visual research](future-visual-research.md).
+**Next visual-prototype requirement:** animate the menu and gameplay water slowly so it feels alive. A simple drift/deformation of the existing shapes is a candidate; a shader is only an option to investigate. Keep the flat palette and readability. Implementation, renderer, motion parameters and performance testing are outstanding. Respect reduced motion with a static rendering. Do not move pads, labels, hitboxes or the dock with the water. See [visual research and acceptance criteria](future-visual-research.md).
 
 ## Gameplay layout and input
 
@@ -171,3 +181,5 @@ The 2026-10-31 audit scanned all 34 Markdown documents, checked local links/anch
 ## Resume after clearing chat
 
 Open this file first, then the selected visual references and the relevant topic document. The chosen direction is **basic Quiet Flat Pond, three-color Winding shallows B, inward 1:1 pad faces, full stretched clickable cells, soft-raised cream controls, 4px/8px spacing and bottom/right docks**. Procedural cutouts and animated water are approved future goals with research/implementation/testing still outstanding. Do not restart the visual comparison or treat those future goals as already implemented.
+
+For the next session, implement only the visual prototype described near the top: navigation, static numbers, pad selection and animated pond backgrounds. Full gameplay remains outside that authorization.

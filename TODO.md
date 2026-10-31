@@ -1,5 +1,11 @@
 # Deferred work
 
+## Next visual prototype
+
+- [ ] Combine menu/gameplay navigation, static example numbers and full-cell pad selection. Keep other controls inert/disabled; do not implement Sudoku logic or the product roadmap.
+- [ ] Focus on the selected theme and convincing dynamic top-down pond water in both screens. Preserve the flat three-color B composition, inward pads, cream controls and fixed layout. Research/test the simplest motion approach with static reduced motion.
+- [ ] Review portrait/landscape at Motorola representative sizes. Keep all prototype code/assets ignored. See [exact scope](docs/design-handoff.md#next-session-visual-prototype-only).
+
 ## More and settings
 
 - [ ] Keep More visibly disabled in the current menu and tenth gameplay-key position; do not open a placeholder popup.

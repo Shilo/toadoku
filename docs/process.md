@@ -8,6 +8,8 @@
 
 Keep conversation extremely concise. Prefer a picture and a short comparison to long explanations. Do not treat a successful prototype or test as approval of its design or stack.
 
+Next authorized work is a visual prototype only: menu/game navigation, static digits, pad selection and dynamic Pond backgrounds. Most controls remain inert/disabled. Do not implement the eventual Sudoku engine, modes, economy, saves or PWA delivery. Follow the bounded scope at the top of [design handoff](design-handoff.md).
+
 Commit durable documentation and guidance with Conventional Commits. Exclude prototype code, dependencies, builds, test outputs, deployment experiments, and temporary mockups.
 
 For a new or compacted chat, read [design handoff](design-handoff.md) first. Selected inward/B references and all preserved alternatives are indexed in [design-artifacts.json](design-artifacts.json). Research records retain original proposals for context and do not override the latest decisions. New cutout and water-motion goals require future research/implementation/testing; recording them is not evidence that they work.

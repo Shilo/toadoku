@@ -16,12 +16,19 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 - Themes and decorative geometry never change rules, hitboxes or saved progress.
 - Persist language, theme/appearance and puzzle progress. Support English, German and Spanish.
 
-## Scope
+## Next prototype
+
+- Focus on visual design, Pond theming and animated top-down water in both screens.
+- Allow menu/game navigation, static example numbers and full-cell pad selection. Most controls are inert or disabled.
+- No Sudoku engine, number entry, scoring, progression, saves or production/PWA implementation.
+- Reuse the ignored demos. Keep inward pads, B water, cream controls and 4px/8px spacing. Research/test simple water motion; keep pads still and reduced motion static.
+
+## Product scope
 
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
 - More stays disabled. Settings, Halloween and save-slot policy are deferred.
-- Pad cutouts and water animation need future research and testing; neither is implemented.
+- Pad cutouts remain future work. Water animation belongs to the next visual prototype; neither is implemented yet.
 - No store, purchases or upgrades.
 
 ## Design

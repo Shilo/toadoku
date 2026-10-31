@@ -1,5 +1,7 @@
 @AGENTS.md
 
+Next task is a visual prototype only: menu/game navigation, static numbers, pad selection and animated Pond water. Most controls stay inert/disabled. Do not build Sudoku logic, number entry, modes, rewards, saves or production/PWA infrastructure. Eventual product scope below is a roadmap, not the next task; follow the bounded scope in docs/design-handoff.md.
+
 Resume from docs/design-handoff.md, then follow docs/process.md. Current decisions override historical research. Keep temporary work under ignored prototypes/. The stack, offline delivery, Quick Play, randomized repeating Progression, fresh completed-level revisits, score and earned currency are in scope. Follow docs/progression.md and docs/scoring.md. No store or upgrades.
 Selected terminology: Metamorphosis (repeat counter), Leap (level), Dewdrops (currency). Detailed scoring policies and remaining visual details stay open.
 Production artwork must be human-made; AI art is temporary mockup material only. Follow docs/menu.md for same-scene mode selection. Save-slot count and replacement policy are deferred.

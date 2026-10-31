@@ -2,6 +2,8 @@
 
 Status: 2026-10-31. Requested future improvements to the selected inward-pad/Winding-shallows design. This records work to research, implement and test later; neither feature is implemented or validated now. Preserve the [design handoff](design-handoff.md).
 
+Scope update: animated water is now part of the next visual prototype. Research the simplest useful approach and implement/test it there; production integration remains later. Procedural pad cuts remain deferred. The prototype only adds menu/game navigation, static digits and pad selection, not Sudoku gameplay or product infrastructure.
+
 ## Procedural lily-pad splits and perimeter
 
 The request concerns silhouette only: researched notches, splits, cutouts or gaps that make the round pad feel like an abstract lily pad, possibly with a gently irregular edge. Preserve its green palette, raised lower edge/highlight, button character, inward alignment and 1:1 bounding envelope. This is not approval for realistic leaf texture, new shading, veins over text, recoloring or a stretched botanical sprite.

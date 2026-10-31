@@ -1,6 +1,6 @@
 # Requirements and open decisions
 
-Current milestone: basic Pond theme, core gameplay and the deliberately temporary combined menu-art placeholder. More functionality, Halloween and sprite-pack acquisition are deferred in [TODO.md](../TODO.md).
+Next milestone: a theme-focused visual prototype with menu/gameplay navigation, static numbers, pad selection and animated Pond backgrounds. Full Sudoku logic, modes, rewards, saves and production/PWA work are excluded. Requirements below describe the eventual product, not authorization to implement everything. More functionality, Halloween and sprite-pack acquisition remain deferred. See [prototype scope](design-handoff.md#next-session-visual-prototype-only).
 
 ## Accepted requirements
 
