@@ -18,6 +18,8 @@ Themes retain classic Sudoku rules and exactly the same frog and lily-pad sprite
 
 Keep theme identity (Pond/Halloween), appearance (light/dark), background treatment and button finish conceptually separate. Use semantic CSS properties and a small set of authored preset fields. Do not add a plugin system, theme editor or user-facing selector for every styling combination.
 
+The selected control finish is soft raised. Board shape is a separate persistent layout preference, default Fill space with Square available. Theme changes must not change that preference, dock geometry, current input mode or active puzzle. Both visual shapes share the same semantic board roles.
+
 A decorative background renderer handles solid fields, optional broad shapes, future gradients and an optional local image. The board, keypad and menu consume semantic roles without checking the active season or background mode. Image fit and focal position are presentation data, not board-layout inputs.
 
 An adopted background needs creator/source/license records, sensible file dimensions, `cover`/`contain` crop review, local paths compatible with GitHub Pages, offline caching and a fallback if loading fails. It must not intercept input or show essential text. Both appearances and all target orientations must remain usable without it.

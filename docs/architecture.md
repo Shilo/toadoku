@@ -17,6 +17,8 @@ The Sudoku API uses plain data and has no dependency on artwork, themes, browser
 
 Use a small independent decorative-background renderer and semantic style roles so C can later become B/A without a second board implementation. Optional local PNG/JPEG/WebP backgrounds need CSS fallbacks and offline asset handling. Button finish and backdrop do not own board proportions, hit targets or Sudoku state. See [theme model](research/theme-structure.md) and [UI/UX](ui-ux.md).
 
+Persist a theme-independent board-shape preference: Fill space by default, Square on request. The presentation measures the current usable viewport and uses a bottom portrait dock or right landscape dock. Relayout preserves logical cell/control identity and state, without rotating board data or stretching glyphs. More overlays do not own layout space or game rules.
+
 ## Correctness and usability
 
 - Keep givens immutable and require a unique solution.

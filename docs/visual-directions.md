@@ -18,6 +18,8 @@ These are three approaches to the same two themes, not three extra themes. Compa
 
 Preserved descriptions, palette/type research and tradeoffs remain in this document and the three linked research notes. Original temporary comparison files are `a-expressive-gradient.png`, `b-layered-pond.png` and `c-quiet-flat.png` under ignored `prototypes/flat-theme-study/`, with exact prompts alongside. Those images are local references, not tracked production assets. The initial agent recommendation favored A; the user selected C for simplicity.
 
+The selected finish is now soft raised, and the selected board preference is Fill space by default with Square available. Old images showing a fixed top overflow, dedicated Tools key or gameplay frog are superseded by the current More/dock proposal in [UI/UX](ui-ux.md). Theme A/B/C descriptions remain preserved independently of those layout changes.
+
 ## Research findings that matter
 
 - Current Material 3 Expressive supports hierarchy through color, shape and restrained motion. It does not require Android-style navigation, cards or a new UI framework. Preserve familiar Sudoku interaction. [Material research](https://design.google/library/expressive-material-design-google-research).

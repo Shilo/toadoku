@@ -26,6 +26,7 @@ Difficulty-based completion credit should dominate. Cap the speed bonus so caref
 ## Timing and completion
 
 - Measure active foreground time. Pause when backgrounded or explicitly paused. If a menu pauses scoring time, conceal the board and notes until play resumes.
+- A brief start status does not defer timing until the first entered digit. Start when the puzzle is revealed and interactive. More and ordinary solving tools keep active time running; Settings can pause only with the puzzle concealed. Completion information remains available until Continue rather than disappearing on a timer.
 - Reward only a valid completed puzzle. Do not award points per entry, guess, correction, undo or check.
 - Give each attempt a stable ID and record the reward once with its completion. Reload, retries and repeated completion events must not pay twice. Preserve elapsed time and assistance history when restarting the same scored attempt.
 - Do not award a multiplier just for a higher repeat counter. Rewards depend on the actual puzzle and performance.

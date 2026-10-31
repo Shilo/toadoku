@@ -3,7 +3,7 @@
 ## Accepted requirements
 
 - Name: Toadodu. Classic numbered Sudoku with frogs in every theme.
-- Immersive, colorful, minimal gameplay; large board and one floating overflow entry point.
+- Immersive, colorful, minimal gameplay; large board and one consolidated secondary entry point, with exact More-menu behavior under review.
 - Mobile and desktop, portrait and landscape; Motorola G31/G32 targets.
 - Persistent English, German, and Spanish.
 - Automatic and explicit seasonal themes, separate light/dark appearance.
@@ -24,7 +24,8 @@
 - Frog and lily-pad sprites stay unchanged between basic and Halloween themes. Theme changes affect UI colors, gradients, background styling, buttons and font roles, not sprite artwork or accessories.
 - Selected initial visual direction: C, Quiet Flat. Preserve B, Layered Pond, and A, Expressive Gradient, as modular future treatments.
 - Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
-- Number entry and frequent actions belong toward the bottom; the overflow stays at the top for now, with future relocation possible.
+- Number entry uses a bottom two-row/five-column dock in portrait and a right five-row/two-column dock in landscape. Keep digits upright; recalculate usable bounds rather than assuming literal pixel transposition.
+- Selected control finish: soft-raised pastilles. Selected default board shape: Fill space, with a persistent Square option available through Settings.
 - Remove the decorative frog from gameplay for now, retaining the menu's frog identity and maximizing board space.
 - Main menu shows both modes directly. Quick Play selection reveals difficulty choices in the same scene. Progression selection reveals existing-save/new-game choices. Back returns to mode choices.
 - Keep personal context out of project artifacts.
@@ -34,9 +35,11 @@
 | Topic | Proposal requiring discussion |
 | --- | --- |
 | Visual details | Quiet Flat selected; exact colors/fonts, control finish and layout details remain open. Preserve [all three treatments](visual-directions.md) |
-| Buttons | Compare soft raised pastille, restrained jelly and lily-pad-inspired CSS finishes; no finish selected |
-| Board proportions | Compare square, gentle fit and full stretch; no aspect ratio selected. Landscape lower-right input is an alternative requiring approval |
-| Tool access | Proposed one bottom Tools disclosure for Notes/Undo/Erase/Hint, with sticky Notes and stable open-tray behavior; not yet selected |
+| Button details | Soft raised selected; exact lip, highlight, colors, focus and pressed treatments need visual refinement |
+| Board preference | Fill space default and Square selected; final setting wording, dock sizing and actual-size note readability need review |
+| Key order | Ascending row-major landscape order recommended; preserving portrait groups as columns remains an alternative |
+| Tool access | Reviewed proposal: digits plus More, no top overflow; More directly exposes Notes/Undo/Erase/Hint and Settings. Overlay may cover controls/board. Notes stays active after closing |
+| Status presentation | User suggests timed start/end splash text. Review recommends nonblocking start notice, non-timed recovery in Settings and persistent completion results until Continue. Exact timing/presentation remain open |
 | Human-made artwork | Creator, asset sources, license/attribution, art direction and budget remain open |
 | Save slots | Deferred: three slots is only a suggestion; count and replacement behavior are not selected |
 | PWA install entry | Optional overflow placement when installation is available; visibility and browser fallback remain proposals |

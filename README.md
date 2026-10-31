@@ -2,7 +2,7 @@
 
 A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, hosted on GitHub Pages.
 
-**Status: design discussion. Quiet Flat C is selected, with B/A preserved as future treatments. Primary actions move toward the bottom; gameplay omits the decorative frog. Board proportions, button finish and tool access remain open. Stack, PWA/offline delivery and gameplay decisions are recorded below. No store is in scope.**
+**Status: design discussion. Quiet Flat C, soft-raised buttons and default Fill space with a Square option are selected. Portrait uses a bottom dock; landscape uses a right dock. The consolidated More menu and transient status are reviewed proposals. Gameplay omits the decorative frog. B/A remain future visual treatments. No store is in scope.**
 
 Production artwork must be human-made. AI-generated art is permitted only for temporary mockups and prototypes.
 The world should be flat, minimal and mostly HTML/CSS color, gradients and organic shapes, with a few identical frog/lily-pad sprites shared across themes.

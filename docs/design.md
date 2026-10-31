@@ -6,16 +6,16 @@ These requirements override earlier visual recommendations in the research notes
 - Start with C, Quiet Flat, and preserve B/A as modular alternatives. Build most of the world using HTML/CSS color and sparse organic shapes. Optional human-made PNG/JPEG/WebP backgrounds are a supported theme capability, not a selected asset. Avoid clutter and heavy glass/blur effects.
 - Make the Sudoku board fill the available play area within practical limits.
 - No gameplay top bar, sidebar, card layout, marketing copy, or decorative whitespace that reduces board size.
-- Use one floating overflow button near the top for secondary actions.
-- Place number entry and frequent actions toward the bottom. Top overflow remains for now; future relocation must not be hardcoded into game logic.
+- Use a bottom portrait dock and right landscape dock with the same ten-key structure. The current recommendation merges top overflow and Tools into one three-dot More key; final popup behavior remains under review.
 - Keep number entry accessible. Discuss notes, undo, erase, and hint access before adding visible controls; avoid an action-button row.
 - Main menu: integrated artwork, minimal text, direct mode choices and same-scene submenus. See [menu flow](menu.md).
 - Keep frogs in the main-menu identity, but remove the decorative gameplay frog for now to maximize board space. Frog-shaped cells and number-holding mascots are not the current gameplay direction.
 - Halloween: recognizable pumpkin orange and near-black, with vivid purple and green accents. Exact swatches remain open.
 - Reuse exactly the same frog and lily-pad artwork across themes. No sprite recoloring, costumes, seasonal replacements or accessories. Themes change UI colors, gradients, fonts, buttons and background styling.
 - Keep the board opaque, with stable legible digits and pencil marks. Put theme typography primarily in menus and short labels.
-- Square versus modest rectangular cells remains open; never stretch digit glyphs. Preserve the nine-row, nine-column and three-by-three-region structure in every layout.
-- Explore shallow raised, jelly and lily-pad-inspired CSS buttons while keeping the world quiet and flat. The final finish and tool access need selection.
+- Default to Fill space and offer Square as a persistent setting. Never stretch glyphs or rotate the logical puzzle; preserve the nine-row, nine-column and three-by-three-region structure.
+- Use selected soft-raised CSS buttons while keeping the world quiet and flat. Jelly and lily-pad studies remain alternatives, not additional required styles.
+- No permanent progress HUD is needed. Review brief start status and persistent completion feedback, with information recoverable in a non-timed secondary view.
 - Animation should make the world feel alive while keeping the puzzle readable. Support reduced motion.
 - Design for desktop and mobile, both orientations. Check representative 360 by 800 and 393 by 873 CSS-pixel layouts and their landscape equivalents. Physical Motorola testing remains outstanding.
 

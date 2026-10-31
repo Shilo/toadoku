@@ -25,6 +25,8 @@ The eventual menu must allow returning from save selection to the two mode choic
 
 A small Install app entry could live in the overflow when installation is available and the app is not already installed. Keep browser-specific install steps secondary to playing; do not require installation to access either mode or show an always-present install button. This placement remains a proposal.
 
+Current recommendation consolidates gameplay tools and secondary navigation under the tenth keypad key, More, removing the old top overflow. Main menu can retain a small lower More entry for Settings; it does not need a numeric dock. Prefer a short primary tool popup plus Settings rather than embedding a long preference list alongside Notes. See [current UI and UX](ui-ux.md).
+
 ## Artwork
 
 Follow the [human-made production artwork policy](design.md#artwork-policy). AI-generated mockups can explore the flow and atmosphere, but are temporary, clearly labeled and ignored by Git.
