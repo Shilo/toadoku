@@ -1,5 +1,7 @@
 # Progression terminology
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 **Decision: Metamorphosis · Leap · Dewdrops is approved.** Other names and earlier rankings below are retained as research alternatives. Rankings are design judgments based on clarity, playfulness, frog-world fit and localization, not measured user preferences.
 
 The main tradeoff is length: Metamorphosis is long, while Leap is a themed substitute for the more immediately familiar Level. The combination remains distinct and coherent. Explain the terms once when needed and avoid adding them as a gameplay header. Their game meanings do not require biological reversibility, frog evolution, new rewards or additional systems.

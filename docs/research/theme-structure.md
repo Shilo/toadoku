@@ -1,5 +1,7 @@
 # Minimal theme structure
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research checked against official browser documentation on October 31, 2026. Quiet Flat (C) is the selected starting point. Layered Pond (B) and Expressive Gradient (A) remain possible later treatments. This note proposes boundaries for that flexibility; it does not implement an interface, select final palettes, adopt assets, or expose new settings.
 
 ## Separate identity from rendering

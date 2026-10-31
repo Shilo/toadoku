@@ -9,7 +9,7 @@ Show both mode choices immediately in the main scene. Quick Play and Progression
 | Quick Play | Select a difficulty, then start the puzzle | Return to mode choices |
 | Progression | Continue/select an existing save, or start a new game | Return to mode choices |
 
-Use a change of menu state within the same illustrated scene, not a new page or dashboard. Avoid an extra Play landing screen before mode selection. Preserve the minimal text and control constraints. Exact transitions, start-button behavior and visual layout require mockup review.
+Use a change of menu state within the same illustrated scene, not a new page or dashboard. Avoid an extra Play landing screen before mode selection. Preserve the selected main-menu layout. Exact submenu transitions and start-button behavior still require review.
 
 Place Quick Play above Progression in a bottom-left block in both orientations. Put More at bottom-right, aligned vertically with Progression, rather than moving the mode block to the right in landscape. Title and the combined placeholder remain higher in the composition. Keep Back with the lower interaction area. More is disabled for now; no settings popup is functional. See [current UI and UX](ui-ux.md).
 
@@ -31,4 +31,6 @@ More functionality and installation placement are deferred. A recorded future al
 
 Follow the [human-made production artwork policy](design.md#artwork-policy). AI-generated mockups can explore the flow and atmosphere, but are temporary, clearly labeled and ignored by Git.
 
-Use one combined frog-and-lily-pad image, intentionally rough black and white with a conspicuous question mark/template cue. Do not make separate frog/pad files or a polished character for this milestone. A later human-made image can replace it without changing layout. The new camera proposal is overhead pond water with a top-down or slightly oblique top-down placeholder, not a horizon scene.
+Use one combined frog-and-lily-pad image, intentionally rough black and white with a conspicuous question mark/template cue. Do not make separate frog/pad files or a polished character for this milestone. A later human-made image can replace it without changing layout. The selected camera is overhead pond water with a top-down or slightly oblique top-down placeholder, not a horizon scene.
+
+Menu and gameplay share the same three solid water fills and 4px/8px spacing. The menu uses broad organic pond curves and should later gain restrained water motion after research/testing. The latest selected menu references and full restart record are in [design handoff](design-handoff.md). Cutout and animation work is not implemented.

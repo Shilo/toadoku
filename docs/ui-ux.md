@@ -1,5 +1,7 @@
 # Current UI and UX direction
 
+For a self-contained continuation record and selected artifact paths, start with [design handoff](design-handoff.md). Inward placement and Winding shallows B are selected; procedural pad cutouts and animated water are future research/implementation tasks.
+
 ## Locked direction
 
 Use C, Quiet Flat, soft-raised controls, and the basic Pond theme only for the current milestone. Keep B/A and background-image capability documented for later. Halloween and More functionality are deferred in [TODO.md](../TODO.md).
@@ -26,7 +28,7 @@ Use only two theme spacing tokens: **small 4 CSS px** and **large 8 CSS px**, wi
 - Fill space consumes the entire remaining rectangle after the single outer 8px inset, dock and 8px board/dock gap. No extra board wrapper padding, doubled region padding, reserved header/status strip or scenic spacer.
 - Dock keys align to the bottom in portrait or right edge in landscape, inside that same 8px scene inset. Measure board spacing between full rectangular cell buttons; circular faces leave additional water inside their slots. That variable visual water is not another padding token. Action-key gaps still use their complete visual bounds.
 - Add actual system safe-area insets outside the authored spacing when necessary. System protection is not a third theme spacing token. Radii, lip depth, strokes, font sizes and control dimensions are not padding/gap tokens.
-- If square mode is eventually selected, center the largest square within the same board allocation and keep the dock fixed. That mode intentionally leaves background visible.
+- When the deferred Square preference is implemented, center the largest square within the same allocation and keep the dock fixed. That mode intentionally leaves background visible.
 - Generated mockup whitespace is not a spacing specification. Actual layout must be measured against its available rectangle and device insets.
 
 ## Main menu
@@ -61,16 +63,18 @@ The board removes the traditional outer panel and drawn grid lines. Each of the 
 
 Use separated 3 by 3 groups and procedural circular pad faces inside stretched rectangular buttons. A face has diameter equal to the shorter available cell dimension; it never stretches into an oval or fills the long axis. Text/notes belong to the circle and move with it. The entire rectangular cell, including visible water, is the button. Do not clip pointer events or focus to the decorative circle. Region gaps remain a second cue alongside water shape/lightness.
 
-## Circular-pad alignment under review
+## Circular-pad alignment: selected inward
 
-Compare two static arrangements without moving, resizing or overlapping logical cell buttons:
+Inward is selected without moving, resizing or overlapping logical cell buttons. Preserve centered as the earlier comparison:
 
 - **Centered:** every circle is horizontally and vertically centered in its rectangle. This preserves evenly stepped digit centers apart from the existing region gap.
 - **Inward:** group row 1 aligns bottom, row 2 center, row 3 top; group column 1 aligns right, column 2 center, column 3 left. Combine both axes, so a group's top-left circle sits bottom-right in its cell. The center circle remains centered. Digits/notes follow the circle. Rows and columns still form straight lines; the distance between their centers becomes uneven across region boundaries.
 
-Inward is recommended for the next visual decision because it strengthens group clusters and exposes more water for the selected B contours. This is not yet a selected alignment or a new user setting. Centered remains the comparison. Circular faces reduce note space: representative diameter is about 33.77 CSS px on the current emulations. A nine-note cell is shown, but its tiny candidate text is not approved production typography. Review readability and row/column scanning before settling the arrangement.
+Inward is selected because it strengthens group clusters and exposes more water for the selected B contours. Do not add an alignment setting. Circular faces reduce note space: representative diameter is about 33.77 CSS px on the current emulations. A nine-note cell is shown, but its tiny candidate text is not approved production typography. Review readability and row/column scanning without treating the selected alignment as an unresolved design vote.
 
 Alignment only moves along an axis with unused cell space. In these portrait emulations that is vertical; in landscape it is horizontal. The unchanged short axis is already filled by the circular diameter.
+
+The next requested silhouette refinement is researched procedural splits/cutouts and possibly a gently irregular edge, within the same 1:1 envelope and inward placement. Change masking only, not pad colors, raised styling, central label area or full-cell buttons. The current circle is the baseline; exact cuts/perimeter are future work, not implemented. Both menu/gameplay water backgrounds should later animate slowly. Preserve flat three-color B and stable puzzle geometry, with a static reduced-motion rendering. CSS-led drift/deformation and a shader are options to research, not selected implementations. See [future visual research](future-visual-research.md).
 
 Both alignments are shown in portrait and landscape under ignored `prototypes/circular-pond/centered-inward-review.png`. The initial ImageGen concept and exact prompt are alongside in `imagegen-concept.png` and `README.md`; its placement is illustrative. The measured follow-up checks all 81 native cell buttons, square circular bounds, the inward rules, full-cell corner hit testing, selection from water, logical arrow navigation and sampled circle color containment. This remains a temporary selection/layout demo, not a Sudoku implementation.
 

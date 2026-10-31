@@ -1,0 +1,495 @@
+{
+  "date": "2026-10-31",
+  "scope": "Local ignored visual history and reproducible prototype sources. Documentation/registry is tracked; these assets are not tracked, published or production art. Selected inward gameplay and menu-only references are identified explicitly. Historical and diagnostic files are not approvals.",
+  "selectedDesign": "Inward circular-derived pads, board B Winding shallows, three-color flat Pond, 4px/8px spacing. Cutouts and animation remain future work.",
+  "artifacts": [
+    {
+      "path": "prototypes/circular-pond/README.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 5335,
+      "sha256": "3c086d41d2421bc8b6eda18256fe0e4cf297393cfc58f819d6c243f0ca3616c8"
+    },
+    {
+      "path": "prototypes/circular-pond/centered-inward-review.png",
+      "status": "preserved comparison",
+      "bytes": 352957,
+      "sha256": "259d8755c73b46550fc1cfead595a41f2f72645dd92a6a4c6fcb71d34634560f",
+      "width": 1584,
+      "height": 900
+    },
+    {
+      "path": "prototypes/circular-pond/debug.png",
+      "status": "discarded diagnostic",
+      "bytes": 274146,
+      "sha256": "95675bbcb94394e1dd13bf0f49cbf8790cae5cd21dd8283f97fcefe2988e75fd",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "path": "prototypes/circular-pond/imagegen-concept.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1407206,
+      "sha256": "975f14ae8e0ea87c717f76b3b24bf637a73e7041bc5d0ab0961e20d95785b3ee",
+      "width": 841,
+      "height": 1870
+    },
+    {
+      "path": "prototypes/circular-pond/index.html",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 11081,
+      "sha256": "b202214087c3913577214fad1ad4e680cac6facd5138f09ddebc47db89be9d98"
+    },
+    {
+      "path": "prototypes/circular-pond/landscape-centered.png",
+      "status": "preserved comparison",
+      "bytes": 243154,
+      "sha256": "912ca1b8c91933f2e0555d6b04eaba6c2eb7705953e8cc816e53b68c37d91bb2",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "path": "prototypes/circular-pond/landscape-inward.png",
+      "status": "selected visual reference",
+      "bytes": 254612,
+      "sha256": "ade386050f6d3c1b1747a2386bdc511bf2d0722e6d42d9e5bb14d422cef3a5c6",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "path": "prototypes/circular-pond/measurements.json",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 162408,
+      "sha256": "310767c1b3d77911dec66e4dfb618b2bfaee417b603f3803cecf26568c985a8b"
+    },
+    {
+      "path": "prototypes/circular-pond/portrait-centered.png",
+      "status": "preserved comparison",
+      "bytes": 251991,
+      "sha256": "1075b28125a6d3b46cb442ac7361d057089b99ad0ab5a91d7987669d3bd33ea0",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "path": "prototypes/circular-pond/portrait-inward.png",
+      "status": "selected visual reference",
+      "bytes": 251493,
+      "sha256": "a0cf0cf43af8de408aec86abd4edef98078b26a2e0e1993b9bf92a07acdf62ab",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "path": "prototypes/circular-pond/reference-winding-shallows.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1825448,
+      "sha256": "77af831a613f6d1b24795c54719a8949879ea4ef4e15ed8f790f215a0aa259c6",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/circular-pond/render.mjs",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 5175,
+      "sha256": "468dcae3a2b183cba1fa9cfef2221ef320b6a3773d49b1326378b509b4770fe1"
+    },
+    {
+      "path": "prototypes/circular-pond/review.html",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1070,
+      "sha256": "ae9307e85cbad1bc479e309b8b04e636b5e48b76b7a875718134ac9e72bf1821"
+    },
+    {
+      "path": "prototypes/fill-space-dock/portrait-landscape-menu-game.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1492501,
+      "sha256": "90687bb182332dd886d578f0c2a1fad34496ef5f9e85718598be7acd3b3b2388",
+      "width": 1619,
+      "height": 971
+    },
+    {
+      "path": "prototypes/fill-space-dock/prompts.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 4580,
+      "sha256": "9fbf9b63a430c9347aebfeddc1aec5314dab3a3fc892007cc135366625b9e3cb"
+    },
+    {
+      "path": "prototypes/flat-theme-study/a-expressive-gradient.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1576402,
+      "sha256": "ed722be25ae649005a3d6f0f1f02131aeb215ad4a98d7ddddc2bd096392b9ad8",
+      "width": 1604,
+      "height": 980
+    },
+    {
+      "path": "prototypes/flat-theme-study/b-layered-pond.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1482648,
+      "sha256": "b5b74b1db3766a1eb37e75de20ea7d1beb9588ac8c7fad9b1956142fab687472",
+      "width": 1604,
+      "height": 980
+    },
+    {
+      "path": "prototypes/flat-theme-study/c-quiet-flat.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1433690,
+      "sha256": "1f35562924dbf275e922465e648f5c5d0002938633606b164574a11eca5ac9ff",
+      "width": 1605,
+      "height": 980
+    },
+    {
+      "path": "prototypes/flat-theme-study/prompts.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 10539,
+      "sha256": "aa88535708de103855fcc12cfb4fe8ea48916867b987a2bf98d4e25353f0f84a"
+    },
+    {
+      "path": "prototypes/flat-water-regions/flat-water-main-menu.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1279395,
+      "sha256": "adcb5a24268b420eb0183f7c52cd6f4f6e9f63d3fbaefa08a4eb277a074454a6",
+      "width": 841,
+      "height": 1870
+    },
+    {
+      "path": "prototypes/flat-water-regions/prompts.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 5914,
+      "sha256": "22dfd446fea27ec7b671b4caf1ac66684579ddb5fa24f60d79aa2a19e3c84051"
+    },
+    {
+      "path": "prototypes/flat-water-regions/region-tone-comparison.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1665740,
+      "sha256": "26e8233b0f5225db4da05a97636dce682ddb02270257fac067d88451828ae37d",
+      "width": 1448,
+      "height": 1086
+    },
+    {
+      "path": "prototypes/initial-web-ui/README.md",
+      "status": "rejected initial experiment",
+      "bytes": 4682,
+      "sha256": "0fcff7446f0f35cfe8c09abd1787fca37d83b260edf3fd2d7b03404ed6a302ee"
+    },
+    {
+      "path": "prototypes/initial-web-ui/index.html",
+      "status": "rejected initial experiment",
+      "bytes": 646,
+      "sha256": "3ff3182b1ca71cbe419786d5ee55e99cefe84379466fb836ee210ce286119068"
+    },
+    {
+      "path": "prototypes/initial-web-ui/output/previews/halloween-desktop.png",
+      "status": "rejected initial experiment",
+      "bytes": 178634,
+      "sha256": "9e4096a120acf6eee0f3d777861b4399353bf75bbcff02aca0fffebaacfdcdf6",
+      "width": 1366,
+      "height": 900
+    },
+    {
+      "path": "prototypes/initial-web-ui/output/previews/halloween-landscape.png",
+      "status": "rejected initial experiment",
+      "bytes": 48467,
+      "sha256": "ea64ce870b8c61f2537447c9bb89ada2aacb4be516cd5c1d18dc6fbc93b6d3f9",
+      "width": 800,
+      "height": 360
+    },
+    {
+      "path": "prototypes/initial-web-ui/output/previews/halloween-mobile.png",
+      "status": "rejected initial experiment",
+      "bytes": 57392,
+      "sha256": "8b3f3494ad08d647a069fc61caacbf0135c7af2f4911bdcf8eea29223466766c",
+      "width": 360,
+      "height": 800
+    },
+    {
+      "path": "prototypes/initial-web-ui/package-lock.json",
+      "status": "rejected initial experiment",
+      "bytes": 41109,
+      "sha256": "362d1bd991580413d942f1a8887d7303a605737c4b5b0749dc4778a026eca698"
+    },
+    {
+      "path": "prototypes/initial-web-ui/package.json",
+      "status": "rejected initial experiment",
+      "bytes": 769,
+      "sha256": "e8a9e8df881a269da583ccbd4e50baaebe9717a976f8af8183faf4375a6951ee"
+    },
+    {
+      "path": "prototypes/initial-web-ui/public/fonts/README.md",
+      "status": "rejected initial experiment",
+      "bytes": 1513,
+      "sha256": "6d816f5c1b7eb1a56a52ae6411dbb83f5764359a7883623b46802fd7c707a4a8"
+    },
+    {
+      "path": "prototypes/initial-web-ui/public/frog.svg",
+      "status": "rejected initial experiment",
+      "bytes": 1340,
+      "sha256": "7afaeb801dc2bb8171a623966d1d10bc396f291d5933eb3b477ae52b2c3348e7"
+    },
+    {
+      "path": "prototypes/initial-web-ui/public/icon-192.png",
+      "status": "rejected initial experiment",
+      "bytes": 9714,
+      "sha256": "7fbfd5c69e399efb349261aae357685e17bce627a6255501ef6e0127bf17b22c",
+      "width": 192,
+      "height": 192
+    },
+    {
+      "path": "prototypes/initial-web-ui/public/icon-512.png",
+      "status": "rejected initial experiment",
+      "bytes": 25296,
+      "sha256": "06685304c1b9af4a660516fb976e358d5ff33f52174302996f8c7dd301f13727",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "prototypes/initial-web-ui/scripts/generate-icons.mjs",
+      "status": "rejected initial experiment",
+      "bytes": 782,
+      "sha256": "4dab9e1db9193871d75ace3d886509e1c85f2034764c7fd14021317aa2c8f3f9"
+    },
+    {
+      "path": "prototypes/initial-web-ui/scripts/install-browser.mjs",
+      "status": "rejected initial experiment",
+      "bytes": 282,
+      "sha256": "589855d8f9b7d654cece1186030f3e424d89d180a9f9dd32b59de36ee1e4a6d3"
+    },
+    {
+      "path": "prototypes/initial-web-ui/scripts/preview-static.mjs",
+      "status": "rejected initial experiment",
+      "bytes": 2397,
+      "sha256": "11c7a0a3c9ad56f9e58361bf3c6e65d95959cc37ad6c84ba686affca3b3d1ac7"
+    },
+    {
+      "path": "prototypes/initial-web-ui/tsconfig.json",
+      "status": "rejected initial experiment",
+      "bytes": 464,
+      "sha256": "6321c95472b5a8d10843d5a0ee25d8d2148d2693b059574ebfa6b4ae575cc6da"
+    },
+    {
+      "path": "prototypes/mockups/README.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 6756,
+      "sha256": "3e371b6584eebbfba71cb7e3ded5dac42497070eb33a7d5a78c9a27a635e9c50"
+    },
+    {
+      "path": "prototypes/mockups/gameplay-concepts.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 2324644,
+      "sha256": "7f6004d55b30e3e56e0b82e7b96012b336024a03c13a60ba52af12f8d38345bc",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "path": "prototypes/mockups/main-menu-concepts.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 2408320,
+      "sha256": "66b4ea7e539ee31b16a8cb70cf862655f47b64cbb8caa545df758fa496fb086c",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "path": "prototypes/motorola-spacing/README.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1085,
+      "sha256": "f09c2f83c0bf366515187e019f9631584dd77ee342cf35eb651a1a8b7b281309"
+    },
+    {
+      "path": "prototypes/motorola-spacing/index.html",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 8576,
+      "sha256": "d5f9611a7af397b820b14f21876008fe0395b9ade057b66d71a17fccce130e7c"
+    },
+    {
+      "path": "prototypes/motorola-spacing/landscape-gameplay.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 220927,
+      "sha256": "86e100e9f2c2cb46530d7ef73a7074c66784100614c236875398036fdbe54d68",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "path": "prototypes/motorola-spacing/landscape-menu.png",
+      "status": "selected visual reference",
+      "bytes": 111430,
+      "sha256": "012708ac641fcf562f96268ee31e16b814db65f75ac14aba345f31a9a4ea8a8b",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "path": "prototypes/motorola-spacing/measurements.json",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 10362,
+      "sha256": "7f7e64460e9af5ba7c67c20a6c745c86663d2ba8716d5fc17067dcecb49b6204"
+    },
+    {
+      "path": "prototypes/motorola-spacing/portrait-gameplay.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 224637,
+      "sha256": "cf397f70c4a74f699df0aff9957e3a1089646f28c24acea6ce29af663e9967de",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "path": "prototypes/motorola-spacing/portrait-landscape-review.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 276921,
+      "sha256": "3b4907086d5f02fe21ecda50861863fb2ba5ec19ba24fde43af4c8fdbe248669",
+      "width": 1584,
+      "height": 900
+    },
+    {
+      "path": "prototypes/motorola-spacing/portrait-menu.png",
+      "status": "selected visual reference",
+      "bytes": 119667,
+      "sha256": "924cea3832253b65eaab613e471a0196deed1c2db1a61e33fa9b815395d4abb9",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "path": "prototypes/motorola-spacing/render.mjs",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 4484,
+      "sha256": "a680ca8335756ef08635065bf9c3c7471b646068c3b923256e5a2944116ecf63"
+    },
+    {
+      "path": "prototypes/motorola-spacing/review.html",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1146,
+      "sha256": "1d4130d2433eb330364dab9ae1f6c31e0e3a235647d27f97ee838feadfc0c6b3"
+    },
+    {
+      "path": "prototypes/organic-three-color-pond/initial-draft.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1498039,
+      "sha256": "819f78d7712867a64ac56e03cd1a84e73a30e49f02239a51c9d27f0d3d1352e6",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/organic-three-color-pond/menu-and-gameplay.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1515583,
+      "sha256": "6a7e309d4dcaab96d37f60679947b34756526babaa433fa8a30e165723e36217",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/organic-three-color-pond/prompts.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 9410,
+      "sha256": "5678be25c42f601664655b1dc3dd67681c8a14b44a7e22543f066f3321e25c87"
+    },
+    {
+      "path": "prototypes/organic-three-color-pond/reference-organic-seams.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 189605,
+      "sha256": "65ed5c0fe0b1e254d24d23d809fbf70f1250bb0dbd3630a5404c1ce5a8ecf05a",
+      "width": 203,
+      "height": 579
+    },
+    {
+      "path": "prototypes/organic-three-color-pond/reference-pad-and-keypad.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 2210386,
+      "sha256": "79074ed3a14267bee58691dcd4988a9a3e258664e483278efa3cf7b1f1dfcf2d",
+      "width": 1619,
+      "height": 971
+    },
+    {
+      "path": "prototypes/organic-three-color-pond/reference-soft-raised.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 154915,
+      "sha256": "4421b52b89d5a4f7c093982c9a6149051a43f4f0ec4346d1e998a131cce8f37c",
+      "width": 290,
+      "height": 344
+    },
+    {
+      "path": "prototypes/quiet-flat-controls/bottom-tools-disclosure.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1365236,
+      "sha256": "5c045f52542b0e431ae3e63c231227c1fc3763fe79dcfc3a582ce61ec76495c0",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/quiet-flat-controls/button-style-comparison.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1561789,
+      "sha256": "e37d33b944e4ed4907dd9a482bd81dba76eaf34e88b73f08543b50ef4bb45d76",
+      "width": 1513,
+      "height": 1039
+    },
+    {
+      "path": "prototypes/quiet-flat-controls/landscape-board-comparison.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1417515,
+      "sha256": "6729b1295e095de3bb52b97c00c9fdbb50131baebea7fe7d01792e50538fbce7",
+      "width": 1870,
+      "height": 841
+    },
+    {
+      "path": "prototypes/quiet-flat-controls/portrait-board-comparison.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1392067,
+      "sha256": "f9a47072a20306185fbe3583475fbba02bcce8ce4790612e8455e6b6d7f0b4ad",
+      "width": 1456,
+      "height": 1080
+    },
+    {
+      "path": "prototypes/quiet-flat-controls/prompts.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 10975,
+      "sha256": "bb7134bbd9b5620f6ec4a4f6dc32e3f99699ab6ecbe95515ae236f07a6b8bd33"
+    },
+    {
+      "path": "prototypes/rounded-water-regions/initial-draft.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1472529,
+      "sha256": "061f8e4891a6d29e00e216a60bdb23efc656a956f1a80ce865e04f5c4ced73b3",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/rounded-water-regions/menu-and-gameplay.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1403222,
+      "sha256": "18154a79ea7f859b289e531e13b5ceb0b8553dbfb922e33de88f0a18a6533190",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/rounded-water-regions/prompts.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 7529,
+      "sha256": "c6e13ade9823065c2e9911efa10d321a3b2b4f91056dcc0c1d321788841dfe60"
+    },
+    {
+      "path": "prototypes/rounded-water-regions/reference-abstract-pond.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1901231,
+      "sha256": "79c589b041eb9b05624c333756c911535066e260224e3366bd9f23549f0637f8",
+      "width": 1619,
+      "height": 971
+    },
+    {
+      "path": "prototypes/rounded-water-regions/reference-region-annotation.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 280369,
+      "sha256": "e1027efb8f81b4e89ebc4a82717f914fba41cfc0f29e3a967e0286f510f99fe1",
+      "width": 354,
+      "height": 514
+    },
+    {
+      "path": "prototypes/top-down-pond/portrait-landscape-menu-game.png",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 1770426,
+      "sha256": "86a6764f242885b3d532e2760a540acb5c725cba372e15edc717e0bfe769cb47",
+      "width": 1619,
+      "height": 971
+    },
+    {
+      "path": "prototypes/top-down-pond/prompts.md",
+      "status": "preserved concept, reference or prototype",
+      "bytes": 7881,
+      "sha256": "a4c0eb59446dcb5bc033daaf12981f2ca3d6274cb672bc222c8d2ed7e790b7e2"
+    }
+  ]
+}

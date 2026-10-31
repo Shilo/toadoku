@@ -19,7 +19,7 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 - Previously completed levels can be revisited, drawing a fresh randomized puzzle for the chosen level.
 - Both modes award a performance score and persistent currency based on difficulty, speed and efficiency. No store, spending, purchases or upgrades are in scope.
 - Approved names: Metamorphosis for the repeat counter, Leap for a level, and Dewdrops for the single earned currency. These names add no transformation mechanic or extra progression system.
-- Retain classic Sudoku rules and solving functionality. A new lily-pad presentation is being reviewed; visual structure must still communicate rows, columns and all 3 by 3 regions.
+- Retain classic Sudoku rules and solving functionality. Inward circular-derived pads over B, Winding shallows, are selected; structure must still communicate rows, columns and all 3 by 3 regions.
 - ImageGen mockups before interface prototypes. Temporary work stays ignored.
 - Production artwork must be human-made with suitable licensing and provenance. Free or paid assets are allowed. AI-generated graphics are restricted to temporary mockups/prototypes and must not ship.
 - Visual implementation must prioritize a flat, full-screen, minimal, super-cute frog environment built mainly from HTML/CSS colors, gradients and soft shapes, with only a few human-made sprites.
@@ -31,6 +31,9 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 - Preserve soft-raised green circles and unchanged cream menu/input buttons. The new full-circle request supersedes the stretched notched silhouette, not the tactile styling.
 - Every group's visible circles, lips and labels stay in one water fill. Selected B needs broad winding contours, not slightly wavy rectangular panels. Curves may use unused water inside stretched cells while every cell remains a full rectangular button; background color never reassigns logical regions.
 - Selected board design B, Winding shallows: whole-region arrangement `A B C / B C A / C A B`, for a more natural pond. Preserve A, Connected bays (`A B A / C A C / A B A`), as a documented alternative. These board names are independent of the earlier A/B/C scene treatments; Quiet Flat C remains selected.
+- Inward placement is selected: group rows align bottom/center/top and columns right/center/left; labels follow the pad. Preserve full rectangular button bounds. Centered is an archived comparison, not a new setting.
+- Future pad refinement: research procedural splits/cutouts and optional irregular perimeter within the 1:1 envelope, preserving colors, raised styling, readable center and full hitbox. Exact generator and cuts are not selected or implemented.
+- Future motion requirement: slowly animate menu/gameplay water while preserving the selected three-color flat design and stable controls. Simple shape drift/deformation and a shader require comparison; no renderer is selected or implementation/performance claimed. Reduced motion remains static.
 - Exactly two authored spacing tokens: 4px between cell rectangles/action buttons and 8px at scene edges, group gutters and board/dock separation. Extra water around circular faces is an effect of their aspect ratio/alignment, not another padding token. Same constants in menus and both orientations; system safe areas are additional.
 - Region recognition must survive loss of hue through shape, spacing and lightness. Subtle alternating pad greens were ineffective; rectangular water panels undermined immersion. Neither comparison is selected.
 - Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
@@ -52,7 +55,7 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 | Visual details | Quiet Flat selected; exact colors/fonts, control finish and layout details remain open. Preserve [all three treatments](visual-directions.md) |
 | Button details | Soft raised selected; exact lip, highlight, colors, focus and pressed treatments need visual refinement |
 | Board preference | Fill space default and Square selected; final setting wording, dock sizing and actual-size note readability need review |
-| Key order | Ascending row-major landscape order recommended; preserving portrait groups as columns remains an alternative |
+| Key details | Ascending row-major order is selected in both orientations; final accessibility/interaction validation remains open |
 | Tool access | Deferred: menu More regular options; gameplay More regular options plus tools alongside, subject to responsive review. Earlier popup structures are alternatives |
 | Status presentation | Nonblocking start and persistent completion accepted; exact timing and future non-timed recovery surface remain open |
 | Human-made artwork | One provisional composite menu image now; final human-made replacement and rights later. No pack acquisition in the current milestone |
@@ -67,7 +70,8 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
 | Region details | B, Winding shallows, selected; A preserved. Exact contour tuning, palette and accessibility checks remain open. Preserve uniform soft-raised pads, fixed spacing and no outlined/raised region cards |
-| Circle alignment | Compare centered with inward by group position: top/bottom rows align bottom/top; left/right columns align right/left; middle axes center. Inward recommended for grouping/pond space, not yet selected. Row/column center lines stay straight but their spacing becomes uneven. Small-note readability needs review |
+| Pad cutouts | Research actual leaf references, splits/cutout masks and restrained edge irregularity. Silhouette refinement only; method/parameters and note readability need review |
+| Water motion | Research CSS-led shape movement against a shader only if justified. Preserve three fills, inward pad containment, static reduced motion and target-device performance; implementation remains future work |
 
 ## Rejected prototype direction
 

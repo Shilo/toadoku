@@ -1,5 +1,7 @@
 # Findings from the initial experiment
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 This records earlier exploration, not production approval. All prototype files and temporary images remain under ignored `prototypes/`.
 
 ## Product and visual review

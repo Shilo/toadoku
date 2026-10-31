@@ -1,5 +1,7 @@
 # Tactile buttons for Quiet Flat C
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research checked 2026-10-31. Proposals for the next visual comparison only. No interface implementation, keypad arrangement, palette, font or production artwork is selected by this note. Follow [visual constraints](../design.md) and the [discussion workflow](../process.md). This study uses the requested Quiet Flat C scene and omits the foreground gameplay frog; shared frog artwork remains available in the menu.
 
 **Current decision overrides the historical comparison below:** soft raised is selected for green lily-pad cells, cream input keys and menu buttons. The latest pad silhouette is a true 1:1 circle with 50% radius, replacing the old stretched notched face. Keep lip/highlight inset within the circle; cream input/menu button shapes stay unchanged. See circular-pad-review.md for alignment and hitbox constraints. The former opaque classic-board recommendation is superseded by the pond board. See [current UI/UX](../ui-ux.md).

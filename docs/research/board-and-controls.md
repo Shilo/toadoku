@@ -1,5 +1,7 @@
 # Responsive board and solving controls
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research checked October 31, 2026. Recommendations below remain proposals. Current discussion selects Quiet Flat CSS, removes frogs from gameplay while retaining them in the menu, puts number entry at the bottom, and retains the top overflow for now. The remaining decisions are board proportions and access to solving tools.
 
 ## Recommendation for visual comparison

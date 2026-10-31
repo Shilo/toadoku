@@ -19,7 +19,9 @@ Use a small independent decorative-background renderer and semantic style roles 
 
 Persist a theme-independent board-shape preference: Fill space by default, Square on request. The presentation measures the current usable viewport and uses a bottom portrait dock or right landscape dock. Relayout preserves logical cell/control identity and state, without rotating board data or stretching glyphs. More overlays do not own layout space or game rules.
 
-More is disabled in the current milestone, so exposing the Square setting is deferred with Settings. The new pad board is a presentation-layer proposal over the same rectangular logical cells; its leaf geometry must not own input hit testing or Sudoku rules. One composite menu-art reference supports replacing the provisional art with one human-made file. No new sprite framework is needed.
+More is disabled in the current milestone, so exposing the Square setting is deferred with Settings. Selected inward pad faces sit inside the same full rectangular logical cell buttons; decorative geometry never owns hit testing or rules. Future procedural cutouts belong to that noninteractive visual mask, while future slow pond motion belongs to the background renderer. Their code must not move cells, change region identity, resize the dock or mutate session/puzzle state. A shader is not a selected dependency. See [future visual research](future-visual-research.md).
+
+One composite menu-art reference supports replacing the provisional art with one human-made file. No new sprite framework is needed. Use [design handoff](design-handoff.md) for the selected spacing, scene composition and saved visual references.
 
 ## Correctness and usability
 

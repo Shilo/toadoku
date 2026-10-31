@@ -12,7 +12,7 @@ Themes retain classic Sudoku rules and exactly the same frog and lily-pad sprite
 - Readable digits, notes, selection, box boundaries and conflicts in every palette.
 - Reduced-motion support and no text embedded in artwork.
 - Shared sprite assets, geometry, palette and animation frames across Pond and Halloween. Do not add seasonal hats, accessories, recolors, replacements or different lily pads.
-- Build most atmosphere with HTML/CSS rather than background illustrations. Keep the solving board opaque and stable; reserve expressive fonts for readable menu/title roles.
+- Build most atmosphere with HTML/CSS rather than background illustrations. Keep number-bearing faces opaque and board geometry stable; reserve expressive fonts for readable menu/title roles.
 - Start with Quiet Flat C, with extension points for Layered Pond B and Expressive Gradient A behind the same UI components.
 - Support optional human-made PNG, JPEG and WebP backgrounds with a usable CSS fallback. No image is selected by this capability.
 
@@ -34,7 +34,9 @@ The menu currently uses one combined provisional frog/pad template, not separate
 
 Current Pond water uses exactly three solid color roles, identical in menu and gameplay. Do not add background tints through opacity, gradients, texture or shadows. Button faces/lips, ink and shared illustration are outside that background-color limit. Exact swatches remain under review.
 
-Region presentation uses selected B, Winding shallows; A remains documented. See [both arrangements](ui-ux.md#three-color-organic-regions-current-comparison). Theme data supplies three fills; geometry derives from region identity and actual visible-circle bounds. Each group's nine circles, lips and labels stay in its fill. Broader winding contours can use unused water inside stretched cell slots; they no longer have to fit only the 8px gutters. Underlays remain noninteractive; no color boundary may change hitboxes, reading order or rules. Circle alignment is under review, not another approved settings control. Do not recolor shared illustration assets.
+Region presentation uses selected B, Winding shallows; A remains documented. See [both arrangements](ui-ux.md#three-color-organic-regions-current-comparison). Theme data supplies three fills; geometry derives from region identity and inward pad bounds. Each group's nine pad faces, lips and labels stay in its fill. Broader winding contours can use unused water inside stretched slots. Underlays remain noninteractive; no boundary may change hitboxes, reading order or rules. Inward alignment is selected, without adding a selector. Do not recolor shared illustration assets.
+
+Future procedural pad cuts/perimeter belong to the decorative control-mask layer, preserving the 1:1 envelope, opaque label zone, green tokens and raised finish. Future slow water animation belongs to the background layer in both scenes; keep its full motion envelope clear of pad surfaces and preserve the same three solid fills. Motion speed/amplitude/renderer remain unselected; CSS-led shape movement is a candidate and a shader is only an option. Provide a static reduced-motion/failure fallback and keep session/layout state independent. See [research and acceptance plan](future-visual-research.md); neither feature is implemented now.
 
 ## Discuss before implementation
 

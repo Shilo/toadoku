@@ -1,5 +1,7 @@
 # Responsive board and input dock audit
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research checked October 31, 2026. This challenges the selected full-stretch default and optional Square board, plus the proposed two-row portrait keypad and two-column right landscape keypad. The current control proposal has exactly nine digits plus More, with no separate top overflow. More opens four solving tools and a Settings entry in the same overlay. Unselected details remain proposals until recorded as decisions. This audit does not approve implementation or generated artwork.
 
 ## Recommendation

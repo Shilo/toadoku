@@ -1,5 +1,7 @@
 # Top-down pond and lily-pad board review
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research date: 2026-10-31. Status: recommendation for discussion, not implementation approval. The newer direction is a basic Pond theme on flat CSS water, viewed from above. The 81-pad board proposal still needs review. Halloween and More functionality are deferred.
 
 ## Recommendation

@@ -1,5 +1,7 @@
 # Technology research
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 > Decision update: Svelte + TypeScript + Vite, GitHub Pages, PWA, and offline play are approved. This comparison records the reasoning; the ignored prototype's interface remains unapproved.
 
 Research date: 2026-10-30. This document records recommendations, not completed implementation or device testing.
@@ -79,7 +81,7 @@ The selected B spacing study now renders menu/gameplay at 360x800 and 800x360 CS
 
 ## Verification priorities
 
-Latest visual follow-up: ignored `prototypes/circular-pond/` checks centered/inward circular faces inside full rectangular buttons at both representative Motorola orientations and DPR 3. Circle aspect ratios, alignment, hitboxes, selection from water, logical arrows and visible-circle water-color containment pass. It supersedes the earlier rectangle-constrained background study for gameplay styling; physical-device and note-readability checks remain outstanding.
+Latest visual follow-up: ignored `prototypes/circular-pond/` checks both circular-face placements inside full rectangular buttons; inward is now selected at both representative Motorola orientations and DPR 3. Circle aspect ratios, alignment, hitboxes, selection from water, logical arrows and visible-circle water-color containment pass. It supersedes the earlier rectangle-constrained background study for gameplay styling; physical-device and note-readability checks remain outstanding.
 
 1. Unit tests: row/column/box conflicts; givens protected; unique solutions for supplied puzzles; valid candidates; notes and undo; completion; malformed save recovery.
 2. Theme tests: October 23/24, October 31, November 7/8; local timezone boundaries; explicit overrides; visual changes leave game state untouched.

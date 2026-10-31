@@ -2,6 +2,8 @@
 
 These requirements override earlier visual recommendations in the research notes.
 
+The complete restart record and selected screenshots are in [design handoff](design-handoff.md).
+
 Current milestone is Pond-only with disabled More and one deliberately rough composite menu-art placeholder. Board design B, Winding shallows, is selected; A, Connected bays, remains a documented alternative. Quiet Flat C is still the overall scene style. See [current UI/UX](ui-ux.md) and [TODO.md](../TODO.md).
 
 - Feel like an immersive, colorful game.
@@ -16,13 +18,14 @@ Current milestone is Pond-only with disabled More and one deliberately rough com
 - Halloween is deferred. Preserve earlier palette research for later rather than designing or implementing it during the basic Pond milestone.
 - Reuse exactly the same frog and lily-pad artwork across themes. No sprite recoloring, costumes, seasonal replacements or accessories. Themes change UI colors, gradients, fonts, buttons and background styling.
 - Keep digits and notes over quiet opaque surfaces. The proposed pad board can show water between those surfaces instead of an opaque panel. Put theme typography primarily in menus and short labels.
-- Green pad faces are now true 1:1 circles with 50% radius inside stretched rectangular cell buttons. Keep their soft-raised finish with inset lip/highlight, and keep cream action/menu buttons unchanged. Entire cell rectangles remain clickable, including water. Compare centered with group-inward alignment; alignment remains open. See [alignment rules](ui-ux.md#circular-pad-alignment-under-review).
+- Green pad faces have 1:1 circular-derived bounds inside stretched rectangular cell buttons, with inward alignment selected by group position. Keep soft-raised finish, inset lip/highlight and unchanged cream action/menu controls. Entire rectangles remain clickable, including water. Centered is preserved as history. See [alignment rules](ui-ux.md#circular-pad-alignment-selected-inward).
+- Research procedural pad splits/cutouts and optional restrained edge irregularity later. This concerns silhouette only, within the 1:1 envelope; do not change approved colors/shading or cut through text/notes. No particular cutout generator or final shape is selected. See [research tasks](future-visual-research.md).
 - Flat water uses exactly three solid colors shared unchanged by menu and gameplay, arranged as broad organic pond curves. No fourth background tint, opacity blends, textures, realistic/gradient scene or large ripple rings. The limit excludes control fills/lips, ink and placeholder art.
 - Use selected B with genuinely flowing three-color contours and selective curved junctions; preserve A as an alternative. All visible circles/labels in a group stay inside one color. Curves may use empty portions of cell slots while hitboxes stay fixed; no need to confine them to 8px channels. Avoid straight panels, per-cell wiggles, random pad jitter or extra spacing. Test shape/lightness without hue. See [both designs](ui-ux.md#three-color-organic-regions-current-comparison).
 - Default to Fill space and offer Square as a persistent setting. Never stretch glyphs or rotate the logical puzzle; preserve the nine-row, nine-column and three-by-three-region structure.
 - Use selected soft-raised CSS buttons while keeping the world quiet and flat. Jelly and lily-pad studies remain alternatives, not additional required styles.
 - No permanent progress HUD is needed. Review brief start status and persistent completion feedback, with information recoverable in a non-timed secondary view.
-- Animation should make the world feel alive while keeping the puzzle readable. Support reduced motion.
+- Both menu and gameplay water should eventually animate slowly, evoking water through restrained movement of the existing flat shapes. Research a simple CSS-led option before adding a shader dependency. Keep all pad/button geometry and labels still, preserve three colors and region containment, provide static reduced motion and test actual-device performance. This feature is requested future work, not implemented or tested yet.
 - Design for desktop and mobile, both orientations. Check representative 360 by 800 and 393 by 873 CSS-pixel layouts and their landscape equivalents. Physical Motorola testing remains outstanding.
 
 ## Artwork policy

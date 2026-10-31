@@ -1,5 +1,7 @@
 # Similar tones for 3 by 3 regions
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research date: 2026-10-31. Status: recommendation for visual comparison, not implementation approval. This review follows the broad CSS pad-face proposal in [the board review](top-down-pond-board.md). It adds no interface or production artwork.
 
 **Superseded recommendation:** the subsequent visual review found subtle pad tones ineffective and rectangular water panels insufficiently immersive. Preserve this comparison as history. The current [rounded-region proposal](rounded-region-review.md) uses shape and lightness over a continuous water ground, with broad abstract pond curves.

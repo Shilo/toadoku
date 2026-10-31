@@ -1,8 +1,10 @@
 # Rounded regions on continuous pond water
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Date: 2026-10-31. Status: B, Winding shallows, selected as the board direction; A preserved. No production implementation approval.
 
-**Latest geometry supersedes parts of this history:** pad faces are now 1:1 circles inside full stretched cell buttons. Alignment compares centered/inward. Curves can use unused cell-slot water, rather than only the 8px group channels. The first measured preview was too rectangular to represent B faithfully. See [circular-pad review](circular-pad-review.md) for the current requirements and checks; older notched faces, full-cell color containment and narrow-curve limits below are historical.
+**Latest geometry supersedes parts of this history:** pad faces are now 1:1 circles inside full stretched cell buttons. Inward is now selected; centered is a preserved comparison. Curves can use unused cell-slot water, rather than only the 8px group channels. The first measured preview was too rectangular to represent B faithfully. See [circular-pad review](circular-pad-review.md) for the current requirements and checks; older notched faces, full-cell color containment and narrow-curve limits below are historical.
 
 ## Latest refinement: three-color organic pond
 

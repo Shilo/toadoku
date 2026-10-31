@@ -1,10 +1,12 @@
 # Circular pads within stretched cell buttons
 
-Date: 2026-10-31. Full-circle faces and full-cell buttons are requested requirements. Alignment remains a visual decision, with inward recommended for the next review.
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
+Date: 2026-10-31. Full-circle faces and full-cell buttons are requested requirements. Inward alignment and the shown B water direction are now selected; centered remains history. Future procedural cutouts/perimeter and slow water animation are recorded in the handoff.
 
 ## Geometry and input
 
-Keep the board's existing stretched cell rectangles and 4px/8px spacing. Each full rectangle is a native button, including areas showing water. The visible pad is a square of side `min(cell width, cell height)` with 50% radius; use inset lip/highlight to preserve a circular silhouette. Green raised styling stays; cream dock/menu controls keep their previous shape and finish. The circular silhouette supersedes stretched notched pastilles.
+Keep the board's existing stretched cell rectangles and 4px/8px spacing. Each full rectangle is a native button, including areas showing water. The visible pad is a square of side `min(cell width, cell height)` with 50% radius; use inset lip/highlight to preserve a circular silhouette. Green raised styling stays; cream dock/menu controls keep their previous shape and finish. The circular-derived 1:1 envelope supersedes stretched pastilles. Future researched splits/cutouts and a restrained irregular edge may refine the mask inside that envelope, preserving colors, raised style and central readability; those refinements are not implemented.
 
 The decorative circle ignores pointer events. Numbers/notes move with that circle, not independently. Keyboard movement follows logical row/column identity. A transient rectangular selection/focus cue can clarify the full hitbox without permanent grid lines. Do not make only the circle clickable or infer region identity from the background color under a tap.
 
@@ -15,17 +17,17 @@ The decorative circle ignores pointer events. Numbers/notes move with that circl
 | Centered | Center in both cell axes | Consistent digit-center spacing supports row/column scanning | Circles in stretched slots can look widely scattered |
 | Inward | Group rows: bottom, center, top; group columns: right, center, left; combine axes | Clusters the nine pads and frees more water around groups for B contours | Distances between digits become uneven across groups; an off-center face makes the water portion of a hitbox less obvious |
 
-Both options retain straight row and column lines because a given global row/column receives the same offset. Inward does not jitter the grid or rotate its data. Group top-left aligns bottom-right, top-right bottom-left, bottom-left top-right, bottom-right top-left. Only the central circle is centered on both axes. No alignment selector is approved.
+Both options retain straight row and column lines because a given global row/column receives the same offset. Inward does not jitter the grid or rotate its data. Group top-left aligns bottom-right, top-right bottom-left, bottom-left top-right, bottom-right top-left. Only the central circle is centered on both axes. Inward is selected without an alignment selector.
 
 On a cell axis already equal to the circle diameter, all alignment positions coincide. Thus this portrait study visibly changes vertical placement, while landscape changes horizontal placement.
 
-Recommend reviewing inward first for group recognition and pond atmosphere, with centered preserved. Treat that recommendation as a design judgment, not a usability finding. At the representative phone sizes, circles are about 33.77 CSS px in either orientation. The largest inscribed square is only about 23.88px, so nine notes require very small type. The study displays a compact example but does not approve that text size for production. If notes are uncomfortable, revisit presentation before accepting the solving interface.
+Inward is selected for group recognition and pond atmosphere, with centered preserved. Selection is a visual decision, not a measured usability finding. At the representative phone sizes, circles are about 33.77 CSS px in either orientation. The largest inscribed square is only about 23.88px, so nine notes require very small type. The study displays a compact example but does not approve that text size for production. If notes are uncomfortable, revisit presentation before accepting the solving interface.
 
 ## Restore selected B
 
 The earlier measured preview reduced the source's natural shallows to nearly rectangular patches. That is not an approved replacement for B. Keep exactly the same three water fills, `A B C / B C A / C A B`, with flowing shared contours and selective curved junctions. Empty parts of stretched cells now provide room for curves without enlarging logical gutters. All visible circles/lips/labels of a group must stay within its assigned fill; unused water in a rectangular button may contain a color transition. This supersedes full-rectangle color-containment checks, but never full-rectangle hit testing.
 
-Avoid nine panels, detailed ripples, gradients, per-cell scallops or contour motion while solving. Circle containment must constrain the water geometry, rather than water squeezing or moving the circles. Geometry remains presentation-only and does not alter Sudoku regions.
+Avoid nine panels, detailed ripples, gradients and per-cell scallops. Slow background water motion is now a requested future feature, subject to region containment, reduced motion and actual-device testing; pads and their geometry stay still. Circle containment must constrain the water geometry, rather than water squeezing or moving the circles. Geometry remains presentation-only and does not alter Sudoku regions.
 
 ## Evidence and limits
 

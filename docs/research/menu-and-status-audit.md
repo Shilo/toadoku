@@ -1,5 +1,7 @@
 # More menu and transient status audit
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research date: October 31, 2026. This is an independent design challenge, not interface implementation or approval of unresolved tool behavior, scoring, or layout proportions.
 
 ## Direction under review

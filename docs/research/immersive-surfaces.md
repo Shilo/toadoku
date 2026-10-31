@@ -1,5 +1,7 @@
 # Immersive surfaces and flat visual directions
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research checked against official sources on October 30, 2026. This is a design proposal, not implementation approval. Read [visual constraints](../design.md), [theme requirements](../themes.md), and [discussion workflow](../process.md) first.
 
 ## Recommendation

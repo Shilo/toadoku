@@ -1,5 +1,7 @@
 # Material 3 Expressive research
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Checked 2026-10-30. Research and proposals only. No new interface, feature, artwork, palette, or dependency is approved by this document.
 
 ## Current guidance and relevance

@@ -1,5 +1,7 @@
 # Game modes and progression
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research date: 2026-10-30. This is a product recommendation, not a commitment to implement every mode.
 
 > Current decision: randomized selection from a bundled pre-rated catalog, rising through difficulty bands and then looping back to easiest with an increased cycle counter. See [cycle approach](../progression.md) and [independent assessment](progression-audit.md). Earlier fixed-Journey, permanent-ceiling and custom-grader-first suggestions below are exploratory alternatives, not final decisions. A suitable public-domain rated bank is identified; a custom grader is not required merely to select those imported puzzles.

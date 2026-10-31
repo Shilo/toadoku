@@ -1,10 +1,10 @@
 # Flat visual directions
 
-Research synthesis and preserved alternatives. **C, Quiet Flat is selected as the starting direction.** B and A remain documented future treatments. Palette swatches, fonts, board proportions and button finish remain open. No interface code, artwork purchase or asset adoption is authorized by this note.
+Research synthesis and preserved alternatives. **C, Quiet Flat is selected as the starting direction.** B and A remain documented future treatments. Exact palette/fonts remain open. Current board geometry, inward placement, soft-raised finish and spacing are selected in the handoff. No interface code, artwork purchase or asset adoption is authorized by this note.
 
 ## Selected start and preserved alternatives
 
-**Quiet Flat** starts with a solid tonal field, a few low-contrast organic edge shapes, clear opaque board and minimal controls. Cute menu sprites and typography provide identity without needing a detailed environment. Gameplay now omits the decorative frog; earlier comparison images containing it are superseded on that point.
+**Quiet Flat** began with a solid tonal field and few organic edge shapes; the selected refinement is three-color abstract pond water, opaque inward pad faces and minimal controls. Cute menu sprites and typography provide identity without needing a detailed environment. Gameplay now omits the decorative frog; earlier comparison images containing it are superseded on that point.
 
 Layered Pond can later add a small number of broad flat banks/water fields. Expressive Gradient can later add restrained atmospheric gradients. Keep gradients out of cells and behind no unbacked small labels. Their background and token choices must not require rewriting the board, controls or game state.
 
@@ -18,7 +18,7 @@ These are three approaches to the same two themes, not three extra themes. Compa
 
 Preserved descriptions, palette/type research and tradeoffs remain in this document and the three linked research notes. Original temporary comparison files are `a-expressive-gradient.png`, `b-layered-pond.png` and `c-quiet-flat.png` under ignored `prototypes/flat-theme-study/`, with exact prompts alongside. Those images are local references, not tracked production assets. The initial agent recommendation favored A; the user selected C for simplicity.
 
-The selected finish is now soft raised, and the selected board preference is Fill space by default with Square available. Old images showing a fixed top overflow, dedicated Tools key or gameplay frog are superseded by the current More/dock proposal in [UI/UX](ui-ux.md). Theme A/B/C descriptions remain preserved independently of those layout changes.
+The selected finish is soft raised. Fill space is default and Square access remains deferred. Board B, Winding shallows, and inward circular pad placement are selected; those board names are independent of scene-treatment A/B/C. Exactly three water fills and 4px/8px spacing are current. Future procedural cuts and slow water animation require research/testing. See [design handoff](design-handoff.md). Old images showing a fixed top overflow, dedicated Tools key or gameplay frog are superseded by the current More/dock proposal in [UI/UX](ui-ux.md). Theme A/B/C descriptions remain preserved independently of those layout changes.
 
 ## Research findings that matter
 

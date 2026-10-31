@@ -1,5 +1,7 @@
 # Independent progression assessment
 
+> Research record: original proposals may be superseded. Read the [design handoff](../design-handoff.md) and [current UI/UX](../ui-ux.md) for selected decisions; this record does not approve implementation.
+
 Research date: 2026-10-30. The randomized pre-rated catalog approach is now approved. The subsequent [cycle design](../progression.md) replaces this assessment's proposed permanent stay at the difficulty ceiling: the agreed loop returns to easiest and increments a cycle counter. Other unselected alternatives below remain research. Scope stays Quick Play plus one Progression mode with classic Sudoku.
 
 ## Recommendation
