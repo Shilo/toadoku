@@ -2,7 +2,7 @@
 
 Research date: 2026-10-30. This is a product recommendation, not a commitment to implement every mode.
 
-> Latest assessment: [independent progression audit](progression-audit.md). It recommends randomized selection from a bundled pre-rated catalog, with gradually harder bands and a ceiling. Earlier fixed-Journey and custom-grader-first suggestions below are exploratory alternatives, not final decisions. A suitable public-domain rated bank is now identified; a custom grader is not required merely to select those imported puzzles.
+> Current decision: randomized selection from a bundled pre-rated catalog, rising through difficulty bands and then looping back to easiest with an increased cycle counter. See [cycle approach](../progression.md) and [independent assessment](progression-audit.md). Earlier fixed-Journey, permanent-ceiling and custom-grader-first suggestions below are exploratory alternatives, not final decisions. A suitable public-domain rated bank is identified; a custom grader is not required merely to select those imported puzzles.
 
 ## Current scope and open choice
 

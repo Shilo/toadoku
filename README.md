@@ -2,13 +2,14 @@
 
 A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, hosted on GitHub Pages.
 
-**Status: gameplay and design discussion. Approved: Svelte + TypeScript + Vite, GitHub Pages, PWA, offline play, and Quick Play plus Progression with traditional Sudoku layout and functionality. Progression details and visual design remain open.**
+**Status: gameplay and design discussion. Approved: Svelte + TypeScript + Vite, GitHub Pages, PWA, offline play, and Quick Play plus randomized Progression with traditional Sudoku. Progression loops through difficulty in cycles. Exact cycle schedule and visual design remain open.**
 
 ## Start here
 
 - [Design constraints](docs/design.md)
 - [Discussion workflow](docs/process.md)
 - [Open decisions](docs/decisions.md)
+- [Randomized progression and cycles](docs/progression.md)
 - [Sudoku and artwork research](docs/research/sudoku-design.md)
 - [Game modes research](docs/research/game-modes.md)
 - [Independent progression assessment](docs/research/progression-audit.md)

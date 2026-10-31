@@ -10,7 +10,7 @@ Frogs remain the identity in every theme. The everyday theme is cute and welcomi
 
 English, German, and Spanish are required throughout the interface. Language, theme, appearance, and current puzzle progress must persist locally. The intended delivery is a static, JavaScript-based application for GitHub Pages, with responsive layouts and installable PWA support. There is no required backend or WebAssembly runtime. Sudoku logic, presentation, themes, localization, and persistence have separate responsibilities so visual changes cannot alter puzzle correctness.
 
-The approved stack is Svelte, TypeScript, and Vite, hosted on GitHub Pages as a PWA with offline play. Initial modes are Quick Play and Progression only, retaining traditional Sudoku's basic layout and functionality. The progression structure, puzzle supply, detailed control access, artwork, and themes still require discussion before implementation. Stack and mode approval do not approve the initial web-style prototype, which remains an ignored experiment.
+The approved stack is Svelte, TypeScript, and Vite, hosted on GitHub Pages as a PWA with offline play. Initial modes are Quick Play and Progression only, retaining traditional Sudoku's basic layout and functionality. Progression uses randomized puzzles from a bundled, pre-rated collection. After the final level, the cycle counter increases, the level returns to 1, and difficulty returns to easiest with another puzzle. Preserve puzzle-use history across cycles. No prestige currencies, upgrades, or additional systems are required. Exact cycle length, difficulty schedule, catalog selection, control access, artwork, and themes still require discussion before implementation. Stack and mode approval do not approve the initial web-style prototype, which remains an ignored experiment.
 
 ## Start here
 
@@ -18,6 +18,7 @@ The approved stack is Svelte, TypeScript, and Vite, hosted on GitHub Pages as a 
 - Visual constraints: [docs/design.md](docs/design.md).
 - Discussion and prototyping workflow: [docs/process.md](docs/process.md).
 - Accepted requirements and open decisions: [docs/decisions.md](docs/decisions.md).
+- Progression and cycle behavior: [docs/progression.md](docs/progression.md).
 - Architecture, stack, boundaries, and validation: [docs/architecture.md](docs/architecture.md).
 - Theme tokens, seasonal selection, and customization: [docs/themes.md](docs/themes.md).
 - Read the relevant research document under `docs/research/` when changing design or technology decisions.

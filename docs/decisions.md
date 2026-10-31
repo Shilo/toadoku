@@ -12,6 +12,8 @@
 - GitHub Pages hosting, JavaScript delivery, no required WebAssembly.
 - Approved stack: Svelte + TypeScript + Vite, delivered as a PWA with offline play.
 - Initial modes: Quick Play and Progression only. Daily challenges and additional rule variants are outside the initial scope.
+- Progression uses randomized selection from a bundled, pre-rated puzzle collection.
+- Progression loops: completing the final level increments the cycle counter, resets the level to 1, and returns to easiest difficulty with another puzzle. Preserve puzzle-use history across cycles. No prestige currencies or upgrades.
 - Retain traditional Sudoku's basic layout and functionality. Visual themes must preserve familiar solving interactions.
 - ImageGen mockups before interface prototypes. Temporary work stays ignored.
 - Keep personal context out of project artifacts.
@@ -24,9 +26,9 @@
 | Halloween palette | Pumpkin orange, near-black, purple, and frog green; select exact swatches visually |
 | Controls | Number entry plus overflow; decide contextual access to essential solving tools |
 | Seasonal dates | October 24 through November 7 inclusive, using local dates |
-| Progression structure | Independent review recommends randomized progression through rated bands with a ceiling; still awaiting selection. No story or map is approved |
+| Cycle details | Two counters, Cycle and Level, are recommended labels. Exact cycle length, band schedule and counter presentation remain open. See [approach](progression.md) |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
-| Puzzle supply | Bundled pre-rated bank recommended over live generation for the first version; candidate public-domain source identified but not imported or approved |
+| Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
 
 ## Rejected prototype direction
 
