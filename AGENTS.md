@@ -2,41 +2,61 @@
 
 ## Product
 
-Toadodu is a cute, polished, frog-themed Sudoku game for browsers on mobile and desktop. Its name combines "toad" and "Sudoku". The experience should feel like entering a quiet little pond: immersive, playful, minimal, and focused on solving a real Sudoku puzzle. Standard digits 1 through 9, familiar row and column rules, and readable 3 by 3 regions remain the foundation. Keep the frog identity in the menu; omit the decorative gameplay frog for now so board and input use the space. Artwork must preserve clear numbers, notes, selection, conflicts, and region boundaries.
+A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep classic 9x9 rules, familiar digits and readable 3x3 groups. The experience is minimal, colorful and focused on solving puzzles in a top-down pond.
 
-The game should feel like a colorful, immersive, full-screen and exceptionally cute frog environment. Start with basic Pond only, Quiet Flat CSS and soft-raised controls; preserve B/A treatments for later. Use only two authored spacing tokens across scenes/orientations: 4px between full cell rectangles/action buttons, 8px at scene edges, group boundaries and board/dock separation. Fill all remaining space without extra wrappers, scenery strips or a header; add necessary system safe-area protection separately. Keys align to the bottom in portrait or right edge in landscape within the same 8px inset. Keep nine digits plus disabled More: two rows of five in portrait, five rows of two in landscape. Recalculate actual viewport/safe areas without rotating logical data or glyphs. Square remains a planned independent preference; its settings access is deferred with More. Do not introduce dashboards, promotional copy, gameplay mascots or permanent status strips. Keep brief nonblocking start information and completion results until Continue. Main-menu Quick Play and Progression form a bottom-left block in both orientations, with disabled More at bottom-right aligned with Progression. Title and art stay higher. Mode selection changes choices in the same scene: difficulty for Quick Play, existing/new save for Progression, with Back returning to modes. Save slots and More functionality are deferred in TODO.md. The proposed future More overlay exposes regular options, with gameplay tools alongside, rather than an extra Tools step; it is not current functionality. Touch, mouse and keyboard must work with equivalent reduced-motion presentation.
+## Tech stack
 
-Use one intentionally rough black-and-white frog-plus-lily-pad menu placeholder with a conspicuous question mark, replaceable as one composite image. Keep it provisional alongside polished UI. Asset acquisition is deferred; final art remains human-made, with no personal context recorded. The accepted scene is top-down CSS pond water: exactly three solid water colors shared unchanged by menu/gameplay, arranged in broad organic curves suggesting water/shallows, not a blank field, large ripple rings, gradients or reflections. Apply that water style to both scenes. Each full stretched cell rectangle is a button, including water. Its visible green pad has a 1:1 circular-derived envelope sized to the shorter cell dimension, currently a circle with 50% radius. Keep raised lip/highlight inset within its 1:1 envelope; cream action/menu buttons stay unchanged. Future pad cutouts/splits and a restrained irregular edge require research, without changing colors, shading, hitboxes or the readable center. Inward alignment is selected: group rows align bottom/center/top and columns right/center/left, with digits/notes following the pad. Centered is preserved as history. Subtle pad tones and rectangular water panels were ineffective. Board design B, Winding shallows, is selected; preserve A, Connected bays, as an alternative in docs/ui-ux.md. These board names are separate from the earlier scene treatments. Keep each group's visible circles/lips/labels in one fill. Restore B's broad winding contours and curved junctions; empty water within cell slots can carry those curves without changing hitboxes. Extra space around circles is not a third padding token. Control/art colors are outside the three-water-color limit. Require shape, spatial group gutters and lightness to work without hue; validate grayscale and color-vision simulations. Retain recognizable rows, columns and regions, upright high-contrast digits and fixed-position notes. Keep pad interiors quiet and opaque; never warp raster artwork to fit stretched cells. Theme boundaries stay modular, but Halloween and seasonal switching are deferred. Future slow water animation is required in both scenes, with static reduced motion; CSS-led movement and shaders need research, implementation and actual-device testing before adoption. Keep pad/dock geometry still, three water colors and region containment intact. Neither cutouts nor animation is implemented. Do not add a theme editor or plugin framework.
+- Svelte, TypeScript, Vite.
+- GitHub Pages; installable PWA with offline play.
+- JavaScript delivery; no required backend or WebAssembly.
 
-Review Motorola G31/G32 with representative 360x800 and 800x360 CSS viewports at DPR 3; label these as emulation, not observed hardware dimensions. English, German, and Spanish are required throughout the interface. Language, theme, appearance, and current puzzle progress must persist locally. The intended delivery is a static, JavaScript-based application for GitHub Pages, with responsive layouts and installable PWA support. There is no required backend or WebAssembly runtime. Sudoku logic, presentation, themes, localization, and persistence have separate responsibilities so visual changes cannot alter puzzle correctness.
+## Architecture
 
-The approved stack is Svelte, TypeScript, and Vite, hosted on GitHub Pages as a PWA with offline play. Initial modes are Quick Play and Progression only, retaining traditional Sudoku's basic functionality. Progression uses randomized puzzles from a bundled, pre-rated collection. Completing the final level increments Metamorphosis, returns Leap to 1 and difficulty to easiest, with another puzzle. Previously completed Leaps can be revisited with a fresh board. Both modes earn a score and Dewdrops reflecting difficulty, speed and efficiency. Currency and puzzle-use history survive repeats. These names require no frog transformation or extra system. Scoring balance, loop length, difficulty schedule, catalog selection and remaining visual details require discussion before implementation. No store, spending, purchases or upgrades are in scope. Earlier prototype code remains an ignored experiment.
+- Separate Sudoku logic, sessions, presentation, themes, localization and persistence.
+- Themes and decorative geometry never change rules, hitboxes or saved progress.
+- Persist language, theme/appearance and puzzle progress. Support English, German and Spanish.
 
-## Start here
+## Scope
 
-- Resume after chat reset: [docs/design-handoff.md](docs/design-handoff.md).
-- Project status and reading order: [README.md](README.md).
-- Deferred work and disabled features: [TODO.md](TODO.md).
-- Pad-cutout and animated-water research: [docs/future-visual-research.md](docs/future-visual-research.md).
-- Visual constraints: [docs/design.md](docs/design.md).
-- Current UI, UX, board and control proposals: [docs/ui-ux.md](docs/ui-ux.md).
-- Flat theme comparison and recommendation: [docs/visual-directions.md](docs/visual-directions.md).
-- Discussion and prototyping workflow: [docs/process.md](docs/process.md).
-- Accepted requirements and open decisions: [docs/decisions.md](docs/decisions.md).
-- Progression and repeat behavior: [docs/progression.md](docs/progression.md).
-- Score and currency proposal: [docs/scoring.md](docs/scoring.md).
-- Architecture, stack, boundaries, and validation: [docs/architecture.md](docs/architecture.md).
-- Theme tokens, seasonal selection, and customization: [docs/themes.md](docs/themes.md).
-- Read the relevant research document under `docs/research/` when changing design or technology decisions.
+- Basic Pond theme; Quick Play and randomized Progression.
+- Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
+- More stays disabled. Settings, Halloween and save-slot policy are deferred.
+- Pad cutouts and water animation need future research and testing; neither is implemented.
+- No store, purchases or upgrades.
 
-## Rules
+## Design
 
-- KISS and YAGNI and DRY: no feature, dependency, option or abstraction without a real need.
-- Follow the Git Conventional Commits standard for every commit.
-- Do not use em dashes in text.
-- Keep personal context out of source code, documentation, interface copy, and assets.
-- Discuss one decision at a time. Keep user-facing text extremely concise and use visual comparisons.
-- Use ImageGen for main-menu and gameplay mockups before writing interface prototypes.
-- Production art must be human-made, free or paid, with creator provenance and a suitable license. AI-generated art, including SVG illustrations, is allowed only in clearly marked temporary mockups/prototypes under ignored `/prototypes/`; never ship it. See [art policy](docs/design.md#artwork-policy).
-- Keep the combined menu illustration deliberately provisional. Do not buy sprites or polish that placeholder during the current milestone.
-- Keep temporary prototypes, mockups, builds, dependencies, and test artifacts under ignored `/prototypes/`. Never commit them or promote them to production without discussion.
+- Quiet Flat scene; Winding shallows B; inward 1:1 pad faces.
+- Three shared water colors; soft-raised green pads and cream controls.
+- Full stretched cell buttons, including water; stationary, readable digits and notes.
+- Spacing: 4px between cells/buttons; 8px at edges, groups and board/dock.
+- Ten dock keys: bottom 2x5 in portrait, right 5x2 in landscape.
+- No top bar, permanent HUD or gameplay mascot. Use one rough combined menu-art placeholder.
+- Support touch, mouse, keyboard, reduced motion and safe areas.
+- Check Motorola G31/G32 at representative 360x800 and 800x360 CSS px, DPR 3. Label emulation; hardware testing remains pending.
+
+## Working rules
+
+- KISS, YAGNI, DRY. Add only what the task needs.
+- Use Conventional Commits.
+- No em dashes or personal context in project files.
+- Discuss one decision at a time; keep replies extremely concise.
+- Use ImageGen before new UI experiments.
+- Keep prototypes, AI mockups, dependencies, builds and test artifacts in ignored `prototypes/`. Do not promote them without discussion.
+- Production art must be human-made with provenance and suitable licensing. Never ship AI illustrations. Keep the menu placeholder provisional.
+
+## Read as needed
+
+Start with [design handoff](docs/design-handoff.md). Current decisions override historical research. Open the relevant details before changing that area.
+
+| Task | Read |
+| --- | --- |
+| Layout, pads, controls, menus | [UI/UX](docs/ui-ux.md), [menu flow](docs/menu.md) |
+| Visual constraints and artwork | [Design](docs/design.md) |
+| Tokens, backgrounds, appearance | [Themes](docs/themes.md) |
+| Pad cutouts or animated water | [Future visual research](docs/future-visual-research.md) |
+| Stack, modules, validation | [Architecture](docs/architecture.md) |
+| Progression or rewards | [Progression](docs/progression.md), [scoring](docs/scoring.md) |
+| Decisions, deferred work, workflow | [Decisions](docs/decisions.md), [TODO](TODO.md), [process](docs/process.md) |
+
+The handoff indexes selected mockups, preserved alternatives, research and test evidence.
