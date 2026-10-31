@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "techniqueVersion": 1,
+  "authorship": "Original implementation and fixtures. HoDoKu mathematical definitions consulted; no diagrams, prose or code copied.",
+  "candidatePolicy": "Recompute legal candidates from current values. Manual notes are never premises. No authoritative elimination cache is retained.",
+  "techniques": [
+    { "id": "naked-single", "source": "https://hodoku.sourceforge.net/en/tech_singles.php", "effect": "placement" },
+    { "id": "hidden-single", "source": "https://hodoku.sourceforge.net/en/tech_singles.php", "effect": "placement" },
+    { "id": "pointing", "source": "https://hodoku.sourceforge.net/en/tech_intersections.php", "effect": "elimination" },
+    { "id": "claiming", "source": "https://hodoku.sourceforge.net/en/tech_intersections.php", "effect": "elimination" },
+    { "id": "naked-pair", "source": "https://hodoku.sourceforge.net/en/tech_naked.php", "effect": "elimination" },
+    { "id": "hidden-pair", "source": "https://hodoku.sourceforge.net/en/tech_hidden.php", "effect": "elimination" },
+    { "id": "naked-triple", "source": "https://hodoku.sourceforge.net/en/tech_naked.php", "effect": "elimination" },
+    { "id": "hidden-triple", "source": "https://hodoku.sourceforge.net/en/tech_hidden.php", "effect": "elimination" },
+    { "id": "x-wing", "source": "https://hodoku.sourceforge.net/en/tech_fishb.php", "effect": "elimination" }
+  ]
+}

@@ -7,4 +7,11 @@
 /tools/catalog/** text eol=lf
 /src/lib/sudoku/** text eol=lf
 /src/lib/catalog/** text eol=lf
+/src/lib/session/** text eol=lf
+/src/lib/hints/** text eol=lf
+/src/lib/modes/** text eol=lf
+/src/lib/rewards/** text eol=lf
+/src/lib/storage/** text eol=lf
+/src/lib/gameplay/** text eol=lf
+/tests/adversarial/** text eol=lf
 /public/licenses/** -text

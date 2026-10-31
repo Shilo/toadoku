@@ -121,4 +121,16 @@ describe('session editing and monotone history', () => {
     expect(state.logicalRevision).toBe(0);
     expect(reduceAttempt(state, { type: 'checkpoint', elapsedMs: 2000 })).toEqual({ kind: 'noop' });
   });
+  it('rejects hidden, symbolic and compensating extras in notes, history and compound changes', () => {
+    const edited = command(attemptFixture(), { type: 'enter', digit: 2 });
+    for (const field of ['notes', 'undo', 'changes'] as const) for (const attack of ['hidden-index', 'hidden-extra', 'symbol', 'compensating'] as const) {
+      const state = structuredClone(edited);
+      const array = field === 'notes' ? state.notes : field === 'undo' ? state.undo : state.undo[0].changes;
+      if (attack === 'hidden-index' || attack === 'compensating') Object.defineProperty(array, 0, { enumerable: false });
+      if (attack === 'hidden-extra') Object.defineProperty(array, 'extra', { value: true });
+      if (attack === 'symbol') Object.defineProperty(array, Symbol('extra'), { value: true });
+      if (attack === 'compensating') Object.assign(array, { extra: true });
+      expect(reduceAttempt(state, { type: 'undo' }).kind).toBe('integrity');
+    }
+  });
 });

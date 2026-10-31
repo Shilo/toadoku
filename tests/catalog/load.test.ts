@@ -23,6 +23,23 @@ function fetchFixture(options: { status?: number; mutate?: (path: string, bytes:
   return { requests, fetcher, maximum: () => maximum };
 }
 describe('progressive local catalog', () => {
+  it('rejects hidden and symbolic array extras without invoking caller array methods or species', async () => {
+    const bytes = await readFile(`public/catalog/v1/${manifest.pools.easy.shards[0].path}`), shard = JSON.parse(bytes.toString()), tuple = shard.records[0];
+    for (const decorate of [
+      (array: readonly unknown[]) => Object.defineProperty(array, 'extra', { value: 1 }),
+      (array: readonly unknown[]) => Object.defineProperty(array, Symbol('extra'), { value: 1 }),
+      (array: readonly unknown[]) => { Object.defineProperty(array, 0, { enumerable: false }); Object.defineProperty(array, 'extra', { value: 1, enumerable: true }); },
+      (array: readonly unknown[]) => Object.defineProperty(array, 'map', { value: () => { throw Error('caller method'); } }),
+    ]) {
+      const badTuple = [...tuple]; decorate(badTuple); expect(() => decodeTuple(badTuple,'easy')).toThrow('catalog record');
+      const badShard = structuredClone(shard); decorate(badShard.records); expect(() => decodeShard(badShard,manifest.pools.easy.shards[0])).toThrow('shard schema');
+      const badManifest = structuredClone(manifest); decorate(badManifest.pools.easy.shards); expect(() => decodeManifest(badManifest)).toThrow('pool schema');
+    }
+    let called = false;
+    class CallerArray extends Array { static get [Symbol.species]() { called = true; return Array; } }
+    const subclass = new CallerArray(); for (const record of shard.records) subclass.push(record);
+    expect(decodeShard({ ...shard, records: subclass },manifest.pools.easy.shards[0])).toHaveLength(subclass.length); expect(called).toBe(false);
+  });
   it('fetches only manifest plus requested shard under root/subpath and coalesces', async () => {
     for (const base of ['https://example.test/catalog/v1/', 'https://example.test/toadoku/catalog/v1/']) {
       const fixture = fetchFixture(), loader = new CatalogLoader(base, fixture);

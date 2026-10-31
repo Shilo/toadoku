@@ -1,9 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { countSolutions, isComplete } from '../../src/lib/sudoku';
+import { exactCover, independentlyValidSolution } from '../../tools/catalog/oracle-exact-cover.ts';
 
 const solved = Array.from({ length: 81 }, (_, cell) => (Math.floor(cell / 9) * 3 + Math.floor(cell / 27) + cell % 9) % 9 + 1);
 
 describe('bounded exact MRV solver', () => {
+  it('retains the declared MRV resource floor on an original independently certified subset', () => {
+    // Original algebraic-grid subset, generator seed 0x5397 sample 0. No first-witness promise.
+    // Dropping candidate cardinality or breaking on a nonsingleton exceeds this bound.
+    const grid = '103406009400089003780123056004000801007800034000034507340670002670902345910345678';
+    const independent = exactCover(grid, { nodeBudget: 1000000 });
+    expect(independent.kind).toBe('complete'); if (independent.kind === 'complete') expect(independent.count).toBe(2);
+    const result = countSolutions([...grid].map(Number), { nodeBudget: 42 });
+    expect(result.kind).toBe('complete');
+    if (result.kind === 'complete') {
+      expect(result.count).toBe(2); expect(result.nodes).toBeLessThanOrEqual(42);
+      expect(independentlyValidSolution(grid, result.solution!.join(''))).toBe(true);
+    }
+  });
   it('distinguishes valid full, unique, unsatisfiable, ambiguous and invalid', () => {
     expect(countSolutions(solved)).toEqual({ kind: 'complete', count: 1, solution: solved, nodes: 1 });
     const unique = [...solved]; unique[80] = 0;

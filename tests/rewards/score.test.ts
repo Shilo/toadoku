@@ -39,4 +39,18 @@ describe('single Dewdrops reward arithmetic', () => {
     expect(() => rewardForAttempt({ ...attempt, assistance: { used: true, exposed: [51] } })).toThrow();
     expect(() => rewardForAttempt({ ...attempt, assistance: { used: false, exposed: [0] } })).toThrow();
   });
+  it('keeps primitive, transport and final-cell boundaries strict without freezing diagnostic prose', () => {
+    expect(safeAdd(12, 0)).toBe(12);
+    const inputs = { blanks: 51, exposed: 0, elapsedMs: 0, information: false };
+    for (const invalid of [{ elapsedMs: NaN }, { elapsedMs: '0' }, { information: 0 }, { information: undefined }, { exposed: 1, information: false }]) {
+      expect(() => calculateReward(policyForBand('easy'), { ...inputs, ...invalid } as never)).toThrow(RangeError);
+    }
+    expect(() => calculateReward(policyForBand('easy'), { blanks: 51, exposed: 52, elapsedMs: 0, information: true })).toThrow(RangeError);
+    // Arithmetic boundary fixtures only; they make no claim of certified Sudoku provenance.
+    const attempt = { definition: { givens: '1'.repeat(30) + '0'.repeat(51) }, policy: policyForBand('easy'), assistance: { used: true, exposed: [] }, elapsedMs: 0, scored: true } as unknown as Attempt;
+    for (const givens of ['X' + attempt.definition.givens, attempt.definition.givens + '1']) expect(() => rewardForAttempt({ ...attempt, definition: { ...attempt.definition, givens } })).toThrow(RangeError);
+    const blankFirst = { ...attempt, definition: { ...attempt.definition, givens: '0'.repeat(51) + '1'.repeat(30) } };
+    expect(() => rewardForAttempt({ ...blankFirst, assistance: { used: true, exposed: ['0'] as never } })).toThrow(RangeError);
+    expect(rewardForAttempt({ ...attempt, assistance: { used: true, exposed: [80] } }).dewdrops).toBe(Number(100n * 50n / 51n));
+  });
 });

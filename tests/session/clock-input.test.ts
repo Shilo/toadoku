@@ -18,11 +18,19 @@ describe('active-play clock', () => {
   });
   it('rejects invalid/backward clocks/overflow rather than inventing elapsed time', () => {
     for (const initial of [-1, NaN, 1.5, Infinity]) expect(() => createActivePlayClock(initial, () => 0)).toThrow(RangeError);
-    let time = 20; const clock = createActivePlayClock(0, () => time); clock.setActive(true); time = 10;
+    let time = 20; const clock = createActivePlayClock(1000, () => time); clock.setActive(true); time = 10;
     expect(() => clock.sample()).toThrow(RangeError);
-    const invalid = createActivePlayClock(0, () => NaN); expect(() => invalid.setActive(true)).toThrow(RangeError);
+    for (const value of [-1, NaN, Infinity, -Infinity]) {
+      const invalid = createActivePlayClock(0, () => value); expect(() => invalid.setActive(true)).toThrow(RangeError);
+    }
     let end = 0; const overflow = createActivePlayClock(Number.MAX_SAFE_INTEGER, () => end); overflow.setActive(true); end = 2;
     expect(() => overflow.sample()).toThrow(RangeError);
+  });
+  it('keeps repeated activation active rather than treating it as a pause', () => {
+    let time = 0; const clock = createActivePlayClock(0, () => time); clock.setActive(true);
+    time = 20; expect(clock.setActive(true)).toBe(20);
+    time = 30; expect(clock.sample()).toBe(30); expect(clock.setActive(false)).toBe(30);
+    time = 1000; expect(clock.setActive(false)).toBe(30); expect(clock.sample()).toBe(30);
   });
 });
 
@@ -46,6 +54,9 @@ describe('scoped keyboard commands', () => {
     expect(commandForKey({ key: 'z', metaKey: true }, { ...scope, platform: 'mac' })).toEqual({ type: 'undo' });
     for (const event of [{ key: 'z', metaKey: true }, { key: 'z', ctrlKey: true, shiftKey: true }, { key: 'z', ctrlKey: true, repeat: true }]) expect(commandForKey(event, scope)).toBeUndefined();
     expect(commandForKey({ key: 'z', ctrlKey: true }, { ...scope, platform: 'mac' })).toBeUndefined();
+    for (const platform of ['mac', 'other'] as const) expect(commandForKey({ key: 'z', ctrlKey: true, metaKey: true }, { ...scope, platform })).toBeUndefined();
     expect(commandForKey({ key: '1' }, { ...scope, selection: -1 })).toBeUndefined();
+    expect(commandForKey({ key: '1' }, { ...scope, selection: 81 })).toBeUndefined();
+    for (const key of ['F1', '1x']) expect(commandForKey({ key }, scope)).toBeUndefined();
   });
 });

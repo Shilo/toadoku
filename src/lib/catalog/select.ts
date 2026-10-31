@@ -37,6 +37,8 @@ export function nextPool(eligible: readonly PoolId[], states: readonly PoolState
   const weights = unseen.some(n => n > 0) ? unseen : selected.map(s => s.count);
   let position = uniformBelow(weights.reduce((a, b) => a + b, 0), random);
   for (let i = 0; i < weights.length; i++) { if (position < weights[i]) return selected[i].pool; position -= weights[i]; }
+  // QA-select proof: positive total and 0<=position<sum force return by the last positive weight.
+  /* v8 ignore next -- @preserve */
   throw new Error('invalid weighted selection');
 }
 export interface OrdinalCandidate { pool: PoolId; ordinal: number; poolRevision: number; epoch: number; cursor: number; consumedSteps: number; nextEpoch: number; nextCursor: number }
@@ -53,5 +55,8 @@ export function nextOrdinal(state: PoolState, excludedOrdinals: readonly number[
     const ordinal = order[cursor++];
     if (!blocked.has(ordinal)) return { pool: state.pool, ordinal, poolRevision: state.revision, epoch: state.epoch, cursor: state.cursor, consumedSteps: step, nextEpoch: epoch, nextCursor: cursor };
   }
+  // QA-select proof: b<count and bijections permit at most b blocked tail + b blocked head probes.
+  // The 2b+1 bound therefore returns first; retain this defensive tail if contracts change.
+  /* v8 ignore next -- @preserve */
   return undefined;
 }

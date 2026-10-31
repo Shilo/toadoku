@@ -6,9 +6,9 @@ const hash = (v: unknown): v is string => typeof v === 'string' && /^[a-f0-9]{64
 const integer = (v: unknown, min: number, max: number): v is number => Number.isSafeInteger(v) && (v as number) >= min && (v as number) <= max;
 function object(v: unknown): v is Record<string, unknown> { return typeof v === 'object' && v !== null && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype; }
 function keys(v: Record<string, unknown>, expected: string[]) { return Object.keys(v).sort().join(',') === [...expected].sort().join(','); }
-function denseArray(value: unknown): value is unknown[] {
-  if (!Array.isArray(value) || value.length > 256 || Object.keys(value).length !== value.length) return false;
-  for (let i = 0; i < value.length; i++) if (!Object.hasOwn(value, i)) return false;
+function denseArray(value: unknown, limit = 256): value is unknown[] {
+  if (!Array.isArray(value) || value.length > limit || Reflect.ownKeys(value).length !== value.length + 1) return false;
+  for (let i = 0; i < value.length; i++) if (!Object.prototype.propertyIsEnumerable.call(value, i)) return false;
   return true;
 }
 export function decodeManifest(value: unknown): CatalogManifest {
@@ -16,9 +16,10 @@ export function decodeManifest(value: unknown): CatalogManifest {
   let total = 0;
   for (const pool of POOLS) {
     const data = value.pools[pool];
-    if (!object(data) || !keys(data, ['count', 'shards']) || !integer(data.count, 1000, 1_000_000) || !Array.isArray(data.shards) || data.shards.length > 5000) throw new Error('pool schema');
+    if (!object(data) || !keys(data, ['count', 'shards']) || !integer(data.count, 1000, 1_000_000) || !denseArray(data.shards, 5000)) throw new Error('pool schema');
     let start = 0;
-    for (const item of data.shards) {
+    for (let index = 0; index < data.shards.length; index++) {
+      const item = data.shards[index];
       if (!object(item) || !keys(item, ['path', 'sha256', 'bytes', 'count', 'start', 'pool', 'recordRoot']) || !hash(item.recordRoot) || item.pool !== pool || !integer(item.start, 0, data.count - 1) || item.start !== start || !integer(item.count, 1, 256) || !integer(item.bytes, 1, 96 * 1024) || !hash(item.sha256) || typeof item.path !== 'string' || item.path !== `${pool}-${item.start}-${item.sha256.slice(0, 16)}.json`) throw new Error('shard descriptor');
       start += item.count;
     }
@@ -49,7 +50,8 @@ export function decodeTuple(value: unknown, pool: PoolId): CatalogRecord {
 }
 export function decodeShard(value: unknown, descriptor: ShardDescriptor): readonly CatalogRecord[] {
   if (!object(value) || !keys(value, ['schemaVersion', 'catalogVersion', 'pool', 'start', 'records']) || value.schemaVersion !== 1 || value.catalogVersion !== '1' || value.pool !== descriptor.pool || value.start !== descriptor.start || !denseArray(value.records) || value.records.length !== descriptor.count) throw new Error('shard schema');
-  const records = value.records.map(v => decodeTuple(v, descriptor.pool));
+  const records: CatalogRecord[] = [];
+  for (let index = 0; index < value.records.length; index++) records.push(decodeTuple(value.records[index], descriptor.pool));
   if (new Set(records.map(r => r.id)).size !== records.length || new Set(records.map(r => r.groupId)).size !== records.length) throw new Error('duplicate shard identities');
   return Object.freeze(records);
 }

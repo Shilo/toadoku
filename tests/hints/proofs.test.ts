@@ -168,6 +168,56 @@ describe('independent named-technique and exact-cover proof gates', () => {
     expect(computeHint({ values: solved, givens: solved, logicalRevision: 9, target: 0 })).toEqual({ kind: 'unavailable', reason: 'full' });
     expect(findDeduction(solved, 0)).toBeUndefined();
   });
+  it('rejects hidden and symbolic own keys in every witness and conclusion array', () => {
+    for (const fixture of fixtures) for (const field of ['units', 'cells', 'digits', 'placements', 'eliminations', 'values'] as const) {
+      for (const attack of ['hidden-index', 'hidden-extra', 'symbol', 'compensating'] as const) {
+        const proof = structuredClone(fixture.deduction), values = [...fixture.values].map(Number);
+        const array = field === 'values' ? values : field === 'placements' || field === 'eliminations' ? proof[field] : proof.witness[field];
+        if ((attack === 'hidden-index' || attack === 'compensating') && array.length === 0) continue;
+        if (attack === 'hidden-index' || attack === 'compensating') Object.defineProperty(array, 0, { enumerable: false });
+        if (attack === 'hidden-extra') Object.defineProperty(array, 'extra', { value: true });
+        if (attack === 'symbol') Object.defineProperty(array, Symbol('extra'), { value: true });
+        if (attack === 'compensating') Object.assign(array, { extra: true });
+        expect(validateWitness(values, proof), `${fixture.technique} ${field} ${attack}`).toBe(false);
+      }
+    }
+  });
+  it('uses indexed proof inputs and rejects a duplicate-pair iterator forgery', () => {
+    const fixture = fixtures.find(item => item.technique === 'naked-pair')!, values = [...fixture.values].map(Number);
+    const proof = structuredClone(fixture.deduction), originalCells = proof.witness.cells;
+    let forgedIteratorCalls = 0;
+    class SpoofArray extends Array<number> {
+      *[Symbol.iterator](): Generator<number, undefined, unknown> { forgedIteratorCalls++; yield originalCells[0]; yield originalCells[1]; return undefined; }
+    }
+    Object.defineProperty(SpoofArray, Symbol.species, { value: Array });
+    proof.witness.cells = new SpoofArray(originalCells[0], originalCells[0]);
+    const unit = proof.witness.units[0];
+    const house = Array.from({ length: 81 }, (_, cell) => cell).filter(cell => unit < 9 ? Math.floor(cell / 9) === unit : unit < 18 ? cell % 9 === unit - 9 : Math.floor(cell / 27) * 3 + Math.floor(cell % 9 / 3) === unit - 18);
+    proof.eliminations = house.filter(cell => cell !== originalCells[0]).flatMap(cell => proof.witness.digits.filter(digit => getCandidates(values, cell) & 2 ** (digit - 1)).map(digit => ({ cell, digit })));
+    const independent = exactCover(fixture.values); expect(independent.kind).toBe('complete');
+    expect(proof.eliminations.some(item => independent.kind === 'complete' && independent.solution && Number(independent.solution[item.cell]) === item.digit)).toBe(true);
+    expect(validateWitness(values, proof)).toBe(false); expect(forgedIteratorCalls).toBe(0);
+    class HostArray<T> extends Array<T> {}
+    let hooks = 0;
+    Object.defineProperty(HostArray, Symbol.species, { get: () => { hooks++; throw Error('caller species'); } });
+    for (const name of ['map', 'flatMap', 'every', 'includes', Symbol.iterator]) Object.defineProperty(HostArray.prototype, name, { value: () => { hooks++; throw Error('caller method'); } });
+    const wrap = <T,>(array: readonly T[]): T[] => { const copy = new HostArray<T>(array.length); for (let index = 0; index < array.length; index++) copy[index] = array[index]; return copy; };
+    for (const source of fixtures) {
+      const normal = structuredClone(source.deduction);
+      normal.witness = { units: wrap(normal.witness.units), cells: wrap(normal.witness.cells), digits: wrap(normal.witness.digits) };
+      normal.placements = wrap(normal.placements); normal.eliminations = wrap(normal.eliminations);
+      expect(validateWitness(wrap([...source.values].map(Number)), normal)).toBe(true);
+    }
+    expect(hooks).toBe(0);
+  });
+  it('bounds and validates captured conclusion primitives before comparing their sets', () => {
+    const fixture = fixtures[0], values = [...fixture.values].map(Number);
+    for (const replacement of [null, {}, Array(730).fill({ cell: 0, digit: 1 }), [1], [{ cell: NaN, digit: 1 }], [{ cell: -1, digit: 1 }],
+      [{ cell: 81, digit: 1 }], [{ cell: 0, digit: NaN }], [{ cell: 0, digit: 0 }], [{ cell: 0, digit: 10 }]]) {
+      const proof = structuredClone(fixture.deduction); proof.placements = replacement as never;
+      expect(validateWitness(values, proof)).toBe(false);
+    }
+  });
   it('offers an honestly classified reveal after original verified singles exhaust the supported techniques', () => {
     const givens = [...fallback.givens].map(Number), values = givens.slice();
     const original = exactCover(fallback.givens);

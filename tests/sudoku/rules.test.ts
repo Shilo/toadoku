@@ -28,9 +28,27 @@ describe('strict Sudoku decoding', () => {
   });
   it('does not strip punctuation, spaces, dots or non-ASCII digits', () => {
     expect(decodeGrid(solved.join(''))).toEqual({ ok: true, board: solved });
-    for (const input of [null, solved, '0'.repeat(80), '0'.repeat(82), '.'.repeat(81), ' '.repeat(81), '０'.repeat(81), '0'.repeat(81) + '\n']) {
+    for (const input of [null, solved, { toString: () => solved.join('') }, new String(solved.join('')), '0'.repeat(80), '0'.repeat(82), '.'.repeat(81), ' '.repeat(81), '０'.repeat(81), '0'.repeat(81) + '\n']) {
       expect(decodeGrid(input).ok).toBe(false);
     }
+  });
+  it('rejects all extra own keys and hidden indices and returns a plain copy of array subclasses', () => {
+    const attacks = [
+      (array: number[]) => Object.defineProperty(array, 0, { enumerable: false }),
+      (array: number[]) => Object.defineProperty(array, 'hidden', { value: true }),
+      (array: number[]) => Object.defineProperty(array, Symbol('extra'), { value: true }),
+      (array: number[]) => { Object.defineProperty(array, 0, { enumerable: false }); Object.assign(array, { extra: true }); },
+      (array: number[]) => { delete array[0]; Object.assign(array, { extra: true }); },
+    ];
+    for (const attack of attacks) { const array = Array(81).fill(0); attack(array); expect(decodeBoard(array).ok).toBe(false); }
+    class HostArray extends Array<number> {}
+    let hooks = 0;
+    Object.defineProperty(HostArray, Symbol.species, { get: () => { hooks++; return Object; } });
+    Object.defineProperty(HostArray.prototype, Symbol.iterator, { value: () => { hooks++; throw new Error('Caller iterator must not run'); } });
+    const result = decodeBoard(new HostArray(81).fill(0));
+    expect(result.ok).toBe(true); expect(hooks).toBe(0);
+    if (result.ok) { expect(Object.getPrototypeOf(result.board)).toBe(Array.prototype); expect(Object.isFrozen(result.board)).toBe(true); expect(result.board).toEqual(Array(81).fill(0)); }
+    expect(decodeBoard(Object.freeze(Array(81).fill(0))).ok).toBe(true);
   });
 });
 

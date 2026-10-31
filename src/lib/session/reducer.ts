@@ -24,8 +24,8 @@ export function getValues(attempt: Attempt): number[] {
 
 function validCell(cell: number): boolean { return Number.isInteger(cell) && cell >= 0 && cell < 81; }
 function validNotes(notes: number[]): boolean {
-  if (!Array.isArray(notes) || notes.length !== 81) return false;
-  for (let cell = 0; cell < 81; cell++) if (!Object.hasOwn(notes, cell) || !Number.isInteger(notes[cell]) || notes[cell] < 0 || notes[cell] > 511) return false;
+  if (!Array.isArray(notes) || notes.length !== 81 || Reflect.ownKeys(notes).length !== 82) return false;
+  for (let cell = 0; cell < 81; cell++) if (!Object.prototype.propertyIsEnumerable.call(notes, cell) || !Number.isInteger(notes[cell]) || notes[cell] < 0 || notes[cell] > 511) return false;
   return true;
 }
 
@@ -39,6 +39,8 @@ export function reduceAttempt(attempt: Attempt, command: SessionCommand): Sessio
       !Number.isSafeInteger(attempt.elapsedMs) || attempt.elapsedMs < 0 ||
       givens.board.some((value, cell) => (value !== 0 && (attempt.entries[cell] !== 0 || attempt.notes[cell] !== 0)) ||
         (attempt.entries[cell] !== 0 && attempt.notes[cell] !== 0))) return { kind: 'integrity', reason: 'state' };
+  if (Reflect.ownKeys(attempt.undo).length !== attempt.undo.length + 1) return { kind: 'integrity', reason: 'history' };
+  for (let index = 0; index < attempt.undo.length; index++) if (!Object.prototype.propertyIsEnumerable.call(attempt.undo, index)) return { kind: 'integrity', reason: 'history' };
 
   function changed(fields: Partial<Attempt>, valuesChanged = false, primaryCell?: number): SessionResult {
     if (attempt.commandSeq === Number.MAX_SAFE_INTEGER || valuesChanged && attempt.logicalRevision === Number.MAX_SAFE_INTEGER) {
@@ -65,11 +67,11 @@ export function reduceAttempt(attempt: Attempt, command: SessionCommand): Sessio
   if (command.type === 'undo') {
     const patch = attempt.undo.at(-1);
     if (!patch) return attempt.undo.length ? { kind: 'integrity', reason: 'history' } : { kind: 'noop' };
-    if (!validCell(patch.cell) || !Array.isArray(patch.changes) || !patch.changes.length || patch.changes.length > 21) return { kind: 'integrity', reason: 'history' };
+    if (!validCell(patch.cell) || !Array.isArray(patch.changes) || !patch.changes.length || patch.changes.length > 21 || Reflect.ownKeys(patch.changes).length !== patch.changes.length + 1) return { kind: 'integrity', reason: 'history' };
     const seen = new Set<number>();
     for (let index = 0; index < patch.changes.length; index++) {
       const change = patch.changes[index];
-      if (!Object.hasOwn(patch.changes, index) || !change || typeof change !== 'object' ||
+      if (!Object.prototype.propertyIsEnumerable.call(patch.changes, index) || !change || typeof change !== 'object' ||
           !validCell(change.cell) || seen.has(change.cell) || givens.board[change.cell] !== 0 ||
           ![change.beforeValue, change.afterValue].every(n => Number.isInteger(n) && n >= 0 && n <= 9) ||
           ![change.beforeNotes, change.afterNotes].every(n => Number.isInteger(n) && n >= 0 && n <= 511) ||

@@ -3,13 +3,17 @@ import { ALL_DIGITS, assertCell, PEERS, UNITS } from './topology.ts';
 
 export function decodeBoard(input: unknown): DecodeResult {
   if (!Array.isArray(input) || input.length !== 81) return { ok: false, reason: 'board-length' };
+  if (Reflect.ownKeys(input).length !== 82) return { ok: false, reason: 'board-properties' };
+  const board: number[] = Array(81);
   for (let cell = 0; cell < 81; cell++) {
-    if (!Object.hasOwn(input, cell) || !Number.isInteger(input[cell]) || input[cell] < 0 || input[cell] > 9) {
+    const value = input[cell];
+    if (!Object.prototype.propertyIsEnumerable.call(input, cell) || !Number.isInteger(value) || value < 0 || value > 9) {
       return { ok: false, reason: 'board-cell' };
     }
+    board[cell] = value;
   }
-  if (Object.keys(input).length !== 81) return { ok: false, reason: 'board-properties' };
-  return { ok: true, board: Object.freeze(input.slice()) };
+  // Caller array subclasses may override slice/species/iteration; copy only validated indices.
+  return { ok: true, board: Object.freeze(board) };
 }
 
 /** Transport strings are deliberately stricter than friendly keyboard parsing. */
