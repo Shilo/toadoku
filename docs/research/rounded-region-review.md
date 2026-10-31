@@ -2,7 +2,17 @@
 
 Date: 2026-10-31. Status: proposed geometry under visual review, not implementation approval.
 
-## Direction
+## Latest refinement: three-color organic pond
+
+Menu and gameplay must share exactly three flat water colors, with broad abstract pond curves. Keep green notched pad faces and cream menu/input buttons in the approved soft-raised finish. The preceding image's flattened pads or lost notches were rendering errors, not a design decision. Background-only changes must preserve faces, lips, highlights and typography. Water cannot gain extra shades through opacity/gradient/texture; the three-color limit excludes controls, ink and placeholder art.
+
+The latest annotation asks for selective natural curves at top/bottom group seams, not yellow outlines. Compare **A, Connected bays**, `A B A / C A C / A B A`, and **B, Winding shallows**, `A B C / B C A / C A B`. A preserves four patches over connected ground; B distributes the three fills among all regions with winding shared edges. Recommend exploring B for a less panel-like environment, but do not claim proven usability or treat it as selected. The older two-color four-radius mask below is preserved history.
+
+Keep each full 3 by 3 pad group inside one color, including its lips and immediate surrounding water. Irregular contours belong only in the existing inter-region channels and perimeter seams. They must not bisect pads or intragroup spaces, change cell positions/hitboxes, or require extra scenery gaps. Use a few restrained asymmetric bends, not nine highly wobbly outlines. Geometry and spacing must still communicate boxes when hues disappear. Review both orientations and nine-note readability before selecting the mask; image generation alone cannot prove this.
+
+Temporary comparison and exact built-in ImageGen prompts: ignored `prototypes/organic-three-color-pond/`. Three proposed water tokens for this study are `#0D6267`, `#329D9A`, `#7ED1B8`, shared by both scenes; these are proposals, not certified measurements from generated pixels. The corrected sheet remains a background study: its residual outer/group gaps, texture and typography are not a replacement layout specification. No implementation or production artwork is added.
+
+## Earlier two-color direction
 
 The subtle alternating pad greens were ineffective; nine rectangular water backings looked like UI panels. Keep flat styling but restore broad organic curving water/shallows from the earlier abstract theme. Flat means solid color shapes, not an empty background. Avoid rings, reflections, textures and environment gradients. The menu may show more curves than gameplay, where they must not confuse the Sudoku regions.
 

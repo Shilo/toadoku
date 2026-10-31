@@ -4,6 +4,8 @@
 
 Use C, Quiet Flat, soft-raised controls, and the basic Pond theme only for the current milestone. Keep B/A and background-image capability documented for later. Halloween and More functionality are deferred in [TODO.md](../TODO.md).
 
+Background experiments must preserve the approved controls: green broad lily-pad faces with the small off-center notch, shallow lower lip and restrained top highlight; cream/ivory menu and input buttons with the same soft-raised finish. Do not replace them with flat plain pills, remove their notches/lips, change their color families or restyle their typography while comparing water. The disabled More treatment remains muted. See [button study](research/tactile-buttons.md) for interaction states; the older opaque classic-board recommendation there is historical.
+
 Keep Fill space as the default board allocation, with Square retained as a modular preference. Its user-facing setting is deferred with the disabled More/Settings entry. Portrait has two rows of five input keys at the bottom; landscape has five rows of two at the right. Preserve upright glyphs, logical cell identity and game state when remeasuring viewport/safe areas.
 
 The ten-key order follows the agreed mockup: portrait `1 2 3 4 5 / 6 7 8 9 More`; landscape `1 2 / 3 4 / 5 6 / 7 8 / 9 More`. The More key remains in its tenth position but is disabled. No top overflow or substitute Tools button is added.
@@ -42,7 +44,7 @@ Retain the agreed nonblocking start notice and persistent completion results unt
 
 ## Accepted pond-board direction; region tones under review
 
-The top-down pond and broad procedural pad-board presentation are accepted as the visual direction. Flat does not mean a blank field: use a few broad organic curves suggesting connected water and shallows, inspired by the earlier abstract theme. Use solid color fields, not large ripple rings, gradients, highlights, reflective water or a painted horizon. Share that pond language between scenes, but keep gameplay decoration from obscuring region boundaries. The menu's combined placeholder remains an overhead/slightly oblique provisional game image, not a commitment to pixel-art rendering or a game engine.
+The top-down pond and broad procedural pad-board presentation are accepted as the visual direction. Flat does not mean a blank field: use a few broad organic curves suggesting connected water and shallows, inspired by the earlier abstract theme. Use exactly three solid background colors, shared unchanged by menu and gameplay. No fourth water tint, opacity blend, large ripple rings, gradients, highlights, reflective water or painted horizon. The three-color limit applies to water/background shapes, not control fills, lips, ink or placeholder art. Keep gameplay contours from obscuring region boundaries. The menu's combined placeholder remains an overhead/slightly oblique provisional game image, not a commitment to pixel-art rendering or a game engine.
 
 The board removes the traditional outer panel and drawn grid lines. Each of the 81 logical rectangular cells shows a lily-pad-like face; its complete rectangle remains selectable, including surrounding water. Rows, columns and all nine 3 by 3 regions remain classic Sudoku. Changing presentation does not change rules or remove notes. Keep the numeric/action keys a distinct warm cream/ivory family against the green pad faces; this separation was explicitly preferred.
 
@@ -58,7 +60,18 @@ The overall visual direction is accepted; exact region tones, dimensions, contra
 
 The latest four-view image and exact ImageGen prompts are under ignored `prototypes/top-down-pond/`. They show the reviewed procedural-pad/region-spacing approach in both orientations, with the rough composite placeholder confined to menus. The render is not an exact spacing or input specification.
 
-## Rounded alternate water regions: current proposal
+## Three-color organic regions: current comparison
+
+Use the same three water fills as the curving menu, with uniform soft-raised green pads. Each complete 3 by 3 group, including all pad faces, lips and immediate water surround, stays inside one water color. Curves belong in the channels between groups; do not cross a pad, bisect the group's internal water or move cell centers. Make boundaries gently asymmetric and winding rather than straight panels or repeated perfect radii. The latest yellow annotations mark selective transitions at the top/bottom group seams; they are not proposed outlines.
+
+Two temporary alternatives are compared in `prototypes/organic-three-color-pond/menu-and-gameplay.png`, with exact initial/correction prompts alongside:
+
+- **A, Connected bays:** one continuous deep-water ground with four organic patches at regions 2, 4, 6, 8. Fill arrangement `A B A / C A C / A B A`. This preserves the selective-patch idea and a connected base, but retains some four-island repetition.
+- **B, Winding shallows:** whole-region three-color arrangement `A B C / B C A / C A B`, with gently winding shared boundaries rather than nine separate cards. Recommended next direction for immersion, provided the nine boxes remain recognizable without hue.
+
+Neither geometry is approved yet. Waviness must fit the existing gutter budget; do not enlarge gaps or add scenery headers/spacers to display it. Stable pad/hitbox geometry takes priority. Validate grayscale, color-vision simulations, notes, focus and selection at target phone sizes in both orientations. The generated images are background studies, not measured layout, exact palette or interaction specifications. Their residual spacing/texture is not an approved change. No public region-style selector or production implementation is added.
+
+## Earlier rounded alternate regions: preserved proposal
 
 The subtle pad-tone comparison did not provide an effective grouping cue, and nine rectangular water backings looked like interface panels. Neither is selected. Do not solve this by introducing another small hue difference.
 

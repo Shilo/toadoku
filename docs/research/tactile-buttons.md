@@ -2,6 +2,8 @@
 
 Research checked 2026-10-31. Proposals for the next visual comparison only. No interface implementation, keypad arrangement, palette, font or production artwork is selected by this note. Follow [visual constraints](../design.md) and the [discussion workflow](../process.md). This study uses the requested Quiet Flat C scene and omits the foreground gameplay frog; shared frog artwork remains available in the menu.
 
+**Current decision overrides the historical comparison below:** soft raised is selected for green lily-pad cells, cream input keys and menu buttons. Preserve the small pad notch, broad face, shallow lower lip and restrained highlight across water-background experiments. The former opaque classic-board recommendation is superseded by the pond board. See [current UI/UX](../ui-ux.md).
+
 ## Recommendation
 
 Compare **soft raised pastilles** first and **restrained jelly** second. A shallow lower lip and small highlight can make buttons feel like candy while the surrounding pond stays flat and calm. Keep the board opaque, traditional and unchanged. Put the tactile treatment on menu choices and number-entry buttons, with less emphasis on overflow and Back.
