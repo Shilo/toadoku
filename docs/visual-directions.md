@@ -1,20 +1,22 @@
 # Flat visual directions
 
-Research synthesis and temporary mockup comparison. The CSS-led environment and unchanged sprites are requirements; these three treatments, palette swatches and font families remain proposals. No interface code, artwork purchase or asset adoption is authorized by this note.
+Research synthesis and preserved alternatives. **C, Quiet Flat is selected as the starting direction.** B and A remain documented future treatments. Palette swatches, fonts, board proportions and button finish remain open. No interface code, artwork purchase or asset adoption is authorized by this note.
 
-## Recommendation
+## Selected start and preserved alternatives
 
-**Expressive Gradient**, restrained by the minimal-control and board-first rules. It supplies the requested immersive atmosphere with CSS rather than expensive or difficult-to-source scene illustrations. Use a small number of broad gradient fields, organic edge shapes, flat filled controls and tiny shared frog/lily-pad sprites. Keep gradients out of the board and behind no unbacked small labels.
+**Quiet Flat** starts with a solid tonal field, a few low-contrast organic edge shapes, clear opaque board and minimal controls. Cute menu sprites and typography provide identity without needing a detailed environment. Gameplay now omits the decorative frog; earlier comparison images containing it are superseded on that point.
 
-The generated version still contains more decorative water shapes than the minimum implementation needs. Treat those as optional atmosphere to simplify, not a prescribed asset set. Quiet Flat is the fallback if the richer background distracts in playtesting.
+Layered Pond can later add a small number of broad flat banks/water fields. Expressive Gradient can later add restrained atmospheric gradients. Keep gradients out of cells and behind no unbacked small labels. Their background and token choices must not require rewriting the board, controls or game state.
 
-| Rank | Direction | Benefit | Main cost |
+| Status | Direction | Benefit | Main cost |
 | --- | --- | --- | --- |
-| 1 | Expressive Gradient | Most immersive and colorful with little art dependency | Needs careful foreground contrast and restrained shapes |
-| 2 | Layered Pond | Flat solid-color banks and water create a cute habitat | Broad layers can compete with the grid if overused |
-| 3 | Quiet Flat | Calmest and simplest, with few tonal edge shapes | Less atmospheric; sprite and type choices carry more personality |
+| Preserved A | Expressive Gradient | Most atmospheric and colorful with little art dependency | Needs careful foreground contrast and restrained shapes |
+| Preserved B | Layered Pond | Flat solid-color banks and water create a cute habitat | Broad layers can compete with the grid if overused |
+| Selected C | Quiet Flat | Calmest and simplest, with few tonal edge shapes | Less atmospheric; sprite and type choices carry more personality |
 
 These are three approaches to the same two themes, not three extra themes. Compare identical menu/game composition and board sizes. Pond and Halloween reuse the same sprite identities and source colors. The imagery is temporary AI concept material and does not establish exact pixel geometry, correct puzzle values, font rendering or accessibility.
+
+Preserved descriptions, palette/type research and tradeoffs remain in this document and the three linked research notes. Original temporary comparison files are `a-expressive-gradient.png`, `b-layered-pond.png` and `c-quiet-flat.png` under ignored `prototypes/flat-theme-study/`, with exact prompts alongside. Those images are local references, not tracked production assets. The initial agent recommendation favored A; the user selected C for simplicity.
 
 ## Research findings that matter
 
@@ -42,4 +44,4 @@ No verified matching frog-and-lily-pad suite was found. A small matching human c
 - [Apple, immersive surfaces, contrast and performance](research/immersive-surfaces.md)
 - [Human-made asset shortlist and typography](research/assets-and-type.md)
 
-Temporary mockups and exact prompts are under ignored `prototypes/flat-theme-study/`. After a direction is selected, refine the same-scene difficulty/save menu states and portrait/landscape/desktop composition using mockups. Do not select save-slot policy, buy assets, add control rows or implement UI during this comparison.
+Temporary theme mockups are under ignored `prototypes/flat-theme-study/`; current board/button studies are under ignored `prototypes/quiet-flat-controls/`. Follow [current UI and UX](ui-ux.md) and [theme requirements](themes.md). Do not select save-slot policy, buy assets or implement UI during these comparisons.

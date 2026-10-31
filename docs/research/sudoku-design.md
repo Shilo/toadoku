@@ -2,6 +2,8 @@
 
 > Historical research. The initial top bar, action row, spacious web layout and muted palette recommendations are superseded by [current design constraints](../design.md). Artwork formats and visual concepts remain proposals; use ImageGen mockups before implementation.
 
+> Current direction selects Quiet Flat C, removes the gameplay frog and puts primary input at the bottom. Earlier mascot/frog-cell and seasonal-accessory ideas below are not the selected gameplay approach. See [UI and UX](../ui-ux.md).
+
 Research date: October 30, 2026. The observations below come from publisher pages and official web standards. Proposed Toadodu designs are recommendations, not claims about those products.
 
 ## The reference and the rules

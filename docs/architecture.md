@@ -15,6 +15,8 @@ The approved stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PW
 
 The Sudoku API uses plain data and has no dependency on artwork, themes, browser storage, or UI framework. Theme changes preserve the puzzle and progress. Avoid a plugin framework, generic event bus, backend, or other abstractions without a demonstrated need.
 
+Use a small independent decorative-background renderer and semantic style roles so C can later become B/A without a second board implementation. Optional local PNG/JPEG/WebP backgrounds need CSS fallbacks and offline asset handling. Button finish and backdrop do not own board proportions, hit targets or Sudoku state. See [theme model](research/theme-structure.md) and [UI/UX](ui-ux.md).
+
 ## Correctness and usability
 
 - Keep givens immutable and require a unique solution.

@@ -22,6 +22,10 @@
 - Production artwork must be human-made with suitable licensing and provenance. Free or paid assets are allowed. AI-generated graphics are restricted to temporary mockups/prototypes and must not ship.
 - Visual implementation must prioritize a flat, full-screen, minimal, super-cute frog environment built mainly from HTML/CSS colors, gradients and soft shapes, with only a few human-made sprites.
 - Frog and lily-pad sprites stay unchanged between basic and Halloween themes. Theme changes affect UI colors, gradients, background styling, buttons and font roles, not sprite artwork or accessories.
+- Selected initial visual direction: C, Quiet Flat. Preserve B, Layered Pond, and A, Expressive Gradient, as modular future treatments.
+- Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
+- Number entry and frequent actions belong toward the bottom; the overflow stays at the top for now, with future relocation possible.
+- Remove the decorative frog from gameplay for now, retaining the menu's frog identity and maximizing board space.
 - Main menu shows both modes directly. Quick Play selection reveals difficulty choices in the same scene. Progression selection reveals existing-save/new-game choices. Back returns to mode choices.
 - Keep personal context out of project artifacts.
 
@@ -29,7 +33,10 @@
 
 | Topic | Proposal requiring discussion |
 | --- | --- |
-| Visual direction | Compare Expressive Gradient, Layered Pond and Quiet Flat. First is recommended; no direction is selected. See [comparison](visual-directions.md) |
+| Visual details | Quiet Flat selected; exact colors/fonts, control finish and layout details remain open. Preserve [all three treatments](visual-directions.md) |
+| Buttons | Compare soft raised pastille, restrained jelly and lily-pad-inspired CSS finishes; no finish selected |
+| Board proportions | Compare square, gentle fit and full stretch; no aspect ratio selected. Landscape lower-right input is an alternative requiring approval |
+| Tool access | Proposed one bottom Tools disclosure for Notes/Undo/Erase/Hint, with sticky Notes and stable open-tray behavior; not yet selected |
 | Human-made artwork | Creator, asset sources, license/attribution, art direction and budget remain open |
 | Save slots | Deferred: three slots is only a suggestion; count and replacement behavior are not selected |
 | PWA install entry | Optional overflow placement when installation is available; visibility and browser fallback remain proposals |

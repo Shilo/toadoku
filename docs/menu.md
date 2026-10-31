@@ -11,6 +11,8 @@ Show both mode choices immediately in the main scene. Quick Play and Progression
 
 Use a change of menu state within the same illustrated scene, not a new page or dashboard. Avoid an extra Play landing screen before mode selection. Preserve the minimal text and control constraints. Exact transitions, start-button behavior and visual layout require mockup review.
 
+Place the main action choices in the lower, reachable portion of the scene where practical. Keep Back with the lower interaction area, without introducing a header bar. Main-menu artwork can retain the frog even though gameplay now omits it. Quiet Flat C is the starting scene treatment.
+
 Quick Play has explicit difficulty selection. Progression follows its saved or initial difficulty schedule; a separate Progression difficulty picker is not approved.
 
 ## Save slots postponed

@@ -11,13 +11,25 @@ Themes retain classic Sudoku rules and exactly the same frog and lily-pad sprite
 - Reduced-motion support and no text embedded in artwork.
 - Shared sprite assets, geometry, palette and animation frames across Pond and Halloween. Do not add seasonal hats, accessories, recolors, replacements or different lily pads.
 - Build most atmosphere with HTML/CSS rather than background illustrations. Keep the solving board opaque and stable; reserve expressive fonts for readable menu/title roles.
+- Start with Quiet Flat C, with extension points for Layered Pond B and Expressive Gradient A behind the same UI components.
+- Support optional human-made PNG, JPEG and WebP backgrounds with a usable CSS fallback. No image is selected by this capability.
+
+## Modular boundary
+
+Keep theme identity (Pond/Halloween), appearance (light/dark), background treatment and button finish conceptually separate. Use semantic CSS properties and a small set of authored preset fields. Do not add a plugin system, theme editor or user-facing selector for every styling combination.
+
+A decorative background renderer handles solid fields, optional broad shapes, future gradients and an optional local image. The board, keypad and menu consume semantic roles without checking the active season or background mode. Image fit and focal position are presentation data, not board-layout inputs.
+
+An adopted background needs creator/source/license records, sensible file dimensions, `cover`/`contain` crop review, local paths compatible with GitHub Pages, offline caching and a fallback if loading fails. It must not intercept input or show essential text. Both appearances and all target orientations must remain usable without it.
+
+Shared menu sprites stay outside theme definitions and unchanged. Gameplay frog removal is a scene-layout choice, not a seasonal theme. A tactile CSS lily-pad button is a control finish, not a replacement sprite. See [candidate theme contract](research/theme-structure.md) for the proposed small model and image/performance evidence.
 
 ## Discuss before implementation
 
 | Topic | Current proposal |
 | --- | --- |
 | Halloween colors | Pumpkin orange, near-black, vivid purple and frog green |
-| Scenery | A few unchanged human-made sprites in a CSS pond; Halloween expressed by palette, gradients, shapes and typography |
+| Scenery | Quiet Flat CSS first, unchanged menu sprites, no gameplay frog; optional licensed image support and B/A treatments later |
 | Automatic window | October 24 through November 7 inclusive, local dates; 15 calendar dates |
 | Customization | Semantic tokens for background, text, board, grid, selection, conflict and decorative colors; gradient stops, shape fields, font roles, motion and copy |
 
