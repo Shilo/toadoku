@@ -20,6 +20,8 @@
 - Retain traditional Sudoku's basic layout and functionality. Visual themes must preserve familiar solving interactions.
 - ImageGen mockups before interface prototypes. Temporary work stays ignored.
 - Production artwork must be human-made with suitable licensing and provenance. Free or paid assets are allowed. AI-generated graphics are restricted to temporary mockups/prototypes and must not ship.
+- Visual implementation must prioritize a flat, full-screen, minimal, super-cute frog environment built mainly from HTML/CSS colors, gradients and soft shapes, with only a few human-made sprites.
+- Frog and lily-pad sprites stay unchanged between basic and Halloween themes. Theme changes affect UI colors, gradients, background styling, buttons and font roles, not sprite artwork or accessories.
 - Main menu shows both modes directly. Quick Play selection reveals difficulty choices in the same scene. Progression selection reveals existing-save/new-game choices. Back returns to mode choices.
 - Keep personal context out of project artifacts.
 
@@ -27,7 +29,7 @@
 
 | Topic | Proposal requiring discussion |
 | --- | --- |
-| Visual direction | Compare immersive pond, pumpkin habitat, and frog-cell treatments |
+| Visual direction | Compare Expressive Gradient, Layered Pond and Quiet Flat. First is recommended; no direction is selected. See [comparison](visual-directions.md) |
 | Human-made artwork | Creator, asset sources, license/attribution, art direction and budget remain open |
 | Save slots | Deferred: three slots is only a suggestion; count and replacement behavior are not selected |
 | PWA install entry | Optional overflow placement when installation is available; visibility and browser fallback remain proposals |

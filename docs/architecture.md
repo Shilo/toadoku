@@ -8,7 +8,7 @@ The approved stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PW
 | --- | --- |
 | Sudoku | Validity, candidates, unique solutions, puzzle generation and difficulty assessment |
 | Session | Entries, notes, undo, pause, completion and progress |
-| Themes | Color tokens, backgrounds, accessories, animation and localized copy references |
+| Themes | UI color tokens, CSS backgrounds and shapes, font roles, motion and localized copy references; shared sprites stay unchanged |
 | Localization | Complete English, German and Spanish messages |
 | Persistence | Validated, versioned local settings and game saves |
 | Presentation | Responsive game world, board, input and contextual controls |
