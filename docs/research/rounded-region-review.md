@@ -2,6 +2,8 @@
 
 Date: 2026-10-31. Status: B, Winding shallows, selected as the board direction; A preserved. No production implementation approval.
 
+**Latest geometry supersedes parts of this history:** pad faces are now 1:1 circles inside full stretched cell buttons. Alignment compares centered/inward. Curves can use unused cell-slot water, rather than only the 8px group channels. The first measured preview was too rectangular to represent B faithfully. See [circular-pad review](circular-pad-review.md) for the current requirements and checks; older notched faces, full-cell color containment and narrow-curve limits below are historical.
+
 ## Latest refinement: three-color organic pond
 
 Menu and gameplay must share exactly three flat water colors, with broad abstract pond curves. Keep green notched pad faces and cream menu/input buttons in the approved soft-raised finish. The preceding image's flattened pads or lost notches were rendering errors, not a design decision. Background-only changes must preserve faces, lips, highlights and typography. Water cannot gain extra shades through opacity/gradient/texture; the three-color limit excludes controls, ink and placeholder art.

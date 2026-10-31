@@ -25,13 +25,13 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 - Visual implementation must prioritize a flat, full-screen, minimal, super-cute frog environment built mainly from HTML/CSS colors, gradients and soft shapes, with only a few human-made sprites.
 - Frog and lily-pad sprites stay unchanged between basic and Halloween themes. Theme changes affect UI colors, gradients, background styling, buttons and font roles, not sprite artwork or accessories.
 - Selected initial visual direction: C, Quiet Flat. Preserve B, Layered Pond, and A, Expressive Gradient, as modular future treatments.
-- Accepted board direction: top-down CSS pond with broad procedural lily-pad faces, rectangular cell hitboxes, no conventional drawn grid/frame, and spatial 3 by 3 grouping.
+- Accepted board direction: top-down CSS pond with procedural 1:1 circular lily-pad faces, full stretched rectangular cell buttons, no conventional drawn grid/frame, and spatial 3 by 3 grouping. Circle diameter follows the shorter cell dimension; use 50% radius and keep lip/highlight inside the silhouette.
 - Keep input/action keys a distinct warm cream/ivory color family against green board pads.
 - Water stays flat but expressive: exactly three solid colors shared unchanged by menu/gameplay, arranged in broad organic pond/shallows shapes. No extra background tint/blend, large ripple rings or reflective/gradient scene. Control fills, lips, ink and art are separate from the three water colors.
-- Preserve the approved soft-raised green notched pad faces and cream menu/input buttons while changing backgrounds. Flattened pads or missing notches/lips in generated studies do not supersede them.
-- Every 3 by 3 group stays entirely within one water color, including pad faces/lips and immediate surround. Organic boundaries may bend in group channels without moving cells or increasing the gutter budget.
+- Preserve soft-raised green circles and unchanged cream menu/input buttons. The new full-circle request supersedes the stretched notched silhouette, not the tactile styling.
+- Every group's visible circles, lips and labels stay in one water fill. Selected B needs broad winding contours, not slightly wavy rectangular panels. Curves may use unused water inside stretched cells while every cell remains a full rectangular button; background color never reassigns logical regions.
 - Selected board design B, Winding shallows: whole-region arrangement `A B C / B C A / C A B`, for a more natural pond. Preserve A, Connected bays (`A B A / C A C / A B A`), as a documented alternative. These board names are independent of the earlier A/B/C scene treatments; Quiet Flat C remains selected.
-- Exactly two authored spacing tokens throughout the theme: 4px small for neighboring pads/buttons and 8px large for scene edges, group gutters and board/dock separation. Same constants in menus, portrait and landscape; large is always twice small. System safe-area protection is additional, not a third theme token.
+- Exactly two authored spacing tokens: 4px between cell rectangles/action buttons and 8px at scene edges, group gutters and board/dock separation. Extra water around circular faces is an effect of their aspect ratio/alignment, not another padding token. Same constants in menus and both orientations; system safe areas are additional.
 - Region recognition must survive loss of hue through shape, spacing and lightness. Subtle alternating pad greens were ineffective; rectangular water panels undermined immersion. Neither comparison is selected.
 - Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
 - Number entry uses a bottom two-row/five-column dock in portrait and a right five-row/two-column dock in landscape. Keep digits upright; recalculate usable bounds rather than assuming literal pixel transposition.
@@ -67,6 +67,7 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
 | Region details | B, Winding shallows, selected; A preserved. Exact contour tuning, palette and accessibility checks remain open. Preserve uniform soft-raised pads, fixed spacing and no outlined/raised region cards |
+| Circle alignment | Compare centered with inward by group position: top/bottom rows align bottom/top; left/right columns align right/left; middle axes center. Inward recommended for grouping/pond space, not yet selected. Row/column center lines stay straight but their spacing becomes uneven. Small-note readability needs review |
 
 ## Rejected prototype direction
 

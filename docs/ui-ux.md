@@ -4,7 +4,7 @@
 
 Use C, Quiet Flat, soft-raised controls, and the basic Pond theme only for the current milestone. Keep B/A and background-image capability documented for later. Halloween and More functionality are deferred in [TODO.md](../TODO.md).
 
-Background experiments must preserve the approved controls: green broad lily-pad faces with the small off-center notch, shallow lower lip and restrained top highlight; cream/ivory menu and input buttons with the same soft-raised finish. Do not replace them with flat plain pills, remove their notches/lips, change their color families or restyle their typography while comparing water. The disabled More treatment remains muted. See [button study](research/tactile-buttons.md) for interaction states; the older opaque classic-board recommendation there is historical.
+Preserve the soft-raised green pad finish and cream/ivory menu/input controls. The latest pad silhouette is a true 1:1 circle with 50% radius, superseding the stretched notched pastille. Keep the lower lip and highlight inside that circular silhouette so neither changes its aspect ratio. Action/menu button shapes stay unchanged. The disabled More treatment remains muted. See [button study](research/tactile-buttons.md) for interaction states; older notched/classic-board geometry there is historical.
 
 Keep Fill space as the default board allocation, with Square retained as a modular preference. Its user-facing setting is deferred with the disabled More/Settings entry. Portrait has two rows of five input keys at the bottom; landscape has five rows of two at the right. Preserve upright glyphs, logical cell identity and game state when remeasuring viewport/safe areas.
 
@@ -16,7 +16,7 @@ Use only two theme spacing tokens: **small 4 CSS px** and **large 8 CSS px**, wi
 
 | Placement | Token |
 | --- | --- |
-| Neighboring lily-pad cells inside a group | Small, 4px |
+| Neighboring rectangular cell buttons inside a group | Small, 4px |
 | Neighboring numeric keys and menu buttons | Small, 4px |
 | Gaps between 3 by 3 groups | Large, 8px |
 | Scene edges in menu and gameplay | Large, 8px |
@@ -24,7 +24,7 @@ Use only two theme spacing tokens: **small 4 CSS px** and **large 8 CSS px**, wi
 | Any other authored padding or gap | Reuse small or large; no third spacing size |
 
 - Fill space consumes the entire remaining rectangle after the single outer 8px inset, dock and 8px board/dock gap. No extra board wrapper padding, doubled region padding, reserved header/status strip or scenic spacer.
-- Dock keys align to the bottom in portrait or right edge in landscape, inside that same 8px scene inset. Measure cell/button gaps between complete visual bounds including the lower lip, not only the face.
+- Dock keys align to the bottom in portrait or right edge in landscape, inside that same 8px scene inset. Measure board spacing between full rectangular cell buttons; circular faces leave additional water inside their slots. That variable visual water is not another padding token. Action-key gaps still use their complete visual bounds.
 - Add actual system safe-area insets outside the authored spacing when necessary. System protection is not a third theme spacing token. Radii, lip depth, strokes, font sizes and control dimensions are not padding/gap tokens.
 - If square mode is eventually selected, center the largest square within the same board allocation and keep the dock fixed. That mode intentionally leaves background visible.
 - Generated mockup whitespace is not a spacing specification. Actual layout must be measured against its available rectangle and device insets.
@@ -59,7 +59,20 @@ The top-down pond and broad procedural pad-board presentation are accepted as th
 
 The board removes the traditional outer panel and drawn grid lines. Each of the 81 logical rectangular cells shows a lily-pad-like face; its complete rectangle remains selectable, including surrounding water. Rows, columns and all nine 3 by 3 regions remain classic Sudoku. Changing presentation does not change rules or remove notes. Keep the numeric/action keys a distinct warm cream/ivory family against the green pad faces; this separation was explicitly preferred.
 
-**Reviewed recommendation:** use subtly separated 3 by 3 groups and broad procedural CSS pad-button faces with a small off-center notch. Wider internal water gutters identify regions without drawn lines. Do not rely on alternating colors alone. The face adapts to the cell; upright text uses a quiet, opaque, generous central area.
+Use separated 3 by 3 groups and procedural circular pad faces inside stretched rectangular buttons. A face has diameter equal to the shorter available cell dimension; it never stretches into an oval or fills the long axis. Text/notes belong to the circle and move with it. The entire rectangular cell, including visible water, is the button. Do not clip pointer events or focus to the decorative circle. Region gaps remain a second cue alongside water shape/lightness.
+
+## Circular-pad alignment under review
+
+Compare two static arrangements without moving, resizing or overlapping logical cell buttons:
+
+- **Centered:** every circle is horizontally and vertically centered in its rectangle. This preserves evenly stepped digit centers apart from the existing region gap.
+- **Inward:** group row 1 aligns bottom, row 2 center, row 3 top; group column 1 aligns right, column 2 center, column 3 left. Combine both axes, so a group's top-left circle sits bottom-right in its cell. The center circle remains centered. Digits/notes follow the circle. Rows and columns still form straight lines; the distance between their centers becomes uneven across region boundaries.
+
+Inward is recommended for the next visual decision because it strengthens group clusters and exposes more water for the selected B contours. This is not yet a selected alignment or a new user setting. Centered remains the comparison. Circular faces reduce note space: representative diameter is about 33.77 CSS px on the current emulations. A nine-note cell is shown, but its tiny candidate text is not approved production typography. Review readability and row/column scanning before settling the arrangement.
+
+Alignment only moves along an axis with unused cell space. In these portrait emulations that is vertical; in landscape it is horizontal. The unchanged short axis is already filled by the circular diameter.
+
+Both alignments are shown in portrait and landscape under ignored `prototypes/circular-pond/centered-inward-review.png`. The initial ImageGen concept and exact prompt are alongside in `imagegen-concept.png` and `README.md`; its placement is illustrative. The measured follow-up checks all 81 native cell buttons, square circular bounds, the inward rules, full-cell corner hit testing, selection from water, logical arrow navigation and sampled circle color containment. This remains a temporary selection/layout demo, not a Sudoku implementation.
 
 Do not stretch bitmap/SVG botanical illustrations to fit long cells. If illustrated pads are selected later, contain their proportions; this leaves more visible water and limits notes. Procedural control surfaces are the stronger first comparison for Fill space and require no additional illustration asset. They must not become detailed AI-authored production leaf drawings.
 
@@ -73,22 +86,22 @@ The latest four-view image and exact ImageGen prompts are under ignored `prototy
 
 ## Three-color organic regions: current comparison
 
-Use the same three water fills as the curving menu, with uniform soft-raised green pads. Each complete 3 by 3 group, including all pad faces, lips and immediate water surround, stays inside one water color. Curves belong in the channels between groups; do not cross a pad, bisect the group's internal water or move cell centers. Make boundaries gently asymmetric and winding rather than straight panels or repeated perfect radii. The latest yellow annotations mark selective transitions at the top/bottom group seams; they are not proposed outlines.
+Use the same three water fills as the curving menu, with uniform soft-raised green circles. All nine visible circles, lips and labels of a group stay within one assigned water color. Restore broad winding contours and selective curved junctions from the B reference, not nine slightly wavy rectangles. Curves may now use the empty water within stretched cell slots as well as group channels, provided no circle/label is crossed. This supersedes the restriction to 8px channels only. Background color never changes the rectangular hitbox or Sudoku region identity. Yellow reference annotations are not outlines.
 
 Two temporary alternatives are compared in `prototypes/organic-three-color-pond/menu-and-gameplay.png`, with exact initial/correction prompts alongside:
 
 - **A, Connected bays, preserved alternative:** one continuous deep-water ground with four organic patches at regions 2, 4, 6, 8. Fill arrangement `A B A / C A C / A B A`. Preserves the selective-patch idea and a connected base, but retains some four-island repetition.
 - **B, Winding shallows, selected:** whole-region three-color arrangement `A B C / B C A / C A B`, with gently winding shared boundaries rather than nine separate cards. Selected for the more natural pond appearance. Keep A documented for possible later reconsideration, not as another current user setting.
 
-Board variant B is now approved as the visual direction; exact contour tuning and palette/accessibility checks remain open. Its name is separate from the earlier scene treatment B, Layered Pond: Quiet Flat C is still the overall style. Waviness must fit the fixed 8px group channels; do not enlarge gaps or add scenic spacers to display it. Stable pad/hitbox geometry takes priority. Validate grayscale, color-vision simulations, notes, focus and selection. Earlier generated spacing/texture is not an approved change. No public region-style selector or production implementation is added.
+Board variant B is now approved as the visual direction; exact contour tuning and palette/accessibility checks remain open. Its name is separate from the earlier scene treatment B, Layered Pond: Quiet Flat C is still the overall style. Use broader winding contours within the available empty water around circular faces; do not enlarge logical cell/group gaps or add scenic spacers. Stable pad/hitbox geometry takes priority. Validate grayscale, color-vision simulations, notes, focus and selection. Earlier generated spacing/texture is not an approved change. No public region-style selector or production implementation is added.
 
 ## Motorola G31/G32 layout study
 
 Use 360 by 800 CSS px in portrait and 800 by 360 in landscape at representative DPR 3, yielding 1080 by 2400 and 2400 by 1080 physical-pixel PNGs. These are emulation assumptions, not observed hardware CSS viewports. See [device evidence and hardware follow-up](research/technology.md#motorola-g31g32-targets).
 
-The ignored static study `prototypes/motorola-spacing/` renders both menu/gameplay orientations using the two spacing tokens. Board allocation measures approximately 344 by 640.81 CSS px in portrait and 640.81 by 344 in landscape. The 65.6px square dock keys use the same four-pixel gaps in both orientations. All remaining play space is filled; glyphs remain upright and unstretched. Boundaries are intentionally restrained to stay in the eight-pixel channels.
+The earlier ignored static study `prototypes/motorola-spacing/` renders both menu/gameplay orientations using the two spacing tokens. Board allocation measures approximately 344 by 640.81 CSS px in portrait and 640.81 by 344 in landscape. The 65.6px square dock keys use the same four-pixel gaps in both orientations. All remaining play space is filled; glyphs remain upright and unstretched. Its restrained rectangular-looking boundaries were subsequently rejected; the circular-pad study above replaces that gameplay presentation while preserving logical allocation.
 
-Its Playwright checks cover 81 pads, ten keys, measured 4px/8px gaps, outer/dock bounds, no overflow, exactly three shared water fills, menu alignment and sampled pad-rectangle containment within the assigned water region. Results are under `measurements.json`; four original screenshots and `portrait-landscape-review.png` are alongside. This is a temporary spacing study after ImageGen design selection, not a functional game. Safe areas are zero in emulation; physical-device comfort, note readability and installed/browser behavior remain unverified.
+That earlier study's Playwright checks cover 81 pads, ten keys, measured 4px/8px gaps, outer/dock bounds, no overflow, exactly three shared water fills, menu alignment and sampled pad-rectangle containment within the assigned water region. Results are under `measurements.json`; four original screenshots and `portrait-landscape-review.png` are alongside. It is preserved as an earlier temporary spacing study, not the latest circle/water direction or a functional game. Safe areas are zero in emulation; physical-device comfort, note readability and installed/browser behavior remain unverified.
 
 ## Earlier rounded alternate regions: preserved proposal
 

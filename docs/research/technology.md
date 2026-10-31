@@ -79,6 +79,8 @@ The selected B spacing study now renders menu/gameplay at 360x800 and 800x360 CS
 
 ## Verification priorities
 
+Latest visual follow-up: ignored `prototypes/circular-pond/` checks centered/inward circular faces inside full rectangular buttons at both representative Motorola orientations and DPR 3. Circle aspect ratios, alignment, hitboxes, selection from water, logical arrows and visible-circle water-color containment pass. It supersedes the earlier rectangle-constrained background study for gameplay styling; physical-device and note-readability checks remain outstanding.
+
 1. Unit tests: row/column/box conflicts; givens protected; unique solutions for supplied puzzles; valid candidates; notes and undo; completion; malformed save recovery.
 2. Theme tests: October 23/24, October 31, November 7/8; local timezone boundaries; explicit overrides; visual changes leave game state untouched.
 3. Localization checks: all keys exist in all three dictionaries; persisted language survives reload; long German labels fit portrait and landscape.
