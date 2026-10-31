@@ -51,3 +51,19 @@ Avoid Lily Pad for levels because it could also refer to board cells or decorati
 Independent art-oriented alternative: Adventure · Leap · Dewdrops. Prefer Rebirth and Level for clearer reset meaning and familiar navigation; no story or changing scenery has been approved.
 
 Proposed translations: Rebirth / Wiedergeburt / Renacimiento; Level / Level / Nivel; Dewdrops / Tautropfen / Gotas de rocío. These need final wording review. Compact displays can use a currency icon and amount with a fully localized accessible label.
+
+## Frog-focused alternatives
+
+Follow-up request: favor frog-related terminology over generic incremental-game labels. These alternatives supersede the general recommendation only as a more thematic naming proposal; no names are approved.
+
+Metamorphosis is the real term for the transformation from tadpole to froglet. Tadpole and pollywog are genuine names for the larval stage. Frogs also form vocal choruses. These provide biological and habitat inspiration, not a requirement to simulate a frog life cycle. [American Museum of Natural History](https://www.amnh.org/exhibitions/frogs-a-chorus-of-colors/reproduction/tadpoles), [San Diego Zoo](https://animals.sandiegozoo.org/animals/frog-and-toad).
+
+| Category | Ranked proposals | Tradeoff |
+| --- | --- | --- |
+| Repeat / ascension | 1. Metamorphosis; 2. Great Leap; 3. Rehatching; 4. Awakening | Metamorphosis is specifically frog-related but long. Great Leap is playful but less explicit about restarting. Rehatching is a coined game metaphor. Awakening is less specifically frog-related |
+| Level | 1. Hop; 2. Leap; 3. Level | Hop is short and thematic. Leap is energetic but overlaps with Great Leap. Level remains the clearest conventional fallback |
+| Currency | 1. Dewdrops; 2. Lily Coins; 3. Frog Coins; 4. Fly Tokens | Dewdrops fits the habitat. Lily/Frog Coins are clearly spendable. Fly Tokens evoke frog food without treating live insects as currency |
+
+**Frog-focused recommendation: Metamorphosis · Hop · Dewdrops.** Example: Metamorphosis 2, Hop 7, 240 Dewdrops. Alternative shorter reset label: Great Leap. Avoid pairing Great Leap with Leap as the level name because the two counters would be harder to distinguish.
+
+The repeat names are fictional game metaphors; frogs do not repeatedly transform from adult back into tadpole. Tadpole, Froglet and Toad are better potential difficulty-band names than repeat counters because they imply distinct life stages. No difficulty-label changes are approved.
