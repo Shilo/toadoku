@@ -2,3 +2,9 @@
 /.agents/skills/** -text
 /docs/licenses/svelte-ai-tools-MIT.txt -text
 /src/assets/fonts/* -text whitespace=-blank-at-eol
+/public/catalog/** -text
+/data/catalog/** text eol=lf
+/tools/catalog/** text eol=lf
+/src/lib/sudoku/** text eol=lf
+/src/lib/catalog/** text eol=lf
+/public/licenses/** -text

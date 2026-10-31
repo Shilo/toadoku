@@ -1,0 +1,757 @@
+{
+  "schemaVersion": 1,
+  "authorship": "Original algebraic solved-grid subsets. Deterministic generator retained; no external puzzle/diagram/prose copied.",
+  "fixtures": [
+    {
+      "technique": "naked-single",
+      "category": "cell",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [],
+          "cells": [
+            5
+          ],
+          "digits": [
+            6
+          ]
+        },
+        "placements": [
+          {
+            "cell": 5,
+            "digit": 6
+          }
+        ],
+        "eliminations": []
+      }
+    },
+    {
+      "technique": "hidden-single",
+      "category": "row",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            0
+          ],
+          "cells": [
+            5
+          ],
+          "digits": [
+            6
+          ]
+        },
+        "placements": [
+          {
+            "cell": 5,
+            "digit": 6
+          }
+        ],
+        "eliminations": []
+      }
+    },
+    {
+      "technique": "pointing",
+      "category": "box",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "pointing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            21,
+            10
+          ],
+          "cells": [
+            37,
+            46
+          ],
+          "digits": [
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 64,
+            "digit": 9
+          }
+        ]
+      }
+    },
+    {
+      "technique": "claiming",
+      "category": "row",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "claiming",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            6,
+            25
+          ],
+          "cells": [
+            57,
+            58
+          ],
+          "digits": [
+            7
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 66,
+            "digit": 7
+          }
+        ]
+      }
+    },
+    {
+      "technique": "naked-pair",
+      "category": "row",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-pair",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            7
+          ],
+          "cells": [
+            64,
+            66
+          ],
+          "digits": [
+            7,
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 68,
+            "digit": 9
+          }
+        ]
+      }
+    },
+    {
+      "technique": "hidden-pair",
+      "category": "row",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-pair",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            2
+          ],
+          "cells": [
+            22,
+            23
+          ],
+          "digits": [
+            2,
+            3
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 22,
+            "digit": 7
+          }
+        ]
+      }
+    },
+    {
+      "technique": "naked-triple",
+      "category": "row",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            5
+          ],
+          "cells": [
+            46,
+            49,
+            52
+          ],
+          "digits": [
+            3,
+            6,
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 50,
+            "digit": 3
+          },
+          {
+            "cell": 50,
+            "digit": 9
+          }
+        ]
+      }
+    },
+    {
+      "technique": "hidden-triple",
+      "category": "box",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            19
+          ],
+          "cells": [
+            12,
+            22,
+            23
+          ],
+          "digits": [
+            2,
+            3,
+            7
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 12,
+            "digit": 9
+          }
+        ]
+      }
+    },
+    {
+      "technique": "x-wing",
+      "category": "row",
+      "seed": 8449,
+      "sample": 0,
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "x-wing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            1,
+            7,
+            10,
+            12
+          ],
+          "cells": [
+            10,
+            12,
+            64,
+            66
+          ],
+          "digits": [
+            7
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 19,
+            "digit": 7
+          },
+          {
+            "cell": 57,
+            "digit": 7
+          }
+        ]
+      }
+    },
+    {
+      "technique": "claiming",
+      "category": "column",
+      "seed": 8449,
+      "sample": 1,
+      "values": "123056709000789023080123456234507891567801204091234567345070912000910300900345600",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "claiming",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            10,
+            24
+          ],
+          "cells": [
+            64,
+            73
+          ],
+          "digits": [
+            7
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 63,
+            "digit": 7
+          }
+        ]
+      }
+    },
+    {
+      "technique": "hidden-pair",
+      "category": "column",
+      "seed": 8449,
+      "sample": 1,
+      "values": "123056709000789023080123456234507891567801204091234567345070912000910300900345600",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-pair",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            11
+          ],
+          "cells": [
+            65,
+            74
+          ],
+          "digits": [
+            2,
+            8
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 65,
+            "digit": 6
+          }
+        ]
+      }
+    },
+    {
+      "technique": "x-wing",
+      "category": "column",
+      "seed": 8449,
+      "sample": 1,
+      "values": "123056709000789023080123456234507891567801204091234567345070912000910300900345600",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "x-wing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            10,
+            16,
+            7,
+            8
+          ],
+          "cells": [
+            64,
+            73,
+            70,
+            79
+          ],
+          "digits": [
+            7
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 63,
+            "digit": 7
+          }
+        ]
+      }
+    },
+    {
+      "technique": "hidden-triple",
+      "category": "row",
+      "seed": 8449,
+      "sample": 2,
+      "values": "123456780056780100789100000034060801507801234891034060000078910078912005902005678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            1
+          ],
+          "cells": [
+            14,
+            16,
+            17
+          ],
+          "digits": [
+            2,
+            3,
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 16,
+            "digit": 4
+          }
+        ]
+      }
+    },
+    {
+      "technique": "naked-triple",
+      "category": "column",
+      "seed": 8449,
+      "sample": 4,
+      "values": "100450089450780100000003006034007001000091230891204560045600012678012040912045678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            15
+          ],
+          "cells": [
+            6,
+            60,
+            69
+          ],
+          "digits": [
+            3,
+            7,
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 24,
+            "digit": 7
+          },
+          {
+            "cell": 33,
+            "digit": 9
+          }
+        ]
+      }
+    },
+    {
+      "technique": "hidden-triple",
+      "category": "column",
+      "seed": 8449,
+      "sample": 6,
+      "values": "020056009006780123709020000034007001500001004891004007000078010078902045010345078",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            12
+          ],
+          "cells": [
+            30,
+            39,
+            48
+          ],
+          "digits": [
+            2,
+            5,
+            8
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 30,
+            "digit": 6
+          },
+          {
+            "cell": 39,
+            "digit": 6
+          },
+          {
+            "cell": 48,
+            "digit": 6
+          }
+        ]
+      }
+    },
+    {
+      "technique": "hidden-pair",
+      "category": "box",
+      "seed": 8449,
+      "sample": 7,
+      "values": "123056080406780100000020406234507801567800000090204060305070912670910045000305678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-pair",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            19
+          ],
+          "cells": [
+            14,
+            23
+          ],
+          "digits": [
+            3,
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 23,
+            "digit": 1
+          }
+        ]
+      }
+    },
+    {
+      "technique": "naked-pair",
+      "category": "column",
+      "seed": 8449,
+      "sample": 11,
+      "values": "120456000406000123709103456230500001567001234890034067305608910608900045010345608",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-pair",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            14
+          ],
+          "cells": [
+            14,
+            32
+          ],
+          "digits": [
+            7,
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 68,
+            "digit": 7
+          }
+        ]
+      }
+    },
+    {
+      "technique": "naked-triple",
+      "category": "box",
+      "seed": 8449,
+      "sample": 18,
+      "values": "103406000006789123000023400000500890500800004801230067000070010000002005912345008",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            21
+          ],
+          "cells": [
+            29,
+            38,
+            46
+          ],
+          "digits": [
+            4,
+            7,
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 27,
+            "digit": 4
+          },
+          {
+            "cell": 27,
+            "digit": 7
+          },
+          {
+            "cell": 28,
+            "digit": 4
+          },
+          {
+            "cell": 28,
+            "digit": 7
+          },
+          {
+            "cell": 37,
+            "digit": 7
+          },
+          {
+            "cell": 37,
+            "digit": 9
+          }
+        ]
+      }
+    },
+    {
+      "technique": "naked-pair",
+      "category": "box",
+      "seed": 8449,
+      "sample": 23,
+      "values": "023000080050709020080003000234507891060090004001000567300000902008002300912300070",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-pair",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            24
+          ],
+          "cells": [
+            55,
+            64
+          ],
+          "digits": [
+            4,
+            7
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 56,
+            "digit": 7
+          },
+          {
+            "cell": 63,
+            "digit": 4
+          },
+          {
+            "cell": 63,
+            "digit": 7
+          }
+        ]
+      }
+    },
+    {
+      "technique": "hidden-single",
+      "category": "column",
+      "seed": 8449,
+      "sample": 34,
+      "values": "000400000000709100789100000004060800560000000000200500000000010078000300002300600",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            9
+          ],
+          "cells": [
+            45
+          ],
+          "digits": [
+            8
+          ]
+        },
+        "placements": [
+          {
+            "cell": 45,
+            "digit": 8
+          }
+        ],
+        "eliminations": []
+      }
+    },
+    {
+      "technique": "hidden-single",
+      "category": "box",
+      "seed": 8449,
+      "sample": 388,
+      "values": "000000009000080000700100400000060090060090030000030000000670010070912000000340008",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            25
+          ],
+          "cells": [
+            59
+          ],
+          "digits": [
+            8
+          ]
+        },
+        "placements": [
+          {
+            "cell": 59,
+            "digit": 8
+          }
+        ],
+        "eliminations": []
+      }
+    }
+  ]
+}
