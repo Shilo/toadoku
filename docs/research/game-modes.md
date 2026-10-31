@@ -2,6 +2,34 @@
 
 Research date: 2026-10-30. This is a product recommendation, not a commitment to implement every mode.
 
+## Current scope and open choice
+
+Approved: **Quick Play and Progression only**, retaining traditional Sudoku's basic layout, rules and functionality. Daily challenges, extra rule variants, a story, a stage map and cosmetic rewards are not approved features. The expanded Journey ideas below remain research options.
+
+Quick Play selects a difficulty and a fresh puzzle. Progression saves advancement through puzzles of gradually increasing challenge. Its exact puzzle supply and presentation remain open.
+
+**Pond Journey is a proposed name and presentation; endless describes how long puzzle supply continues. They can be combined.** For a practical comparison, the two versions discussed are:
+
+| Aspect | Stage-based Journey | Endless progression |
+| --- | --- | --- |
+| Next puzzle | A stable, reviewed numbered stage | A fresh rated puzzle selected for the current band |
+| Replay | Same stage returns the same puzzle | New attempts can use different puzzles; an unfinished puzzle stays fixed |
+| Progress | Defined stages and milestones, with a catalog endpoint | An ongoing level counter; difficulty eventually plateaus |
+| Main benefit | Predictable challenge curve and easy stage replay | Spontaneous repeat play without continually authoring stages |
+| Main cost | Preparing and maintaining a finite puzzle catalog | Reliable puzzle generation/selection, rating, duplicate handling and advancement rules |
+
+Neither structure needs a story, map, additional controls, new Sudoku rules, or an internet connection after the PWA is cached. Both require reliable difficulty ratings; endless generation does not remove that work. A large finite pregraded pool can also supply an ongoing sequence without generating puzzles on the phone.
+
+For the requested simple scope, a proposed lightweight option is a saved level counter and a Continue action, with fresh rated puzzles within gradually harder bands. At the supported difficulty ceiling, continue with variety at that level. Fixed replayable stages are an alternative if predictable stage identity matters more. This recommendation has not been selected.
+
+## Gameplay findings
+
+- Preserve standard 9 by 9 Sudoku, visible digits 1 through 9, 3 by 3 boxes, immutable clues and unique solutions.
+- Familiar functionality includes cell selection, number entry, pencil notes, undo, erase and saved progress. Exact visible access must follow the minimal-control design constraints.
+- Logical hints, optional conflict feedback, optional timing, no punitive lives, and Easy/Medium/Hard/Expert labels are proposals. Their precise scope is still open.
+- Human-technique grading is recommended for meaningful progression; fewer clues alone do not establish greater difficulty.
+- Separate mode progress from puzzle rules and appearance. Changing themes must not change stage advancement or the active board.
+
 ## Recommendation
 
 Keep **Quick Play** as the immediate, unrestricted way to choose a difficulty and start a fresh classic Sudoku. Add **Pond Journey** later as an optional, saved sequence of short chapters. Journey should gradually introduce harder reasoning, then settle into varied practice at a chosen challenge ceiling. It should never prevent spontaneous play.

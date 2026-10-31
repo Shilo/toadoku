@@ -10,7 +10,7 @@ Frogs remain the identity in every theme. The everyday theme is cute and welcomi
 
 English, German, and Spanish are required throughout the interface. Language, theme, appearance, and current puzzle progress must persist locally. The intended delivery is a static, JavaScript-based application for GitHub Pages, with responsive layouts and installable PWA support. There is no required backend or WebAssembly runtime. Sudoku logic, presentation, themes, localization, and persistence have separate responsibilities so visual changes cannot alter puzzle correctness.
 
-The approved stack is Svelte, TypeScript, and Vite, hosted on GitHub Pages as a PWA with offline play. Artwork, layouts, theme details, gameplay controls, and game modes still require discussion before implementation. Stack approval does not approve the initial web-style prototype, which remains an ignored experiment.
+The approved stack is Svelte, TypeScript, and Vite, hosted on GitHub Pages as a PWA with offline play. Initial modes are Quick Play and Progression only, retaining traditional Sudoku's basic layout and functionality. The progression structure, puzzle supply, detailed control access, artwork, and themes still require discussion before implementation. Stack and mode approval do not approve the initial web-style prototype, which remains an ignored experiment.
 
 ## Start here
 

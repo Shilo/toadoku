@@ -1,6 +1,6 @@
 # Proposed architecture
 
-The approved stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PWA with offline play. Gameplay and design remain open. The initial experiment lives in ignored `prototypes/initial-web-ui/`; its code, tests, interface, and deployment workflow are not approved production work.
+The approved stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PWA with offline play. The two initial modes are Quick Play and Progression, sharing traditional Sudoku's board and functionality. Progression details and visual design remain open. The initial experiment lives in ignored `prototypes/initial-web-ui/`; its code, tests, interface, and deployment workflow are not approved production work.
 
 ## Module boundaries
 

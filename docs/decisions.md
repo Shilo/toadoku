@@ -11,6 +11,8 @@
 - Separate Sudoku, session, theme, localization, storage, and presentation responsibilities.
 - GitHub Pages hosting, JavaScript delivery, no required WebAssembly.
 - Approved stack: Svelte + TypeScript + Vite, delivered as a PWA with offline play.
+- Initial modes: Quick Play and Progression only. Daily challenges and additional rule variants are outside the initial scope.
+- Retain traditional Sudoku's basic layout and functionality. Visual themes must preserve familiar solving interactions.
 - ImageGen mockups before interface prototypes. Temporary work stays ignored.
 - Keep personal context out of project artifacts.
 
@@ -22,9 +24,9 @@
 | Halloween palette | Pumpkin orange, near-black, purple, and frog green; select exact swatches visually |
 | Controls | Number entry plus overflow; decide contextual access to essential solving tools |
 | Seasonal dates | October 24 through November 7 inclusive, using local dates |
-| Modes | Quick Play plus an optional Pond Journey |
+| Progression structure | Fixed replayable stages, an ongoing fresh-puzzle sequence, or a small combination; no story or map is approved |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
-| Journey supply | Reviewed stages with randomized practice within difficulty bands |
+| Puzzle supply | Reviewed fixed stages versus generated or pregraded fresh puzzles; choose before implementation |
 
 ## Rejected prototype direction
 
