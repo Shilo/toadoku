@@ -2,17 +2,20 @@
 
 These requirements override earlier visual recommendations in the research notes.
 
+Current milestone is Pond-only with disabled More and one deliberately rough composite menu-art placeholder. See [current UI/UX](ui-ux.md) and [TODO.md](../TODO.md). The new top-down pond/pad board is a proposal under review, not settled by an earlier grid mockup.
+
 - Feel like an immersive, colorful game.
 - Start with C, Quiet Flat, and preserve B/A as modular alternatives. Build most of the world using HTML/CSS color and sparse organic shapes. Optional human-made PNG/JPEG/WebP backgrounds are a supported theme capability, not a selected asset. Avoid clutter and heavy glass/blur effects.
 - Make the Sudoku board fill the available play area within practical limits.
+- Fill space reaches available edges with no decorative outer padding. Respect actual safe areas, keep key gaps consistent and use only a small board/dock safety gap.
 - No gameplay top bar, sidebar, card layout, marketing copy, or decorative whitespace that reduces board size.
-- Use a bottom portrait dock and right landscape dock with the same ten-key structure. The current recommendation merges top overflow and Tools into one three-dot More key; final popup behavior remains under review.
+- Use a bottom portrait dock and right landscape dock with the same ten-key structure. Keep More disabled in its position, with no top overflow. Future regular-options-plus-tools layout is deferred.
 - Keep number entry accessible. Discuss notes, undo, erase, and hint access before adding visible controls; avoid an action-button row.
 - Main menu: integrated artwork, minimal text, direct mode choices and same-scene submenus. See [menu flow](menu.md).
 - Keep frogs in the main-menu identity, but remove the decorative gameplay frog for now to maximize board space. Frog-shaped cells and number-holding mascots are not the current gameplay direction.
-- Halloween: recognizable pumpkin orange and near-black, with vivid purple and green accents. Exact swatches remain open.
+- Halloween is deferred. Preserve earlier palette research for later rather than designing or implementing it during the basic Pond milestone.
 - Reuse exactly the same frog and lily-pad artwork across themes. No sprite recoloring, costumes, seasonal replacements or accessories. Themes change UI colors, gradients, fonts, buttons and background styling.
-- Keep the board opaque, with stable legible digits and pencil marks. Put theme typography primarily in menus and short labels.
+- Keep digits and notes over quiet opaque surfaces. The proposed pad board can show water between those surfaces instead of an opaque panel. Put theme typography primarily in menus and short labels.
 - Default to Fill space and offer Square as a persistent setting. Never stretch glyphs or rotate the logical puzzle; preserve the nine-row, nine-column and three-by-three-region structure.
 - Use selected soft-raised CSS buttons while keeping the world quiet and flat. Jelly and lily-pad studies remain alternatives, not additional required styles.
 - No permanent progress HUD is needed. Review brief start status and persistent completion feedback, with information recoverable in a non-timed secondary view.
@@ -25,7 +28,7 @@ These requirements override earlier visual recommendations in the research notes
 - AI-generated images and illustrations are temporary concept material only. This includes AI-authored SVG illustrations, sprites, icons, backgrounds and textures; vector format is not an exception.
 - Use ImageGen for clearly marked mockups under ignored `/prototypes/`. Those images are references, not production assets or proof of a human-made art style's availability.
 - Existing prototype frog artwork and generated mockups have no production approval and must not ship. A paid listing or an AI image traced into another format does not establish human authorship.
-- Select a final art direction alongside available human-made assets or a human artist's commission. Exact sources and budget remain open.
+- Defer asset-pack sourcing now. Use one combined, intentionally provisional black-and-white frog/lily-pad question-mark placeholder. Final artwork is a later human-made replacement; no personal motivation belongs in project artifacts.
 
 ## Visual review
 

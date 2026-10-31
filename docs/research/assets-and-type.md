@@ -1,5 +1,7 @@
 # Human artwork and theme typography
 
+> Current scope update: asset-pack acquisition is deferred. Use one intentionally provisional black-and-white frog-plus-lily-pad question-mark placeholder and a later human-made replacement. The pack shortlist below is preserved research, not the current sourcing plan. Halloween font selection is also deferred.
+
 Research checked 2026-10-30. These are candidates for discussion, with no asset purchase, download, adoption or interface implementation. The target is one small, fixed set of simple frogs and lily pads shared by Pond and Halloween. Theme differences come from backgrounds, gradients, colors, buttons and typography.
 
 ## Artwork shortlist

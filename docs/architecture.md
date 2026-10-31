@@ -19,6 +19,8 @@ Use a small independent decorative-background renderer and semantic style roles 
 
 Persist a theme-independent board-shape preference: Fill space by default, Square on request. The presentation measures the current usable viewport and uses a bottom portrait dock or right landscape dock. Relayout preserves logical cell/control identity and state, without rotating board data or stretching glyphs. More overlays do not own layout space or game rules.
 
+More is disabled in the current milestone, so exposing the Square setting is deferred with Settings. The new pad board is a presentation-layer proposal over the same rectangular logical cells; its leaf geometry must not own input hit testing or Sudoku rules. One composite menu-art reference supports replacing the provisional art with one human-made file. No new sprite framework is needed.
+
 ## Correctness and usability
 
 - Keep givens immutable and require a unique solution.

@@ -11,7 +11,7 @@ Show both mode choices immediately in the main scene. Quick Play and Progression
 
 Use a change of menu state within the same illustrated scene, not a new page or dashboard. Avoid an extra Play landing screen before mode selection. Preserve the minimal text and control constraints. Exact transitions, start-button behavior and visual layout require mockup review.
 
-Place the main action choices in the lower, reachable portion of the scene where practical. Keep Back with the lower interaction area, without introducing a header bar. Main-menu artwork can retain the frog even though gameplay now omits it. Quiet Flat C is the starting scene treatment.
+Place Quick Play above Progression in a bottom-left block in both orientations. Put More at bottom-right, aligned vertically with Progression, rather than moving the mode block to the right in landscape. Title and the combined placeholder remain higher in the composition. Keep Back with the lower interaction area. More is disabled for now; no settings popup is functional. See [current UI and UX](ui-ux.md).
 
 Quick Play has explicit difficulty selection. Progression follows its saved or initial difficulty schedule; a separate Progression difficulty picker is not approved.
 
@@ -25,8 +25,10 @@ The eventual menu must allow returning from save selection to the two mode choic
 
 A small Install app entry could live in the overflow when installation is available and the app is not already installed. Keep browser-specific install steps secondary to playing; do not require installation to access either mode or show an always-present install button. This placement remains a proposal.
 
-Current recommendation consolidates gameplay tools and secondary navigation under the tenth keypad key, More, removing the old top overflow. Main menu can retain a small lower More entry for Settings; it does not need a numeric dock. Prefer a short primary tool popup plus Settings rather than embedding a long preference list alongside Notes. See [current UI and UX](ui-ux.md).
+More functionality and installation placement are deferred. A recorded future alternative is regular menu options plus an adjacent tools column in gameplay, with no separate Tools submenu. The current mockup must not suggest that the disabled More key opens anything. See [TODO.md](../TODO.md).
 
 ## Artwork
 
 Follow the [human-made production artwork policy](design.md#artwork-policy). AI-generated mockups can explore the flow and atmosphere, but are temporary, clearly labeled and ignored by Git.
+
+Use one combined frog-and-lily-pad image, intentionally rough black and white with a conspicuous question mark/template cue. Do not make separate frog/pad files or a polished character for this milestone. A later human-made image can replace it without changing layout. The new camera proposal is overhead pond water with a top-down or slightly oblique top-down placeholder, not a horizon scene.

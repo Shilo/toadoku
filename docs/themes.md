@@ -1,5 +1,7 @@
 # Theme requirements and proposals
 
+Current scope is basic Pond only. Halloween and seasonal selection remain future requirements, explicitly deferred in [TODO.md](../TODO.md). Preserve modular theme boundaries without implementing the deferred theme now.
+
 Themes retain classic Sudoku rules and exactly the same frog and lily-pad sprites. Their definitions customize semantic UI colors, CSS gradients and background shapes, button styling, font roles, suitable motion parameters and localized text. Theme code stays independent of puzzle correctness and progress.
 
 ## Required behavior
@@ -25,6 +27,8 @@ A decorative background renderer handles solid fields, optional broad shapes, fu
 An adopted background needs creator/source/license records, sensible file dimensions, `cover`/`contain` crop review, local paths compatible with GitHub Pages, offline caching and a fallback if loading fails. It must not intercept input or show essential text. Both appearances and all target orientations must remain usable without it.
 
 Shared menu sprites stay outside theme definitions and unchanged. Gameplay frog removal is a scene-layout choice, not a seasonal theme. A tactile CSS lily-pad button is a control finish, not a replacement sprite. See [candidate theme contract](research/theme-structure.md) for the proposed small model and image/performance evidence.
+
+The menu currently uses one combined provisional frog/pad template, not separate finished sprites. The new scene proposal is flat top-down CSS pond water; the new pad-board proposal uses separate quiet opaque control faces rather than one opaque board panel. Treat backdrop, board face and art asset as separate responsibilities. Existing opaque classic-board notes describe the earlier visual baseline, not a requirement to reject the new concept.
 
 ## Discuss before implementation
 
