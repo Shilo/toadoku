@@ -4,12 +4,12 @@
 
 - [x] Close the prototype phase and write the [full production UI handoff](docs/production-ui-handoff.md), including selected design/prototype links, scope, tokens, navigation, assets and validation.
 - [x] Install all three canonical official Svelte skills and references in this project's `.agents/skills/`, with [pinned provenance](docs/svelte-agent-skills.md) and no global installation.
-- [x] Make the stack explicit: Svelte framework, TypeScript and Vite, without SvelteKit. This task does not implement production code.
-- [ ] After implementation is activated, scaffold fresh tracked production source and a compatible local toolchain. Preserve the ignored prototype as reference.
-- [ ] Use the lead/specialist workflow: lead-owned foundation/contracts/integration, researched and challenged module proposals, agreed direction, critical implementation review and integrated visual/engineering acceptance.
-- [ ] Implement modular Pond tokens, responsive menu/board presentation, localization inputs and safe motion from the selected guidelines.
-- [ ] Enable gameplay More with accessible Resume/Close and Back to main menu, correct browser/keyboard history and no new dock key.
-- [ ] Validate the new implementation independently; do not reuse prototype results as production certification. Keep Sudoku logic and later systems out of scope.
+- [x] Make the stack explicit: Svelte framework, TypeScript and Vite, without SvelteKit. The original handoff prepared the later activated implementation.
+- [x] Scaffold fresh tracked production source and a compatible local locked toolchain. Preserve the ignored prototype as reference.
+- [x] Use the lead/specialist workflow: lead-owned foundation/contracts/integration, researched and challenged module proposals, agreed direction, critical implementation review and integrated visual/engineering acceptance.
+- [x] Implement modular Pond tokens, responsive menu/board presentation, localization inputs and safe motion from the selected guidelines.
+- [x] Enable gameplay More with accessible Resume/Close and Back to main menu, correct browser/keyboard history and no new dock key.
+- [x] Validate the new implementation independently; do not reuse prototype results as production certification. Keep Sudoku logic and later systems out of scope. See [production acceptance and limits](docs/production-ui-progress.md).
 
 ## Current visual prototype
 

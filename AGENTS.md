@@ -18,9 +18,9 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Current task and next phase
 
-- The prototype is complete. The latest request is handoff and project-local skill installation only; do not implement production code in this task.
-- Start with [production UI handoff](docs/production-ui-handoff.md). After the user activates implementation, build fresh tracked production source using the Svelte framework, TypeScript and Vite.
-- The next phase is design, responsive presentation and navigation only. Enable gameplay More with Resume/Close and Back to main menu; no Sudoku logic or later product systems.
+- The prototype and first production UI phase are complete. Read [production UI progress](docs/production-ui-progress.md) for implementation, acceptance and remaining limits.
+- The tracked root application uses the Svelte framework, TypeScript and Vite. The ignored prototype remains unchanged as a design reference; the [production UI handoff](docs/production-ui-handoff.md) records its implementation brief.
+- Gameplay More provides Resume and Back to main menu. This application remains presentation/navigation with immutable example data; Sudoku logic and later product systems require a subsequent task.
 - In that implementation phase, the lead acts as project manager, senior engineer and senior UI/UX designer: own the core foundation, contracts and integration; delegate bounded specialist modules efficiently. Specialists research/challenge their briefs, the lead challenges proposals until direction is agreed, and the lead reviews/challenges each implementation before acceptance. Follow the [team workflow](docs/production-ui-handoff.md#12-lead-orchestration-and-efficient-specialist-teamwork).
 - Official Svelte skills are installed for this project only in `.agents/skills/`. Read [provenance and usage](docs/svelte-agent-skills.md), then load the local code-writer and best-practices skills for Svelte component/module work. Upstream SvelteKit examples do not change this project's stack. Installing the feedback skill does not authorize unsolicited external reports.
 
@@ -38,7 +38,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
 - More stays disabled in the completed prototype reference. The next production UI phase enables gameplay More for navigation. Settings, Halloween and save-slot policy remain deferred.
-- Water animation exists in the ignored baseline. Pad silhouettes, ground and floating refinements are authorized prototype work; production integration and hardware validation remain deferred. See [progress](docs/prototype-progress.md).
+- The tracked UI integrates fresh water, pads, shore and floating modules. Physical hardware validation remains deferred. See [production progress](docs/production-ui-progress.md) and the separate [prototype record](docs/prototype-progress.md).
 - No store, purchases or upgrades.
 
 ## Design
@@ -63,7 +63,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 - Discuss one decision at a time; keep replies extremely concise.
 - Use ImageGen before new UI experiments.
 - Keep prototypes, AI mockups, dependencies, builds and test artifacts in ignored `prototypes/`. Do not promote them without discussion.
-- Once the production implementation phase is activated, its fresh source, tests and package/lock configuration are tracked normally; experimental source/assets remain ignored. No production scaffolding is authorized by this handoff-only task.
+- Production source, tests and package/lock configuration are tracked normally; experimental source/assets remain ignored. The completed UI phase does not authorize later game systems.
 - Production art must be human-made with provenance and suitable licensing. Never ship AI illustrations. Keep the menu placeholder provisional.
 - Keep vendored official skill payloads verbatim. Project-authored wording/punctuation rules do not require rewriting upstream files.
 

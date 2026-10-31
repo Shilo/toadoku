@@ -1,5 +1,7 @@
 # Project-local official Svelte agent skills
 
+Production update, 2026-10-31: the installed skills were used for the subsequently activated [production UI phase](production-ui-progress.md). The installation/provenance record below remains unchanged in scope; no global skills or external feedback reports were added.
+
 Installed and verified: 2026-10-31. Scope is this repository only. No global skills, plugins or MCP server configuration were installed. The production application has not been scaffolded or implemented.
 
 ## Installed set and provenance

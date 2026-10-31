@@ -1,0 +1,16 @@
+/* Original upstream font files and notices: docs/production-assets.md. */
+@font-face {
+  font-family: 'Outfit';
+  src: url('../../assets/fonts/Outfit.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Chewy';
+  src: url('../../assets/fonts/Chewy-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}

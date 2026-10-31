@@ -1,5 +1,7 @@
 # Proposed architecture
 
+Production update, 2026-10-31: maintained root source now implements presentation/navigation only. [Production progress](production-ui-progress.md#scope-and-structure) maps the actual modules and validation. The prototype-only/preparation restrictions below are historical; gameplay More is now functional. Rules, sessions, persistence and PWA remain unimplemented.
+
 Current phase update: [production UI handoff](production-ui-handoff.md) defines the next maintained application using the **Svelte framework, TypeScript and Vite**, without SvelteKit. This task only prepares documentation/local skills. Future implementation starts fresh, enables gameplay More navigation and keeps all Sudoku/product logic out of scope. The older prototype-specific restrictions below describe the reference snapshot.
 
 The approved eventual stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PWA with offline play. The two initial modes are Quick Play and Progression, sharing traditional Sudoku's board and functionality. Progression details and visual design remain open. The initial experiment lives in ignored `prototypes/initial-web-ui/`; its code, tests, interface, and deployment workflow are not approved production work.

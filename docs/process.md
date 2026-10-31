@@ -1,5 +1,7 @@
 # Discussion and prototyping
 
+Production update, 2026-10-31: the explicitly activated UI phase is complete using the researched/challenged specialist workflow below. See [decision/revision and acceptance evidence](production-ui-progress.md). Future work must preserve the completed prototype and the current phase boundary; this does not authorize Sudoku or later systems.
+
 Current phase: the prototype is complete. The [production UI handoff](production-ui-handoff.md) and project-local Svelte skills are preparation only; no production source is implemented in this task. When the user activates the next phase, build fresh maintained Svelte framework + TypeScript + Vite source, preserve the selected visual design and implement gameplay More navigation without Sudoku logic. Prototype workflow below remains historical/reference guidance for future visual experiments.
 
 The receiving lead owns project management, core engineering, overall UI/UX and integration. Use an efficient bounded specialist team for theme/scene/leaf/motion responsibilities. Every specialist researches and challenges its task, then the lead challenges material proposals until agreement and critically reviews each resulting implementation. [The handoff's team workflow](production-ui-handoff.md#12-lead-orchestration-and-efficient-specialist-teamwork) defines ownership, decision/revision loops, evidence and integration acceptance. This is not permission to start implementation during the handoff-only task.

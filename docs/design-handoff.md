@@ -1,5 +1,7 @@
 # Design handoff: resume here
 
+Production update, 2026-10-31: the fresh tracked presentation/navigation shell is implemented. Read [production results](production-ui-progress.md) before the historical prototype/handoff material below. Gameplay More is enabled; final human-made menu art and hardware/tiny-note validation remain open. No Sudoku logic is implemented.
+
 **Phase update, 2026-10-31:** the prototype is complete. The latest task is handoff/tooling only. Read the [production UI handoff](production-ui-handoff.md) for the subsequent fresh Svelte framework + TypeScript + Vite application, with enabled gameplay More navigation and no Sudoku logic. No SvelteKit or production implementation is part of this handoff task. Visual decisions below remain the selected guideline; older prototype-only scope and disabled-More rules describe the reference, not the next activated production phase.
 
 Status: 2026-10-31. **Basic Pond, inward near-circular lily pads and B, Winding shallows, remain selected.** The latest authorized refinement adds two ground colors, varied pad edges/notches, natural selection and subtle floating pond objects. It supersedes the earlier perfect-circle, stationary-pad and full-cell selection-outline rules.

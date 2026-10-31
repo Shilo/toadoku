@@ -1,5 +1,15 @@
 # Requirements and open decisions
 
+## Implemented production UI phase, 2026-10-31
+
+The user explicitly activated the fresh Svelte framework + TypeScript + Vite presentation/navigation implementation. It is complete with no SvelteKit, Sudoku logic or later product systems. See [production results and specialist decisions](production-ui-progress.md) and [asset provenance](production-assets.md). Root production source, tests and locked configuration are tracked; the completed ignored prototype remains unchanged.
+
+The enabled tenth gameplay More key opens a native modal with Resume and Back to main menu. Explicit focus cycling/restoration and consumed overlay history prevent stale popup resurrection. Selection and decorative seeds remain independent. Numeric entry and tools are disabled and visibly inactive; main-menu More stays disabled.
+
+One complete Pond preset, deterministic scene/leaves, shared active-time motion and English/German/Spanish inputs are implemented. The maximum localized menu panel is computed from production sizing rather than copied as a prototype pixel constant. Original fonts were independently obtained from pinned official upstream files with licenses shipped in build output. No AI illustration ships; the fixed menu art slot has a neutral text fallback until approved human-made art exists.
+
+Physical Motorola/native DPR3 testing, tiny-note typography, final art and final region-recognition evaluation remain open. Current browser and geometry results are production-specific, with no inherited prototype certification. Historical authorization text below records earlier tasks.
+
 Current milestone: the visual prototype is complete and the [production UI handoff](production-ui-handoff.md) is prepared. The latest task installs project-local official Svelte skills and documents a future fresh Svelte framework + TypeScript + Vite application; it implements no production app. Future scope is presentation/navigation with enabled gameplay More, not Sudoku logic, modes, rewards, saves or PWA delivery. Earlier prototype refinements and measured findings remain in [prototype progress](prototype-progress.md).
 
 The baseline was built fresh without copying old prototype code, then refined and completed; older demos remain visual references only. Preserve experimental code/images/evidence as ignored reference. Project-local official skills and durable documentation are tracked; fresh production source will be tracked when its implementation phase is activated. Follow the bounded team workflow in the new handoff rather than continuing prototype experiments.

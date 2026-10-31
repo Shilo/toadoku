@@ -1,5 +1,7 @@
 # Production UI implementation handoff
 
+Implementation update, 2026-10-31: the user activated this brief and the first maintained presentation/navigation phase is complete. See [fresh production results and limits](production-ui-progress.md). The preparation-only statements below describe the historical handoff task, not the current tracked root application.
+
 Prepared: 2026-10-31. Prototype review is complete. This task installs project-local official Svelte skills and prepares documentation only. **No production application, root package manifest, UI component, router or infrastructure is implemented by this handoff.** Activate the implementation phase in a subsequent task.
 
 ## 1. Objective, authority and phase boundary

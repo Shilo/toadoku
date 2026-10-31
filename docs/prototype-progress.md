@@ -1,5 +1,7 @@
 # Pond prototype progress and findings
 
+Production update, 2026-10-31: the prototype below remains unchanged. Fresh tracked production presentation/navigation and its independent results are recorded separately in [production UI progress](production-ui-progress.md). None of this prototype's test counts are production certification.
+
 Status: 2026-10-31. This records the local visual prototype, its authorized refinement and the evidence needed to resume work. It is not production acceptance or a working Sudoku game.
 
 ## Scope and source of truth
