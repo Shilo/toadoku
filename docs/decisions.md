@@ -2,6 +2,8 @@
 
 Next milestone: a theme-focused visual prototype with menu/gameplay navigation, static numbers, pad selection and animated Pond backgrounds. Full Sudoku logic, modes, rewards, saves and production/PWA work are excluded. Requirements below describe the eventual product, not authorization to implement everything. More functionality, Halloween and sprite-pack acquisition remain deferred. See [prototype scope](design-handoff.md#next-session-visual-prototype-only).
 
+Build a fresh ignored prototype; do not copy or extend old prototype code. Existing designs remain visual references. Delegate animation research and background implementation to a sub-agent, with a concise approach comparison before choosing and separate ownership from screens/integration.
+
 ## Accepted requirements
 
 - Name: Toadodu. Classic numbered Sudoku with frogs in every theme.

@@ -10,7 +10,9 @@ The repository currently tracks documentation and guidance. Interface experiment
 
 ## Next session: visual prototype only
 
-The priority is making the selected design visually functional, especially the Pond theme and convincing animated top-down water in both menu and gameplay. Reuse the existing ignored layout/selection demos as references or a starting point. Do not implement the whole product.
+The priority is making the selected design visually functional, especially the Pond theme and convincing animated top-down water in both menu and gameplay. Create a fresh prototype in a new ignored directory, such as `prototypes/pond-visual-v1/`. Use existing screenshots, measurements and design notes only as references. Do not copy/extend old prototype code, overwrite existing demos or treat one as the new project's starting codebase. Do not implement the whole product.
+
+Use a sub-agent for the animated pond. First have it compare CSS/SVG shape movement, canvas and a small shader approach against the selected three-color design, pad containment, reduced motion and Motorola performance. It should report a concise recommendation and tradeoffs; the parent should challenge assumptions and share the findings before choosing the approach. The pond sub-agent then owns the fresh prototype's background module and its motion checks; the parent owns screens, layout, selection, navigation and integration. Assign explicit files after scaffolding. Tell the worker it shares the workspace and must preserve others' edits. Keep this a small division of work, not a new rendering framework.
 
 Allowed interaction: main-menu/gameplay navigation, a minimal return path, static example digits on pads, full rectangular cell selection and visible selection feedback. Most buttons should remain inert or disabled. Preserve the ten-key dock and disabled More; temporary navigation must not silently redesign those controls. Mode buttons may reach the same example board without implementing either game mode.
 

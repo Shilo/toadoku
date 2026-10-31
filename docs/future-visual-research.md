@@ -4,6 +4,8 @@ Status: 2026-10-31. Requested future improvements to the selected inward-pad/Win
 
 Scope update: animated water is now part of the next visual prototype. Research the simplest useful approach and implement/test it there; production integration remains later. Procedural pad cuts remain deferred. The prototype only adds menu/game navigation, static digits and pad selection, not Sudoku gameplay or product infrastructure.
 
+Create a fresh prototype rather than extending old demos. A pond sub-agent researches animation options and reports a short recommendation/tradeoff comparison, then owns implementation and motion checks for the chosen background. The parent challenges the recommendation and handles screens/integration. Use explicit, separate file ownership; existing demos are visual references only.
+
 ## Procedural lily-pad splits and perimeter
 
 The request concerns silhouette only: researched notches, splits, cutouts or gaps that make the round pad feel like an abstract lily pad, possibly with a gently irregular edge. Preserve its green palette, raised lower edge/highlight, button character, inward alignment and 1:1 bounding envelope. This is not approval for realistic leaf texture, new shading, veins over text, recoloring or a stretched botanical sprite.

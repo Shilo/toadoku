@@ -2,6 +2,8 @@
 
 ## Next visual prototype
 
+- [ ] Start a fresh ignored prototype directory; preserve old demos and use only their visual references/measurements, not their code.
+- [ ] Delegate pond-motion research and implementation to a sub-agent. Review its approach comparison before choosing; separate background ownership from parent-owned screens/integration.
 - [ ] Combine menu/gameplay navigation, static example numbers and full-cell pad selection. Keep other controls inert/disabled; do not implement Sudoku logic or the product roadmap.
 - [ ] Focus on the selected theme and convincing dynamic top-down pond water in both screens. Preserve the flat three-color B composition, inward pads, cream controls and fixed layout. Research/test the simplest motion approach with static reduced motion.
 - [ ] Review portrait/landscape at Motorola representative sizes. Keep all prototype code/assets ignored. See [exact scope](docs/design-handoff.md#next-session-visual-prototype-only).
