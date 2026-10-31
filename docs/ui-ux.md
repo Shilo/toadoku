@@ -12,9 +12,20 @@ The ten-key order follows the agreed mockup: portrait `1 2 3 4 5 / 6 7 8 9 More`
 
 ## Exact space use
 
-- Fill space reaches the available scene edges after necessary safe-area insets. No decorative outer board margin, frame, reserved header/status strip or empty spacer belongs in the board allocation.
-- Dock keys align to the bottom in portrait or right edge in landscape. Use only consistent inter-key spacing and the small board/dock separation needed to prevent accidental activation.
-- Board padding, logical cell size, visible pad-face inset and safe-area protection are different concepts. Internal leaf/water gaps do not justify adding outer page padding.
+Use only two theme spacing tokens: **small 4 CSS px** and **large 8 CSS px**, with large always exactly twice small. This supersedes the earlier zero-decorative-edge rule. Share these tokens between menus and gameplay and keep them constant when rotating.
+
+| Placement | Token |
+| --- | --- |
+| Neighboring lily-pad cells inside a group | Small, 4px |
+| Neighboring numeric keys and menu buttons | Small, 4px |
+| Gaps between 3 by 3 groups | Large, 8px |
+| Scene edges in menu and gameplay | Large, 8px |
+| Board-to-dock separation | Large, 8px |
+| Any other authored padding or gap | Reuse small or large; no third spacing size |
+
+- Fill space consumes the entire remaining rectangle after the single outer 8px inset, dock and 8px board/dock gap. No extra board wrapper padding, doubled region padding, reserved header/status strip or scenic spacer.
+- Dock keys align to the bottom in portrait or right edge in landscape, inside that same 8px scene inset. Measure cell/button gaps between complete visual bounds including the lower lip, not only the face.
+- Add actual system safe-area insets outside the authored spacing when necessary. System protection is not a third theme spacing token. Radii, lip depth, strokes, font sizes and control dimensions are not padding/gap tokens.
 - If square mode is eventually selected, center the largest square within the same board allocation and keep the dock fixed. That mode intentionally leaves background visible.
 - Generated mockup whitespace is not a spacing specification. Actual layout must be measured against its available rectangle and device insets.
 
@@ -66,10 +77,18 @@ Use the same three water fills as the curving menu, with uniform soft-raised gre
 
 Two temporary alternatives are compared in `prototypes/organic-three-color-pond/menu-and-gameplay.png`, with exact initial/correction prompts alongside:
 
-- **A, Connected bays:** one continuous deep-water ground with four organic patches at regions 2, 4, 6, 8. Fill arrangement `A B A / C A C / A B A`. This preserves the selective-patch idea and a connected base, but retains some four-island repetition.
-- **B, Winding shallows:** whole-region three-color arrangement `A B C / B C A / C A B`, with gently winding shared boundaries rather than nine separate cards. Recommended next direction for immersion, provided the nine boxes remain recognizable without hue.
+- **A, Connected bays, preserved alternative:** one continuous deep-water ground with four organic patches at regions 2, 4, 6, 8. Fill arrangement `A B A / C A C / A B A`. Preserves the selective-patch idea and a connected base, but retains some four-island repetition.
+- **B, Winding shallows, selected:** whole-region three-color arrangement `A B C / B C A / C A B`, with gently winding shared boundaries rather than nine separate cards. Selected for the more natural pond appearance. Keep A documented for possible later reconsideration, not as another current user setting.
 
-Neither geometry is approved yet. Waviness must fit the existing gutter budget; do not enlarge gaps or add scenery headers/spacers to display it. Stable pad/hitbox geometry takes priority. Validate grayscale, color-vision simulations, notes, focus and selection at target phone sizes in both orientations. The generated images are background studies, not measured layout, exact palette or interaction specifications. Their residual spacing/texture is not an approved change. No public region-style selector or production implementation is added.
+Board variant B is now approved as the visual direction; exact contour tuning and palette/accessibility checks remain open. Its name is separate from the earlier scene treatment B, Layered Pond: Quiet Flat C is still the overall style. Waviness must fit the fixed 8px group channels; do not enlarge gaps or add scenic spacers to display it. Stable pad/hitbox geometry takes priority. Validate grayscale, color-vision simulations, notes, focus and selection. Earlier generated spacing/texture is not an approved change. No public region-style selector or production implementation is added.
+
+## Motorola G31/G32 layout study
+
+Use 360 by 800 CSS px in portrait and 800 by 360 in landscape at representative DPR 3, yielding 1080 by 2400 and 2400 by 1080 physical-pixel PNGs. These are emulation assumptions, not observed hardware CSS viewports. See [device evidence and hardware follow-up](research/technology.md#motorola-g31g32-targets).
+
+The ignored static study `prototypes/motorola-spacing/` renders both menu/gameplay orientations using the two spacing tokens. Board allocation measures approximately 344 by 640.81 CSS px in portrait and 640.81 by 344 in landscape. The 65.6px square dock keys use the same four-pixel gaps in both orientations. All remaining play space is filled; glyphs remain upright and unstretched. Boundaries are intentionally restrained to stay in the eight-pixel channels.
+
+Its Playwright checks cover 81 pads, ten keys, measured 4px/8px gaps, outer/dock bounds, no overflow, exactly three shared water fills, menu alignment and sampled pad-rectangle containment within the assigned water region. Results are under `measurements.json`; four original screenshots and `portrait-landscape-review.png` are alongside. This is a temporary spacing study after ImageGen design selection, not a functional game. Safe areas are zero in emulation; physical-device comfort, note readability and installed/browser behavior remain unverified.
 
 ## Earlier rounded alternate regions: preserved proposal
 

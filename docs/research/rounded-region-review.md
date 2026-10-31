@@ -1,16 +1,22 @@
 # Rounded regions on continuous pond water
 
-Date: 2026-10-31. Status: proposed geometry under visual review, not implementation approval.
+Date: 2026-10-31. Status: B, Winding shallows, selected as the board direction; A preserved. No production implementation approval.
 
 ## Latest refinement: three-color organic pond
 
 Menu and gameplay must share exactly three flat water colors, with broad abstract pond curves. Keep green notched pad faces and cream menu/input buttons in the approved soft-raised finish. The preceding image's flattened pads or lost notches were rendering errors, not a design decision. Background-only changes must preserve faces, lips, highlights and typography. Water cannot gain extra shades through opacity/gradient/texture; the three-color limit excludes controls, ink and placeholder art.
 
-The latest annotation asks for selective natural curves at top/bottom group seams, not yellow outlines. Compare **A, Connected bays**, `A B A / C A C / A B A`, and **B, Winding shallows**, `A B C / B C A / C A B`. A preserves four patches over connected ground; B distributes the three fills among all regions with winding shared edges. Recommend exploring B for a less panel-like environment, but do not claim proven usability or treat it as selected. The older two-color four-radius mask below is preserved history.
+The annotation asks for selective natural curves at top/bottom group seams, not yellow outlines. **A, Connected bays**, `A B A / C A C / A B A`, preserves four patches over connected ground; retain it as an alternative. **B, Winding shallows**, `A B C / B C A / C A B`, distributes the three fills among all regions with winding shared edges; it is selected for the more natural appearance. Visual preference is not proof of usability. The older two-color four-radius mask below is preserved history.
 
 Keep each full 3 by 3 pad group inside one color, including its lips and immediate surrounding water. Irregular contours belong only in the existing inter-region channels and perimeter seams. They must not bisect pads or intragroup spaces, change cell positions/hitboxes, or require extra scenery gaps. Use a few restrained asymmetric bends, not nine highly wobbly outlines. Geometry and spacing must still communicate boxes when hues disappear. Review both orientations and nine-note readability before selecting the mask; image generation alone cannot prove this.
 
 Temporary comparison and exact built-in ImageGen prompts: ignored `prototypes/organic-three-color-pond/`. Three proposed water tokens for this study are `#0D6267`, `#329D9A`, `#7ED1B8`, shared by both scenes; these are proposals, not certified measurements from generated pixels. The corrected sheet remains a background study: its residual outer/group gaps, texture and typography are not a replacement layout specification. No implementation or production artwork is added.
+
+## Selected spacing and measured follow-up
+
+Use only small 4px and large 8px authored spacing. Small separates pads/buttons; large applies at scene edges, between groups and between board/dock. The latest edge inset supersedes earlier zero-padding descriptions. Keep the board filling all remaining space. Winding contours must fit these fixed channels, so their amplitude is subtler than in broad-gutter image concepts. Do not enlarge the gaps to reproduce a generated curve.
+
+The ignored `prototypes/motorola-spacing/` study follows the ImageGen selection with measured HTML/CSS geometry. Menu/gameplay screenshots use 360x800 and 800x360 CSS px at DPR 3, producing 1080x2400 and 2400x1080 PNGs. Spacing, bounds, control count, overflow, three-color consistency and sampled group containment checks pass. Real hardware, browser chrome, system insets, notes and accessible states still need review. See [current UI/UX](../ui-ux.md#motorola-g31g32-layout-study).
 
 ## Earlier two-color direction
 

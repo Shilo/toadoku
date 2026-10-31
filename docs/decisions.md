@@ -30,12 +30,14 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 - Water stays flat but expressive: exactly three solid colors shared unchanged by menu/gameplay, arranged in broad organic pond/shallows shapes. No extra background tint/blend, large ripple rings or reflective/gradient scene. Control fills, lips, ink and art are separate from the three water colors.
 - Preserve the approved soft-raised green notched pad faces and cream menu/input buttons while changing backgrounds. Flattened pads or missing notches/lips in generated studies do not supersede them.
 - Every 3 by 3 group stays entirely within one water color, including pad faces/lips and immediate surround. Organic boundaries may bend in group channels without moving cells or increasing the gutter budget.
+- Selected board design B, Winding shallows: whole-region arrangement `A B C / B C A / C A B`, for a more natural pond. Preserve A, Connected bays (`A B A / C A C / A B A`), as a documented alternative. These board names are independent of the earlier A/B/C scene treatments; Quiet Flat C remains selected.
+- Exactly two authored spacing tokens throughout the theme: 4px small for neighboring pads/buttons and 8px large for scene edges, group gutters and board/dock separation. Same constants in menus, portrait and landscape; large is always twice small. System safe-area protection is additional, not a third theme token.
 - Region recognition must survive loss of hue through shape, spacing and lightness. Subtle alternating pad greens were ineffective; rectangular water panels undermined immersion. Neither comparison is selected.
 - Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
 - Number entry uses a bottom two-row/five-column dock in portrait and a right five-row/two-column dock in landscape. Keep digits upright; recalculate usable bounds rather than assuming literal pixel transposition.
 - Selected control finish: soft-raised pastilles. Selected default board shape: Fill space, with a persistent Square option available through Settings.
 - More stays in the menu/tenth gameplay-key position but is disabled for now. No replacement top overflow or active placeholder menu.
-- Fill space has no decorative outer padding or reserved header. Dock keys sit against their available bottom/right edge, respecting safe areas, with only consistent key gaps and a small board/dock safety gap.
+- Fill space fills the entire rectangle remaining after the single 8px scene inset, dock and 8px board/dock gap. No extra board margins, wrapper padding or reserved header. Dock keys sit at the bottom/right inside the same scene inset.
 - In both orientations, main-menu modes form a bottom-left block: Quick Play above Progression. More is bottom-right, vertically aligned with Progression. Title and combined placeholder remain higher in the scene.
 - Use one intentionally rough black-and-white frog-plus-lily-pad template image with a question mark, replaceable as one file. Final art remains human-made; current asset sourcing is deferred.
 - Brief nonblocking start status and persistent completion information until Continue are selected in principle; exact presentation remains open.
@@ -64,7 +66,7 @@ Current milestone: basic Pond theme, core gameplay and the deliberately temporar
 | Level revisits | Fresh randomized puzzle required. Preserve furthest advancement; cross-reset unlock access and exact return-to-active-game behavior need confirmation |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
-| Region cue | Compare organic Connected bays (`A B A / C A C / A B A`) with Winding shallows (`A B C / B C A / C A B`), using the same three menu colors. B recommended for immersion; shape, exact palette and accessibility checks remain open. Uniform soft-raised pads, spatial gutters, no outlined/raised region cards |
+| Region details | B, Winding shallows, selected; A preserved. Exact contour tuning, palette and accessibility checks remain open. Preserve uniform soft-raised pads, fixed spacing and no outlined/raised region cards |
 
 ## Rejected prototype direction
 

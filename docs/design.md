@@ -2,12 +2,12 @@
 
 These requirements override earlier visual recommendations in the research notes.
 
-Current milestone is Pond-only with disabled More and one deliberately rough composite menu-art placeholder. The top-down pond and broad procedural pad-board direction are accepted; region-tone method and exact dimensions remain under review. See [current UI/UX](ui-ux.md) and [TODO.md](../TODO.md).
+Current milestone is Pond-only with disabled More and one deliberately rough composite menu-art placeholder. Board design B, Winding shallows, is selected; A, Connected bays, remains a documented alternative. Quiet Flat C is still the overall scene style. See [current UI/UX](ui-ux.md) and [TODO.md](../TODO.md).
 
 - Feel like an immersive, colorful game.
 - Start with C, Quiet Flat, and preserve B/A as modular alternatives. Build most of the world using HTML/CSS color and sparse organic shapes. Optional human-made PNG/JPEG/WebP backgrounds are a supported theme capability, not a selected asset. Avoid clutter and heavy glass/blur effects.
 - Make the Sudoku board fill the available play area within practical limits.
-- Fill space reaches available edges with no decorative outer padding. Respect actual safe areas, keep key gaps consistent and use only a small board/dock safety gap.
+- Use only 4px and 8px authored spacing: 4px between pads/buttons, 8px at scene edges, between groups and between board/dock. Large is exactly twice small in both orientations and menus. Fill every remaining board pixel with no extra wrapper padding or scenic spacer; add necessary system safe-area protection separately.
 - No gameplay top bar, sidebar, card layout, marketing copy, or decorative whitespace that reduces board size.
 - Use a bottom portrait dock and right landscape dock with the same ten-key structure. Keep More disabled in its position, with no top overflow. Future regular-options-plus-tools layout is deferred.
 - Keep number entry accessible. Discuss notes, undo, erase, and hint access before adding visible controls; avoid an action-button row.
@@ -18,7 +18,7 @@ Current milestone is Pond-only with disabled More and one deliberately rough com
 - Keep digits and notes over quiet opaque surfaces. The proposed pad board can show water between those surfaces instead of an opaque panel. Put theme typography primarily in menus and short labels.
 - Preserve green lily-pad buttons and cream action/menu buttons in the approved soft-raised style: broad faces, small pad notch, shallow lower lip and restrained highlight. Background studies must not flatten or redesign them.
 - Flat water uses exactly three solid colors shared unchanged by menu and gameplay, arranged as broad organic pond curves. No fourth background tint, opacity blends, textures, realistic/gradient scene or large ripple rings. The limit excludes control fills/lips, ink and placeholder art.
-- Compare four organic bays over continuous water with three-color winding region boundaries. Keep each full 3 by 3 pad group and its immediate water surround inside one color; bends stay within group gutters. Avoid straight panels and repeated perfect radii. No pad jitter or extra spacing to display decoration. Test shape/lightness in grayscale rather than relying on hue. See [current comparison](ui-ux.md#three-color-organic-regions-current-comparison).
+- Use selected B, three-color winding region boundaries; preserve A, four organic bays, as an alternative. Keep each full 3 by 3 pad group and its immediate water surround inside one color; bends stay within the 8px group gutters. Avoid straight panels and repeated perfect radii. No pad jitter or extra spacing to display decoration. Test shape/lightness in grayscale rather than relying on hue. See [both designs](ui-ux.md#three-color-organic-regions-current-comparison).
 - Default to Fill space and offer Square as a persistent setting. Never stretch glyphs or rotate the logical puzzle; preserve the nine-row, nine-column and three-by-three-region structure.
 - Use selected soft-raised CSS buttons while keeping the world quiet and flat. Jelly and lily-pad studies remain alternatives, not additional required styles.
 - No permanent progress HUD is needed. Review brief start status and persistent completion feedback, with information recoverable in a non-timed secondary view.

@@ -75,6 +75,8 @@ Use the following representative emulation matrix, clearly labeled as emulation:
 
 Emulate 1080 x 2400 physical rendering with a representative CSS viewport/DPR combination, such as 360 x 800 at DPR 3, but label that combination as an assumption. On hardware, record `innerWidth`, `innerHeight`, `visualViewport` and DPR in browser and installed modes, portrait and landscape, with default and larger Android text/display sizes. Browser emulation cannot certify touch comfort, refresh-rate behavior or performance on the actual device.
 
+The selected B spacing study now renders menu/gameplay at 360x800 and 800x360 CSS px, DPR 3, under ignored `prototypes/motorola-spacing/`. It verifies 4px small gaps, 8px edges/group/dock gaps, complete allocation, no overflow and shared three-color backgrounds in both orientations. Physical device and system-inset checks remain outstanding. Resolution corroboration: [Lenovo G31 announcement](https://www.lenovo.com/jp/ja/news/article/1508072022.html), [Motorola G32 specifications](https://jp-jp.support.motorola.com/app/answers/detail/a_id/192477/p/7901,8013,/).
+
 ## Verification priorities
 
 1. Unit tests: row/column/box conflicts; givens protected; unique solutions for supplied puzzles; valid candidates; notes and undo; completion; malformed save recovery.
