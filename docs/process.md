@@ -1,5 +1,15 @@
 # Discussion and prototyping
 
+## Next gameplay phase: autonomous researched/challenged execution
+
+The latest task prepares documentation only. Once gameplay implementation is explicitly activated, follow the [complete gameplay handoff](gameplay-implementation-handoff.md) and its [mandatory loop](gameplay-implementation-handoff.md#6-mandatory-research-and-reciprocal-challenge-loop). Research and challenge **every plan before executing it**, including the lead's overall/architecture/dependency/integration plans, specialist plans, data/storage/balance/UI plans, test/acceptance plans and every proposed fix or material revision. A named subagent must challenge lead-authored plans. Record primary online sources, assumptions, alternatives, counterexamples, replies and agreed evidence gates. Routine execution within an accepted plan inherits its plan ID; new directions/revisions reenter the loop.
+
+Assign exact files/interfaces/dependencies/acceptance and shared-workspace constraints to each specialist. The lead continues contracts/integration work while specialists research/implement. Review actual diffs and surrounding code, run independent tests and personally exercise Codex browser journeys. Specialists challenge the lead's diagnoses/fixes in return; resolve with evidence and repeat until accepted, using an independent reviewer when needed. Passing isolated tests or agent agreement alone never accepts a module. Commit accepted green slices periodically. Preserve the complete prototype, maintained Pond design, asset provenance and local skill policy.
+
+Ordinary engineering and provisional policy choices are resolved autonomously within the brief. Historical one-decision-at-a-time user discussion/prototype-only guidance below does not require user polling or limit an activated gameplay phase. Do not claim tests prove every possible bug absent or convert unavailable external hardware evidence into a pass.
+
+## Historical UI/prototype workflow
+
 Production update, 2026-10-31: the explicitly activated UI phase is complete using the researched/challenged specialist workflow below. See [decision/revision and acceptance evidence](production-ui-progress.md). Future work must preserve the completed prototype and the current phase boundary; this does not authorize Sudoku or later systems.
 
 Current phase: the prototype is complete. The [production UI handoff](production-ui-handoff.md) and project-local Svelte skills are preparation only; no production source is implemented in this task. When the user activates the next phase, build fresh maintained Svelte framework + TypeScript + Vite source, preserve the selected visual design and implement gameplay More navigation without Sudoku logic. Prototype workflow below remains historical/reference guidance for future visual experiments.

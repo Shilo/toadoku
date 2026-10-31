@@ -1,5 +1,7 @@
 # Randomized progression and repeat runs
 
+Implementation handoff, 2026-10-31: use the [gameplay brief](gameplay-implementation-handoff.md) and [mode/state specification](gameplay-state-and-persistence.md) for the next activated phase. They provide provisional v1 defaults for autonomous researched/challenged ratification: 60 Leaps, starting Metamorphosis 1/Leap 1, five rated intervals, lifetime completed-Leap access per schedule, separate frontier/replay roles and once-only grants. These are explicit implementation direction, not historically approved numerical balance or completed playtesting. Earlier open-policy language below records how requirements developed; it must not cause routine user polling or conflicting save logic.
+
 ## Agreed behavior
 
 Progression draws shuffled puzzles from a bundled, pre-rated collection. Difficulty rises across a defined sequence of levels. After the final level, the level returns to 1, a second counter increases, and the next puzzle uses the easiest difficulty. Quick Play remains separate.

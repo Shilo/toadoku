@@ -1,5 +1,7 @@
 # Main-menu flow
 
+Gameplay handoff update, 2026-10-31: the tracked UI already enables gameplay More with Resume and Back to main menu. The next activated [gameplay phase](gameplay-implementation-handoff.md) expands tools/Settings, entry, resumable Quick Play/frontier/replay roles and persistent results. Its [role/status policy](gameplay-state-and-persistence.md#role-status-action-policy) and validation matrix govern replacements, pending completion, Continue, focus/history and failures. It does not introduce arbitrary named save slots or an extra permanent key/HUD. Functional persistent Fill space/Square is required when Settings is implemented. Older disabled-More and unresolved save-policy statements below are historical; preparation remains documentation-only.
+
 Production UI phase delta: the prototype is complete. The [new handoff](production-ui-handoff.md#7-screen-states-more-and-navigation-behavior) requires an enabled gameplay More popup with Resume/Close and Back to main menu, including touch, keyboard and browser Back behavior. Older disabled-More statements below describe the completed prototype. Main-menu More contents and functional Settings/tools remain outside the specified minimum scope. This handoff-only task does not implement those changes.
 
 ## Agreed interaction

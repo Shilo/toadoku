@@ -1,5 +1,7 @@
 # Production UI implementation handoff
 
+Next-phase handoff, 2026-10-31: the [autonomous gameplay brief](gameplay-implementation-handoff.md) now specifies the subsequent complete rules/modes/storage phase, with researched/challenged plans and independent acceptance. Its preparation is documentation-only. This file remains the completed UI phase's historical brief; do not restart the app or apply its gameplay exclusion to a later explicitly activated gameplay task.
+
 Implementation update, 2026-10-31: the user activated this brief and the first maintained presentation/navigation phase is complete. See [fresh production results and limits](production-ui-progress.md). The preparation-only statements below describe the historical handoff task, not the current tracked root application.
 
 Artwork follow-up, 2026-10-31: the user subsequently requested restoring the current rough frog/lily-pad sketch to the built UI. That narrow temporary-placeholder authorization supersedes this historical handoff's neutral-text-only requirement. See [current asset provenance](production-assets.md#artwork-boundary); final artwork still requires human authorship and suitable rights.

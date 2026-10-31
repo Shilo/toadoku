@@ -1,5 +1,7 @@
 # Score and earned currency
 
+Implementation handoff, 2026-10-31: the [gameplay brief](gameplay-implementation-handoff.md) and [exact score/state policy](gameplay-state-and-persistence.md#5-exact-score-and-dewdrops-policy) define provisional v1 bases, targets, integer rounding, assistance treatment and atomic receipt/wallet updates for autonomous researched/challenged ratification. Any disclosed information assistance disables the speed bonus; distinct answers exposed also reduce the unassisted share. This refines the earlier answer-only proposal below. The numerical defaults are not calibrated fairness claims or completed implementation. Use the [validation matrix](gameplay-validation-matrix.md) for independent arithmetic and failure cases.
+
 ## Requested scope
 
 Both Quick Play and Progression award a performance score and persistent currency. Rewards reflect rated difficulty, speed and efficiency. Completed-level revisits use the same reward rules for equivalent fresh puzzles. A future store is out of scope; do not implement spending, purchases, upgrades or additional currencies.

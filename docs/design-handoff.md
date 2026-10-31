@@ -1,5 +1,7 @@
 # Design handoff: resume here
 
+Gameplay handoff update, 2026-10-31: start the next activated gameplay task from the [autonomous gameplay brief](gameplay-implementation-handoff.md), including all linked specifications and its every-plan research/challenge rule. This preparation does not implement gameplay. Preserve the selected design below and extend the maintained UI rather than restarting production/prototype work. Historical next-session restrictions below describe earlier phases.
+
 Production update, 2026-10-31: the fresh tracked presentation/navigation shell is implemented. Read [production results](production-ui-progress.md) before the historical prototype/handoff material below. Gameplay More is enabled; final human-made menu art and hardware/tiny-note validation remain open. No Sudoku logic is implemented.
 
 **Phase update, 2026-10-31:** the prototype is complete. The latest task is handoff/tooling only. Read the [production UI handoff](production-ui-handoff.md) for the subsequent fresh Svelte framework + TypeScript + Vite application, with enabled gameplay More navigation and no Sudoku logic. No SvelteKit or production implementation is part of this handoff task. Visual decisions below remain the selected guideline; older prototype-only scope and disabled-More rules describe the reference, not the next activated production phase.

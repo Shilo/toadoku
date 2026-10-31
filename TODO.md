@@ -1,5 +1,15 @@
 # Deferred work
 
+## Gameplay handoff and next activated phase
+
+- [x] Review gameplay/mode/scoring/storage documentation and primary sources; prepare the [complete autonomous handoff](docs/gameplay-implementation-handoff.md), [data/rules](docs/gameplay-data-and-correctness.md), [state/storage](docs/gameplay-state-and-persistence.md), [validation matrix](docs/gameplay-validation-matrix.md) and [readiness audit](docs/research/gameplay-readiness-audit.md).
+- [x] Include a copy-ready receiving-agent prompt explicitly requiring research and challenge of every plan, including the orchestrator's own plans, all task/test/integration plans and every fix/material revision.
+- [ ] Activate the complete gameplay implementation in a subsequent task. Use researched/challenged specialist ownership, reciprocal actual-code/fix review, lead-owned Codex browser acceptance and periodic green Conventional Commits. Handoff preparation does not activate implementation.
+- [ ] Build/certify at least 100,000 licensed, deduplicated puzzles with stored solutions and progressive loading. Source metadata counts are not completed certification.
+- [ ] Implement and independently validate rules, input/notes/undo/hints, active-play timer, Quick Play, Progression/replays, score/Dewdrops, atomic persistent state and recovery/backup.
+- [ ] Implement complete tools/Settings including persistent Fill space/Square, usable enlarged notes, accessible results and all required navigation/locale/shape/failure cases. Preserve the Pond UI.
+- [ ] Ratify the handoff's explicit provisional v1 schedule/balance/role defaults through evidence; complete the entire validation matrix and document actual external/hardware limits. Historical open questions below are superseded for this phase by the handoff's autonomous decision process, not by claims of prior user approval.
+
 ## Production UI handoff and next phase
 
 - [x] Close the prototype phase and write the [full production UI handoff](docs/production-ui-handoff.md), including selected design/prototype links, scope, tokens, navigation, assets and validation.
@@ -23,7 +33,7 @@
 - [x] Compare implementation screenshots against ImageGen, recording better/worse/intentional differences and exact measured checks.
 - [x] Record final refinement results and remaining limits in [prototype progress](docs/prototype-progress.md); keep all code/assets/evidence ignored.
 
-See [current scope](docs/design-handoff.md#next-session-visual-prototype-only). Refining the existing fresh prototype is authorized; older demos remain visual references only. No Sudoku engine, number entry, economy, saves or production/PWA work is authorized.
+This section records completed prototype scope; it does not authorize further prototype work. Preserve its reference unchanged. The current application is the maintained UI; the next activated gameplay phase is defined above.
 
 ## More and settings
 
@@ -54,6 +64,6 @@ See [current scope](docs/design-handoff.md#next-session-visual-prototype-only). 
 - [ ] Validate the new top-down pad board: recognizable 3 by 3 groups without grid lines, nine-note readability, immutable clues, focus/selection/conflicts and rectangular hitboxes.
 - [ ] Test full-allocation Fill space with 4px/8px spacing at actual portrait/landscape sizes, including safe areas and the Square alternative. Existing representative emulation passes do not certify physical hardware.
 - [ ] Settle score/currency formula, progression schedule, catalog and repeated-level policies.
-- [ ] Discuss save slots and replacement policy. Three slots and automatic overwriting are not selected.
+- [ ] Ratify the gameplay handoff's separate Quick Play/frontier/replay roles and explicit replacement policy. Arbitrary three-slot management and automatic overwriting are not selected.
 
 This is a backlog, not implementation approval. Keep temporary mockups/code under ignored `prototypes/`.

@@ -4,6 +4,8 @@ A colorful, immersive frog Sudoku game for mobile and desktop browsers. GitHub P
 
 Maintained Pond presentation/navigation shell using Svelte 5, TypeScript and Vite. This phase contains an immutable example board, selection and accessible navigation. It contains no Sudoku rules, editable numbers, saves, economy, PWA or deployment infrastructure.
 
+The next complete gameplay phase is prepared in the [autonomous implementation handoff](docs/gameplay-implementation-handoff.md), including a copy-ready receiving-agent prompt. Read its [source/readiness audit](docs/research/gameplay-readiness-audit.md), [data/correctness specification](docs/gameplay-data-and-correctness.md), [state/persistence specification](docs/gameplay-state-and-persistence.md) and [validation matrix](docs/gameplay-validation-matrix.md). These specify future implementation and certification, not results already achieved. Every plan, including the lead's plans and all fixes, requires primary online research and reciprocal specialist challenge before execution.
+
 ## Local workflow
 
 Use Node 24 or newer compatible Node release. The locked toolchain was verified with Node 25.0.0 and npm 11.16.0.

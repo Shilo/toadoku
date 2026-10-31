@@ -18,6 +18,8 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Current task and next phase
 
+- The latest task prepares the [autonomous gameplay handoff](docs/gameplay-implementation-handoff.md), its data/state/validation specifications and embedded receiving-agent prompt. This is documentation/research only; do not implement gameplay during preparation. On explicit activation, that brief governs the complete gameplay phase and supersedes historical UI-only restrictions.
+- Every plan in the activated gameplay phase must be researched online and challenged before execution, including the lead's own overall/architecture/integration plans, each specialist plan, test plans and every proposed fix or material revision. Assign a named specialist to challenge lead-authored plans. Record evidence-supported agreement, review actual implementations reciprocally, test integrated journeys personally with Codex browser, and commit accepted green slices periodically. See the [mandatory research/challenge loop](docs/gameplay-implementation-handoff.md#6-mandatory-research-and-reciprocal-challenge-loop).
 - The prototype and first production UI phase are complete. Read [production UI progress](docs/production-ui-progress.md) for implementation, acceptance and remaining limits.
 - The tracked root application uses the Svelte framework, TypeScript and Vite. The ignored prototype remains unchanged as a design reference; the [production UI handoff](docs/production-ui-handoff.md) records its implementation brief.
 - Gameplay More provides Resume and Back to main menu. This application remains presentation/navigation with immutable example data; Sudoku logic and later product systems require a subsequent task.
@@ -37,7 +39,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
-- More stays disabled in the completed prototype reference. The next production UI phase enables gameplay More for navigation. Settings, Halloween and save-slot policy remain deferred.
+- More stays disabled in the completed prototype reference and is enabled in the tracked UI. Functional tools/Settings, modes, storage and rewards are specified for the next activated gameplay phase. The handoff proposes three active roles, not arbitrary save slots. Halloween remains deferred.
 - The tracked UI integrates fresh water, pads, shore and floating modules. Physical hardware validation remains deferred. See [production progress](docs/production-ui-progress.md) and the separate [prototype record](docs/prototype-progress.md).
 - No store, purchases or upgrades.
 
@@ -69,7 +71,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Read as needed
 
-Start with [production UI handoff](docs/production-ui-handoff.md), then [design handoff](docs/design-handoff.md). Current phase instructions override completed-prototype scope restrictions; approved visual decisions override historical research. Open the relevant details before changing that area.
+For gameplay, start with the [autonomous gameplay handoff](docs/gameplay-implementation-handoff.md) and all its specifications. For the preserved UI, use [production UI handoff](docs/production-ui-handoff.md) and [design handoff](docs/design-handoff.md). Current phase instructions override completed-prototype scope restrictions; approved visual decisions override historical research. Open the relevant details before changing that area.
 
 | Task | Read |
 | --- | --- |
@@ -78,6 +80,8 @@ Start with [production UI handoff](docs/production-ui-handoff.md), then [design 
 | Tokens, backgrounds, appearance | [Themes](docs/themes.md) |
 | Pad cutouts or animated water | [Future visual research](docs/future-visual-research.md) |
 | Stack, modules, validation | [Architecture](docs/architecture.md) |
+| Rules, catalogs, deduction patterns | [Data/correctness](docs/gameplay-data-and-correctness.md), [source audit](docs/research/gameplay-readiness-audit.md) |
+| Sessions, modes, storage, backups | [State/persistence](docs/gameplay-state-and-persistence.md), [validation gates](docs/gameplay-validation-matrix.md) |
 | Progression or rewards | [Progression](docs/progression.md), [scoring](docs/scoring.md) |
 | Decisions, deferred work, workflow | [Decisions](docs/decisions.md), [TODO](TODO.md), [process](docs/process.md) |
 

@@ -1,5 +1,13 @@
 # Requirements and open decisions
 
+## Gameplay handoff preparation, 2026-10-31
+
+The latest user request is documentation/research for a complete later autonomous gameplay phase. The [implementation handoff](gameplay-implementation-handoff.md), its [data/rules](gameplay-data-and-correctness.md), [state/storage](gameplay-state-and-persistence.md), [validation](gameplay-validation-matrix.md) and [source/decision audit](research/gameplay-readiness-audit.md) are the receiving agent's authority when implementation is activated. No gameplay code or production catalog is implemented/certified by preparation.
+
+The user explicitly requires subagent groups, online research and reciprocal challenge of every plan, including lead-authored overall/architecture/integration plans, all specialist/test plans and fixes/material revisions. A named specialist challenges the lead; evidence-supported agreement is recorded before affected implementation. The lead independently reviews actual code/data and integrated Codex browser journeys; specialists and lead challenge findings/fixes until accepted. Commit coherent green slices periodically and work autonomously without routine user polling.
+
+The preparation team researched/challenged an established public-domain Sudoku Exchange source, strict independent dual-oracle certification, a minimum 100,000 accepted corpus, progressive shards, separate role-based sessions, transactional IndexedDB and explicit provisional schedule/reward defaults. Those defaults require autonomous evidence-based ratification; they are not retroactive user approval or empirical difficulty calibration. Functional persistent Square is required with Settings in that future phase, resolving its earlier access-only deferral; dock anchoring preserves exact 8px spacing. The audit records alternatives, counterexamples and resolutions. Later explicit phase scope overrides older restrictions below while approved visual/product requirements remain binding.
+
 ## Implemented production UI phase, 2026-10-31
 
 The user explicitly activated the fresh Svelte framework + TypeScript + Vite presentation/navigation implementation. It is complete with no SvelteKit, Sudoku logic or later product systems. See [production results and specialist decisions](production-ui-progress.md) and [asset provenance](production-assets.md). Root production source, tests and locked configuration are tracked; the completed ignored prototype remains unchanged.
