@@ -6,7 +6,7 @@ import { openNativeHarness } from './harness';
 const mutants = [
   { id: 'ST-GENERATION', module: 'repository', from: 'if (active.generation !== generation) issue("generation");', to: 'if (false) issue("generation");', run: 'nativeRepositoryCases', failure: 'old generation wrote after restore' },
   { id: 'ST-OWNER', module: 'repository', from: 'if (!same(attempt.writer, guard.writer)) issue("owner");', to: 'if (false) issue("owner");', run: 'nativeRepositoryCases', failure: 'stale owner disclosed information' },
-  { id: 'ST-RECEIPT', module: 'repository', from: 'if (values[1] !== undefined) {', to: 'if (false) {', run: 'nativeRepositoryCases', failure: 'repeated completion did not return retained receipt' },
+  { id: 'ST-RECEIPT', module: 'repository', from: 'if (receiptSlot.value !== undefined) {', to: 'if (false) {', run: 'nativeRepositoryCases', failure: 'repeated completion did not return retained receipt' },
   { id: 'ST-WALLET', module: 'repository', from: 'safeAdd(profile.wallet, result.dewdrops)', to: 'result.dewdrops', run: 'nativeRepositoryCases', failure: 'concurrent wallet delta/frontier failed' },
   { id: 'ST-EXPOSURE', module: 'repository', from: 'exposed: [...new Set([...attempt.assistance.exposed, ...disclosure.exposed])].sort((a, b) => a - b)', to: 'exposed: [...attempt.assistance.exposed]', run: 'nativeRepositoryCases', failure: 'pending-disclosure' },
   { id: 'ST-ACKNOWLEDGEMENT', module: 'transaction', from: 'value = result;', to: 'value = result; resolve({ kind: "committed", value: result });', run: 'nativeTransactionCases', failure: 'request success must not acknowledge aborted tx' },

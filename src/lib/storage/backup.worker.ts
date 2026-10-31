@@ -4,14 +4,18 @@ import { verifyAttestedRecord } from '../catalog/attestation';
 import { StorageFailure, storageFailure } from './transaction';
 import type { Backup } from './repository';
 import type { StorageResult } from '../gameplay/contracts';
+import { materializeBackup } from './physical-backup';
+import type { PhysicalBackup } from './physical-backup';
+import { prepareRestoreRows } from './prepare-restore';
+import type { PreparedRestore } from './prepare-restore';
 
 const scope = globalThis as unknown as {
-  onmessage: (event: MessageEvent<{ id: number; bytes?: ArrayBuffer; backup?: Backup; serialize?: boolean }>) => void;
+  onmessage: (event: MessageEvent<{ id: number; bytes?: ArrayBuffer; backup?: Backup | PhysicalBackup; serialize?: boolean; prepareGeneration?: string }>) => void;
   postMessage: (value: unknown) => void;
 };
 scope.onmessage = async event => {
   const started = performance.now(); let decodedAt = started; let bytes = 0;
-  let result: StorageResult<Backup | string>;
+  let result: StorageResult<Backup | string | PreparedRestore>;
   try {
     const input = event.data;
     if (!Number.isSafeInteger(input.id) || input.id < 1) throw new StorageFailure({ kind: 'corrupt', reason: 'worker-request' });
@@ -20,7 +24,7 @@ scope.onmessage = async event => {
       if (input.bytes.byteLength > BACKUP_LIMITS.bytes) throw new StorageFailure({ kind: 'corrupt', reason: 'backup-bytes' });
       bytes = input.bytes.byteLength;
       backup = decodeBackup(parseBoundedJson(new TextDecoder('utf-8', { fatal: true }).decode(input.bytes)));
-    } else backup = decodeBackup(input.backup);
+    } else backup = decodeBackup(materializeBackup(input.backup));
     decodedAt = performance.now();
     const checked = new Set<string>();
     for (const item of [...backup.attempts, ...backup.receipts]) {
@@ -34,7 +38,7 @@ scope.onmessage = async event => {
       bytes = new TextEncoder().encode(text).byteLength;
       if (bytes > BACKUP_LIMITS.bytes) throw new StorageFailure({ kind: 'corrupt', reason: 'backup-bytes' });
     }
-    result = { kind: 'committed', value: input.serialize ? text! : backup };
+    result = { kind: 'committed', value: input.prepareGeneration !== undefined ? prepareRestoreRows(backup, input.prepareGeneration) : input.serialize ? text! : backup };
   } catch (error) { result = storageFailure(error).issue; }
   scope.postMessage({ id: event.data.id, result, decodeMs: decodedAt - started, proofMs: performance.now() - decodedAt, bytes });
 };

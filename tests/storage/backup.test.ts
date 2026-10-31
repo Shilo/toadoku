@@ -5,6 +5,26 @@ import type { Backup } from '../../src/lib/storage/repository';
 import { attempt, definition, pools, preferences, profile, receipt } from './fixtures';
 import { bandForPool, frontierGrantId, policyForBand, poolForLeap } from '../../src/lib/modes';
 
+it('rejects hidden or symbol extras and own method overrides in canonical record arrays', () => {
+  for (const name of ['roles', 'attempts', 'pools', 'receipts', 'issued', 'intents'] as const) {
+    for (const decorate of [
+      (array: unknown[]) => { Object.defineProperty(array, 'hidden', { value: 1 }); },
+      (array: unknown[]) => { Object.defineProperty(array, Symbol('extra'), { value: 1 }); },
+      (array: unknown[]) => { Object.defineProperty(array, 'map', { value: () => [] }); },
+    ]) { const value = progressedBackup(); decorate(value[name]); expect(() => decodeBackup(value)).toThrow(); }
+  }
+  for (const name of ['roles', 'pools', 'receipts', 'issued'] as const) {
+    const value = progressedBackup(); Object.defineProperty(value[name], 0, { enumerable: false }); expect(() => decodeBackup(value)).toThrow();
+    const compensated = progressedBackup(); Object.defineProperty(compensated[name], 0, { enumerable: false }); Object.assign(compensated[name], { extra: 1 }); expect(() => decodeBackup(compensated)).toThrow();
+  }
+});
+it('normalizes indexed backup records before inherited array methods can substitute data', () => {
+  class HiddenReceipts<T> extends Array<T> { override map<U>(_callback: (value: T, index: number, array: T[]) => U): U[] { return []; } }
+  const value = progressedBackup(); value.receipts = new HiddenReceipts(...value.receipts);
+  const decoded = decodeBackup(value); expect(decoded.receipts).toHaveLength(3); expect(decodeBackup(decoded)).toEqual(decoded);
+  value.receipts[0].result.dewdrops = -1; expect(() => decodeBackup(value)).toThrow();
+});
+
 function progressedBackup(): Backup {
   const generation = 'backup-generation';
   const receipts = [1, 2, 3].map(leap => {

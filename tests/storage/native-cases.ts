@@ -9,6 +9,7 @@ import { verifyAttestedRecord } from '../../src/lib/catalog/attestation';
 import { permutation } from '../../src/lib/catalog/select';
 import { computeHint } from '../../src/lib/hints';
 import { attempt, pools, preferences, profile } from './fixtures';
+import { bucketId, bucketKey } from '../../src/lib/storage/history-codec';
 
 let certified: { definitions: Definition[]; pools: PoolState[] } | undefined;
 async function certifiedFixtures(): Promise<NonNullable<typeof certified>> {
@@ -211,7 +212,7 @@ export async function nativeEnvironmentCases(): Promise<string[]> {
     const closed = await second.savePreferences(test.generation, preferences);
     check(closed.kind === 'unavailable' && closed.reason === 'closed', 'closed connection was silently reset');
     const upgraded = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(databaseName(test.base), 2); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+      const request = indexedDB.open(databaseName(test.base), 3); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
     upgraded.close();
     const future = await openRepository({ baseUrl: test.base, initial: { preferences, profile, pools: (await certifiedFixtures()).pools }, verifyDefinition: verifyAttestedRecord });
@@ -249,8 +250,11 @@ export async function nativeCorruptHistoryCases(): Promise<number> {
       const corrupted: unknown = mutation === 'zero' ? 0 : mutation === 'null' ? null
         : mutation === 'wrong-group' ? { ...issued, groupId: 'f'.repeat(64) }
         : mutation === 'wrong-pool' ? { ...issued, pool: 'hard-high' } : { ...issued, issues: issued.issues + 1 };
-      committed(await transact(raw, ['issued'], 'readwrite', context => {
-        context.store('issued').put(corrupted, [test.generation, `id:${value.definition.id}`]); context.result(true);
+      committed(await transact(raw, ['issuedBuckets'], 'readwrite', context => {
+        const address = bucketKey(test.generation, 'id', value.definition.id);
+        context.request(context.store('issuedBuckets').get(address), bucket => {
+          context.store('issuedBuckets').put(mutation === 'zero' || mutation === 'null' ? corrupted : { ...bucket, items: [corrupted] }, address); context.result(true);
+        });
       }));
       check((await test.repository.readIssued(test.generation, value.definition.id, value.definition.groupId)).kind === 'corrupt', `corrupt history treated as unused: ${mutation}`);
       const request = await allocation(test.repository, test.generation, 'frontier'); request.attempt.definition = value.definition;
@@ -295,7 +299,7 @@ export async function nativeRetentionCases(): Promise<string[]> {
     check(obsolete.kind === 'conflict' && obsolete.reason === 'intent', 'pruned superseded stage was not a clear intent conflict');
     committed(await test.repository.activateRestore(newest)); await test.repository.cleanupGenerations();
     status = committed(await inspect()); check(status.headers === 2 && !status.pending, 'cleanup removed protected or retained superseded generations');
-    const stores = ['settings', 'profile', 'attempts', 'roles', 'receipts', 'grants', 'intents', 'pools', 'issued'];
+    const stores = ['settings', 'profile', 'attempts', 'roles', 'receipts', 'receiptBuckets', 'grants', 'intents', 'pools', 'issued', 'issuedBuckets'];
     const generations = committed(await transact<string[]>(raw, stores, 'readonly', context => {
       const results: unknown[][] = new Array(stores.length); let remaining = stores.length;
       stores.forEach((store, index) => context.request(context.store(store).getAll(), records => {
@@ -332,33 +336,228 @@ export async function nativeCancelledValidationCase(): Promise<void> {
   } finally { delayed?.close(); await test.cleanup(); }
 }
 
+export async function nativeLegacyUpgradeCase(): Promise<string[]> {
+  const test = await fresh();
+  try {
+    const original = await allocate(test.repository, test.generation);
+    const backup = JSON.parse(committed(await test.repository.exportBackup()).text);
+    test.repository.close();
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(databaseName(test.base)); request.onsuccess = () => resolve(); request.onerror = () => reject(request.error);
+    });
+    // Explicit frozen v1 physical schema fixture, containing an actual certified allocated attempt.
+    const legacy = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(databaseName(test.base), 1);
+      request.onupgradeneeded = () => {
+        for (const name of ['meta', 'settings', 'profile', 'attempts', 'roles', 'receipts', 'grants', 'intents', 'pools', 'issued', 'quarantine', 'cache']) {
+          const store = request.result.createObjectStore(name); if (name !== 'meta' && name !== 'cache') store.createIndex('generation', 'generation');
+        }
+      };
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    committed(await transact(legacy, [...legacy.objectStoreNames], 'readwrite', context => {
+      const generation = test.generation;
+      context.store('meta').put({ generation, essentialRevision: 0 }, 'current');
+      context.store('meta').put({ generation, complete: true }, [generation, 'stage']);
+      context.store('settings').put({ ...backup.preferences, generation }, generation); context.store('profile').put({ ...backup.profile, generation }, generation);
+      for (const name of ['attempts', 'roles', 'pools', 'intents']) for (const item of backup[name]) {
+        context.store(name).put({ ...item, generation }, [generation, name === 'roles' ? item.role : name === 'pools' ? item.pool : item.id]);
+      }
+      for (const item of backup.issued) {
+        context.store('issued').put(item, [generation, `id:${item.id}`]); context.store('issued').put(item, [generation, `group:${item.groupId}`]);
+      }
+      context.result(true);
+    })); legacy.close();
+    const upgraded = committed(await openRepository({ baseUrl: test.base, initial: { preferences, profile, pools: (await certifiedFixtures()).pools }, verifyDefinition: verifyAttestedRecord }));
+    try {
+      const saved = committed(await upgraded.readCurrent()); check(saved.meta.generation === test.generation && saved.attempts[0].id === original.id, 'v1 upgrade replaced existing identity');
+      let value = committed(await upgraded.acquireWriter(test.generation, original.id, 'legacy-upgraded-writer'));
+      value = committed(await upgraded.saveSnapshot(guard(value), value.revision, { ...value, elapsedMs: 100 }));
+      value = await solved(upgraded, value); const completed = committed(await upgraded.complete(guard(value), value.revision));
+      const frontier = await allocate(upgraded, test.generation, 'frontier');
+      check(frontier.role === 'frontier' && completed.receipt.result.dewdrops > 0, 'legacy writes or receipt failed');
+      const exported = committed(await upgraded.exportBackup()); const preview = committed(await upgraded.previewRestore(exported.text));
+      check(preview.summary.receipts === 1 && preview.summary.issued === 2, 'legacy upgraded export lost logicalhistory');
+      const raw = await new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open(databaseName(test.base)); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+      const rows = committed(await transact<unknown[]>(raw, ['meta', 'issuedBuckets', 'receiptBuckets', 'issued', 'receipts'], 'readonly', context => {
+        const requests = [context.store('meta').get([test.generation, 'layout']), context.store('issuedBuckets').count(), context.store('receiptBuckets').count(), context.store('issued').count(), context.store('receipts').count()];
+        const values: unknown[] = []; let count = 0; requests.forEach((request, index) => context.request(request, value => { values[index] = value; if (++count === requests.length) context.result(values); }));
+      })); raw.close();
+      check((rows[0] as { layout: string }).layout === 'rows-v1' && rows[1] === 0 && rows[2] === 0 && rows[3] === 4 && rows[4] === 1, 'legacy physical rows silently migrated or reset');
+    } finally { upgraded.close(); }
+    return ['v1 schema upgrade retained certified attempt', 'legacy save allocation completion export remain rowlayout'];
+  } finally { await test.cleanup(); }
+}
+
+export async function nativeSameBucketCompletionCase(): Promise<void> {
+  const test = await fresh(); let second: Repository | undefined;
+  try {
+    const firstRequest = await allocation(test.repository, test.generation), id = '__proto__'; firstRequest.attempt.id = id;
+    let quick = committed(await test.repository.allocate(firstRequest));
+    const next = await allocation(test.repository, test.generation, 'frontier');
+    let index = 0; while (bucketId('receipt', `frontier-${index}`) !== bucketId('receipt', id)) index++;
+    next.attempt.id = `frontier-${index}`; let frontier = committed(await test.repository.allocate(next));
+    second = committed(await openRepository({ baseUrl: test.base, initial: { preferences, profile, pools: (await certifiedFixtures()).pools }, verifyDefinition: verifyAttestedRecord }));
+    quick = await solved(test.repository, quick); frontier = await solved(second, frontier);
+    const results = await Promise.all([test.repository.complete(guard(quick), quick.revision), second.complete(guard(frontier), frontier.revision)]);
+    const completions = results.map(committed), sum = completions.reduce((total, item) => total + item.receipt.result.dewdrops, 0);
+    const snapshot = JSON.parse(committed(await test.repository.exportBackup()).text);
+    check(snapshot.receipts.length === 2 && snapshot.profile.wallet === sum && new Set(snapshot.receipts.map((receipt: { id: string }) => receipt.id)).size === 2, 'samebucket concurrent completion lost receipt or wallet');
+    check(snapshot.receipts.some((receipt: { id: string }) => receipt.id === '__proto__'), 'prototype-like valid ID lost');
+  } finally { second?.close(); await test.cleanup(); }
+}
+
+export async function nativeOverflowHistoryCase(): Promise<void> {
+  const test = await fresh();
+  try {
+    const value = await solved(test.repository, await allocate(test.repository, test.generation));
+    const result = committed(await test.repository.complete(guard(value), value.revision));
+    const backup = JSON.parse(committed(await test.repository.exportBackup()).text);
+    const address = bucketId('receipt', value.id), records = [result.receipt];
+    for (let index = 0; records.length < 600; index++) {
+      const id = `colliding-${index}`;
+      if (bucketId('receipt', id) === address) records.push({ ...result.receipt, id, attemptId: id });
+    }
+    backup.receipts = records; backup.issued[0].issues = records.length;
+    backup.profile.wallet = backup.profile.lifetimeEarned = records.reduce((total, item) => total + item.result.dewdrops, 0);
+    const preview = committed(await test.repository.previewRestore(JSON.stringify(backup)));
+    const stage = committed(await test.repository.stageRestore(preview)); committed(await test.repository.activateRestore(stage));
+    const exported = JSON.parse(committed(await test.repository.exportBackup()).text);
+    check(exported.receipts.length === records.length && exported.profile.wallet === backup.profile.wallet, 'colliding overflow history lost canonical rewards');
+    const raw = await new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open(databaseName(test.base)); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+    try {
+      const count = committed(await transact<number>(raw, ['receipts'], 'readonly', context => context.request(context.store('receipts').index('generation').count(stage.generation), value => context.result(value))));
+      check(count > 0, 'adversarial receipt fixture never exercised overflow');
+      const duplicate = { ...result.receipt, generation: stage.generation };
+      committed(await transact(raw, ['receipts'], 'readwrite', context => {
+        context.store('receipts').put({ physicalVersion: 1, generation: stage.generation, kind: 'receipt', id: duplicate.attemptId, record: duplicate }, [stage.generation, `overflow:receipt:${duplicate.attemptId}`]); context.result(true);
+      }));
+      check((await test.repository.exportBackup()).kind === 'corrupt', 'equal bucket overflow duplicate silently won');
+    } finally { raw.close(); }
+  } finally { await test.cleanup(); }
+}
+
+export async function nativeMissingLayoutCase(): Promise<void> {
+  const test = await fresh();
+  try {
+    const value = await allocate(test.repository, test.generation), candidate = await allocation(test.repository, test.generation, 'frontier');
+    const raw = await new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open(databaseName(test.base)); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+    try {
+      committed(await transact(raw, ['meta'], 'readwrite', context => { context.store('meta').delete([test.generation, 'layout']); context.result(true); }));
+      check((await test.repository.readIssued(test.generation, value.definition.id, value.definition.groupId)).kind === 'corrupt', 'missing layout hid issued bucket as unseen');
+      check((await test.repository.allocate(candidate)).kind === 'corrupt', 'missing layout allowed new allocation');
+      check((await test.repository.readCurrent()).kind === 'corrupt' && (await test.repository.exportBackup()).kind === 'corrupt', 'missing essential layout silently resumed or exported');
+      check(committed(await test.repository.readPreferences()).language === 'en', 'layout corruption destroyed independent settings');
+      committed(await transact(raw, ['meta'], 'readwrite', context => { context.store('meta').put({ generation: test.generation, layout: 'buckets-v9' }, [test.generation, 'layout']); context.result(true); }));
+      check((await test.repository.readCurrent()).kind === 'unsupported-future', 'unknown physical layout was not preserved readonly');
+      check(committed(await test.repository.exportRecovery()).includes('buckets-v9'), 'future physical layout original not quarantined');
+    } finally { raw.close(); }
+  } finally { await test.cleanup(); }
+}
+
+export async function nativeCleanupQuantumCase(): Promise<{ maxDeletes: number; checkpointMs: number; failuresPreserved: boolean }> {
+  let maxDeletes = 0, checkpointMs = 0;
+  for (const mode of ['checkpoint', 'recovery-pointer', 'abort'] as const) {
+    const test = await fresh(); let raw: IDBDatabase | undefined;
+    const originalDelete = IDBObjectStore.prototype.delete, originalCursor = IDBIndex.prototype.openKeyCursor;
+    try {
+      const activeAttempt = await allocate(test.repository, test.generation), old = `inactive-${crypto.randomUUID()}`;
+      raw = await new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open(databaseName(test.base)); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+      committed(await transact(raw, ['meta', 'issuedBuckets'], 'readwrite', context => {
+        context.store('meta').put({ jobVersion: 1, generation: old, status: 'abandoned', complete: false }, [old, 'stage']);
+        for (let index = 0; index < 100; index++) { const bucket = index.toString(16).padStart(2, '0');
+          context.store('issuedBuckets').put({ physicalVersion: 1, generation: old, kind: 'id', bucket, items: [] }, [old, `id:${bucket}`]); }
+        context.result(true);
+      }));
+      let triggered = false, cleanupFinished = false, checkpointDuringCleanup = false, pending: Promise<unknown> | undefined;
+      const counts = new WeakMap<IDBTransaction, number>();
+      IDBObjectStore.prototype.delete = function (...args: Parameters<IDBObjectStore['delete']>) {
+        const request = originalDelete.apply(this, args), candidate = args[0];
+        if (this.name === 'issuedBuckets' && Array.isArray(candidate) && candidate[0] === old) {
+          const count = (counts.get(this.transaction) ?? 0) + 1; counts.set(this.transaction, count); maxDeletes = Math.max(maxDeletes, count);
+          if (!triggered && mode !== 'abort') { triggered = true; request.addEventListener('success', () => {
+            if (mode === 'checkpoint') {
+              const started = performance.now();
+              pending = test.repository.saveSnapshot(guard(activeAttempt), activeAttempt.revision, { ...activeAttempt, elapsedMs: 100 }).then(result => {
+                committed(result); checkpointMs = performance.now() - started; checkpointDuringCleanup = !cleanupFinished;
+              });
+            } else pending = transact(raw!, ['meta'], 'readwrite', context => { context.store('meta').put({ generation: old, essentialRevision: 0 }, 'recovery'); context.result(true); }).then(committed);
+          }, { once: true }); }
+        }
+        return request;
+      };
+      IDBIndex.prototype.openKeyCursor = function (...args: Parameters<IDBIndex['openKeyCursor']>) {
+        const request = originalCursor.apply(this, args);
+        if (mode === 'abort' && !triggered && this.objectStore.name === 'issuedBuckets' && args[0] === old) {
+          triggered = true; const transaction = this.objectStore.transaction;
+          request.addEventListener('success', () => transaction.abort(), { once: true });
+        }
+        return request;
+      };
+      await test.repository.cleanupGenerations(); cleanupFinished = true; await pending;
+      check(triggered && maxDeletes <= 8, 'cleanup exceeded eight native deletes or failed to exercise interleaving');
+      const remaining = committed(await transact<number>(raw, ['issuedBuckets'], 'readonly', context => context.request(context.store('issuedBuckets').index('generation').count(old), value => context.result(value))));
+      if (mode === 'checkpoint') check(remaining === 0 && checkpointDuringCleanup, 'active checkpoint starved behind entire cleanup');
+      else if (mode === 'recovery-pointer') check(remaining === 92, 'cleanup ignored newly protected recovery generation between chunks');
+      else {
+        check(remaining === 100 && test.repository.maintenanceResult?.kind === 'unavailable', 'aborted cleanup deleted rows or acknowledged a committed count');
+        IDBIndex.prototype.openKeyCursor = originalCursor;
+        await test.repository.cleanupGenerations();
+        const after = committed(await transact<number>(raw, ['issuedBuckets'], 'readonly', context => context.request(context.store('issuedBuckets').index('generation').count(old), value => context.result(value))));
+        check(after === 0, 'interrupted pruning did not resume remaining keys');
+      }
+      const current = committed(await test.repository.readCurrent()); check(current.meta.generation === test.generation && current.attempts[0].id === activeAttempt.id, 'cleanup changed active essential generation');
+    } finally { IDBObjectStore.prototype.delete = originalDelete; IDBIndex.prototype.openKeyCursor = originalCursor; raw?.close(); await test.cleanup(); }
+  }
+  return { maxDeletes, checkpointMs, failuresPreserved: true };
+}
+
 export async function nativeCapacityCase(batchSize: 256 | 1024 = 256): Promise<Record<string, unknown>> {
   const test = await fresh();
+  const activeAttempt = await allocate(test.repository, test.generation);
   const response = await fetch('/prototypes/gameplay-validation/storage/capacity-real.json');
   check(response.ok, 'run npm test -- tests/storage/capacity.test.ts to prepare ignored native capacity fixture');
   const text = await response.text();
   const started = performance.now();
-  let beats = 0; let lastBeat = started; let maxGap = 0;
-  const timer = setInterval(() => { const now = performance.now(); maxGap = Math.max(maxGap, now - lastBeat); lastBeat = now; beats++; }, 10);
+  let beats = 0; let lastBeat = started; let maxGap = 0; let phase = 'preview';
+  const phaseGaps: Record<string, number> = {};
+  const timer = setInterval(() => { const now = performance.now(), gap = now - lastBeat; maxGap = Math.max(maxGap, gap); phaseGaps[phase] = Math.max(phaseGaps[phase] ?? 0, gap); lastBeat = now; beats++; }, 10);
   try {
     console.log('STORAGE_SCALE preview start');
     const preview = committed(await test.repository.previewRestore(text)); const previewAt = performance.now();
     check(preview.summary.receipts === 10_000 && preview.summary.issued === 100_000 && test.repository.backupTiming?.worker, 'worker capacity fixture counts');
     const previewTiming = test.repository.backupTiming;
+    let checkpoint: Promise<unknown> | undefined, checkpointMs = 0, checkpointFinished = false;
+    phase = 'staging-with-checkpoint';
     console.log('STORAGE_SCALE preview complete, stage start');
     const stage = committed(await test.repository.stageRestore(preview, { batchSize, onProgress: (done, total) => {
+      if (!checkpoint) {
+        const checkpointStarted = performance.now();
+        checkpoint = test.repository.saveSnapshot(guard(activeAttempt), activeAttempt.revision, { ...activeAttempt, elapsedMs: 100 }).then(result => {
+          committed(result); checkpointMs = performance.now() - checkpointStarted; checkpointFinished = true;
+        });
+      }
       if (done % 10240 === 0 || done === total) console.log(`STORAGE_SCALE stage ${done}/${total}`);
     } })); const stagedAt = performance.now();
+    check(checkpointFinished, 'active attempt checkpoint starved until background staging finished'); await checkpoint;
+    const firstStageTiming = test.repository.stageTiming;
+    const staleActivation = await test.repository.activateRestore(stage);
+    check(staleActivation.kind === 'conflict' && staleActivation.reason === 'revision', 'large staging overwrote concurrent active checkpoint');
+    phase = 'fresh-preview-restage';
+    const freshPreview = committed(await test.repository.previewRestore(text));
+    const freshStage = committed(await test.repository.stageRestore(freshPreview, { batchSize })); const restagedAt = performance.now();
     console.log('STORAGE_SCALE stage complete, export start');
-    committed(await test.repository.activateRestore(stage));
+    committed(await test.repository.activateRestore(freshStage)); phase = 'export';
     const exported = committed(await test.repository.exportBackup()); const exportedAt = performance.now();
     console.log('STORAGE_SCALE export complete, roundtrip start');
+    phase = 'roundtrip-preview';
     const roundTrip = committed(await test.repository.previewRestore(exported.text)); const finished = performance.now();
     check(roundTrip.summary.receipts === 10_000 && roundTrip.summary.issued === 100_000 && roundTrip.summary.importedWallet === preview.summary.importedWallet, 'large native export/import lost canonical state');
     return { fixture: 'simulated history with all100k actual catalog identities and10k certified-definition receipts; not player journey evidence',
       bytes: test.repository.backupTiming?.bytes, receipts: roundTrip.summary.receipts, issued: roundTrip.summary.issued,
-      previewMs: previewAt - started, previewTiming, stageMs: stagedAt - previewAt, stageTiming: test.repository.stageTiming, exportMs: exportedAt - stagedAt,
-      roundTripMs: finished - exportedAt, totalMs: finished - started, heartbeatCount: beats, maxHeartbeatGapMs: maxGap };
+      previewMs: previewAt - started, previewTiming, stageMs: stagedAt - previewAt, stageTiming: firstStageTiming, restageMs: restagedAt - stagedAt, restageTiming: test.repository.stageTiming, exportMs: exportedAt - restagedAt,
+      roundTripMs: finished - exportedAt, totalMs: finished - started, checkpointMs, checkpointFinishedDuringStage: checkpointFinished,
+      heartbeatCount: beats, maxHeartbeatGapMs: maxGap, phaseGaps };
   } finally { clearInterval(timer); await test.cleanup(); }
 }
 

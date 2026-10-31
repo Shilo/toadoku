@@ -42,9 +42,13 @@ function version(value: unknown): void {
   }
 }
 function list(value: unknown, max: number): unknown[] {
-  if (!Array.isArray(value) || value.length > max || Object.keys(value).length !== value.length) return fail('array');
-  for (let index = 0; index < value.length; index++) if (!Object.hasOwn(value, index)) return fail('array-hole');
-  return value;
+  if (!Array.isArray(value) || value.length > max || Reflect.ownKeys(value).length !== value.length + 1) return fail('array');
+  const copy: unknown[] = [];
+  for (let index = 0; index < value.length; index++) {
+    if (!Object.prototype.propertyIsEnumerable.call(value, index)) return fail('array-hole');
+    copy[index] = value[index];
+  }
+  return copy;
 }
 function cells(value: unknown, max: number, min = 0): number[] {
   const values = list(value, 81).map(cell => integer(cell, min, max));
@@ -283,9 +287,10 @@ export function same(left: unknown, right: unknown, depth = 0): boolean {
   if (left === right && (left === null || typeof left !== 'object')) return true;
   if (left === null || right === null || typeof left !== 'object' || typeof right !== 'object') return false;
   if (Array.isArray(left) || Array.isArray(right)) {
-    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length
+      || Reflect.ownKeys(left).length !== left.length + 1 || Reflect.ownKeys(right).length !== right.length + 1) return false;
     for (let index = 0; index < left.length; index++) {
-      if (!Object.hasOwn(left, index) || !Object.hasOwn(right, index) || !same(left[index], right[index], depth + 1)) return false;
+      if (!Object.prototype.propertyIsEnumerable.call(left, index) || !Object.prototype.propertyIsEnumerable.call(right, index) || !same(left[index], right[index], depth + 1)) return false;
     }
     return true;
   }

@@ -1,8 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import { decodeAttempt, decodeDisclosure, decodePool, decodeReceipt, mergeSnapshot, recomputeReward, same, validateDisclosureAnswers } from '../../src/lib/storage/decode';
 import { attempt, receipt, solution } from './fixtures';
+import { runInNewContext } from 'node:vm';
 
 describe('strict storage snapshots', () => {
+  it('validates indexed values independently of inherited array methods across realms', () => {
+    class SpoofArray extends Array<number> {
+      override map<U>(_callback: (value: number, index: number, array: number[]) => U): U[] { return Array(81).fill(0) as U[]; }
+    }
+    const invalid = attempt(), notes = new SpoofArray(...invalid.notes); notes[1] = 512; invalid.notes = notes;
+    expect(() => decodeAttempt(invalid)).toThrow();
+    const valid = attempt(); valid.notes = new SpoofArray(...valid.notes);
+    expect(decodeAttempt(decodeAttempt(valid))).toEqual(decodeAttempt(valid));
+    valid.notes = Object.freeze(Array(81).fill(0)) as unknown as number[]; expect(decodeAttempt(valid).notes).toEqual(Array(81).fill(0));
+    valid.notes = runInNewContext('Array(81).fill(0)') as number[]; expect(decodeAttempt(valid).notes).toEqual(Array(81).fill(0));
+  });
+  it('rejects hidden and symbol array metadata, overrides and nonenumerable indices', () => {
+    for (const decorate of [
+      (array: number[]) => { Object.defineProperty(array, 'extra', { value: 1 }); },
+      (array: number[]) => { Object.defineProperty(array, Symbol('extra'), { value: 1 }); },
+      (array: number[]) => { Object.defineProperty(array, 'map', { value: () => [] }); },
+      (array: number[]) => { Object.defineProperty(array, 0, { enumerable: false }); },
+      (array: number[]) => { Object.defineProperty(array, 0, { enumerable: false }); Object.assign(array, { extra: 1 }); },
+    ]) {
+      for (const name of ['entries', 'notes'] as const) { const value = attempt(); decorate(value[name]); expect(() => decodeAttempt(value)).toThrow(); }
+      const array = [0]; decorate(array); expect(same(array, [0])).toBe(false); expect(same([0], array)).toBe(false); expect(same(array, array)).toBe(false);
+    }
+  });
   it('validates an original test definition and rejects boundary mutations', () => {
     expect(decodeAttempt(attempt())).toEqual(attempt());
     const mutations: ((value: ReturnType<typeof attempt>) => void)[] = [

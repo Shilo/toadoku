@@ -44,7 +44,32 @@ test('native restore retention protects active recovery and pending generations'
   });
   expect(evidence).toContain('cancelled stage pruned'); console.log(JSON.stringify(evidence));
 });
-test('native capacity preserves 100000 issued groups and10000 receipts', async ({ page }, testInfo) => {
+
+test('native legacy v1 upgrade retains row writes and samebucket completion serializes', async ({ page }) => {
+  await openNativeHarness(page);
+  const evidence = await page.evaluate(async () => {
+    const moduleUrl = '/tests/storage/native-cases.ts'; const cases = await import(moduleUrl);
+    const legacy = await cases.nativeLegacyUpgradeCase(); await cases.nativeSameBucketCompletionCase(); return legacy;
+  });
+  expect(evidence).toContain('legacy save allocation completion export remain rowlayout'); console.log(JSON.stringify(evidence));
+});
+
+test('native colliding receipt overflow roundtrips and rejects duplicate physical copies', async ({ page }) => {
+  await openNativeHarness(page);
+  await page.evaluate(async () => { const moduleUrl = '/tests/storage/native-cases.ts'; const cases = await import(moduleUrl); await cases.nativeOverflowHistoryCase(); });
+});
+
+test('native missing or future physical layout never hides issued history', async ({ page }) => {
+  await openNativeHarness(page);
+  await page.evaluate(async () => { const moduleUrl = '/tests/storage/native-cases.ts'; const cases = await import(moduleUrl); await cases.nativeMissingLayoutCase(); });
+});
+
+test('native cleanup quanta permit active checkpoints and recheck protection after each batch', async ({ page }) => {
+  await openNativeHarness(page);
+  const result = await page.evaluate(async () => { const moduleUrl = '/tests/storage/native-cases.ts'; const cases = await import(moduleUrl); return cases.nativeCleanupQuantumCase(); });
+  expect(result.maxDeletes).toBe(8); expect(result.failuresPreserved).toBe(true); console.log(JSON.stringify(result));
+});
+test('native capacity preserves 100000 issued groups and10000 receipts', async ({ page, browser }, testInfo) => {
   test.setTimeout(240_000);
   page.on('console', message => { if (message.text().startsWith('STORAGE_SCALE')) console.log(message.text()); });
   await openNativeHarness(page);
@@ -53,7 +78,9 @@ test('native capacity preserves 100000 issued groups and10000 receipts', async (
   }, process.env.STORAGE_STAGE_BATCH === '1024' ? 1024 : 256);
   expect(report.issued).toBe(100_000); expect(report.receipts).toBe(10_000);
   expect(Number(report.bytes)).toBeLessThan(128 * 1024 * 1024);
-  writeFileSync(testInfo.outputPath('capacity.json'), JSON.stringify({ browser: testInfo.project.name, ...report }, null, 2));
+  const recorded = JSON.stringify({ browser: testInfo.project.name, browserVersion: browser.version(), recordedAt: new Date().toISOString(), ...report }, null, 2);
+  writeFileSync(testInfo.outputPath('capacity.json'), recorded);
+  writeFileSync(`prototypes/gameplay-validation/storage/capacity-${testInfo.project.name}-${Date.now()}.json`, recorded);
   console.log(JSON.stringify(report));
 });
 test('native generation index throughput diagnostic', async ({ page }, testInfo) => {

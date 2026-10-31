@@ -25,10 +25,14 @@ export function decodeIssued(value: unknown): IssuedRecord {
   return structuredClone(value) as IssuedRecord;
 }
 function records(value: unknown, limit: number): unknown[] {
-  if (!Array.isArray(value) || value.length > limit || Object.keys(value).length !== value.length) corrupt('backup-record-limit');
+  if (!Array.isArray(value) || value.length > limit || Reflect.ownKeys(value).length !== value.length + 1) corrupt('backup-record-limit');
   const array = value as unknown[];
-  for (let index = 0; index < array.length; index++) if (!Object.hasOwn(array, index)) corrupt('backup-array-hole');
-  return array;
+  const copy: unknown[] = [];
+  for (let index = 0; index < array.length; index++) {
+    if (!Object.prototype.propertyIsEnumerable.call(array, index)) corrupt('backup-array-hole');
+    copy[index] = array[index];
+  }
+  return copy;
 }
 export function decodeBackup(value: unknown): Backup {
   const input = object(value);

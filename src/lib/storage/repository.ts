@@ -21,9 +21,13 @@ import type { TransactionContext } from './transaction';
 import { BackupValidationClient } from './backup-client';
 import { validateDisclosureProof } from './disclosure';
 import { assertCompleted, compositeBoard, decodeBackup, decodeIssued } from './backup';
+import { historyLayout, historySlot } from './history';
+import { bucketKey, decodeLayout, overflowKey, rowKey } from './history-codec';
+import type { PhysicalBackup } from './physical-backup';
+import { captureRestoreCounts, validatePreparedRestore } from './prepare-restore';
 export { decodeBackup } from './backup';
 
-const ESSENTIAL = ['meta', 'settings', 'profile', 'attempts', 'roles', 'receipts', 'grants', 'intents', 'pools', 'issued'] as const;
+const ESSENTIAL = ['meta', 'settings', 'profile', 'attempts', 'roles', 'receipts', 'grants', 'intents', 'pools', 'issued', 'issuedBuckets', 'receiptBuckets'] as const;
 const STORES = [...ESSENTIAL, 'quarantine', 'cache'] as const;
 const issue = (reason: 'generation' | 'revision' | 'owner' | 'role' | 'pool' | 'intent' | 'frontier'): never => {
   throw new StorageFailure({ kind: 'conflict', reason });
@@ -90,7 +94,7 @@ export interface RestorePreview {
 }
 export interface RestoreStage { generation: string; expected: GenerationMeta }
 export interface StageOptions { batchSize?: 256 | 1024; onProgress?: (completed: number, total: number) => void }
-export interface StageTiming { rows: number; transactions: number; batchSize: number; maxEnqueueMs: number; maxCommitMs: number; totalMs: number }
+export interface StageTiming { rows: number; transactions: number; batchSize: number; maxEnqueueMs: number; maxCommitMs: number; totalMs: number; validationMs: number; packingMs: number }
 interface RestoreJob { jobVersion: 1; generation: string; status: 'staging' | 'ready' | 'abandoned' | 'pruning'; complete: boolean; expected?: GenerationMeta }
 
 function meta(value: unknown): GenerationMeta {
@@ -159,23 +163,41 @@ export async function openRepository(options: RepositoryOptions): Promise<Storag
     let request: IDBOpenDBRequest;
     let settled = false;
     const finish = (result: StorageResult<Repository>) => { if (!settled) { settled = true; resolve(result); } };
-    try { request = (options.factory ?? indexedDB).open(name, 1); }
+    try { request = (options.factory ?? indexedDB).open(name, 2); }
     catch (error) { finish(storageFailure(error).issue); return; }
     request.onblocked = () => finish({ kind: 'unavailable', reason: 'blocked' });
     request.onerror = () => finish(request.error?.name === 'VersionError'
       ? { kind: 'unsupported-future', reason: 'database-version' } : storageFailure(request.error).issue);
     request.onupgradeneeded = event => {
       if (settled) { request.transaction?.abort(); return; }
-      // v1 starts fresh. No prototype migrations and no recovery-by-reset.
-      if (event.oldVersion !== 0) { request.transaction?.abort(); return; }
       const database = request.result;
+      if (event.oldVersion === 1 && STORES.filter(store => store !== 'issuedBuckets' && store !== 'receiptBuckets')
+        .some(store => !database.objectStoreNames.contains(store))) {
+        finish({ kind: 'corrupt', reason: 'missing-legacy-store' }); request.transaction?.abort(); return;
+      }
       for (const store of STORES) {
+        if (database.objectStoreNames.contains(store)) continue;
         const created = database.createObjectStore(store);
         if (store !== 'meta' && store !== 'cache') created.createIndex('generation', 'generation');
+      }
+      // A known v1 database used rows for every profile generation. Materialize that fact once.
+      if (event.oldVersion === 1) {
+        const transaction = request.transaction!;
+        const cursorRequest = transaction.objectStore('profile').openKeyCursor();
+        cursorRequest.onsuccess = () => {
+          const cursor = cursorRequest.result; if (!cursor) return;
+          try {
+            const existingGeneration = identifier(cursor.primaryKey);
+            transaction.objectStore('meta').put({ generation: existingGeneration, layout: 'rows-v1' }, key(existingGeneration, 'layout'));
+            cursor.continue();
+          } catch { finish({ kind: 'corrupt', reason: 'legacy-generation-key' }); transaction.abort(); }
+        };
+        return;
       }
       const transaction = request.transaction!;
       transaction.objectStore('meta').put({ generation, essentialRevision: 0 }, 'current');
       transaction.objectStore('meta').put({ generation, complete: true }, key(generation, 'stage'));
+      transaction.objectStore('meta').put({ generation, layout: 'buckets-v1' }, key(generation, 'layout'));
       transaction.objectStore('settings').put({ ...initial.preferences, generation }, generation);
       transaction.objectStore('profile').put({ ...initial.profile, generation }, generation);
       for (const role of ROLES) transaction.objectStore('roles').put({ generation, role, revision: 0, lastIntentSeq: 0 }, key(generation, role));
@@ -226,9 +248,10 @@ export class Repository {
         const active = meta(value); const generation = active.generation;
         readMany(context, [context.store('settings').get(generation), context.store('profile').get(generation),
           ...ROLES.map(role => context.store('roles').get(key(generation, role))),
-          ...POOLS.map(pool => context.store('pools').get(key(generation, pool)))], values => {
+          ...POOLS.map(pool => context.store('pools').get(key(generation, pool))), context.store('meta').get(key(generation, 'layout'))], values => {
           const preferences = decodePreferences(values[0]); const profile = decodeProfile(values[1]);
-          const roles = values.slice(2, 5).map(decodeRole); const pools = values.slice(5).map(decodePool);
+          const roles = values.slice(2, 5).map(decodeRole); const pools = values.slice(5, 10).map(decodePool);
+          decodeLayout(values[10], generation);
           const bound = roles.filter(role => role.attemptId);
           readMany(context, bound.map(role => context.store('attempts').get(key(generation, role.attemptId!))), entries => {
             const attempts = entries.map(decodeAttempt);
@@ -265,8 +288,8 @@ export class Repository {
       context.request(context.store('meta').get('current'), rawMeta => {
         const generation = rawMeta && typeof rawMeta === 'object' && typeof rawMeta.generation === 'string' ? rawMeta.generation : 'unresolved';
         const stores = ['settings', 'profile', 'attempts', 'roles', 'pools'];
-        readMany(context, stores.map(store => context.store(store).index('generation').getAll(generation)), values => {
-          context.result({ generation, raw: { meta: rawMeta, ...Object.fromEntries(stores.map((store, index) => [store, values[index]])) } });
+        readMany(context, [...stores.map(store => context.store(store).index('generation').getAll(generation)), context.store('meta').get(key(generation, 'layout'))], values => {
+          context.result({ generation, raw: { meta: rawMeta, layout: values[stores.length], ...Object.fromEntries(stores.map((store, index) => [store, values[index]])) } });
         });
       });
     });
@@ -290,23 +313,29 @@ export class Repository {
   }
 
   async readIssued(generation: string, id: string, groupId: string): Promise<StorageResult<{ id?: IssuedRecord; group?: IssuedRecord }>> {
-    const result = await transact<{ id?: IssuedRecord; group?: IssuedRecord }>(this.database, ['meta', 'issued'], 'readonly', context => current(context, generation, () => {
-      readMany(context, [context.store('issued').get(key(generation, `id:${id}`)), context.store('issued').get(key(generation, `group:${groupId}`))], values => {
-        context.result(issuedPair(values, generation, id, groupId));
-      });
+    const result = await transact<{ id?: IssuedRecord; group?: IssuedRecord }>(this.database, ['meta', 'issued', 'issuedBuckets'], 'readonly', context => current(context, generation, () => {
+      historyLayout(context, generation, layout => historySlot(context, generation, 'id', id, byId => {
+        historySlot(context, generation, 'group', groupId, byGroup => context.result(issuedPair([byId.value, byGroup.value], generation, id, groupId)), layout);
+      }, layout));
     }));
     if (result.kind === 'corrupt') await this.quarantineIssued(generation, id, groupId);
     return result;
   }
   private async quarantineIssued(generation: string, id: string, groupId: string): Promise<void> {
-    const records = await transact<unknown[]>(this.database, ['issued'], 'readonly', context => {
-      readMany(context, [context.store('issued').get(key(generation, `id:${id}`)), context.store('issued').get(key(generation, `group:${groupId}`))], values => context.result(values));
+    let locations: { store: string; key: IDBValidKey }[];
+    try { locations = (['id', 'group'] as const).flatMap(kind => {
+      const identifier = kind === 'id' ? id : groupId;
+      return [{ store: 'issued', key: rowKey(generation, kind, identifier) }, { store: 'issued', key: overflowKey(generation, kind, identifier) },
+        { store: 'issuedBuckets', key: bucketKey(generation, kind, identifier) }];
+    }); } catch { return; }
+    const records = await transact<unknown[]>(this.database, ['issued', 'issuedBuckets'], 'readonly', context => {
+      readMany(context, locations.map(location => context.store(location.store).get(location.key)), values => context.result(values));
     });
     if (records.kind !== 'committed') return;
     await transact(this.database, ['quarantine'], 'readwrite', context => {
       const recoveryKey = key(generation, `issued:${id}:${groupId}`);
       context.request(context.store('quarantine').get(recoveryKey), old => {
-        if (old === undefined) context.store('quarantine').put({ generation, reason: 'issued-pair', keys: [key(generation, `id:${id}`), key(generation, `group:${groupId}`)], raw: records.value }, recoveryKey);
+        if (old === undefined) context.store('quarantine').put({ generation, reason: 'issued-pair', locations, raw: records.value }, recoveryKey);
         context.result(true);
       });
     });
@@ -405,7 +434,6 @@ export class Repository {
       const generation = request.generation; const { intent, attempt } = request;
       readMany(context, [context.store('intents').get(key(generation, intent.id)), context.store('roles').get(key(generation, intent.role)),
         context.store('profile').get(generation), context.store('pools').get(key(generation, attempt.definition.pool)),
-        context.store('issued').get(key(generation, `id:${attempt.definition.id}`)), context.store('issued').get(key(generation, `group:${attempt.definition.groupId}`)),
         ...ROLES.map(role => context.store('roles').get(key(generation, role)))], values => {
         const priorIntent = values[0] === undefined ? undefined : decodeIntent(values[0]);
         const role = decodeRole(values[1]); const profile = decodeProfile(values[2]); const pool = decodePool(values[3]);
@@ -421,12 +449,14 @@ export class Repository {
         if (intent.sequence !== role.lastIntentSeq + 1 || intent.expectedRoleRevision !== role.revision || intent.previousAttemptId !== role.attemptId) issue('intent');
         if (pool.revision !== request.expectedPoolRevision || request.nextPool.revision !== pool.revision + 1 || request.nextPool.pool !== pool.pool
           || request.nextPool.count !== pool.count || request.nextPool.catalogVersion !== pool.catalogVersion || attempt.definition.catalogVersion !== pool.catalogVersion) issue('pool');
-        const history = issuedPair([values[4], values[5]], generation, attempt.definition.id, attempt.definition.groupId, pool.pool);
+        historyLayout(context, generation, layout => historySlot(context, generation, 'id', attempt.definition.id, byId => {
+        historySlot(context, generation, 'group', attempt.definition.groupId, byGroup => {
+        const history = issuedPair([byId.value, byGroup.value], generation, attempt.definition.id, attempt.definition.groupId, pool.pool);
         const previousIssued = history.id; const groupIssued = history.group;
         const firstIssue = !previousIssued && !groupIssued;
         if (!firstIssue && pool.lifetimeIssued < pool.count) issue('pool');
         if (request.nextPool.lifetimeIssued !== pool.lifetimeIssued + (firstIssue ? 1 : 0) || request.nextPool.lifetimeIssued > pool.count) issue('pool');
-        const currentRoles = values.slice(6).map(decodeRole);
+        const currentRoles = values.slice(4).map(decodeRole);
         const bound = currentRoles.filter(record => record.attemptId);
         readMany(context, bound.map(record => context.store('attempts').get(key(generation, record.attemptId!))), snapshots => {
           const attempts = snapshots.map(decodeAttempt); const old = attempts.find(item => item.id === role.attemptId);
@@ -452,8 +482,7 @@ export class Repository {
           const issued: IssuedRecord = { generation, id: attempt.definition.id, groupId: attempt.definition.groupId,
             catalogVersion: attempt.definition.catalogVersion, pool: pool.pool, firstAttemptId: previousIssued?.firstAttemptId ?? groupIssued?.firstAttemptId ?? attempt.id,
             issues: increment(previousIssued?.issues ?? groupIssued?.issues ?? 0) };
-          context.store('issued').put(issued, key(generation, `id:${issued.id}`));
-          context.store('issued').put(issued, key(generation, `group:${issued.groupId}`));
+          byId.put(issued); byGroup.put(issued);
           context.store('pools').put({ ...request.nextPool, generation, lastId: issued.id, lastOrdinal: ordinal }, key(generation, pool.pool));
           context.store('attempts').put(attempt, key(generation, attempt.id));
           context.store('roles').put({ ...role, revision: increment(role.revision), lastIntentSeq: intent.sequence, attemptId: attempt.id }, key(generation, role.role));
@@ -462,6 +491,8 @@ export class Repository {
           if (old) context.store('attempts').delete(key(generation, old.id));
           touch(context, active); context.result(structuredClone(attempt));
         });
+        }, layout);
+        }, layout));
       });
     }), true);
     if (result.kind === 'corrupt') await this.quarantineIssued(request.generation, request.attempt.definition.id, request.attempt.definition.groupId);
@@ -472,14 +503,15 @@ export class Repository {
     let guard: WriterGuard;
     try { guard = captureGuard(input); integer(expectedRevision); } catch (error) { return Promise.resolve(storageFailure(error).issue); }
     const nextRunId = crypto.randomUUID();
-    return transact(this.database, ['meta', 'attempts', 'roles', 'profile', 'receipts', 'grants'], 'readwrite', context => current(context, guard.generation, active => {
+    return transact(this.database, ['meta', 'attempts', 'roles', 'profile', 'receipts', 'receiptBuckets', 'grants'], 'readwrite', context => current(context, guard.generation, active => {
       const generation = guard.generation;
-      readMany(context, [context.store('attempts').get(key(generation, guard.attemptId)), context.store('receipts').get(key(generation, guard.attemptId)),
+      readMany(context, [context.store('attempts').get(key(generation, guard.attemptId)),
         context.store('profile').get(generation)], values => {
         const attempt = decodeAttempt(values[0]); guardAttempt(attempt, guard);
-        const profile = decodeProfile(values[2]);
-        if (values[1] !== undefined) {
-          const receipt = decodeReceipt(values[1]);
+        const profile = decodeProfile(values[1]);
+        historySlot(context, generation, 'receipt', guard.attemptId, receiptSlot => {
+        if (receiptSlot.value !== undefined) {
+          const receipt = receiptSlot.value as CompletionReceipt;
           if (attempt.status !== 'completed' || attempt.receiptId !== receipt.id || receipt.attemptId !== attempt.id) corrupt('receipt-attempt');
           context.result({ attempt, receipt, profile }); return;
         }
@@ -504,7 +536,7 @@ export class Repository {
               context.store('grants').add({ generation, grantId, attemptId: attempt.id }, key(generation, grantId));
             }
             const completed: Attempt = { ...attempt, revision: increment(attempt.revision), status: 'completed', receiptId: receipt.id };
-            context.store('receipts').add(receipt, key(generation, attempt.id));
+            receiptSlot.put(receipt, true);
             context.store('attempts').put(completed, key(generation, attempt.id));
             context.store('profile').put({ ...nextProfile, generation }, generation);
             touch(context, active); context.result({ attempt: completed, receipt, profile: nextProfile });
@@ -512,30 +544,27 @@ export class Repository {
           if (grantId) context.request(context.store('grants').get(key(generation, grantId)), grant => { if (grant) issue('frontier'); finish(); });
           else finish();
         });
+        });
       });
     }), true);
   }
 
   async exportBackup(): Promise<StorageResult<{ text: string; meta: GenerationMeta }>> {
-    const result = await transact<{ backup: Backup; meta: GenerationMeta }>(this.database, ESSENTIAL, 'readonly', context => {
+    const result = await transact<{ backup: PhysicalBackup; meta: GenerationMeta }>(this.database, ESSENTIAL, 'readonly', context => {
       context.request(context.store('meta').get('current'), value => {
         const active = meta(value); const generation = active.generation;
-        const indexed = ['roles', 'attempts', 'pools', 'receipts', 'issued', 'intents'];
+        historyLayout(context, generation, layout => {
+        const indexed = ['roles', 'attempts', 'pools', 'intents'];
         readMany(context, [context.store('settings').get(generation), context.store('profile').get(generation),
           ...indexed.map(store => context.store(store).index('generation').getAll(generation)),
-          context.store('issued').index('generation').getAllKeys(generation)], values => {
-          const issuedKeys = values[8] as IDBValidKey[];
-          const uniqueIssued = (values[6] as unknown[]).filter((value, index) => {
-            const recordKey = issuedKeys[index];
-            if (!Array.isArray(recordKey) || typeof recordKey[1] !== 'string') corrupt('issued-key');
-            const idKey = (recordKey as IDBValidKey[])[1] as string;
-            if (!idKey.startsWith('id:')) return false;
-            if (idKey !== `id:${object(value).id}`) corrupt('issued-key-record');
-            return true;
-          });
-          const backup = { schemaVersion: 1, application: 'toadodu', preferences: values[0], profile: values[1],
-            roles: values[2], attempts: values[3], pools: values[4], receipts: values[5], issued: uniqueIssued, intents: values[7] } as Backup;
+          ...['receipts', 'issued', 'receiptBuckets', 'issuedBuckets'].flatMap(store => [
+            context.store(store).index('generation').getAll(generation), context.store(store).index('generation').getAllKeys(generation)])], values => {
+          const backup = { physicalExportVersion: 1, base: { schemaVersion: 1, application: 'toadodu', preferences: values[0], profile: values[1],
+            roles: values[2], attempts: values[3], pools: values[4], intents: values[5] },
+            history: { generation, layout, receiptRows: values[6], receiptKeys: values[7], issuedRows: values[8], issuedKeys: values[9],
+              receiptBuckets: values[10], receiptBucketKeys: values[11], issuedBuckets: values[12], issuedBucketKeys: values[13] } } as PhysicalBackup;
           context.result({ backup, meta: active });
+        });
         });
       });
     });
@@ -561,16 +590,20 @@ export class Repository {
   }
 
   async stageRestore(preview: RestorePreview, options: StageOptions = {}): Promise<StorageResult<RestoreStage>> {
+    const validationStarted = performance.now();
     const operation = ++this.backupSequence;
     const batchSize = options.batchSize ?? 256, onProgress = options.onProgress;
     if (batchSize !== 256 && batchSize !== 1024) return { kind: 'corrupt', reason: 'stage-batch-size' };
-    let expected: GenerationMeta;
-    try { expected = structuredClone(meta(preview.expected)); } catch (error) { return storageFailure(error).issue; }
-    const validated = await this.backupValidation.validate(preview.backup, this.verifyDefinition);
-    if (validated.kind !== 'committed') return validated;
-    if (this.closed || operation !== this.backupSequence) return { kind: 'unavailable', reason: this.closed ? 'closed' : 'abort', detail: 'restore-cancelled' };
-    const backup = validated.value;
+    let expected: GenerationMeta, expectedCounts;
+    try { expected = structuredClone(meta(preview.expected)); expectedCounts = captureRestoreCounts(preview.backup); } catch (error) { return storageFailure(error).issue; }
     const generation = crypto.randomUUID();
+    const validated = await this.backupValidation.prepare(preview.backup, generation, this.verifyDefinition);
+    if (validated.kind !== 'committed') return validated;
+    const validationMs = performance.now() - validationStarted;
+    if (this.closed || operation !== this.backupSequence) return { kind: 'unavailable', reason: this.closed ? 'closed' : 'abort', detail: 'restore-cancelled' };
+    let prepared;
+    try { prepared = validatePreparedRestore(validated.value, generation, expectedCounts); } catch (error) { return storageFailure(error).issue; }
+    const rows = prepared.rows, packingMs = prepared.packingMs;
     const registered = await transact(this.database, ['meta'], 'readwrite', context => current(context, expected.generation, active => {
       if (active.essentialRevision !== expected.essentialRevision) issue('revision');
       readMany(context, [context.store('meta').get('pendingRestore'), context.store('meta').get('recovery')], pointers => {
@@ -579,6 +612,7 @@ export class Repository {
         const register = () => {
           if (this.closed || operation !== this.backupSequence) throw new StorageFailure({ kind: 'unavailable', reason: this.closed ? 'closed' : 'abort', detail: 'restore-cancelled' });
           context.store('meta').put({ jobVersion: 1, generation, status: 'staging', complete: false, expected } satisfies RestoreJob, key(generation, 'stage'));
+          context.store('meta').put({ generation, layout: 'buckets-v1' }, key(generation, 'layout'));
           context.store('meta').put({ generation }, 'pendingRestore'); context.result(true);
         };
         if (previous && previous.generation !== active.generation && previous.generation !== recovery?.generation) {
@@ -591,28 +625,17 @@ export class Repository {
     if (registered.kind !== 'committed') return registered;
     this.currentStageGeneration = generation;
     void this.cleanupGenerations();
-    const rewrite = <T extends { generation: string }>(item: T): T => ({ ...item, generation });
-    const receipts = backup.receipts.map(receipt => ({ ...rewrite(receipt),
-      ...(receipt.grantId ? { grantId: frontierGrantId(generation, receipt.binding!) } : {}) }));
-    const rows: { store: string; key: IDBValidKey; value: unknown }[] = [
-      { store: 'settings', key: generation, value: { ...backup.preferences, generation } },
-      { store: 'profile', key: generation, value: { ...backup.profile, generation } },
-      ...backup.roles.map(item => ({ store: 'roles', key: key(generation, item.role), value: rewrite(item) })),
-      ...backup.attempts.map(item => ({ store: 'attempts', key: key(generation, item.id), value: rewrite(item) })),
-      ...backup.pools.map(item => ({ store: 'pools', key: key(generation, item.pool), value: { ...item, generation } })),
-      ...receipts.map(item => ({ store: 'receipts', key: key(generation, item.attemptId), value: item })),
-      ...receipts.filter(item => item.grantId).map(item => ({ store: 'grants', key: key(generation, item.grantId!), value: { generation, grantId: item.grantId, attemptId: item.attemptId } })),
-      ...backup.intents.map(item => ({ store: 'intents', key: key(generation, item.id), value: rewrite(item) })),
-      ...backup.issued.flatMap(item => [
-        { store: 'issued', key: key(generation, `id:${item.id}`), value: rewrite(item) },
-        { store: 'issued', key: key(generation, `group:${item.groupId}`), value: rewrite(item) },
-      ]),
-    ];
     const started = performance.now(); let maxEnqueueMs = 0, maxCommitMs = 0, transactions = 0;
     // Inactive staging never mutates the active pointer/revision. Scope only the stores being written.
-    for (let start = 0; start < rows.length; start += batchSize) {
+    for (let start = 0; start < rows.length;) {
       if (operation !== this.backupSequence) return { kind: 'unavailable', reason: 'abort', detail: 'restore-cancelled' };
-      const batch = rows.slice(start, start + batchSize), stores = [...new Set(['meta', ...batch.map(row => row.store)])];
+      const batch: typeof rows = []; let bytes = 0;
+      while (start + batch.length < rows.length && batch.length < Math.min(batchSize, 8)) {
+        const row = rows[start + batch.length], size = new TextEncoder().encode(JSON.stringify(row.value)).byteLength;
+        if (batch.length && bytes + size > 2 * 1024 * 1024) break;
+        bytes += size; batch.push(row);
+      }
+      const stores = [...new Set(['meta', ...batch.map(row => row.store)])];
       const before = performance.now();
       const result = await transact(this.database, stores, 'readwrite', context => {
         readMany(context, [context.store('meta').get('pendingRestore'), context.store('meta').get(key(generation, 'stage'))], values => {
@@ -625,10 +648,10 @@ export class Repository {
       });
       if (result.kind !== 'committed') return result;
       transactions++; maxCommitMs = Math.max(maxCommitMs, performance.now() - before);
-      onProgress?.(Math.min(start + batchSize, rows.length), rows.length);
+      start += batch.length; onProgress?.(start, rows.length);
     }
     if (operation !== this.backupSequence) return { kind: 'unavailable', reason: 'abort', detail: 'restore-cancelled' };
-    this.stageTiming = { rows: rows.length, transactions, batchSize, maxEnqueueMs, maxCommitMs, totalMs: performance.now() - started };
+    this.stageTiming = { rows: rows.length, transactions, batchSize: Math.min(batchSize, 8), maxEnqueueMs, maxCommitMs, totalMs: performance.now() - started, validationMs, packingMs };
     return transact(this.database, ['meta'], 'readwrite', context => {
       readMany(context, [context.store('meta').get('pendingRestore'), context.store('meta').get(key(generation, 'stage'))], values => {
         if (object(values[0]).generation !== generation || restoreJob(values[1]).status !== 'staging' || operation !== this.backupSequence) issue('intent');
@@ -703,8 +726,8 @@ export class Repository {
               this.protectGeneration(context, generation, allowed => {
                 if (!allowed) { context.result({ done: true, removed: 0 }); return; }
                 let count = 0;
-                context.request(context.store(store).index('generation').openCursor(generation), cursor => {
-                  if (!cursor || count === 256) { context.result({ done: !cursor, removed: count }); return; }
+                context.request(context.store(store).index('generation').openKeyCursor(generation), cursor => {
+                  if (!cursor || count === 8) { context.result({ done: !cursor, removed: count }); return; }
                   context.store(store).delete(cursor.primaryKey); count++; cursor.continue();
                 });
               });
@@ -715,7 +738,7 @@ export class Repository {
         }
         if (this.closed) return;
         const cleared = await transact(this.database, ['meta'], 'readwrite', context => this.protectGeneration(context, generation, allowed => {
-          if (allowed) { context.store('meta').delete(key(generation, 'stage')); context.store('meta').delete(key(generation, 'recovery')); }
+          if (allowed) { context.store('meta').delete(key(generation, 'stage')); context.store('meta').delete(key(generation, 'recovery')); context.store('meta').delete(key(generation, 'layout')); }
           context.result(true);
         }));
         if (cleared.kind !== 'committed') { this.maintenanceResult = cleared; return; }

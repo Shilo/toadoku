@@ -2,6 +2,11 @@ import type { Backup } from './repository';
 import type { Definition, StorageResult } from '../gameplay/contracts';
 import { BACKUP_LIMITS, parseBoundedJson } from './json';
 import { storageFailure } from './transaction';
+import { decodeBackup } from './backup';
+import { materializeBackup } from './physical-backup';
+import type { PhysicalBackup } from './physical-backup';
+import { prepareRestoreRows } from './prepare-restore';
+import type { PreparedRestore } from './prepare-restore';
 
 export interface BackupTiming { encodeMs: number; roundTripMs: number; workerDecodeMs: number; workerProofMs: number; bytes: number; worker: boolean }
 export class BackupValidationClient {
@@ -12,17 +17,19 @@ export class BackupValidationClient {
   validate(input: string | Backup, verify: (definition: Definition) => Promise<boolean>): Promise<StorageResult<Backup>> {
     return this.execute<Backup>(input, verify, false);
   }
-  serialize(input: Backup, verify: (definition: Definition) => Promise<boolean>): Promise<StorageResult<string>> {
+  serialize(input: Backup | PhysicalBackup, verify: (definition: Definition) => Promise<boolean>): Promise<StorageResult<string>> {
     return this.execute<string>(input, verify, true);
   }
-  private async execute<T extends Backup | string>(input: string | Backup, verify: (definition: Definition) => Promise<boolean>, serialize: boolean): Promise<StorageResult<T>> {
+  prepare(input: Backup, generation: string, verify: (definition: Definition) => Promise<boolean>): Promise<StorageResult<PreparedRestore>> {
+    return this.execute<PreparedRestore>(input, verify, false, generation);
+  }
+  private async execute<T extends Backup | string | PreparedRestore>(input: string | Backup | PhysicalBackup, verify: (definition: Definition) => Promise<boolean>, serialize: boolean, prepareGeneration?: string): Promise<StorageResult<T>> {
     const started = performance.now();
     if (typeof input === 'string' && input.length > BACKUP_LIMITS.bytes) return { kind: 'corrupt', reason: 'backup-bytes' };
     // Explicit Node-only path for pure tools/tests. Browser acceptance always uses Worker.
     if (typeof Worker === 'undefined') {
       try {
-        const { decodeBackup } = await import('./backup');
-        const backup = decodeBackup(typeof input === 'string' ? parseBoundedJson(input) : structuredClone(input));
+        const backup = decodeBackup(typeof input === 'string' ? parseBoundedJson(input) : materializeBackup(structuredClone(input)));
         const checked = new Set<string>();
         for (const item of [...backup.attempts, ...backup.receipts]) {
           const identity = JSON.stringify(item.definition);
@@ -30,8 +37,9 @@ export class BackupValidationClient {
           checked.add(identity);
         }
         this.timing = { encodeMs: 0, roundTripMs: performance.now() - started, workerDecodeMs: 0, workerProofMs: 0, bytes: 0, worker: false };
-        const value = serialize ? JSON.stringify(backup) : backup;
-        if (serialize && new TextEncoder().encode(value as string).byteLength > BACKUP_LIMITS.bytes) return { kind: 'corrupt', reason: 'backup-bytes' };
+        const text = JSON.stringify(backup);
+        if (new TextEncoder().encode(text).byteLength > BACKUP_LIMITS.bytes) return { kind: 'corrupt', reason: 'backup-bytes' };
+        const value = prepareGeneration !== undefined ? prepareRestoreRows(backup, prepareGeneration) : serialize ? text : backup;
         return { kind: 'committed', value: value as T };
       } catch (error) { return storageFailure(error).issue; }
     }
@@ -60,8 +68,8 @@ export class BackupValidationClient {
         finish(event.data.result);
       };
       try {
-        if (bytes) worker.postMessage({ id, bytes: bytes.buffer, serialize }, [bytes.buffer]);
-        else worker.postMessage({ id, backup: input, serialize });
+        if (bytes) worker.postMessage({ id, bytes: bytes.buffer, serialize, prepareGeneration }, [bytes.buffer]);
+        else worker.postMessage({ id, backup: input, serialize, prepareGeneration });
       } catch (error) { finish(storageFailure(error).issue); }
     });
   }
