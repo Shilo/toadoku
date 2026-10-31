@@ -24,9 +24,9 @@
 | Halloween palette | Pumpkin orange, near-black, purple, and frog green; select exact swatches visually |
 | Controls | Number entry plus overflow; decide contextual access to essential solving tools |
 | Seasonal dates | October 24 through November 7 inclusive, using local dates |
-| Progression structure | Fixed replayable stages, an ongoing fresh-puzzle sequence, or a small combination; no story or map is approved |
+| Progression structure | Independent review recommends randomized progression through rated bands with a ceiling; still awaiting selection. No story or map is approved |
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
-| Puzzle supply | Reviewed fixed stages versus generated or pregraded fresh puzzles; choose before implementation |
+| Puzzle supply | Bundled pre-rated bank recommended over live generation for the first version; candidate public-domain source identified but not imported or approved |
 
 ## Rejected prototype direction
 

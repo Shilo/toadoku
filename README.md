@@ -11,6 +11,7 @@ A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, 
 - [Open decisions](docs/decisions.md)
 - [Sudoku and artwork research](docs/research/sudoku-design.md)
 - [Game modes research](docs/research/game-modes.md)
+- [Independent progression assessment](docs/research/progression-audit.md)
 - [Prototype findings](docs/research/prototype-findings.md)
 - [Technology comparison](docs/research/technology.md)
 - [Module boundaries](docs/architecture.md)

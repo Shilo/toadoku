@@ -2,6 +2,8 @@
 
 Research date: 2026-10-30. This is a product recommendation, not a commitment to implement every mode.
 
+> Latest assessment: [independent progression audit](progression-audit.md). It recommends randomized selection from a bundled pre-rated catalog, with gradually harder bands and a ceiling. Earlier fixed-Journey and custom-grader-first suggestions below are exploratory alternatives, not final decisions. A suitable public-domain rated bank is now identified; a custom grader is not required merely to select those imported puzzles.
+
 ## Current scope and open choice
 
 Approved: **Quick Play and Progression only**, retaining traditional Sudoku's basic layout, rules and functionality. Daily challenges, extra rule variants, a story, a stage map and cosmetic rewards are not approved features. The expanded Journey ideas below remain research options.
