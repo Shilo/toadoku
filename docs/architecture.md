@@ -1,8 +1,10 @@
 # Proposed architecture
 
-The approved stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PWA with offline play. The two initial modes are Quick Play and Progression, sharing traditional Sudoku's board and functionality. Progression details and visual design remain open. The initial experiment lives in ignored `prototypes/initial-web-ui/`; its code, tests, interface, and deployment workflow are not approved production work.
+The approved eventual stack is Svelte + TypeScript + Vite, hosted on GitHub Pages as a PWA with offline play. The two initial modes are Quick Play and Progression, sharing traditional Sudoku's board and functionality. Progression details and visual design remain open. The initial experiment lives in ignored `prototypes/initial-web-ui/`; its code, tests, interface, and deployment workflow are not approved production work.
 
 ## Module boundaries
+
+Current implementation is only the ignored visual prototype in `prototypes/pond-visual-v1/`. It has menu navigation, static numbers/notes and cell selection, plus decorative water. Shore, notches, natural selection and bounded floating are authorized refinements. No Sudoku/session/persistence/product infrastructure is implied by the eventual module table below. Final findings and checks are in [prototype progress](prototype-progress.md).
 
 | Module | Responsibility |
 | --- | --- |
@@ -19,7 +21,7 @@ Use a small independent decorative-background renderer and semantic style roles 
 
 Persist a theme-independent board-shape preference: Fill space by default, Square on request. The presentation measures the current usable viewport and uses a bottom portrait dock or right landscape dock. Relayout preserves logical cell/control identity and state, without rotating board data or stretching glyphs. More overlays do not own layout space or game rules.
 
-More is disabled in the current milestone, so exposing the Square setting is deferred with Settings. Selected inward pad faces sit inside the same full rectangular logical cell buttons; decorative geometry never owns hit testing or rules. Future procedural cutouts belong to that noninteractive visual mask, while future slow pond motion belongs to the background renderer. Their code must not move cells, change region identity, resize the dock or mutate session/puzzle state. A shader is not a selected dependency. See [future visual research](future-visual-research.md).
+More is disabled, so Square access stays deferred with Settings. Inward pad anchors sit inside fixed full rectangular native cell buttons. Procedural near-round silhouettes/notches belong to a noninteractive leaf-mask layer. SVG water/shore geometry belongs to the decorative background. A small shared floating-object token applies seeded visual drift to leaves/labels and title/art; controls on land, hitboxes and layout anchors do not move. Selection styling belongs to the leaf surface, with two dew beads for keyboard focus. These layers cannot change rules, logical region identity, dock sizing or session state. There is no shader/game-engine dependency. See [visual acceptance](future-visual-research.md).
 
 One composite menu-art reference supports replacing the provisional art with one human-made file. No new sprite framework is needed. Use [design handoff](design-handoff.md) for the selected spacing, scene composition and saved visual references.
 

@@ -1,8 +1,14 @@
 # Requirements and open decisions
 
-Next milestone: a theme-focused visual prototype with menu/gameplay navigation, static numbers, pad selection and animated Pond backgrounds. Full Sudoku logic, modes, rewards, saves and production/PWA work are excluded. Requirements below describe the eventual product, not authorization to implement everything. More functionality, Halloween and sprite-pack acquisition remain deferred. See [prototype scope](design-handoff.md#next-session-visual-prototype-only).
+Current milestone: refine the fresh ignored `prototypes/pond-visual-v1/` visual baseline. Menu/game navigation, static numbers, selection and SVG water exist; latest authorized refinements add shore, organic notched pads, natural selection, fixed menu anchors and subtle floating pond objects. Full Sudoku logic, modes, rewards, saves and production/PWA work are excluded. Requirements below describe the eventual product, not authorization to implement everything. See [scope](design-handoff.md#next-session-visual-prototype-only) and [implementation/findings/test status](prototype-progress.md).
 
-Build a fresh ignored prototype; do not copy or extend old prototype code. Existing designs remain visual references. Delegate animation research and background implementation to a sub-agent, with a concise approach comparison before choosing and separate ownership from screens/integration.
+The baseline was built fresh without copying old prototype code. Refining that current prototype is authorized; older demos remain visual references only. Use bounded concept/ImageGen and background sub-agents with explicit separate ownership from screens/integration. Keep code, images and evidence ignored; commit durable documentation only.
+
+## Latest visual refinement authorization
+
+The 2026-10-31 user refinement explicitly replaces earlier stationary perfect-circle pads, selection outlines, all-water control backgrounds and submenu-driven identity movement. It requests two abstract ground colors, smoother more fluid gameplay water, subtle varied pad clefts/perimeters, natural leaf selection, title-only stylistic lettering, fixed title/art anchors and subtle floating pond objects. The title-only local prototype font is Chewy; readable Outfit UI/digits and the deliberately scribbly black-and-white single placeholder remain.
+
+The continuous wet/dry bank supports all menu/dock controls and bleeds across orientation edges without a rectangular card. Reserve maximum Progression menu height. Keep all cell targets, layout anchors and 4px/8px spacing fixed. Current implementation parameters are prototype choices under these requests, not production typography/palette/hardware approval. Review generated concepts against measured browser screenshots and record intentional differences in [prototype progress](prototype-progress.md).
 
 ## Accepted requirements
 
@@ -27,15 +33,15 @@ Build a fresh ignored prototype; do not copy or extend old prototype code. Exist
 - Visual implementation must prioritize a flat, full-screen, minimal, super-cute frog environment built mainly from HTML/CSS colors, gradients and soft shapes, with only a few human-made sprites.
 - Frog and lily-pad sprites stay unchanged between basic and Halloween themes. Theme changes affect UI colors, gradients, background styling, buttons and font roles, not sprite artwork or accessories.
 - Selected initial visual direction: C, Quiet Flat. Preserve B, Layered Pond, and A, Expressive Gradient, as modular future treatments.
-- Accepted board direction: top-down CSS pond with procedural 1:1 circular lily-pad faces, full stretched rectangular cell buttons, no conventional drawn grid/frame, and spatial 3 by 3 grouping. Circle diameter follows the shorter cell dimension; use 50% radius and keep lip/highlight inside the silhouette.
+- Accepted board direction: top-down pond with inward near-circular procedural lily-pad faces in 1:1 envelopes, full fixed rectangular cell buttons, no conventional grid/frame and spatial 3x3 grouping. The latest refinement adds stable subtle perimeter variation and shallow real notches, preserving an opaque text zone and inset lip/highlight.
 - Keep input/action keys a distinct warm cream/ivory color family against green board pads.
-- Water stays flat but expressive: exactly three solid colors shared unchanged by menu/gameplay, arranged in broad organic pond/shallows shapes. No extra background tint/blend, large ripple rings or reflective/gradient scene. Control fills, lips, ink and art are separate from the three water colors.
-- Preserve soft-raised green circles and unchanged cream menu/input buttons. The new full-circle request supersedes the stretched notched silhouette, not the tactile styling.
+- Water stays flat but expressive: exactly three solid roles shared by menu/gameplay, #0D6267/#329D9A/#7ED1B8, with broad flowing shared contours. No fourth water tint/blend, large ripple rings or reflective/gradient water. Ground adds wet reed #6D9F81 and dry sage #B6BA86 under all non-gameplay controls. Controls/lips, ink and art are outside the water limit.
+- Preserve the soft-raised green leaf family and unchanged cream menu/input buttons. Near-round irregular edges and shallow varied notches now supersede perfect circles; earlier stretched notched pastilles remain historical.
 - Every group's visible circles, lips and labels stay in one water fill. Selected B needs broad winding contours, not slightly wavy rectangular panels. Curves may use unused water inside stretched cells while every cell remains a full rectangular button; background color never reassigns logical regions.
 - Selected board design B, Winding shallows: whole-region arrangement `A B C / B C A / C A B`, for a more natural pond. Preserve A, Connected bays (`A B A / C A C / A B A`), as a documented alternative. These board names are independent of the earlier A/B/C scene treatments; Quiet Flat C remains selected.
 - Inward placement is selected: group rows align bottom/center/top and columns right/center/left; labels follow the pad. Preserve full rectangular button bounds. Centered is an archived comparison, not a new setting.
-- Future pad refinement: research procedural splits/cutouts and optional irregular perimeter within the 1:1 envelope, preserving colors, raised styling, readable center and full hitbox. Exact generator and cuts are not selected or implemented.
-- Future motion requirement: slowly animate menu/gameplay water while preserving the selected three-color flat design and stable controls. Simple shape drift/deformation and a shader require comparison; no renderer is selected or implementation/performance claimed. Reduced motion remains static.
+- Current pad refinement: stable procedural variation within the 1:1 nearly circular envelope, with shallow true notches, protected readable center and unchanged full rectangular hitbox. Natural selection brightens/lifts the leaf without cell/pad outlines; two dew beads identify keyboard focus. Final full solving-state accessibility remains open.
+- Current motion direction: the ignored baseline selected SVG after a CSS/SVG/canvas/shader comparison. The latest refinement adds one seeded floating-object token for pad faces/labels and title/art, with float targets at most 0.48px and 1.8px respectively. Hitboxes, layout, controls and ground remain fixed. Reduced motion is static and hidden rendering pauses. Final evidence is prototype-only; no Motorola performance claim.
 - Exactly two authored spacing tokens: 4px between cell rectangles/action buttons and 8px at scene edges, group gutters and board/dock separation. Extra water around circular faces is an effect of their aspect ratio/alignment, not another padding token. Same constants in menus and both orientations; system safe areas are additional.
 - Region recognition must survive loss of hue through shape, spacing and lightness. Subtle alternating pad greens were ineffective; rectangular water panels undermined immersion. Neither comparison is selected.
 - Themes must support optional human-made PNG/JPEG/WebP backgrounds with CSS fallback; no background image is selected.
@@ -43,7 +49,7 @@ Build a fresh ignored prototype; do not copy or extend old prototype code. Exist
 - Selected control finish: soft-raised pastilles. Selected default board shape: Fill space, with a persistent Square option available through Settings.
 - More stays in the menu/tenth gameplay-key position but is disabled for now. No replacement top overflow or active placeholder menu.
 - Fill space fills the entire rectangle remaining after the single 8px scene inset, dock and 8px board/dock gap. No extra board margins, wrapper padding or reserved header. Dock keys sit at the bottom/right inside the same scene inset.
-- In both orientations, main-menu modes form a bottom-left block: Quick Play above Progression. More is bottom-right, vertically aligned with Progression. Title and combined placeholder remain higher in the scene.
+- In both orientations, main-menu modes form a bottom-left block: Quick Play above Progression. More remains bottom-right aligned with the lower row. The largest Progression label-plus-three-button height reserves a fixed shore/action allocation, so title/art anchors do not shift between menu states. In landscape one connected cove supports left modes and right More; pond objects alone float inside their anchors.
 - Use one intentionally rough black-and-white frog-plus-lily-pad template image with a question mark, replaceable as one file. Final art remains human-made; current asset sourcing is deferred.
 - Brief nonblocking start status and persistent completion information until Continue are selected in principle; exact presentation remains open.
 - Remove the decorative frog from gameplay for now, retaining the menu's frog identity and maximizing board space.
@@ -72,8 +78,8 @@ Build a fresh ignored prototype; do not copy or extend old prototype code. Exist
 | Difficulty | Human solving techniques; clue counts alone are insufficient |
 | Puzzle supply | Bundled pre-rated bank approach approved; specific catalog source, size and imported subset remain open |
 | Region details | B, Winding shallows, selected; A preserved. Exact contour tuning, palette and accessibility checks remain open. Preserve uniform soft-raised pads, fixed spacing and no outlined/raised region cards |
-| Pad cutouts | Research actual leaf references, splits/cutout masks and restrained edge irregularity. Silhouette refinement only; method/parameters and note readability need review |
-| Water motion | Research CSS-led shape movement against a shader only if justified. Preserve three fills, inward pad containment, static reduced motion and target-device performance; implementation remains future work |
+| Pad cutouts | Shallow stable varied notches and subtle near-round perimeter are authorized in the prototype. Final silhouette/readability and full solving-state validation remain open |
+| Water/object motion | SVG is the prototype choice. Validate fluid shared curves and combined bounded floating envelopes, reduced/hidden behavior and hardware performance before production adoption |
 
 ## Rejected prototype direction
 

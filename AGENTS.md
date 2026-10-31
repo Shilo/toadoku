@@ -16,27 +16,31 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 - Themes and decorative geometry never change rules, hitboxes or saved progress.
 - Persist language, theme/appearance and puzzle progress. Support English, German and Spanish.
 
-## Next prototype
+## Current visual prototype
 
 - Focus on visual design, Pond theming and animated top-down water in both screens.
 - Allow menu/game navigation, static example numbers and full-cell pad selection. Most controls are inert or disabled.
 - No Sudoku engine, number entry, scoring, progression, saves or production/PWA implementation.
-- Build a fresh prototype under ignored `prototypes/`. Old demos are visual references only; do not copy or extend their code.
-- Use a sub-agent for pond-animation research and implementation. Compare approaches briefly before choosing; keep pads still and reduced motion static.
+- The fresh baseline is under ignored `prototypes/pond-visual-v1/`. Refining that current prototype is authorized. Older demos remain visual references only; do not copy their code.
+- Use sub-agents for bounded concept/background work, with screens and integration separately owned. Compare the implementation visually with ImageGen guidelines.
+- Current refinements: two-color ground behind controls, fluid water, varied near-circular notched pads, natural selection, fixed menu identity anchors, title-only display lettering and subtle floating pond objects. Reduced motion stays static; hitboxes stay fixed.
 
 ## Product scope
 
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
 - More stays disabled. Settings, Halloween and save-slot policy are deferred.
-- Pad cutouts remain future work. Water animation belongs to the next visual prototype; neither is implemented yet.
+- Water animation exists in the ignored baseline. Pad silhouettes, ground and floating refinements are authorized prototype work; production integration and hardware validation remain deferred. See [progress](docs/prototype-progress.md).
 - No store, purchases or upgrades.
 
 ## Design
 
 - Quiet Flat scene; Winding shallows B; inward 1:1 pad faces.
-- Three shared water colors; soft-raised green pads and cream controls.
-- Full stretched cell buttons, including water; stationary, readable digits and notes.
+- Three shared water colors plus wet reed `#6D9F81` and dry sage `#B6BA86` ground; soft-raised green pads and cream controls.
+- Full stretched fixed cell buttons, including water. Near-circular pad faces have stable procedural variation and a shallow real notch, with readable opaque centers.
+- Subtle seeded float moves pad faces/labels and menu title/art only. Prototype float targets are at most 0.48px for pads and 1.8px for title/art; reduced motion is static and hidden work pauses.
+- Selected pads use a brighter, slightly lifted leaf treatment with no cell or pad outline. Keyboard focus uses two dew beads.
+- Keep title/art anchors and the menu shore fixed across menu states, reserving the largest Progression submenu height. Use Chewy only for the prototype title; UI/digits retain Outfit.
 - Spacing: 4px between cells/buttons; 8px at edges, groups and board/dock.
 - Ten dock keys: bottom 2x5 in portrait, right 5x2 in landscape.
 - No top bar, permanent HUD or gameplay mascot. Use one rough combined menu-art placeholder.

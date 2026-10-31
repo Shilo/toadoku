@@ -1,111 +1,78 @@
 # Current UI and UX direction
 
-For a self-contained continuation record and selected artifact paths, start with [design handoff](design-handoff.md). Inward placement and Winding shallows B are selected; procedural pad cutouts and animated water are future research/implementation tasks.
+For continuation, read [design handoff](design-handoff.md) and [prototype progress](prototype-progress.md). The current ignored prototype is `prototypes/pond-visual-v1/`; latest authorized refinements replace perfect circles, stationary pad faces, cell selection outlines and menu identity reflow.
 
 ## Locked direction
 
-Use C, Quiet Flat, soft-raised controls, and the basic Pond theme only for the current milestone. Keep B/A and background-image capability documented for later. Halloween and More functionality are deferred in [TODO.md](../TODO.md).
+Basic Quiet Flat Pond uses fluid three-color Winding shallows B, two-color abstract ground, inward near-circular notched green pads and soft-raised cream controls. More stays disabled. The world should feel like an animated pond; clean consistency belongs to readable digits and UI controls. No conventional board frame, permanent gameplay HUD or gameplay frog.
 
-Preserve the soft-raised green pad finish and cream/ivory menu/input controls. The latest pad silhouette is a true 1:1 circle with 50% radius, superseding the stretched notched pastille. Keep the lower lip and highlight inside that circular silhouette so neither changes its aspect ratio. Action/menu button shapes stay unchanged. The disabled More treatment remains muted. See [button study](research/tactile-buttons.md) for interaction states; older notched/classic-board geometry there is historical.
-
-Keep Fill space as the default board allocation, with Square retained as a modular preference. Its user-facing setting is deferred with the disabled More/Settings entry. Portrait has two rows of five input keys at the bottom; landscape has five rows of two at the right. Preserve upright glyphs, logical cell identity and game state when remeasuring viewport/safe areas.
-
-The ten-key order follows the agreed mockup: portrait `1 2 3 4 5 / 6 7 8 9 More`; landscape `1 2 / 3 4 / 5 6 / 7 8 / 9 More`. The More key remains in its tenth position but is disabled. No top overflow or substitute Tools button is added.
+The board remains Fill space with the Square preference deferred behind unavailable Settings. Portrait dock: `1 2 3 4 5 / 6 7 8 9 More`. Landscape dock: `1 2 / 3 4 / 5 6 / 7 8 / 9 More`. Keep upright glyphs, fixed logical identity and exactly ten keys.
 
 ## Exact space use
 
-Use only two theme spacing tokens: **small 4 CSS px** and **large 8 CSS px**, with large always exactly twice small. This supersedes the earlier zero-decorative-edge rule. Share these tokens between menus and gameplay and keep them constant when rotating.
-
 | Placement | Token |
 | --- | --- |
-| Neighboring rectangular cell buttons inside a group | Small, 4px |
-| Neighboring numeric keys and menu buttons | Small, 4px |
-| Gaps between 3 by 3 groups | Large, 8px |
-| Scene edges in menu and gameplay | Large, 8px |
-| Board-to-dock separation | Large, 8px |
-| Any other authored padding or gap | Reuse small or large; no third spacing size |
+| Neighboring full rectangular cell buttons and action/menu buttons | Small, 4px |
+| Scene edges, 3x3 group gaps and board/dock separation | Large, 8px |
+| Other authored padding/gaps | Reuse small or large |
 
-- Fill space consumes the entire remaining rectangle after the single outer 8px inset, dock and 8px board/dock gap. No extra board wrapper padding, doubled region padding, reserved header/status strip or scenic spacer.
-- Dock keys align to the bottom in portrait or right edge in landscape, inside that same 8px scene inset. Measure board spacing between full rectangular cell buttons; circular faces leave additional water inside their slots. That variable visual water is not another padding token. Action-key gaps still use their complete visual bounds.
-- Add actual system safe-area insets outside the authored spacing when necessary. System protection is not a third theme spacing token. Radii, lip depth, strokes, font sizes and control dimensions are not padding/gap tokens.
-- When the deferred Square preference is implemented, center the largest square within the same allocation and keep the dock fixed. That mode intentionally leaves background visible.
-- Generated mockup whitespace is not a spacing specification. Actual layout must be measured against its available rectangle and device insets.
+Apply the single scene inset once, plus actual system safe areas. Fill every remaining board pixel after dock/gap allocation. No wrapper padding, scenic strip or artificial aspect-ratio cap. Shape sizes, fonts, lip depth and tiny motion travel are not spacing tokens. Water around near-circular faces is an aspect-ratio effect.
 
 ## Main menu
 
-Show both modes directly. Place Quick Play above Progression in a bottom-left action block. Put the disabled More button at bottom-right, aligned with Progression's vertical center and lower edge. Use this same action relationship in portrait and landscape, rather than moving the mode block to the right in landscape. Title and combined art placeholder stay higher in the scene with responsive positioning.
+Place Quick Play above Progression in a bottom-left action block and disabled More bottom-right aligned with the lower row in both orientations. Quick Play shows same-scene difficulty choices; Progression shows new/existing-game choices with no separate difficulty picker. The visual prototype opens the same fixed specimen and exposes no save policy.
 
-Quick Play switches to difficulty choices in the same scene; Progression switches to existing/new-save choices. Back returns to mode selection. Save-slot count and replacement policy remain deferred. Do not add an initial Play-only screen.
+Reserve the largest Progression label-plus-three-button allocation for every menu state. The title, art anchor and ground/shore height stay fixed when switching mode, Quick Play and Progression choices. Only bounded visual float moves title/art. In landscape retain the left mode/right More relationship on one connected cove shore; do not move modes to the right.
+
+## Ground behind controls
+
+Water uses `#0D6267`, `#329D9A`, `#7ED1B8`. Ground adds dry sage `#B6BA86` plus wet reed `#6D9F81` as a transition bank. All menu actions and gameplay dock keys rest over dry ground, with an organic wet-bank curve merging into the pond. No straight separators, rectangular cards or per-button ground trays.
+
+Shore geometry bleeds through left/right edges in portrait. In landscape the dock bank bleeds through top/bottom edges; the menu's connected cove supports both lower action blocks and continues to its vertical edges. Gameplay land uses the existing dock allocation/gap and never reduces the board or crosses pad motion bounds.
 
 ## Deliberately temporary art
 
-Use one replaceable **combined frog-and-lily-pad menu image**, not two independently positioned sprites. It is intentionally rough, black and white, with a conspicuous question mark or template marker. It must look provisional alongside polished UI and background styling. Do not source paid/free sprite packs for this milestone or turn the placeholder into a polished character design.
+Use one replaceable combined frog-and-pad image. It remains intentionally childish and scribbly, black and white, with a conspicuous question mark/TEMP marker. Keep its stable display anchor and contain sizing. No polished mascot or sprite-pack sourcing. Final production illustration must be human-made with verified provenance/license.
 
-Final illustration will be supplied by a human author, with the existing provenance/license rules. Keep replacement simple: one local asset reference, a stable display box and contain sizing. A different compatible art style must not require UI reconstruction. Existing AI concept art remains temporary and ignored. The placeholder is not evidence of approved final art.
-
-Gameplay still has no decorative frog mascot. Proposed lily-pad cells below are functional presentation surfaces, separate from the replaceable menu image.
+Chewy is the local licensed title-only prototype font, giving plump playful lettering. Outfit remains the consistent UI/digit face. Title and art are pond objects and float subtly; neither participates in submenu reflow. Gameplay has no decorative frog.
 
 ## More menu: deferred idea, not implemented
 
-Keep More disabled in menus and gameplay for now. Later, main-menu More could expose regular options. In gameplay, one shared overlay could expose those regular options with Sudoku tools to the right, without a nested More > Tools step. This is a recorded idea, not a selected popup layout. On narrow screens it may need stacking rather than side-by-side columns.
-
-The earlier direct-tools-plus-Settings proposal remains research, not current functionality. Notes, Undo, Erase and Hint are the common shortlist. Restore accessible access before claiming that the mockup demonstrates the full solving workflow. Do not invent hidden gestures to compensate for a disabled menu.
+More remains disabled in both scenes. Future regular options plus adjacent gameplay tools are a recorded proposal, with narrow-screen stacking unresolved. Notes, Undo, Erase and Hint remain future tools. No top overflow, extra dock key or invented gesture replaces unavailable controls.
 
 ## Progress information
 
-Retain the agreed nonblocking start notice and persistent completion results until Continue, rather than a permanent HUD. Do not force timed waits or auto-dismiss earned rewards. Exact duration/presentation remains open. A non-timed session-information surface is required when More/Settings is implemented. Start active timing when the board is visible and interactive, not at the first digit.
+A brief nonblocking start notice and persistent completion results remain eventual feedback decisions. The prototype's temporary return/dismiss notice overlays the ground-backed dock without adding a permanent key. Browser Back and Escape provide a minimal return path; after dismissing the notice touch users use browser Back. There is no scoring, timing, reward or completion implementation.
 
 ## Accepted pond-board direction; region tones under review
 
-The top-down pond and broad procedural pad-board presentation are accepted as the visual direction. Flat does not mean a blank field: use a few broad organic curves suggesting connected water and shallows, inspired by the earlier abstract theme. Use exactly three solid background colors, shared unchanged by menu and gameplay. No fourth water tint, opacity blend, large ripple rings, gradients, highlights, reflective water or painted horizon. The three-color limit applies to water/background shapes, not control fills, lips, ink or placeholder art. Keep gameplay contours from obscuring region boundaries. The menu's combined placeholder remains an overhead/slightly oblique provisional game image, not a commitment to pixel-art rendering or a game engine.
+Keep classic 9x9 logical structure and separated 3x3 groups without a drawn grid/frame. Every cell is a fixed full rectangular native button, including water and pad cutouts. Decorative geometry is noninteractive and cannot resize or clip the target.
 
-The board removes the traditional outer panel and drawn grid lines. Each of the 81 logical rectangular cells shows a lily-pad-like face; its complete rectangle remains selectable, including surrounding water. Rows, columns and all nine 3 by 3 regions remain classic Sudoku. Changing presentation does not change rules or remove notes. Keep the numeric/action keys a distinct warm cream/ivory family against the green pad faces; this separation was explicitly preferred.
-
-Use separated 3 by 3 groups and procedural circular pad faces inside stretched rectangular buttons. A face has diameter equal to the shorter available cell dimension; it never stretches into an oval or fills the long axis. Text/notes belong to the circle and move with it. The entire rectangular cell, including visible water, is the button. Do not clip pointer events or focus to the decorative circle. Region gaps remain a second cue alongside water shape/lightness.
+Water has exactly three solid fills shared by both scenes; the two land roles are separate. No water gradients, fourth tints, opacity blend, texture, reflective lighting or large ripple rings. Broad smooth S curves and shared junctions must feel fluid rather than like nine wavy rectangles or small hooked corners. Every group's complete moving pad/label envelope stays in its assigned fill.
 
 ## Circular-pad alignment: selected inward
 
-Inward is selected without moving, resizing or overlapping logical cell buttons. Preserve centered as the earlier comparison:
+Inward anchors remain selected: group rows align bottom/center/top and columns right/center/left. Centered placement remains a historical comparison, not a setting.
 
-- **Centered:** every circle is horizontally and vertically centered in its rectangle. This preserves evenly stepped digit centers apart from the existing region gap.
-- **Inward:** group row 1 aligns bottom, row 2 center, row 3 top; group column 1 aligns right, column 2 center, column 3 left. Combine both axes, so a group's top-left circle sits bottom-right in its cell. The center circle remains centered. Digits/notes follow the circle. Rows and columns still form straight lines; the distance between their centers becomes uneven across region boundaries.
+The decorative envelope remains 1:1 and fits the cell's shorter axis, but its edge is nearly circular rather than a perfect circle. Use subtle deterministic per-cell perimeter variation and a true shallow notch with varied angle/depth. Preserve the soft-raised green finish, inset lip/highlight and quiet opaque number/note area. Never stretch leaves or glyphs, paint fake holes or add distracting veins. Variation must not regenerate on selection, rerender or rotation.
 
-Inward is selected because it strengthens group clusters and exposes more water for the selected B contours. Do not add an alignment setting. Circular faces reduce note space: representative diameter is about 33.77 CSS px on the current emulations. A nine-note cell is shown, but its tiny candidate text is not approved production typography. Review readability and row/column scanning without treating the selected alignment as an unresolved design vote.
+A shared floating token moves each pad face and its text together, with seeded phase/direction and at most 0.48 CSS px of float travel in this prototype. Title/art target about 1.8 CSS px. Logical cells, hitboxes, dock, land and menu anchors remain fixed. Reduced motion renders a static pose and hidden-page work pauses.
 
-Alignment only moves along an axis with unused cell space. In these portrait emulations that is vertical; in landscape it is horizontal. The unchanged short axis is already filled by the circular diameter.
+Selection naturally brightens and lifts the leaf by 0.9px with a 0.95px lip and one cream-edged dew drop. No rectangular selection outline or encircling pad ring. Two dew beads provide distinct keyboard focus. Keep readable text and clear non-color cues; final full solving-state accessibility still needs validation.
 
-The next requested silhouette refinement is researched procedural splits/cutouts and possibly a gently irregular edge, within the same 1:1 envelope and inward placement. Change masking only, not pad colors, raised styling, central label area or full-cell buttons. The current circle is the baseline; exact cuts/perimeter are future work, not implemented. Both menu/gameplay water backgrounds should later animate slowly. Preserve flat three-color B and stable puzzle geometry, with a static reduced-motion rendering. CSS-led drift/deformation and a shader are options to research, not selected implementations. See [future visual research](future-visual-research.md).
-
-Both alignments are shown in portrait and landscape under ignored `prototypes/circular-pond/centered-inward-review.png`. The initial ImageGen concept and exact prompt are alongside in `imagegen-concept.png` and `README.md`; its placement is illustrative. The measured follow-up checks all 81 native cell buttons, square circular bounds, the inward rules, full-cell corner hit testing, selection from water, logical arrow navigation and sampled circle color containment. This remains a temporary selection/layout demo, not a Sudoku implementation.
-
-Do not stretch bitmap/SVG botanical illustrations to fit long cells. If illustrated pads are selected later, contain their proportions; this leaves more visible water and limits notes. Procedural control surfaces are the stronger first comparison for Fill space and require no additional illustration asset. They must not become detailed AI-authored production leaf drawings.
-
-Implementation-format options for later: CSS control geometry is the simplest adaptive approach; a human-made SVG gives a scalable recognizable leaf with preserved aspect ratio; a human-made PNG/WebP with transparency gives a fixed sprite but needs suitable source resolution and contain sizing. These are presentation alternatives, not a new game-engine decision. A single shared leaf asset can be reused across 81 cells if that route is selected.
-
-Solid high-contrast digits are preferable to outlined text over a busy leaf. Keep candidate positions fixed and inspect all nine notes at phone size. Selection/focus/conflict states need non-color cues without permanent grid borders. Board geometry stays stable while solving; no eighty-one independently bobbing pads.
-
-The overall visual direction is accepted; exact region tones, dimensions, contrast and actual-size interaction still need review before implementation. Reject or revise details if regions cannot be identified, notes become unreadable, or pad shapes mislead touch selection. See [independent redesign review](research/top-down-pond-board.md).
-
-The latest four-view image and exact ImageGen prompts are under ignored `prototypes/top-down-pond/`. They show the reviewed procedural-pad/region-spacing approach in both orientations, with the rough composite placeholder confined to menus. The render is not an exact spacing or input specification.
+Tiny nine-note examples at phone size remain unapproved production typography. Inward placement and restrained motion do not waive that limitation.
 
 ## Three-color organic regions: current comparison
 
-Use the same three water fills as the curving menu, with uniform soft-raised green circles. All nine visible circles, lips and labels of a group stay within one assigned water color. Restore broad winding contours and selective curved junctions from the B reference, not nine slightly wavy rectangles. Curves may now use the empty water within stretched cell slots as well as group channels, provided no circle/label is crossed. This supersedes the restriction to 8px channels only. Background color never changes the rectangular hitbox or Sudoku region identity. Yellow reference annotations are not outlines.
+Selected B uses `A B C / B C A / C A B`. Preserve A, Connected bays, with `A B A / C A C / A B A`, as an archived alternative. These names do not change the selected overall scene C, Quiet Flat. Do not add public A/B selectors.
 
-Two temporary alternatives are compared in `prototypes/organic-three-color-pond/menu-and-gameplay.png`, with exact initial/correction prompts alongside:
-
-- **A, Connected bays, preserved alternative:** one continuous deep-water ground with four organic patches at regions 2, 4, 6, 8. Fill arrangement `A B A / C A C / A B A`. Preserves the selective-patch idea and a connected base, but retains some four-island repetition.
-- **B, Winding shallows, selected:** whole-region three-color arrangement `A B C / B C A / C A B`, with gently winding shared boundaries rather than nine separate cards. Selected for the more natural pond appearance. Keep A documented for possible later reconsideration, not as another current user setting.
-
-Board variant B is now approved as the visual direction; exact contour tuning and palette/accessibility checks remain open. Its name is separate from the earlier scene treatment B, Layered Pond: Quiet Flat C is still the overall style. Use broader winding contours within the available empty water around circular faces; do not enlarge logical cell/group gaps or add scenic spacers. Stable pad/hitbox geometry takes priority. Validate grayscale, color-vision simulations, notes, focus and selection. Earlier generated spacing/texture is not an approved change. No public region-style selector or production implementation is added.
+Current curve work improves the baseline's rigid corners while preserving group-fill containment over both water and pad motion. Use available empty cell water, not extra group spacing or scenic voids. Compare screenshots against the [new ImageGen guideline](../prototypes/pond-visual-v1/refinement/concept-shore-v2.png): match fluid rhythm, near-round leaves, shore composition and playful title. Reject generated gradients, exaggerated cuts, wrong digits/cell counts and oversized gaps. Record better/worse/intentional differences in [prototype progress](prototype-progress.md).
 
 ## Motorola G31/G32 layout study
 
-Use 360 by 800 CSS px in portrait and 800 by 360 in landscape at representative DPR 3, yielding 1080 by 2400 and 2400 by 1080 physical-pixel PNGs. These are emulation assumptions, not observed hardware CSS viewports. See [device evidence and hardware follow-up](research/technology.md#motorola-g31g32-targets).
+Current checks target 360x800 and 800x360 CSS px, with 393x873 and its transpose as additional layouts. Native DPR-3 and hardware testing remain pending. Baseline Codex captures used native DPR 1, plus explicitly labeled 3x rendering simulation for 1080x2400 and 2400x1080 outputs. Browser chrome, safe areas, Android text scaling and sustained device performance require hardware.
 
-The earlier ignored static study `prototypes/motorola-spacing/` renders both menu/gameplay orientations using the two spacing tokens. Board allocation measures approximately 344 by 640.81 CSS px in portrait and 640.81 by 344 in landscape. The 65.6px square dock keys use the same four-pixel gaps in both orientations. All remaining play space is filled; glyphs remain upright and unstretched. Its restrained rectangular-looking boundaries were subsequently rejected; the circular-pad study above replaces that gameplay presentation while preserving logical allocation.
-
-That earlier study's Playwright checks cover 81 pads, ten keys, measured 4px/8px gaps, outer/dock bounds, no overflow, exactly three shared water fills, menu alignment and sampled pad-rectangle containment within the assigned water region. Results are under `measurements.json`; four original screenshots and `portrait-landscape-review.png` are alongside. It is preserved as an earlier temporary spacing study, not the latest circle/water direction or a functional game. Safe areas are zero in emulation; physical-device comfort, note readability and installed/browser behavior remain unverified.
+Earlier `prototypes/motorola-spacing/` and `prototypes/circular-pond/` measurements are historical evidence for the fixed cell/dock allocation, not proof of new shore, notch or floating behavior. Their scripts and images remain preserved. Current test state lives in [prototype progress](prototype-progress.md).
 
 ## Earlier rounded alternate regions: preserved proposal
 

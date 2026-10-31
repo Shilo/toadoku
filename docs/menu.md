@@ -11,7 +11,7 @@ Show both mode choices immediately in the main scene. Quick Play and Progression
 
 Use a change of menu state within the same illustrated scene, not a new page or dashboard. Avoid an extra Play landing screen before mode selection. Preserve the selected main-menu layout. Exact submenu transitions and start-button behavior still require review.
 
-Place Quick Play above Progression in a bottom-left block in both orientations. Put More at bottom-right, aligned vertically with Progression, rather than moving the mode block to the right in landscape. Title and the combined placeholder remain higher in the composition. Keep Back with the lower interaction area. More is disabled for now; no settings popup is functional. See [current UI and UX](ui-ux.md).
+Place Quick Play above Progression in a bottom-left block in both orientations. Put More at bottom-right, aligned vertically with Progression, rather than moving the mode block to the right in landscape. Title and the combined placeholder remain higher over water at fixed layout anchors. Reserve the maximum Progression label plus three action-button rows for every submenu, so the identity and shore height do not reflow when choices change. Keep Back with the lower interaction area. More is disabled for now; no settings popup is functional. See [current UI and UX](ui-ux.md).
 
 Quick Play has explicit difficulty selection. Progression follows its saved or initial difficulty schedule; a separate Progression difficulty picker is not approved.
 
@@ -33,4 +33,8 @@ Follow the [human-made production artwork policy](design.md#artwork-policy). AI-
 
 Use one combined frog-and-lily-pad image, intentionally rough black and white with a conspicuous question mark/template cue. Do not make separate frog/pad files or a polished character for this milestone. A later human-made image can replace it without changing layout. The selected camera is overhead pond water with a top-down or slightly oblique top-down placeholder, not a horizon scene.
 
-Menu and gameplay share the same three solid water fills and 4px/8px spacing. The menu uses broad organic pond curves and should later gain restrained water motion after research/testing. The latest selected menu references and full restart record are in [design handoff](design-handoff.md). Cutout and animation work is not implemented.
+Menu and gameplay share three solid water fills, two ground roles and 4px/8px spacing. The menu's abstract wet reed #6D9F81 to dry sage #B6BA86 shore supports all actions and reserves the largest submenu height. It bleeds through left/right edges in portrait; the landscape connected cove keeps modes left and More right while continuing ground to the vertical edges. Avoid a straight separator or rectangular backing.
+
+The title uses licensed local Chewy only in this prototype; UI/digits retain Outfit. Title and art receive the pond-floating token, with seeded subtle float targeting about 1.8px inside their fixed anchors. Reduced motion is static and hidden work pauses. Keep the combined black-and-white art deliberately childish and scribbly. The baseline water renderer exists; current refinement/test status is in [prototype progress](prototype-progress.md).
+
+CSS sets the shared maximum menu allocation on the first layout, without waiting for a resize observer. It is 240.8 CSS px at the representative phone dimensions. Geometry measurements may feed the shore renderer, but cannot move the initial identity anchors or change reservation between submenus.

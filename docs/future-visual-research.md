@@ -1,67 +1,74 @@
-# Future visual research and acceptance plan
+# Visual refinement and acceptance plan
 
-Status: 2026-10-31. Requested future improvements to the selected inward-pad/Winding-shallows design. This records work to research, implement and test later; neither feature is implemented or validated now. Preserve the [design handoff](design-handoff.md).
+Status: 2026-10-31. The fresh ignored baseline in `prototypes/pond-visual-v1/` implements menu/game navigation, static digits, cell selection and SVG water motion. The current authorized refinement adds shore, varied near-round notched leaves, natural selection, stable menu anchors and subtle floating pond objects. The [progress record](prototype-progress.md) owns final implementation/test results. No production adoption or hardware validation follows from this plan alone.
 
-Scope update: animated water is now part of the next visual prototype. Research the simplest useful approach and implement/test it there; production integration remains later. Procedural pad cuts remain deferred. The prototype only adds menu/game navigation, static digits and pad selection, not Sudoku gameplay or product infrastructure.
-
-Create a fresh prototype rather than extending old demos. A pond sub-agent researches animation options and reports a short recommendation/tradeoff comparison, then owns implementation and motion checks for the chosen background. The parent challenges the recommendation and handles screens/integration. Use explicit, separate file ownership; existing demos are visual references only.
+The latest user directions supersede earlier stationary perfect-circle pads, full-cell selection outlines, all-water control backgrounds and title/art reflow. Older demos remain visual references only. Refining the current fresh baseline is authorized; keep code/assets/dependencies/builds/evidence ignored.
 
 ## Procedural lily-pad splits and perimeter
 
-The request concerns silhouette only: researched notches, splits, cutouts or gaps that make the round pad feel like an abstract lily pad, possibly with a gently irregular edge. Preserve its green palette, raised lower edge/highlight, button character, inward alignment and 1:1 bounding envelope. This is not approval for realistic leaf texture, new shading, veins over text, recoloring or a stretched botanical sprite.
+Implement restrained stable per-cell silhouette variation inside the same 1:1 circular-derived envelope: a nearly round perimeter and one shallow real notch with varied angle/depth. Preserve inward anchors, the green raised finish, inset lip/highlight and a broad quiet opaque center for digits/notes. This is not approval for stretched botanical art, busy veins, deep star-like cuts or random text motion.
 
-Research tasks:
+Botanical/reference work should distinguish true openings from surface markings. Procedural variation must be seeded and stable across selection, rendering and rotation, not regenerated every frame. The notch exposes the actual underlying water rather than a painted fake dark hole. Final human-made artwork policy still applies to illustrations; these are temporary procedural presentation studies.
 
-- Inspect reliable botanical photos/descriptions and record sources. Determine which features are actual openings versus surface markings. Do not assume every apparent vein should become a transparent slit.
-- Compare a single edge split with a few restrained cuts and an optional mildly irregular perimeter. Research the minimum recognizable treatment rather than building a general plant generator.
-- Compare simple procedural CSS/SVG masking or path geometry for these control surfaces. Choose the smallest approach that supports the required cutouts, smooth sizing and phone performance; no additional generator framework is selected.
-- Keep any cutout outside a protected central number/note zone. True gaps expose the existing pond fill; do not paint dark fake holes or use extra water colors.
-- If controlled variation is useful, keep it deterministic and stable for a cell/puzzle. Do not regenerate it on input, language/theme changes or rotation. Seed/variation policy and parameter values remain open.
-- Use temporary ignored ImageGen comparisons before refining a measured control prototype. Final illustrated assets, if ever needed, remain subject to the human-made artwork policy.
+Acceptance:
 
-Acceptance before adoption:
+- The leaf and full floating/lift envelope fit the fixed logical cell allocation without overlapping another pad or crossing group water/ground boundaries.
+- Inward anchors, all 81 full rectangular button bounds, 4px/8px gaps and logical arrow navigation remain unchanged.
+- Clicking a notch or water selects the same cell. Visual masks/layers ignore pointer input.
+- Quiet opaque text zones contain digits and all candidate positions over the whole movement range. Tiny nine-note specimens remain unapproved production typography.
+- Lip/highlight follows the leaf silhouette without filling the notch or leaving a rectangular surface.
+- Near-round perimeter variation is subtle at actual phone size; notches remain varied without distracting from recognition.
 
-- Decorative face remains within a 1:1 circular-derived envelope at all target sizes and orientations; it never stretches with the long cell axis.
-- Inward placement, all rectangular button bounds, spacing and logical row/column navigation remain unchanged.
-- Water, cuts and perimeter layers ignore pointer input. Clicking an opening or empty part of the cell selects that exact cell.
-- Labels and all nine candidate positions remain on a quiet opaque area with readable type and contrast. Test givens, entries, errors, selection, focus, blank pads and pressed states. Do not approve the current tiny note specimen by default.
-- Lower edge/highlight follows the new visual mask without leaking across holes or expanding the face bounds. The cream dock/menu controls are unchanged.
-- Shape stays still while solving, scales cleanly, and remains usable in grayscale, browser zoom and both orientations.
-- Procedural UI control geometry is not a substitute route for shipping AI-created illustrations. Keep provenance requirements for actual artwork.
+## Natural selection and keyboard focus
 
-Open choices: exact cuts, count/depth, perimeter amplitude, whether any variation is beneficial, mask/path format and final readable note solution.
+Replace rectangular cell outlines and encircling pad rings with a brighter leaf face, 0.9px raised pose, 0.95px lip and one cream-edged dew drop. This selection treatment belongs to the decorative leaf, not the rectangular target. Keyboard focus is distinct through two dew beads. Check keyboard discoverability and non-color recognition without adding a permanent cell grid. Later entry/error/conflict solving states remain separate future work.
 
-## Animated pond water in both scenes
+## Two-color ground and fixed menu identity
 
-The menu and gameplay backgrounds should gently evoke moving/rippling water while retaining the selected flat abstract design. Slow drift/deformation of the existing three shapes is an explicitly suggested simple option. A shader is an investigation option, not an adopted technology or dependency.
+Three solid water roles remain `#0D6267`, `#329D9A`, `#7ED1B8`. Add wet reed `#6D9F81` and dry sage `#B6BA86` as two solid land roles. Dry ground covers all menu controls and gameplay dock keys. Its wet bank merges into the pond through broad abstract curves, with no straight divider, individual tray or rectangular dock card.
 
-Research tasks:
+Portrait shore bleeds beyond left/right edges. Landscape dock shore bleeds beyond top/bottom edges. The landscape menu retains left modes/right More on a connected cove bank, continuing land to vertical edges. Shore crests cannot cover pad motion bounds or reduce full board allocation.
 
-- Compare a static reference, restrained CSS-led shape movement and a small procedural-rendering approach only if the simpler option cannot achieve the desired motion.
-- Establish how to deform shared boundaries without seams, gaps, overlap flicker or temporary fourth colors. Decide what looks like water without becoming a realistic reflective scene or a collection of large ripple rings.
-- If a shader is evaluated, compare its visual benefit, startup/caching cost, compatibility, fallback and sustained device performance against CSS. Preserve JavaScript/static hosting and no required WebAssembly; do not introduce a game engine merely for water.
-- Keep menu and gameplay motion in one small background responsibility with authored theme parameters. Use broader freedom in the menu and constrained motion around gameplay circles.
-- Design a motion envelope so every visible pad, lip, digit and note remains in its assigned region fill throughout the animation. Do not let moving water imply a different 3x3 box.
-- Investigate reduced-motion handling, a stable static fallback, suspension when the page is hidden and behavior on resize, orientation change, resume and theme changes.
-- Discuss speed, amplitude and whether a motion preference is needed after comparing examples. No new permanent control is approved.
+Reserve the largest Progression submenu height, including its label plus three buttons, for every menu state. Title/art anchors and shore height must remain identical when switching modes and submenus. Only bounded floating is allowed. Chewy is the local licensed title-only prototype font; Outfit remains the readable UI/digit font. The one combined scribbly black-and-white question-mark/TEMP asset remains deliberately provisional.
 
-Acceptance before adoption:
+Acceptance:
 
-- Exactly the same three solid water fills remain shared by menu and gameplay; no unwanted gradient, tint, reflective layer or decorative texture. The desired impression comes from restrained movement/shape, not a new palette.
-- Full board allocation, inward pad placement, hitboxes, labels, focus indicators, dock and 4px/8px spacing remain stationary. No eighty-one bobbing pads or animated Sudoku contents.
-- Sample color containment over the complete motion range, not only a single animation frame. Check extreme phases and changes in orientation/viewport.
-- Reduced motion gives a fully usable static composition with the same region/readability cues. Hidden/background operation should not keep unnecessary rendering work active.
-- Verify hit testing and logical navigation during motion; the background never intercepts input. Motion must not affect puzzle correctness, timing, currency or saved progress.
-- Test actual Motorola G31/G32 in browser and installed PWA, portrait and landscape. Record frame timing, dropped frames, responsiveness, sustained load and memory against the static baseline; review energy/thermal impact where measurable. Set budgets from evidence, not desktop-only claims.
-- Verify desktop, Android display/text scaling, browser chrome/safe areas, offline reload, fallback behavior and screenshot comparability.
-- Keep the static renderer usable if animation/rendering support fails. No motion backend is selected until research and target-device testing justify it.
+- Every point behind each menu/dock button rectangle is dry land, in both orientations and every menu state.
+- Both ground roles are visible as one connected abstract shore/cove rather than a straight bar.
+- Switching main/Quick Play/Progression menus preserves title/art anchor bounds and maximum action/shore allocation.
+- No extra gameplay strip, header, dock key or spacing value is introduced.
+
+## Animated pond water and floating objects
+
+The baseline compared CSS transform drift, SVG deformation, Canvas2D and a small shader. A small shared SVG path renderer was chosen for the prototype. The current contour refinement should remove rigid panel-like corners and tiny hooks, using smooth broad winding S curves. There is no need for a game engine or shader dependency merely to copy generated gradients.
+
+Water movement and floating-object movement are separate presentation layers. One shared token marks pond objects: pad faces/labels, title and menu art. Stable per-object seeds vary phase, duration and direction. Current float targets are at most 0.48 CSS px for pads and 1.8 CSS px for title/art, separate from subtle selected-leaf lift. Final measured envelopes belong in the progress record. Hitboxes, layout anchors, dock, land and UI controls remain fixed. Motion should feel like very gentle floating, with readability taking priority over amplitude.
+
+Acceptance:
+
+- Exactly three solid authored water fills remain shared by menu/gameplay. The two ground fills are separate; no gradients, translucent water layers, reflective highlights, texture or large ripple rings.
+- Every moving leaf/lip/label remains in its assigned group fill over the combined water/object motion envelope.
+- Verify analytical maximum envelopes as well as sampled phases. A finite sample sweep alone does not prove every instant of independent seeded cycles.
+- The current pad construction uses normalized base radius 44.1 and maximum Bezier control radius 44.87. Its conservative visual union `0.4487D + 1.43px` stays within the fixed half-diameter for `D >= 28px`; water clearance reserves the larger nominal circle plus 1.5px. Recheck that bound if float, selected lift, lip or silhouette parameters change.
+- Adjacent water shapes share smooth boundaries without cracks, overlap flicker, tiny unexpected hooks or tray-like rectangular corners.
+- Reduced motion yields a usable stable static composition, including water, leaves, title and art. Check initial preference and runtime changes.
+- Hidden/background work pauses and resumes without counting hidden elapsed time or snapping between seeds.
+- Selection, keyboard movement, resize and rotation preserve fixed cell bounds and object seeds. The floating layer never owns rules, sessions or storage.
+- Compare native-size browser images with the ImageGen guideline. Match fluid curve rhythm, shore composition and gentle leaf character while rejecting wrong cell counts, giant scenic voids, gradients and inaccurate spacing. Record better/worse/intentional differences.
+
+## Validation and implementation limits
+
+Use Codex browser checks at representative Motorola 360x800 and 800x360 CSS px, plus 393x873 and its transpose and desktop. Label emulation. The earlier baseline browser exposed native DPR 1 and dimensions-only viewport control; its 3x screenshots are rendering simulations, not native DPR-3 or hardware. Retain that distinction in new evidence.
+
+Actual G31/G32 testing remains pending: native viewport/DPR, browser chrome, safe areas, Android text scaling, sustained frame pacing, dropped frames, responsiveness, energy, thermals and installed-PWA behavior. Offline/PWA infrastructure is outside this prototype. Desktop path-update counts exclude paint/compositing and cannot establish phone performance.
+
+Keep final production palette/font/art approval, full solving states and grayscale/color-vision accessibility as explicit remaining work. Current scope still excludes Sudoku logic, number entry, scoring, progression logic, saves, stores and production delivery.
 
 ## Implementation order
 
-1. Research sources/options and record a concise comparison for the next discussion.
-2. Review temporary examples against the selected handoff; settle the unresolved parameters.
-3. Implement only the agreed feature in the presentation/background boundary.
-4. Test geometry, readability, input and actual-device performance as applicable.
-5. Record evidence and limitations before calling either feature complete.
-
-These tasks do not reopen the accepted inward alignment, board B, cream action controls, two-size spacing, menu layout or basic-Pond scope.
+1. Use a sub-agent for bounded concept/ImageGen work and background refinements, with explicit separate screen/integration ownership.
+2. Review the guideline's useful visual qualities and reject its geometry/spacing errors.
+3. Implement only the authorized presentation refinements in the existing current ignored prototype.
+4. Check geometry, containment, input, fixed menu anchors, ground coverage, reduced motion, hidden-page behavior and both orientations.
+5. Compare screenshots against the mockup and record findings, progress and limits in [prototype progress](prototype-progress.md).
+6. Commit durable documentation with Conventional Commits. Keep prototype code, AI assets and test artifacts ignored.

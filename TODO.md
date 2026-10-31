@@ -1,12 +1,18 @@
 # Deferred work
 
-## Next visual prototype
+## Current visual prototype
 
-- [ ] Start a fresh ignored prototype directory; preserve old demos and use only their visual references/measurements, not their code.
-- [ ] Delegate pond-motion research and implementation to a sub-agent. Review its approach comparison before choosing; separate background ownership from parent-owned screens/integration.
-- [ ] Combine menu/gameplay navigation, static example numbers and full-cell pad selection. Keep other controls inert/disabled; do not implement Sudoku logic or the product roadmap.
-- [ ] Focus on the selected theme and convincing dynamic top-down pond water in both screens. Preserve the flat three-color B composition, inward pads, cream controls and fixed layout. Research/test the simplest motion approach with static reduced motion.
-- [ ] Review portrait/landscape at Motorola representative sizes. Keep all prototype code/assets ignored. See [exact scope](docs/design-handoff.md#next-session-visual-prototype-only).
+- [x] Build the fresh ignored `prototypes/pond-visual-v1/` baseline without copying old prototype code.
+- [x] Delegate renderer research/background implementation with separate screen/integration ownership; compare CSS/SVG, canvas and a small shader before selecting prototype SVG.
+- [x] Implement baseline menu/game navigation, static numbers/notes, full rectangular selection targets, disabled/inert controls and water animation.
+- [x] Check baseline Motorola CSS orientations, fixed allocation, input, reduced/hidden motion and geometric containment. Hardware/native DPR-3 are not certified.
+- [x] Use a sub-agent and ImageGen to explore the authorized shore/floating refinement before UI experiments. Preserve generated errors as critique, not requirements.
+- [x] Finish/verify the current authorized refinement: two-color abstract ground, fluid shared water curves, stable varied near-round notched leaves, natural selection/two-dew focus, fixed menu identity/maximum submenu shore and title-only Chewy.
+- [x] Verify bounded seeded pond-object float, fixed hitboxes/layout, complete combined motion containment, static reduced motion and hidden pause in the prototype. Native hardware remains pending.
+- [x] Compare implementation screenshots against ImageGen, recording better/worse/intentional differences and exact measured checks.
+- [x] Record final refinement results and remaining limits in [prototype progress](docs/prototype-progress.md); keep all code/assets/evidence ignored.
+
+See [current scope](docs/design-handoff.md#next-session-visual-prototype-only). Refining the existing fresh prototype is authorized; older demos remain visual references only. No Sudoku engine, number entry, economy, saves or production/PWA work is authorized.
 
 ## More and settings
 
@@ -23,13 +29,14 @@
 - [ ] Replace the deliberately provisional black-and-white question-mark frog-plus-pad image with one human-made composite asset. Final provenance and rights still apply.
 - [ ] Asset-pack sourcing and purchases are deferred; a placeholder is the current direction.
 
-## Selected design: future visual refinements
+## Selected design: refinement and validation
 
-- [x] Select inward 1:1 pad placement and B, Winding shallows. Preserve centered and board A as historical alternatives. Resume from [design handoff](docs/design-handoff.md).
-- [ ] Research real lily-pad references for splits, cutouts and a restrained irregular edge. Distinguish actual openings from surface markings before choosing procedural masks/paths.
-- [ ] Mock up and review the minimum procedural silhouette treatment inside the same 1:1 bounds. Preserve inward placement, green colors, raised lip/highlight, opaque number/note zone and full rectangular hitboxes. No generator/variation policy is selected.
-- [ ] Research slow water animation for both menu and gameplay: compare simple shape drift/deformation with a shader only if the visual benefit justifies it. Preserve the three-color flat B composition and static puzzle geometry.
-- [ ] Implement/test motion only after that research and review: complete-phase pad containment, reduced-motion/static fallback, hidden-page behavior, input/keyboard, resize/rotation and actual Motorola performance. Both cutouts and animation are unimplemented now. Follow [acceptance plan](docs/future-visual-research.md).
+- [x] Select inward 1:1 pad anchors and B, Winding shallows. Preserve centered and board A as history.
+- [x] Authorize two ground roles behind controls, stable maximum-submenu menu anchoring, natural selection, varied shallow pad notches and subtle floating pond objects. These supersede stationary perfect circles and full-cell selection outlines.
+- [x] Review procedural silhouettes at representative phone CSS sizes: shallow true openings, nearly round subtle perimeter variation, opaque text zone, stable seeds and full water/notch hit testing. Physical-phone readability remains pending.
+- [x] Verify combined water/leaf motion envelopes analytically and through sampled browser/geometry evidence, rather than reusing stationary-baseline results.
+- [ ] Validate region recognition in grayscale/color-vision simulations and tiny-note readability. The current nine-note specimen is not approved production typography.
+- [ ] Test actual Motorola G31/G32 viewport/DPR, browser chrome/safe areas, Android scaling, sustained rendering, energy and thermals. CSS emulation and 3x rendering simulations do not replace hardware.
 
 ## Design and gameplay decisions
 

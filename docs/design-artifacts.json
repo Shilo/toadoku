@@ -1,7 +1,7 @@
 {
   "date": "2026-10-31",
-  "scope": "Local ignored visual history and reproducible prototype sources. Documentation/registry is tracked; these assets are not tracked, published or production art. Selected inward gameplay and menu-only references are identified explicitly. Historical and diagnostic files are not approvals.",
-  "selectedDesign": "Inward circular-derived pads, board B Winding shallows, three-color flat Pond, 4px/8px spacing. Cutouts and animation remain future work.",
+  "scope": "Tracked documentation/hash registry for local ignored prototypes, sources and visual evidence. Assets/code are not tracked, published, backed up by Git or promoted to production. Historical choices do not override the latest handoff.",
+  "selectedDesign": "Living flat Pond: three water colors plus two-color shore, inward organic notched leaves, natural selection, fixed menu identity, bounded floating objects, 4px/8px spacing and ten-key docks. Visual prototype and emulated checks complete; native Motorola/DPR3 and production acceptance pending.",
   "artifacts": [
     {
       "path": "prototypes/circular-pond/README.md",
@@ -49,7 +49,7 @@
     },
     {
       "path": "prototypes/circular-pond/landscape-inward.png",
-      "status": "selected visual reference",
+      "status": "historical selected visual reference; superseded by living pond refinement",
       "bytes": 254612,
       "sha256": "ade386050f6d3c1b1747a2386bdc511bf2d0722e6d42d9e5bb14d422cef3a5c6",
       "width": 2400,
@@ -71,7 +71,7 @@
     },
     {
       "path": "prototypes/circular-pond/portrait-inward.png",
-      "status": "selected visual reference",
+      "status": "historical selected visual reference; superseded by living pond refinement",
       "bytes": 251493,
       "sha256": "a0cf0cf43af8de408aec86abd4edef98078b26a2e0e1993b9bf92a07acdf62ab",
       "width": 1080,
@@ -307,7 +307,7 @@
     },
     {
       "path": "prototypes/motorola-spacing/landscape-menu.png",
-      "status": "selected visual reference",
+      "status": "historical selected visual reference; superseded by living pond refinement",
       "bytes": 111430,
       "sha256": "012708ac641fcf562f96268ee31e16b814db65f75ac14aba345f31a9a4ea8a8b",
       "width": 2400,
@@ -337,7 +337,7 @@
     },
     {
       "path": "prototypes/motorola-spacing/portrait-menu.png",
-      "status": "selected visual reference",
+      "status": "historical selected visual reference; superseded by living pond refinement",
       "bytes": 119667,
       "sha256": "924cea3832253b65eaab613e471a0196deed1c2db1a61e33fa9b815395d4abb9",
       "width": 1080,
@@ -490,6 +490,389 @@
       "status": "preserved concept, reference or prototype",
       "bytes": 7881,
       "sha256": "a4c0eb59446dcb5bc033daaf12981f2ca3d6274cb672bc222c8d2ed7e790b7e2"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/README.md",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 5954,
+      "sha256": "26b6b7bc521e03b2df12758162d1b90da20584c0aec23104955f6dac16ee50f2"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/package.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 467,
+      "sha256": "06d00d01440ad43d2a5c5239c49a83b95c2176f2396ec8c2085616e2c32183d8"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/package-lock.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 49751,
+      "sha256": "85c531611be42c5f8deb0b642dc22c6f482db279aa4f0e5f5af0318cc4dc8b80"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/index.html",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 547,
+      "sha256": "8b900529a36377686762e4cd2ae3a280ace2df2d571cd7f34b5becc405e7b43a"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/tsconfig.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 373,
+      "sha256": "c2e0c67bc10f06333fe48ed5e8df30a5914b855f0a6586ede6ba35819026bbad"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/vite.config.ts",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 158,
+      "sha256": "4083430e49431e1d551922d96874010cdc2b1c6c9bfdcbdf584e8e4ff14d0598"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/public/menu-placeholder.png",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 1296420,
+      "sha256": "b4c53b629017faa5f57c9a72d3cb80d182268dd729b93e842ddd6be229ffedf1",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "path": "prototypes/pond-visual-v1/public/Outfit.ttf",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 110884,
+      "sha256": "fc7287273e66929776e2ba54f144fe699080bec29f61bf649d70d871468aeade"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/public/Outfit-OFL.txt",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 4389,
+      "sha256": "c676351bf8576b9aba743cd5eaa8c0e7ee0d51f805d720447b4df4ddb6a2e416"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/public/Chewy-Regular.ttf",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 41248,
+      "sha256": "7cf75ea288f82fd20badea8ab4da7a656a96a7277c170811e813b3d3d6294147"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/public/Chewy-LICENSE.txt",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/research/concept-v2.md",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 7085,
+      "sha256": "85e04ba2b9470eab0b9eaff594a97d67b7cb771c83a81fa5faccdf1869a3d09f"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/research/water-v2.md",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 8990,
+      "sha256": "56656a51f0fc7dd6149aa62db6a3da95dbfa9eed0a477f6fadf56756d2c5b5e4"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/research/pads-v2.md",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 5755,
+      "sha256": "6c55d2f0d5538ecccd9a707d9fd1c21614dc44cd3e62e0bb9ac2d285db411b21"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/concept-shore-v2.png",
+      "status": "temporary AI guideline; not production art",
+      "bytes": 1602550,
+      "sha256": "4e468c0903a4a394fbc105f8353ddf47e37ae6a0c528c20c5adb9104b7e623b8",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/user-reference.png",
+      "status": "temporary AI guideline; not production art",
+      "bytes": 1798347,
+      "sha256": "9c9bf0963f7dfa77f825cdb0afd0b715593285192d2335416ca24f7a86506c2e",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/portrait-menu.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 29665,
+      "sha256": "dcaef334bbd9c1f48296c6d950199f8e338d59b20a15bdf475465a2e802dd6ab",
+      "width": 360,
+      "height": 800
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/portrait-game.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 42055,
+      "sha256": "a86331dc02fdf12771c67f57f687a91e0abc4fdcd24910e2956140ea30df186c",
+      "width": 360,
+      "height": 800
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/landscape-menu.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 26151,
+      "sha256": "5be1847fc07859f806cf1003d87958dec6f906dd1f4412a859a2ee23fd9fb930",
+      "width": 800,
+      "height": 360
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/landscape-game.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 41525,
+      "sha256": "768423c4aae68adc0da9cce44c75ba40a3bc8210dd5ce128506b2e97164110cc",
+      "width": 800,
+      "height": 360
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/portrait-progression.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 31107,
+      "sha256": "519c3291836026b876968ef596a2b42987ba346130f0d2ab818f1934002059f1",
+      "width": 360,
+      "height": 800
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/landscape-progression.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 27559,
+      "sha256": "d7bddbaaf450c33e692c52161825c68023ba2bf63bde74d7b4c1ddd54242b3c4",
+      "width": 800,
+      "height": 360
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/portrait-menu-3x.jpg",
+      "status": "current density rendering simulation; native DPR 1; not Motorola hardware",
+      "bytes": 147481,
+      "sha256": "ae6d8d1077578f399378e17f70c284d9c11aeb06e74c3c37fd8c356eccbe1a35",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/portrait-game-3x.jpg",
+      "status": "current density rendering simulation; native DPR 1; not Motorola hardware",
+      "bytes": 164795,
+      "sha256": "e6e86067d08af622e4c927bd488ec40c60e418204a6ad7ed6573f7507b745c7d",
+      "width": 1080,
+      "height": 2400
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/landscape-menu-3x.jpg",
+      "status": "current density rendering simulation; native DPR 1; not Motorola hardware",
+      "bytes": 125096,
+      "sha256": "297637ee1e323650c228ceccc42f7554fc46ab7f9a6b549d039b386d289afc67",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/landscape-game-3x.jpg",
+      "status": "current density rendering simulation; native DPR 1; not Motorola hardware",
+      "bytes": 165830,
+      "sha256": "94eb0f062370805e4e97aba2a26fc72cfd4ee8d12726d1c494536518126975c9",
+      "width": 2400,
+      "height": 1080
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/selection-detail.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 2988,
+      "sha256": "af916194d51efee30bee6ed691354716f7ab0969352f6bb8b5e930616c4698f0",
+      "width": 82,
+      "height": 91
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/visual-review.jpg",
+      "status": "current visual prototype evidence; emulation, hardware pending",
+      "bytes": 153455,
+      "sha256": "b5245de7e232db383616210f5037d6345722c815ef754c74d0d26eefab015b38",
+      "width": 1552,
+      "height": 840
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/gallery.html",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 1214,
+      "sha256": "d8d80de0d809dcbd2ecdb485db4a817108582967d3aaec55f28b092fe91781c1"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/layout-results.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 591,
+      "sha256": "f5c2de42878c8d738eacb790eb0cd70829459a1710abc4ddbb1e20f777de4a2c"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/menu-anchor-results.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 151,
+      "sha256": "461b443f14d807c5a7aae163eba551a856019bd749f3f3ca7d4db359503cbed6"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/interaction-results.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 165,
+      "sha256": "f2eb1e686ccce44cbc0ec6bc4028d8961c827ef921bd21c1f7933772c42f88f4"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/motion-results.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 1506,
+      "sha256": "1512cbcb559999d10de791eefdb8c3c076bb634ccc47808c2f615cd0e0b4e774"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/additional-layouts.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 152287,
+      "sha256": "88f011dbca2d6996d923909085e9e862a0e2f6555bc0f0026117dca5bd17f994"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/refinement/shore-measurements.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 121983,
+      "sha256": "17948e3b087098d50663249d23569518cc507516dfeead65eceace825a71be13"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/evidence/water-geometry.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2337,
+      "sha256": "257f75356a5a2e56e38c7a7e30393632aa014937ae72fa53eb3e189bc002c4e3"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/evidence/pads-geometry.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 491,
+      "sha256": "44d0eb857d6f2d0cd779b39033ade885bce519db20a54c9d98c6d6b30532d9c8"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/evidence/shore-geometry.json",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 468,
+      "sha256": "b1f2305b0b4ea1c7bcb3e813cc056e0c7f1b3db24a62068919919ac701be55f6"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/checks/assert-layout.mjs",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2732,
+      "sha256": "ac2f3bf40ba86e0975ba40b141ee525822290e0a206030657a9b0ee9489a6d00"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/checks/shore-check.mjs",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2495,
+      "sha256": "5328052869e1d66338c08a1d435e43e630ad35d201fefdbedd7117bdc4564e3f"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/checks/pads-check.mjs",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 5656,
+      "sha256": "149920d045f9050d81a4ef0fed0acec1e2097bbcb4aaa4426ef91add02364a30"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/checks/water-check.mjs",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 9012,
+      "sha256": "72ac4abe5e9109c308ada28e56764b0b0ea085172e03ec9d3f313699092ba0b1"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/checks/review.html",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 3194,
+      "sha256": "425c7cd8fc644762ef8a6bd8ed0ccbad7cf76786cfe9beac75ca02637a57068a"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/App.svelte",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 1176,
+      "sha256": "8cbf437b015326738d88d9857cd6f1cecd54aed65101b6194273b2a251afd72f"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/Game.svelte",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 4750,
+      "sha256": "d3c6ea0c6a04d0ec26096463af2d5dd4bdfb96dab41bfb4887863e0c359fefeb"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/Menu.svelte",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2778,
+      "sha256": "eec824cf321c58baf16acc147686721ffa30e4a74de76f2c60109deae1c906ff"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/motion/float.css",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 645,
+      "sha256": "0327f0df7559bc83e699b7e984d8c89a928e60688fba0bca9822c59d0468ce1a"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/motion/float.ts",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2972,
+      "sha256": "38db5b00797bb75789d9b3a07eccd4ec03f2cf61883a65a3fe4822bd4c9e9791"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/motion/random.js",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 364,
+      "sha256": "cd1410648a3f304e09ce8a9d0c1745f36bc1512c469805804d72abbc61971269"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/pads/LilyPad.svelte",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2122,
+      "sha256": "472bbcd305a8300717a82abc4e0b5bb1da7b501ec0537cb5670922df13d75a2f"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/pads/shape.ts",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 3139,
+      "sha256": "65b6bd49619312a44269042e28eb9eb848d6abe832cec865e79438bb573d88f7"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/pond/geometry.ts",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 11579,
+      "sha256": "2e82a7dc26bd4dff3d80ae7b2fe5028b11bad6adcbe592736043500bca607ecc"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/pond/Pond.svelte",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2626,
+      "sha256": "542e72f2115f29917084b48c2402baccd53d66945d72e3a3465dec3c9bd1b8be"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/shore/geometry.ts",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 2795,
+      "sha256": "e32971e111fb64e11bca5254499fb5579b92b0af11526c28a9c002f21d31bbea"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/lib/shore/Shore.svelte",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 915,
+      "sha256": "fe5df360f08015d0063bc75b2dfe3963451c4fb2ad64d264e3dae0d4c44b29c8"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/main.ts",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 176,
+      "sha256": "73e1b714a44fd62d47340e2bb033842e1935f7a64d637c82ce56b4d9b6dd175d"
+    },
+    {
+      "path": "prototypes/pond-visual-v1/src/style.css",
+      "status": "current ignored prototype source, provenance or reproducible evidence",
+      "bytes": 6252,
+      "sha256": "ce6aea0fca0e176fa4a60ea41c61d3b14a2a8adfa3f68acd3db57b74e70a1c70"
     }
-  ]
+  ],
+  "currentRefinement": {
+    "root": "prototypes/pond-visual-v1/",
+    "progress": "docs/prototype-progress.md",
+    "visualReview": "prototypes/pond-visual-v1/refinement/visual-review.jpg",
+    "guideline": "prototypes/pond-visual-v1/refinement/concept-shore-v2.png",
+    "nativeBrowserDpr": 1,
+    "densityCaptures": "3x scaled CSS rendering simulation, not native DPR3",
+    "hardware": "pending",
+    "waterEnvelopeSamples": 4976640,
+    "compoundOwnershipSamples": 144680
+  }
 }

@@ -2,20 +2,21 @@
 
 A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, hosted on GitHub Pages.
 
-**Next task: visual prototype only.** Connect main menu/gameplay, show static digits, allow pad selection, and implement/test dynamic top-down Pond water. Most controls remain inert/disabled. Full gameplay, scoring, progression, saves and production/PWA delivery are outside this task. Read the [bounded handoff](docs/design-handoff.md#next-session-visual-prototype-only).
+**Current milestone: visual prototype only.** The fresh ignored `prototypes/pond-visual-v1/` now connects menu/gameplay, static digits, full-cell selection and an animated top-down pond. Its latest refinement adds two-color shore, subtle notched/floating lily pads, natural selection, a playful title and fixed menu identity. Most controls remain inert/disabled. Full gameplay, scoring, progression, saves and production/PWA delivery remain excluded. Read the [findings and measured progress](docs/prototype-progress.md) and [bounded handoff](docs/design-handoff.md#next-session-visual-prototype-only).
 
-Create a fresh ignored prototype rather than copying/extending old demos. Use a sub-agent for pond-animation research and implementation, with a concise approach comparison first.
+The baseline was built fresh without copying old demo code. Refining that current prototype is authorized. Concept/ImageGen, pond geometry and pad/motion sub-agents had separate ownership from screens/integration; independent browser-image review compared the result with the generated guideline.
 
-**Status: design discussion. Current milestone: basic flat Pond, procedural lily-pad board, cream soft-raised keys, Fill space within the shared 8px edge inset, bottom/right docks, disabled More and one rough combined menu-art placeholder. Menu/gameplay share three flat pond colors; B, Winding shallows, is selected; A, Connected bays, is preserved. Use soft-raised 1:1 circular pad faces inside full stretched rectangular buttons; inward placement is selected; centered is preserved. Preserve cream controls. Use only 4px/8px spacing; region cues must work without hue. Halloween and More functionality are deferred. Layered Pond/Expressive Gradient remain future scene treatments. No store is in scope.**
+**Selected design:** basic flat Pond, three shared water colors plus wet/dry ground behind controls, B Winding shallows, inward near-circular procedural leaves, cream soft-raised keys and 4px/8px spacing. Fill space, bottom/right ten-key docks and disabled More remain. The scribbly combined menu image is provisional. Natural leaf selection has no cell/pad outline; bounded leaf/title/art float becomes static under reduced motion. No store is in scope. Halloween, More functionality and alternative scene treatments remain deferred.
 
 Production artwork must be human-made. AI-generated art is permitted only for temporary mockups and prototypes.
-The current world is flat and minimal, with exactly three shared pond colors, inward 1:1 pad faces and one rough combined menu placeholder. Procedural pad cutouts and slow water animation are future research/implementation tasks; their shape, colors, input and motion constraints are recorded in the handoff.
+Build/type, layout/input, shore coverage, leaf/water envelopes and motion lifecycle checks pass in the prototype. Motorola CSS emulation and labeled 3x renders were visually reviewed; native DPR-3 and physical-device performance remain pending. These results are not production art, typography or renderer approval.
 
 ## Start here
 
 - [Resume here: complete design handoff](docs/design-handoff.md)
+- [Current prototype progress, findings and ImageGen comparison](docs/prototype-progress.md)
 - [Saved visual artifact registry](docs/design-artifacts.json)
-- [Future pad cutouts and water animation](docs/future-visual-research.md)
+- [Visual refinement and acceptance plan](docs/future-visual-research.md)
 - [Design constraints](docs/design.md)
 - [Current UI and UX direction](docs/ui-ux.md)
 - [Deferred work](TODO.md)
@@ -36,6 +37,6 @@ The current world is flat and minimal, with exactly three shared pond colors, in
 
 ## Temporary work
 
-The initial exploratory implementation, dependencies, builds, tests, screenshots, and deployment experiments are in `prototypes/initial-web-ui/`. The entire `prototypes/` directory is ignored by Git. Its README records how that experiment ran; it is not a production specification.
+The current local prototype and its README are in `prototypes/pond-visual-v1/`; current screenshots and browser measurements are in its `refinement/` directory. The initial exploratory implementation remains in `prototypes/initial-web-ui/` as history. The entire `prototypes/` directory, including code, dependencies, builds, AI concepts and test artifacts, is ignored by Git.
 
 This repository tracks documentation and project guidance. The old prototype's top bar, sparse board layout, action row, copy, and muted Halloween palette were rejected as a direction.
