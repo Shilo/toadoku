@@ -4,7 +4,7 @@
 
 Progression draws shuffled puzzles from a bundled, pre-rated collection. Difficulty rises across a defined sequence of levels. After the final level, the level returns to 1, a second counter increases, and the next puzzle uses the easiest difficulty. Quick Play remains separate.
 
-The label Cycle was rejected. Replacement names, including Rebirth, remain proposals. See [ranked terminology](research/terminology.md). Keep counter wording separate from progression logic, and confirm the initial numbering convention once the name is chosen.
+Approved names: **Metamorphosis** for the repeat counter, **Leap** for a level, and **Dewdrops** for earned currency. Example: Metamorphosis 2, Leap 7, 240 Dewdrops. These are game metaphors, not an approved frog-transformation feature. Keep labels separate from progression logic; the initial repeat-counter numbering convention remains open. See [naming research](research/terminology.md).
 
 | Event | Outcome |
 | --- | --- |
@@ -48,4 +48,4 @@ Clicker Heroes uses Ascension and Transcendence resets with lasting resources. T
 
 ## Open decisions
 
-Names, repeat-counter starting convention, loop length and difficulty breakpoints, catalog selection, replay unlock scope and save behavior, scoring formula and numerical balance, and visual presentation. No game or interface code is authorized by this note.
+Repeat-counter starting convention, loop length and difficulty breakpoints, catalog selection, replay unlock scope and save behavior, scoring formula and numerical balance, and visual presentation. No game or interface code is authorized by this note.

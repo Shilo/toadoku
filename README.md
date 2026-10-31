@@ -2,7 +2,7 @@
 
 A colorful, immersive frog Sudoku game planned for mobile and desktop browsers, hosted on GitHub Pages.
 
-**Status: gameplay and design discussion. Approved: Svelte + TypeScript + Vite, GitHub Pages, PWA, offline play, and Quick Play plus randomized Progression with traditional Sudoku. Repeated progression, randomized level revisits, score and earned currency are in scope. Names, scoring balance, repeat schedule and visual design remain open. No store is in scope.**
+**Status: design discussion. Approved: Svelte + TypeScript + Vite, GitHub Pages, PWA, offline play, Quick Play and randomized Progression, fresh level revisits, score and currency. Selected names: Metamorphosis, Leap, Dewdrops. Scoring balance, repeat schedule and visual design remain open. No store is in scope.**
 
 ## Start here
 

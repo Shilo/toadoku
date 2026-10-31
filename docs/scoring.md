@@ -4,6 +4,8 @@
 
 Both Quick Play and Progression award a performance score and persistent currency. Rewards reflect rated difficulty, speed and efficiency. Completed-level revisits use the same reward rules for equivalent fresh puzzles. A future store is out of scope; do not implement spending, purchases, upgrades or additional currencies.
 
+The approved currency name is **Dewdrops**. Its name does not imply another collectible or a second currency.
+
 The following scoring policy is a recommendation, not an approved formula or numerical balance.
 
 ## Recommended calculation
@@ -40,7 +42,7 @@ Easy puzzles can earn more per minute even when harder puzzles earn more per com
 
 Currency is a record of rewarded play, not an objective measurement of effort. No single time target fairly measures every player's skill, reasoning or input needs. Keep progression independent of the score so slow solving does not block advancement.
 
-Still open: selected names, difficulty reward bands, speed target times and caps, conversion rate and rounding, assistance policy, starting counter convention, and reward presentation. Show score details on completion or in secondary views, preserving the minimal gameplay surface.
+Still open: difficulty reward bands, speed target times and caps, conversion rate and rounding, assistance policy, starting counter convention, and reward presentation. Show score details on completion or in secondary views, preserving the minimal gameplay surface.
 
 ## Research precedent
 
