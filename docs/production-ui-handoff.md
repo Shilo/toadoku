@@ -285,7 +285,7 @@ Complete the phase only when the integrated application meets section 10, specia
 Use this brief in the subsequent implementation task. It is not an instruction to implement during the handoff-preparation task.
 
 ```text
-Work in C:\Programming_Files\Shilocity\Therra\toadoku.
+Work from this repository's root directory.
 
 Implement the next production UI phase from scratch. The prototype is finished.
 Use the Svelte framework + TypeScript + Vite. Do not use SvelteKit.
