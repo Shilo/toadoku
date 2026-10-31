@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import type { SessionCommand } from '../../src/lib/session/index.ts';
 import { reduceAttempt } from '../../src/lib/session/index.ts';
 import { attemptFixture } from './fixtures.ts';
@@ -53,20 +54,29 @@ function reference(model: Model, command: SessionCommand): void {
 }
 
 it('matches an independent snapshot model across 2000 seeded sequences of 250 commands', () => {
+  const requested: Record<string, number> = {}, changed: Record<string, number> = {};
+  const pairs = new Set<string>();
   for (let seed = 1; seed <= 2000; seed++) {
     let random = seed;
     const next = () => { random = (Math.imul(random, 1664525) + 1013904223) >>> 0; return random; };
     let state = attemptFixture();
     state.assistance = { used: true, exposed: [5, 40] };
     const model: Model = { entries: Array(81).fill(0), notes: Array(81).fill(0), selection: 1, notesMode: false, history: [], logical: 0, sequence: 0, elapsed: 0 };
+    let previous: SessionCommand['type'] | undefined;
     for (let step = 0; step < 250; step++) {
-      const choice = next() % 16;
+      // Low four LCG bits plus conditional parameter draws collapsed command diversity.
+      // High bits improve this measured test distribution; they are not a fairness claim.
+      const choice = next() >>> 28;
       const command: SessionCommand = choice < 4 ? { type: 'select', cell: next() % 81 } :
         choice < 9 ? { type: 'enter', digit: next() % 9 + 1 } :
         choice === 9 ? { type: 'toggle-notes' } :
         choice === 10 ? { type: 'erase' } : choice < 14 ? { type: 'undo' } :
         choice === 14 ? { type: 'checkpoint', elapsedMs: next() % 100000 } : { type: 'restart' };
       const result = reduceAttempt(state, command);
+      requested[command.type] = (requested[command.type] ?? 0) + 1;
+      if (result.kind === 'changed') changed[command.type] = (changed[command.type] ?? 0) + 1;
+      if (previous) pairs.add(`${previous}->${command.type}`);
+      previous = command.type;
       reference(model, command);
       if (result.kind === 'changed') state = result.attempt;
       if (step % 31 === 0) state = structuredClone(state); // persisted/reloaded snapshots use the same semantics
@@ -80,4 +90,9 @@ it('matches an independent snapshot model across 2000 seeded sequences of 250 co
       }
     }
   }
+  expect(Object.keys(requested)).toHaveLength(7); expect(pairs.size).toBe(49);
+  mkdirSync('prototypes/gameplay-validation/session', { recursive: true });
+  writeFileSync('prototypes/gameplay-validation/session/model-distribution.json', JSON.stringify({
+    generator: 'lcg-high-four-v2', seeds: [1, 2000], commandsPerSeed: 250, requested, changed, adjacentCommandPairs: [...pairs].sort(),
+  }, null, 2) + '\n');
 }, 120000);

@@ -45,7 +45,7 @@ export async function verifyCleanCheckouts() {
   for (const autocrlf of ['true', 'false']) {
     const checkout = join(evidence, `autocrlf-${autocrlf}`);
     if (!withinWorkspace(resolve('prototypes/gameplay-validation/checkouts'), checkout)) throw new Error('fresh clone boundary');
-    command('git', ['clone', '--no-hardlinks', '--no-checkout', root, checkout], root);
+    command('git', ['clone', '--local', '--no-hardlinks', '--no-checkout', root.replaceAll('\\', '/'), checkout.replaceAll('\\', '/')], root);
     if (command('git', ['rev-parse', 'HEAD'], checkout).trim() !== head) throw new Error('checkout HEAD mismatch');
     command('git', ['read-tree', 'HEAD'], checkout);
     const attr = command('git', ['-c', `core.autocrlf=${autocrlf}`, 'check-attr', '--cached', '--all', '--', 'public/catalog/v1/manifest.json', 'public/catalog/v1/LICENSE.txt', 'src/lib/catalog/trust.v1.ts', 'tools/catalog/import.ts'], checkout);

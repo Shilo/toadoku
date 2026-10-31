@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import original from '../fixtures/techniques/original.v1.json';
 import fallback from '../fixtures/techniques/fallback.v1.json';
 import type { Deduction, Technique } from '../../src/lib/gameplay/contracts.ts';
 import { computeHint, findDeduction, validateWitness } from '../../src/lib/hints/index.ts';
 import { getCandidates } from '../../src/lib/sudoku/index.ts';
 import { exactCover } from '../../tools/catalog/oracle-exact-cover.ts';
+import * as detector from '../../src/lib/hints/detect.ts';
 
 const fixtures = original.fixtures as { technique: Technique; category: string; values: string; deduction: Deduction }[];
 const techniques: Technique[] = ['naked-single', 'hidden-single', 'pointing', 'claiming', 'naked-pair', 'hidden-pair', 'naked-triple', 'hidden-triple', 'x-wing'];
@@ -121,10 +122,38 @@ describe('independent named-technique and exact-cover proof gates', () => {
       expect(validateWitness(changed, proof), `Expanded naked premise ${fixture.technique}`).toBe(false);
     }
   });
+  it('rejects malformed conclusions, wrong house orientation and degenerate witness cardinalities', () => {
+    for (const fixture of fixtures) {
+      const malformed = structuredClone(fixture.deduction);
+      if (malformed.placements.length) malformed.placements[0] = null as never;
+      else malformed.eliminations[0] = { cell: 0.5, digit: 1 };
+      expect(validateWitness([...fixture.values].map(Number), malformed)).toBe(false);
+    }
+    for (const technique of ['pointing', 'claiming', 'x-wing'] as const) {
+      const fixture = fixtures.find(item => item.technique === technique)!;
+      const malformed = structuredClone(fixture.deduction);
+      malformed.witness.units = technique === 'pointing' ? [0, 9] : technique === 'claiming' ? [18, 0] : [0, 1, 2, 3];
+      expect(validateWitness([...fixture.values].map(Number), malformed)).toBe(false);
+    }
+    // Negative raw witness states deliberately violate satisfiability. They must never pass a
+    // named witness even before computeHint's independent anti-vacuity barrier rejects them.
+    const deficient = Array(81).fill(0); for (let col = 3; col < 9; col++) deficient[col] = col; deficient[9] = 9;
+    const naked: Deduction = { kind: 'deduction', technique: 'naked-triple', techniqueVersion: 1, logicalRevision: 0,
+      witness: { units: [0], cells: [0, 1, 2], digits: [1, 2, 3] }, placements: [], eliminations: [{ cell: 9, digit: 1 }] };
+    expect(validateWitness(deficient, naked)).toBe(false);
+    const duplicate = Array(81).fill(0); [4, 4, 5, 6, 7, 8, 9].forEach((digit, offset) => { duplicate[offset + 2] = digit; });
+    const hidden = { ...naked, technique: 'hidden-triple' as const };
+    expect(validateWitness(duplicate, hidden)).toBe(false);
+  });
   it('distinguishes technical unknown/abort, full, clue corruption and explicit inconsistency', () => {
     const values = [...fixtures[0].values].map(Number);
     const input = { values, givens: values, logicalRevision: 5, target: values.indexOf(0) };
+    const helpful = computeHint(input);
+    expect(helpful.kind).toBe('ready');
+    if (helpful.kind !== 'ready' || helpful.payload.kind !== 'deduction') throw new Error('Expected an actual logical proof');
+    expect(helpful.payload.logicalRevision).toBe(5); expect(validateWitness(values, helpful.payload)).toBe(true);
     expect(computeHint(input, { nodeBudget: 0 })).toEqual({ kind: 'unavailable', reason: 'budget' });
+    expect(computeHint(input, { nodeBudget: -1 })).toEqual({ kind: 'unavailable', reason: 'invalid' });
     expect(computeHint(input, { shouldAbort: () => true })).toEqual({ kind: 'unavailable', reason: 'aborted' });
     expect(computeHint(input, { shouldAbort: () => { throw new Error('callback'); } })).toEqual({ kind: 'unavailable', reason: 'callback' });
     expect(computeHint({ ...input, values: [] })).toEqual({ kind: 'unavailable', reason: 'invalid' });
@@ -162,5 +191,17 @@ describe('independent named-technique and exact-cover proof gates', () => {
     // Notes are intentionally absent from the API: wrong/missing notes cannot manufacture a premise.
     const withWrongNotes = { values, givens, logicalRevision: 22, target, notes: Array(81).fill(1) };
     expect(computeHint(withWrongNotes)).toEqual(result);
+    expect(computeHint({ values, givens, logicalRevision: 22, target }, { nodeBudget: 48 })).toEqual({ kind: 'unavailable', reason: 'budget' });
+    let calls = 0;
+    expect(computeHint({ values, givens, logicalRevision: 22, target }, { shouldAbort: () => ++calls > 100 })).toEqual({ kind: 'unavailable', reason: 'aborted' });
+    calls = 0;
+    expect(computeHint({ values, givens, logicalRevision: 22, target }, { shouldAbort: () => { if (++calls > 100) throw new Error('callback'); return false; } })).toEqual({ kind: 'unavailable', reason: 'callback' });
+  });
+  it('rejects a faulty detector result at the separately validated compute boundary', () => {
+    const fixture = fixtures[0], values = [...fixture.values].map(Number);
+    const falseProof = structuredClone(fixture.deduction); falseProof.technique = 'x-wing';
+    const fault = vi.spyOn(detector, 'findDeduction').mockReturnValue(falseProof);
+    try { expect(computeHint({ values, givens: values, logicalRevision: 0, target: values.indexOf(0) })).toEqual({ kind: 'unavailable', reason: 'invalid' }); }
+    finally { fault.mockRestore(); }
   });
 });

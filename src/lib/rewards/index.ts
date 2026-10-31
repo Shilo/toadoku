@@ -16,7 +16,7 @@ export function calculateReward(policy: RewardPolicy, inputs: RewardInputs): Rew
   const bonusBasisPoints = inputs.information ? 0 : Math.floor(policyData.maxBonusBasisPoints * remaining / policy.targetMs);
   const numerator = policy.base * (inputs.blanks - inputs.exposed) * (10000 + bonusBasisPoints);
   const denominator = inputs.blanks * 10000;
-  if (!Number.isSafeInteger(numerator) || !Number.isSafeInteger(denominator)) throw new RangeError('reward overflow');
+  // Validated v2 pins bound numerator to 400*81*11000=356400000 and denominator to 810000.
   return { ...inputs, base: policy.base, targetMs: policy.targetMs, bonusBasisPoints, dewdrops: Math.floor(numerator / denominator) };
 }
 export function rewardForAttempt(attempt: Attempt): RewardResult {

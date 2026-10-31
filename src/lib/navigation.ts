@@ -1,61 +1,106 @@
-export type Route = 'menu' | 'quick' | 'progression' | 'board' | 'more';
-const routes: readonly string[] = ['menu', 'quick', 'progression', 'board', 'more'];
+import type { DialogView } from './gameplay/ui/types.ts';
+
+export type Screen = 'menu' | 'quick' | 'progression' | 'board';
+export type Route = Screen | 'more';
+export interface OverlayState {
+  readonly id: string;
+  readonly base: Screen;
+  readonly panel: DialogView;
+  readonly parentId?: string;
+}
+const screens: readonly string[] = ['menu', 'quick', 'progression', 'board'];
+const panels: readonly string[] = ['more', 'settings', 'notes', 'hint', 'result', 'pause', 'replay', 'backup', 'restart', 'replace'];
+const routes: readonly string[] = [...screens, 'more'];
+const isScreen = (value: unknown): value is Screen => typeof value === 'string' && screens.includes(value);
 export const parseRoute = (hash: string): Route => routes.includes(hash.slice(1)) ? hash.slice(1) as Route : 'menu';
 export interface NavigationHost {
   location: Pick<Location, 'hash'>;
-  history: Pick<History, 'state' | 'pushState' | 'replaceState' | 'back'>;
+  history: Pick<History, 'state' | 'pushState' | 'replaceState' | 'back'> & Partial<Pick<History, 'go'>>;
   addEventListener(type: 'popstate', listener: () => void): void;
   removeEventListener(type: 'popstate', listener: () => void): void;
 }
 
-/** Only navigation state lives in history. Selection and decorative seeds never do. */
-export function createNavigation(host: NavigationHost, render: (route: Route) => void) {
+/** P007: UI history only. Durable roles, ownership, entries and time never live here. */
+export function createNavigation(host: NavigationHost, render: (route: Route, overlay?: OverlayState) => void) {
   let current = parseRoute(host.location.hash);
-  let closing = false;
-  let overlaySequence = 0;
-  let activeOverlay: number | undefined;
-  const dismissed = new Set<number>();
-  // A directly linked modal has no underlying board history entry to consume.
+  let closing = false, destroyed = false, sequence = 0;
+  // A reload cannot confuse an old document's first pane with a new document's first pane.
+  const instance = crypto.randomUUID();
+  let active: OverlayState | undefined;
+  const known = new Map<string, OverlayState>(), consumed = new Set<string>();
+  function screenState(screen: Screen) { return { toadodu: screen }; }
+  function overlayState(overlay: OverlayState) { return { toadodu: 'more', instance, overlay: overlay.id, base: overlay.base, panel: overlay.panel, ...(overlay.parentId ? { parentId: overlay.parentId } : {}) }; }
+  function replaceScreen(screen: Screen): void { host.history.replaceState(screenState(screen), '', `#${screen}`); }
+  function ancestry(overlay = active): OverlayState[] {
+    const chain: OverlayState[] = [];
+    while (overlay) { chain.push(overlay); overlay = overlay.parentId ? known.get(overlay.parentId) : undefined; }
+    return chain;
+  }
+  function consumeUntil(stopId?: string): void {
+    for (const overlay of ancestry()) { if (overlay.id === stopId) break; consumed.add(overlay.id); }
+  }
+  function incoming(): OverlayState | undefined {
+    const state = host.history.state;
+    if (!state || typeof state !== 'object' || state.toadodu !== 'more' || state.instance !== instance ||
+        typeof state.overlay !== 'string' || !isScreen(state.base) || !panels.includes(state.panel)) return;
+    const overlay = known.get(state.overlay);
+    if (!overlay || overlay.base !== state.base || overlay.panel !== state.panel || overlay.parentId !== state.parentId ||
+        ancestry(overlay).some(item => consumed.has(item.id))) return;
+    return overlay;
+  }
+  // A directly linked/reloaded modal has no live ancestry or durable session authority.
   if (current === 'more') current = 'board';
-  host.history.replaceState({ toadodu: current }, '', `#${current}`);
-  render(current);
+  replaceScreen(current); render(current);
   const pop = () => {
-    if (current === 'more' && activeOverlay !== undefined) dismissed.add(activeOverlay);
+    if (destroyed) return;
+    const route = parseRoute(host.location.hash);
+    const target = route === 'more' ? incoming() : undefined;
+    // A multi-entry Back consumes every skipped child, while a parent restored by Back remains live.
+    consumeUntil(target?.id);
     closing = false;
-    current = parseRoute(host.location.hash);
-    activeOverlay = host.history.state?.overlay;
-    if (current === 'more' && (host.history.state?.toadodu !== 'more' || activeOverlay === undefined || dismissed.has(activeOverlay))) {
-      current = 'board';
-      host.history.replaceState({ toadodu: current }, '', '#board');
-    }
-    render(current);
+    if (route === 'more' && !target) {
+      const state = host.history.state;
+      const previous = typeof state?.overlay === 'string' ? known.get(state.overlay) : undefined;
+      const base: Screen = previous?.base ?? (isScreen(state?.base) ? state.base : 'board');
+      current = base; active = undefined; replaceScreen(base);
+    } else { current = route; active = target; }
+    render(current, active);
   };
   host.addEventListener('popstate', pop);
+  function openPanel(panel: DialogView): void {
+    if (closing || destroyed || !panels.includes(panel) || active?.panel === panel) return;
+    const overlay: OverlayState = Object.freeze({ id: `${instance}:${++sequence}`, base: active?.base ?? current as Screen,
+      panel, ...(active ? { parentId: active.id } : {}) });
+    known.set(overlay.id, overlay); active = overlay;
+    host.history.pushState(overlayState(overlay), '', '#more'); current = 'more'; render(current, active);
+  }
+  function closeTop(): void {
+    if (closing || destroyed || current !== 'more' || !active) return;
+    consumed.add(active.id); replaceScreen(active.base);
+    closing = true; host.history.back();
+  }
   return {
-    go(next: Exclude<Route, 'more'>) {
-      if (closing || next === current) return;
-      host.history.pushState({ toadodu: next }, '', `#${next}`);
-      render(current = next);
+    get isClosing() { return closing; },
+    go(next: Screen) {
+      if (closing || destroyed || next === current || !isScreen(next)) return;
+      consumeUntil(); active = undefined;
+      host.history.pushState(screenState(next), '', `#${next}`); current = next; render(current);
     },
-    openMore() {
-      if (closing || current !== 'board') return;
-      activeOverlay = ++overlaySequence;
-      host.history.pushState({ toadodu: 'more', overlay: activeOverlay }, '', '#more');
-      render(current = 'more');
-    },
-    closeMore() {
-      if (closing || current !== 'more') return;
-      // Scrub this entry before traversing, so Forward cannot revive a dismissed modal.
-      host.history.replaceState({ toadodu: 'board' }, '', '#board');
-      closing = true;
-      host.history.back();
+    openMore() { if (current === 'board') openPanel('more'); },
+    openPanel,
+    closeMore: closeTop,
+    closeAll() {
+      if (closing || destroyed || current !== 'more' || !active) return;
+      const chain = ancestry(), base = active.base;
+      consumeUntil(); replaceScreen(base); closing = true;
+      if (chain.length > 1 && host.history.go) host.history.go(-chain.length);
+      else host.history.back(); // Legacy single-overlay test hosts have only back().
     },
     quit() {
-      if (closing || (current !== 'more' && current !== 'board')) return;
-      host.history.replaceState({ toadodu: 'menu' }, '', '#menu');
-      render(current = 'menu');
+      if (closing || destroyed || current !== 'more' && current !== 'board') return;
+      consumeUntil(); active = undefined; replaceScreen('menu'); current = 'menu'; render(current);
     },
-    destroy() { host.removeEventListener('popstate', pop); }
+    destroy() { destroyed = true; host.removeEventListener('popstate', pop); },
   };
 }
 export type Navigation = ReturnType<typeof createNavigation>;

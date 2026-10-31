@@ -38,6 +38,7 @@ describe('independently expected topology and rules', () => {
   it('has exact memberships and every symmetric non-self peer', () => {
     expect(UNITS).toHaveLength(27);
     expect(Object.isFrozen(UNITS)).toBe(true);
+    expect(Object.isFrozen(CELL_UNITS)).toBe(true); expect(Object.isFrozen(PEERS)).toBe(true);
     for (let cell = 0; cell < 81; cell++) {
       const row = Math.floor(cell / 9), column = cell % 9;
       const sameBox = (other: number) => Math.floor(Math.floor(other / 9) / 3) === Math.floor(row / 3) && Math.floor(other % 9 / 3) === Math.floor(column / 3);
@@ -45,6 +46,7 @@ describe('independently expected topology and rules', () => {
       expect(PEERS[cell]).toEqual(peers);
       expect(peers).toHaveLength(20);
       expect(CELL_UNITS[cell]).toHaveLength(3);
+      expect(Object.isFrozen(CELL_UNITS[cell])).toBe(true);
       for (const unit of CELL_UNITS[cell]) expect(UNITS[unit]).toContain(cell);
       for (const peer of PEERS[cell]) expect(PEERS[peer]).toContain(cell);
       expect(Object.isFrozen(PEERS[cell])).toBe(true);
