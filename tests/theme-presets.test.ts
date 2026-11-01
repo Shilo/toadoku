@@ -40,6 +40,8 @@ describe.each(presets)('%s semantic preset', (_, theme) => {
     for (const [role, value] of Object.entries(presentation.typography)) expect(theme.typography[role as keyof typeof presentation.typography]).toBe(value);
     expect(theme.typography.titleWeight).toBe(400);
     expect(css['--weight-title']).toBe('400');
+    expect(theme.typography).not.toHaveProperty('ui');
+    expect(css).not.toHaveProperty('--font-ui'); // A theme cannot replace the global UI family.
     expect(theme.surface.dialogRadius).toBeGreaterThan(0);
     expect(theme.surface.buttonRadius).toBeGreaterThan(0);
   });

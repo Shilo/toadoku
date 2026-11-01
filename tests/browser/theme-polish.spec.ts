@@ -508,6 +508,55 @@ test('stationary repeated clicks keep More responsive and accept intentional not
   await expect.poll(async () => (await snapshot(page)).attempt!.notes[cell]).toBe(1);
 });
 
+test('one global font covers every non-wordmark text surface and theme recovery', async ({ page, browser }) => {
+  const audit = async (target: Page) => {
+    await expect.poll(() => target.evaluate(() => document.fonts.check('600 16px Outfit')
+      && [...document.fonts].some(face => face.family.replaceAll('"', '') === 'Outfit' && face.status === 'loaded'))).toBe(true);
+    const result = await target.locator('.world').evaluate(world => {
+      const expected = getComputedStyle(document.documentElement).fontFamily, wrong: string[] = [];
+      const walker = document.createTreeWalker(world, NodeFilter.SHOW_TEXT); let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const parent = node.parentElement;
+        if (!node.textContent?.trim() || !parent || !parent.getClientRects().length || parent.closest('.title-lockup h1')) continue;
+        if (getComputedStyle(parent).fontFamily !== expected) wrong.push(`${parent.tagName}.${parent.className}: ${getComputedStyle(parent).fontFamily}`);
+      }
+      for (const field of world.querySelectorAll('button,input,select,textarea,option')) {
+        if (getComputedStyle(field).fontFamily !== expected) wrong.push(`${field.tagName}: ${getComputedStyle(field).fontFamily}`);
+      }
+      return { expected, wrong, override: (world as HTMLElement).style.getPropertyValue('--font-ui') };
+    });
+    expect(result.expected).toContain('Outfit'); expect(result.wrong).toEqual([]); expect(result.override).toBe('');
+  };
+  await page.goto('/'); await ready(page);
+  for (const theme of ['pond', 'cauldron']) for (const appearance of ['light', 'dark']) {
+    await settings(page); await choose(page, 'Theme', theme); await choose(page, 'Appearance', appearance);
+    await expect(page.locator('.world')).toHaveAttribute('data-theme', theme); await audit(page);
+    const face = theme === 'pond' ? 'Chewy' : 'Creepster';
+    expect(await page.locator('.title-lockup h1').evaluate(title => getComputedStyle(title).fontFamily)).toContain(face);
+    await closeDialogs(page); await audit(page);
+  }
+  await quick(page);
+  const blank = page.locator('.cell[data-clue="false"]').first(); await blank.click();
+  await page.locator('.dock .more').click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Notes', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0); await page.keyboard.press('2');
+  await expect(blank.locator('.note')).toHaveCount(1);
+  for (const theme of ['pond', 'cauldron']) for (const appearance of ['light', 'dark']) {
+    await settings(page); await choose(page, 'Theme', theme); await choose(page, 'Appearance', appearance);
+    await audit(page); await closeDialogs(page); await audit(page);
+  }
+  const context = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: 'en-US', reducedMotion: 'reduce' });
+  let release!: () => void; const held = new Promise<void>(resolve => release = resolve);
+  try {
+    const fault = await context.newPage();
+    await fault.clock.setFixedTime(new Date('2026-10-31T12:00:00-07:00'));
+    await fault.route('**/src/lib/theme/cauldron.ts*', async route => { await held; await route.abort('failed'); });
+    await fault.goto('/');
+    await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.loading); await audit(fault);
+    release(); await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.failed); await audit(fault);
+  } finally { release(); await context.close(); }
+});
+
 test('submenu headings use the ground foreground in both themes and appearances', async ({ page }) => {
   await page.goto('/'); await ready(page);
   for (const theme of ['pond', 'cauldron']) for (const appearance of ['light', 'dark']) {

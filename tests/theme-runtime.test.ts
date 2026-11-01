@@ -12,7 +12,7 @@ function deferred<T>() {
 }
 const light = { ...pond, id: 'pond', water: { ...pond.water, deep: '#123456' } };
 const dark = { ...pond, id: 'pond', water: { ...pond.water, deep: '#654321' } };
-const definition: ThemeDefinition = { ...pondDefinition, light, dark, font: { family: 'TestTitle', url: '/title.ttf' } };
+const definition: ThemeDefinition = { ...pondDefinition, light, dark, titleFont: { family: 'TestTitle', url: '/title.ttf' } };
 const date = new Date(2026, 9, 31, 12);
 afterEach(() => { vi.useRealTimers(); });
 

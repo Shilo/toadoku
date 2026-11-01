@@ -3,11 +3,12 @@ import type { ThemeTokens } from './tokens';
 import type { Layout } from '../layout';
 import type { LiquidFrame, SceneBubble, VesselRenderer } from '../scene/types';
 
-export interface ThemeFont { readonly family: string; readonly url: string; readonly weight?: string }
+export interface ThemeTitleFont { readonly family: string; readonly url: string; readonly weight?: string }
 export interface ThemeDefinition {
   readonly light: ThemeTokens;
   readonly dark: ThemeTokens;
-  readonly font?: ThemeFont;
+  /** Applies only to the main-menu Toadoku wordmark. UI typography is global. */
+  readonly titleFont?: ThemeTitleFont;
   readonly cellPath: (id: number) => string;
   readonly cellDetail?: (id: number) => string;
   readonly liquid: (layout: Layout, screen: 'menu' | 'game', time: number) => LiquidFrame;
@@ -22,7 +23,7 @@ export interface AppliedTheme {
   readonly definition: ThemeDefinition;
 }
 /** Registration is delayed until the winning request; timed-out/stale faces cannot swap later. */
-export type ThemeFontLoader = (font: ThemeFont) => Promise<void | (() => void)>;
+export type ThemeFontLoader = (font: ThemeTitleFont) => Promise<void | (() => void)>;
 export interface ThemeRuntimeOptions {
   load?: (id: ThemeId) => Promise<ThemeDefinition>;
   loadFont?: ThemeFontLoader;
@@ -35,13 +36,13 @@ export const loadThemeDefinition = async (id: ThemeId): Promise<ThemeDefinition>
 
 const FONT_WAIT_MS = 5000;
 /** Font failures are supported fallback typography, while chunk failures retain the old theme. */
-export async function loadThemeFont(font: ThemeFont): Promise<() => void> {
+export async function loadThemeFont(font: ThemeTitleFont): Promise<() => void> {
   const face = new FontFace(font.family, `url("${font.url}")`, { weight: font.weight ?? '400', display: 'swap' });
   await face.load();
   return () => { document.fonts.add(face); };
 }
 
-function boundedFont(font: ThemeFont, load: ThemeFontLoader): Promise<void | (() => void)> {
+function boundedFont(font: ThemeTitleFont, load: ThemeFontLoader): Promise<void | (() => void)> {
   let timer: ReturnType<typeof setTimeout>;
   return Promise.race([
     Promise.resolve().then(() => load(font)),
@@ -55,7 +56,7 @@ export function createThemeRuntime(options: ThemeRuntimeOptions) {
   let generation = 0, disposed = false, appliedKey: string | undefined;
   let pendingKey: string | undefined, pending: Promise<void> | undefined;
   const fonts = new Map<string, Promise<void | (() => void)>>();
-  function readyFont(font: ThemeFont) {
+  function readyFont(font: ThemeTitleFont) {
     const key = `${font.family}:${font.url}:${font.weight ?? '400'}`;
     let ready = fonts.get(key);
     if (!ready) {
@@ -81,8 +82,8 @@ export function createThemeRuntime(options: ThemeRuntimeOptions) {
           const definition = await load(id);
           if (!current()) return;
           let fontFallback = false, register: void | (() => void) = undefined;
-          if (definition.font) {
-            try { register = await readyFont(definition.font); }
+          if (definition.titleFont) {
+            try { register = await readyFont(definition.titleFont); }
             catch { fontFallback = true; }
           }
           if (!current()) return;

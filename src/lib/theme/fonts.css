@@ -1,4 +1,6 @@
 /* Original upstream font files and notices: docs/production-assets.md. */
+:root { --font-ui: "Outfit", system-ui, sans-serif; }
+
 @font-face {
   font-family: 'Outfit';
   src: url('../../assets/fonts/Outfit.ttf') format('truetype');

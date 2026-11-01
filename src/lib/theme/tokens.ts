@@ -18,7 +18,7 @@ export interface ThemeTokens {
     readonly hoverFace: string; readonly pressedFace: string; readonly selectedFace: string; readonly selectedInk: string;
   };
   readonly typography: {
-    readonly ui: string; readonly title: string; readonly titleInk: string;
+    readonly title: string; readonly titleInk: string;
     readonly controlMin: number; readonly controlMax: number;
     readonly digitMin: number; readonly digitMax: number; readonly noteMin: number; readonly noteMax: number;
     readonly titleMin: number; readonly titleMax: number;
@@ -72,7 +72,7 @@ export function themeStyle(theme: ThemeTokens): string {
     'control-disabled-lip': theme.control.disabledLip, 'control-focus': theme.control.focus,
     'control-edge': theme.control.edge, 'control-selected-edge': theme.control.selectedEdge, 'control-disabled-edge': theme.control.disabledEdge,
     'control-edge-width': `${theme.surface.controlEdgeWidth}px`,
-    'font-ui': theme.typography.ui, 'font-title': theme.typography.title, 'title-ink': theme.typography.titleInk,
+    'font-title': theme.typography.title, 'title-ink': theme.typography.titleInk,
     'type-control-min': `${theme.typography.controlMin}px`, 'type-control-max': `${theme.typography.controlMax}px`,
     'type-digit-min': `${theme.typography.digitMin}px`, 'type-digit-max': `${theme.typography.digitMax}px`,
     'type-note-min': `${theme.typography.noteMin}px`, 'type-note-max': `${theme.typography.noteMax}px`,

@@ -24,7 +24,7 @@ export const cauldron: ThemeTokens = {
   },
   typography: {
     ...presentation.typography,
-    ui: '"Outfit", system-ui, sans-serif', title: '"Creepster", "Outfit", system-ui, sans-serif',
+    title: '"Creepster", "Outfit", system-ui, sans-serif',
     titleInk: '#FFF0CA', digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11,
     titleWeight: 400, uiWeight: 600, digitWeight: 600, noteWeight: 500, numberLineHeight: 1,
   },
@@ -51,7 +51,7 @@ export const cauldronDark: ThemeTokens = {
 };
 export const definition: ThemeDefinition = {
   light: cauldron, dark: cauldronDark,
-  font: { family: 'Creepster', url: creepsterUrl },
+  titleFont: { family: 'Creepster', url: creepsterUrl },
   cellPath: id => medallionShape(id).path, cellDetail: squashRindPath, vessel,
   liquid: cauldronLiquid, bubbles: cauldronBubbles,
 };

@@ -12,7 +12,7 @@ Every theme should feel like a coherent top-down liquid environment. The liquid 
 | All 81 full rectangular targets, inward 1:1 face anchors, digit/note geometry and fixed logical IDs | Cell silhouette and peripheral material detail inside the shared envelope, with an opaque readable center |
 | Shared layout, 4px/8px spacing, ten dock keys, Fill/Square setting and navigation | Ground/vessel contour inside the existing clearance corridor; optional narrow lip following that contour |
 | Selection, keyboard focus, conflicts, notes, progress, rewards and persistence authority | Semantic colors for all states, complete control boundaries, finish and radii |
-| Toadoku name, shared main-menu logo/sketch and product terminology | Licensed title/body font roles, fallbacks, weights and measured metric adjustments |
+| Toadoku name, shared main-menu logo/sketch, product terminology and global Outfit UI/digit font | Licensed title font for the main-menu Toadoku wordmark, colors, weights and measured metric adjustments |
 
 Do not add a scenic frame, enclosing oval pot, permanent gameplay HUD, side-view horizon, gradients or decorative margins that shrink the board. Keep soft controls and equal corner radii on each dialog/popover. Theme-specific ornament never moves or resizes hitboxes. Layout changes are shared product decisions, not per-theme options.
 
@@ -31,7 +31,7 @@ Use the actual typed contract in [tokens.ts](../src/lib/theme/tokens.ts), not th
 | `decoration.bubble/bubbleEdge` | Separate decorative paint. Rings may use a fourth color distinct from the liquid; it is not a group cue. A theme can omit bubbles. |
 | `leaf` | Existing semantic name for any cell material, including lily pads or squash. Cover normal/selected faces, lip, ink, notes, entries, conflicts, focus and optional peripheral rind. |
 | `control`, `surface`, `dialog` | Complete normal/hover/pressed/selected/disabled/focus materials, edges, shadows and control/window radii. An edge must survive every applicable state. |
-| `typography` | Title and normal font stacks, colors, weights, line heights and established size limits. Keep font sizes stable unless measured font metrics justify a change. |
+| `typography` | Main-menu Toadoku title font stack, colors, weights, line heights and established size limits. The normal UI family is global and cannot be overridden by a theme. Keep font sizes stable unless measured font metrics justify a change. |
 | Shared budgets | Spacing, geometry, floating travel and update-rate limits are shared presentation contracts. A new palette does not justify changing them. Theme liquid periods may differ. |
 
 Pond retains its three water colors and wet/dry ground, organic shore and notched lily pads. Cauldron uses orange pumpkin broth, pale squash faces, dark iron/enamel ground and a thin metal lip. Its boundary has one regular concave curve, not a wavy shore or convex mound. These material choices are examples for future themes, not a requirement that every theme resemble cookware.
@@ -52,7 +52,7 @@ Active text must satisfy the maintained contrast checks. Cauldron's three group 
 
 Keep shared Scene/Leaf/board components free of theme-ID checks. Shared components receive functions and semantic CSS properties. Lazy-load theme modules and their fonts/assets; do not turn the system into a plugin framework or add a separate board implementation.
 
-Outfit currently supplies the shared, eagerly loaded normal UI/digit font. `ThemeDefinition.font` loads one theme-specific face, currently the title font. Changing `typography.ui` alone does not load a new body font. A future body-font change needs explicit lazy loading/readiness for every required face, licensed local files, coherent fallback/publication and measured digit/note/control metrics. Extend that small contract only as required; keep font loading inside the guarded runtime.
+Outfit is the single shared, eagerly loaded font for all UI, digits, notes, forms, windows, loading/error messages and the `SUDOKU` descriptor in every theme and appearance. Its family is defined globally in `fonts.css`, not in a theme preset or theme CSS output. Only the main-menu Toadoku wordmark uses theme-specific lettering: `ThemeDefinition.titleFont` lazy-loads that face and `typography.title` supplies its stack. The special family is scoped to `.title-lockup h1`. Themes cannot supply a normal/body font. Changing the global UI font is a separate product-wide decision with licensing, metrics and regression validation across all themes; it is not a theme extension point.
 
 Rendering functions consume `Layout`, screen and the existing active-time clock. They own no timers, observers or gameplay state. Reduced motion has a deterministic static pose; hidden work pauses. Reserve full independent face/lip/lift/float/focus sweeps, not just the current position. Decorations must stay outside readable centers and meaningful region boundaries. Cache expensive layout-only site/proof work against immutable layout objects. SVG path/circle animation still paints; do not claim compositor-only or phone performance without measurement.
 
