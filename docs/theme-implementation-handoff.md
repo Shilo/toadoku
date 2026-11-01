@@ -22,6 +22,10 @@ This user activation supersedes historical theme-deferral wording for your isola
 
 Use named specialists for bounded theme concepts/research and independent challenge. Research primary documentation for token architecture, CSS custom properties, lazy loading, font licensing/metrics, contrast, motion and native scrollbars. Research Cauldron references too. Challenge every material plan, including your own, and the user's proposed objects/styles. Record concise evidence, alternatives, counterexamples and decisions in `docs/theme-progress.md`. Review actual implementation independently.
 
+## Current visual boundary
+
+The user's subsequent correction requires preserving the established Quiet Flat C design and current visual choices. Theme work is an adaptation within that design, not a heavy redesign. Use the maintained screens, [design handoff](design-handoff.md), [design](design.md), [UI/UX](ui-ux.md) and [themes](themes.md) as visual authority. The first isolated ImageGen comparison is rejected in its entirety as a design direction. Preserve full-screen composition, Winding shallows B grouping, inward opaque near-circular faces, soft rounded controls, cream light surfaces, existing title/art anchors and exact spacing/dock geometry. Seasonal colors, readable title typography and restrained flat decorative treatments must stay within those boundaries. No scenic frame, enclosed pot illustration, new mascot, gradients or redesigned menu composition.
+
 ## Theme system
 
 Build a small typed semantic token system. Theme swapping must update appearance coherently without changing gameplay state or geometry contracts. Cover:

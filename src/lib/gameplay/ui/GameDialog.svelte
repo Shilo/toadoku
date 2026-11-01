@@ -239,8 +239,7 @@
   .more-groups section { min-width: 0; }
   .more-groups section + section { border-left: 1px solid var(--control-lip); padding-left: 8px; }
   .tool-row { width: 100%; justify-content: flex-start; text-align: left; padding: 8px 4px; gap: 4px; background: transparent; }
-  .tool-row:hover:not(:disabled) { background: var(--control-hover-face); }
-  .tool-row[aria-pressed="true"] { background: var(--control-selected-face); color: var(--control-selected-ink); }
+  .tool-row:hover:not(:disabled), .tool-row[aria-pressed="true"] { background: var(--leaf-face); color: var(--leaf-ink); }
   .tool-row span:not(.toggle) { flex: 1; min-width: 0; }
   .toggle { display: inline-grid; place-items: center; border: 1px solid currentColor; border-radius: 12px; height: 20px; min-width: 24px; font-size: .85rem; }
   [aria-pressed="true"] .toggle { background: var(--control-selected-face); color: var(--control-selected-ink); }

@@ -18,6 +18,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Current task and next phase
 
+- Theme visual boundary: preserve the established Quiet Flat C design and Winding shallows B within all themes. The first isolated ImageGen comparison was rejected by the user as a heavy redesign. Use maintained screens and current design documentation as authority; seasonal adaptation must retain the established composition, soft controls and fixed geometry.
 - Isolated theme activation: the user explicitly authorized `docs/theme-implementation-handoff.md` on the separate `codex/themes` worktree. [Theme progress](docs/theme-progress.md) records its completed implementation and validation. Theme-deferral wording below remains applicable to gameplay/main; integration needs later coordination after gameplay completion. Do not edit or merge into the gameplay checkout.
 
 - Gameplay is explicitly activated. The maintained source now includes certified catalog data, Sudoku/session/hint modules, Quick Play/Progression/replays, direct Dewdrops rewards and transactional IndexedDB storage. [Gameplay progress](docs/gameplay-progress.md) records accepted slices and unfinished gates. Do not treat the historical presentation-only statements below as the current implementation or mark the full phase accepted before its required validation finishes.

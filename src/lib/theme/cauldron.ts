@@ -16,8 +16,8 @@ export const cauldron: ThemeTokens = {
     focus: '#FFF1DB', dew: '#E1BDF6', entryInk: '#49305F', noteInk: '#291B33', conflictInk: '#79271F',
   },
   control: {
-    face: '#E9D9C5', lip: '#C6B29C', highlight: '#FFF1DB', ink: '#291B33',
-    hoverFace: '#FFF1DB', pressedFace: '#D9C2A9', selectedFace: '#49305F', selectedInk: '#FFF1DB',
+    face: '#FFF5D9', lip: '#C6B29C', highlight: '#FFF1DB', ink: '#291B33',
+    hoverFace: '#FFFDF1', pressedFace: '#D9C2A9', selectedFace: '#49305F', selectedInk: '#FFF1DB',
     disabledFace: '#45434B', disabledInk: '#A49BA8', disabledLip: '#30303A', focus: '#291B33',
   },
   typography: {
@@ -29,15 +29,15 @@ export const cauldron: ThemeTokens = {
   spacing: presentation.spacing,
   surface: {
     ...presentation.surface,
-    controlRadius: 12, controlDepth: 2, controlHighlight: 1,
+    controlRadius: 20, controlDepth: 2, controlHighlight: 1,
     focusBeadSize: 3, focusEdge: '#291B33', focusWidth: 2,
-    dialogRadius: 24, artFallbackInk: '#291B33', buttonRadius: 10,
+    dialogRadius: 28, artFallbackInk: '#291B33', buttonRadius: 12,
     windowShadow: '0 8px 0 #171B22',
   },
   geometry: presentation.geometry,
   motion: presentation.motion,
   layer: { water: 0, shore: 1, objects: 2, controls: 3, dialog: 4 },
-  dialog: { surface: '#E9D9C5', edge: '#8B6C9D', ink: '#291B33', backdrop: 'rgb(16 10 24 / 45%)' },
+  dialog: { surface: '#FFF5D9', edge: '#8B6C9D', ink: '#291B33', backdrop: 'rgb(16 10 24 / 45%)' },
   transition: { duration: 140, easing: 'ease-out', reducedDuration: 0 },
 };
 export const cauldronDark: ThemeTokens = {
