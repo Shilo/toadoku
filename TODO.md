@@ -52,6 +52,7 @@ This section records completed prototype scope; it does not authorize further pr
 
 ## Themes and art
 
+- [ ] Deferred: make the overall visuals and themes much prettier and more dynamic. Explore and discuss visual polish and motion with ImageGen before new UI experiments, preserving the established composition, readable grid, fixed hitboxes and reduced-motion support.
 - [x] Finish gameplay and pause/report with the accepted evidence and external limits.
 - [ ] Await fresh user direction before theme implementation or integration in this checkout. Separate-worktree theme activity does not authorize merging it automatically. Preserve the Auto/Pond/Cauldron brief and provenance boundaries for the later task.
 - [ ] Replace the deliberately provisional black-and-white question-mark frog-plus-pad image with one human-made composite asset. Final provenance and rights still apply.
@@ -68,6 +69,7 @@ This section records completed prototype scope; it does not authorize further pr
 
 ## Design and gameplay decisions
 
+- [ ] Deferred: research which Sudoku games are most popular on web and mobile, then play and test representative titles on both platforms. Record useful findings about visuals, themes, controls, solving tools, onboarding and overall play experience to inform later Toadoku decisions.
 - [ ] Deferred: design a polished, decorative Dewdrops balance display on the main menu that feels like a premium currency and a source of pride or bragging rights, anticipating future spending. Show the current spendable balance separately from lifetime earnings. Keep it off the gameplay screen so it never covers the board or grid; preserve the established composition and explore the visual treatment before implementation.
 - [ ] Deferred: discuss and research player history and lifetime statistics before implementation. Track total Dewdrops earned separately from the current balance so future currency spending does not reduce lifetime earnings. Include total puzzles solved; leave definitions, replay counting and presentation open for later agreement.
 - [ ] As part of that research, explore unique puzzles solved or discovered against the current 100,000-puzzle catalog, including what counts as discovered and how catalog changes affect the denominator. Consider other useful statistics and their persistence/backup requirements without committing to a metric set or interface yet.
