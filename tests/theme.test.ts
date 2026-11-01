@@ -60,6 +60,8 @@ describe('Pond presentation contract', () => {
 
   it('retains exact official font and license payloads', () => {
     const files: Record<string, string> = {
+      'Creepster-Regular.ttf': '402aeb734586c74aecd3dbdc454589b1fb12e2e1c71f782fd019ae68066d9f44',
+      'Creepster-OFL.txt': 'c09e3b81d9cfeec46bc29a3374000e8ad013d694bdf24a288088491dd4cd5c69',
       'Outfit.ttf': 'fc7287273e66929776e2ba54f144fe699080bec29f61bf649d70d871468aeade',
       'Outfit-OFL.txt': 'c676351bf8576b9aba743cd5eaa8c0e7ee0d51f805d720447b4df4ddb6a2e416',
       'Chewy-Regular.ttf': '7cf75ea288f82fd20badea8ab4da7a656a96a7277c170811e813b3d3d6294147',

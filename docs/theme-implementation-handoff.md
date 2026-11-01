@@ -1,5 +1,7 @@
 # Isolated theme implementation handoff
 
+Implementation status: [theme progress](theme-progress.md) records the explicitly activated isolated `codex/themes` branch, validation and remaining integration/hardware limits. The brief below remains its scope contract.
+
 This brief activates the theme task only when the user sends it to a new agent. Work autonomously in a separate Git worktree and branch. Gameplay continues independently in the original checkout and must finish before theme integration.
 
 ## Isolation and ownership

@@ -23,6 +23,22 @@ const disjoint = (curve: Curve, rect: Rect) => Math.max(...curve.map(p => p.x)) 
   || Math.min(...curve.map(p => p.y)) > rect.y + rect.height;
 
 describe('Cauldron vessel presentation', () => {
+  it('uses a broad desktop arch when identity leaves a full-width corridor', () => {
+    const layout = createLayout(1264, 704), vessel = cauldronVessel(layout, 'menu');
+    for (const boundary of [vessel.boundaries.wet, vessel.boundaries.dry]) {
+      const left = boundary[1], right = boundary[2];
+      expect(left[3].x).toBe(layout.width / 2);
+      expect(right[0]).toEqual(left[3]);
+      expect(left[3].y).toBeLessThan(left[0].y - 48);
+      expect(left[3].y).toBeLessThan(right[3].y - 48);
+      expect(left[1].x).toBeLessThan(left[2].x);
+      expect(right[1].x).toBeLessThan(right[2].x);
+    }
+    const short = createLayout(784, 344), cove = cauldronVessel(short, 'menu');
+    const artLeft = short.menuArt.x - presentation.motion.identityTravel - 4;
+    expect(cove.boundaries.wet[1][3].x).toBe(artLeft);
+    expect(cove.boundaries.dry[1][3].x).toBe(artLeft);
+  });
   it('preserves every game leaf envelope while backing every dock target', () => {
     for (const [width, height] of sizes) for (const shape of ['fill', 'square'] as const) {
       const layout = createLayout(width, height, shape), before = structuredClone(layout);

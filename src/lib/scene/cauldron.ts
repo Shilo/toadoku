@@ -11,13 +11,17 @@ const path = (curves: Curve[]) => `M${pair(curves[0][0])}${curves.map(c => `C${p
  * Cubic hulls protect every cell and identity rectangle without moving layout. */
 export function cauldronVessel(layout: Layout, screen: 'menu' | 'game'): ShoreGeometry {
   const bleed = presentation.geometry.backgroundBleed;
-  if (screen === 'menu' && layout.landscape) {
+  const identityBottom = Math.max(layout.menuTitle.y + layout.menuTitle.height,
+    layout.menuArt.y + layout.menuArt.height) + presentation.motion.identityTravel;
+  // A broad full-width rim is preferable whenever the fixed identity leaves
+  // room above the complete menu reservation. Short landscapes need a cove.
+  if (screen === 'menu' && layout.landscape && identityBottom + 4 >= layout.menuPanel.y) {
     const { width: w, height: h, menuPanel: panel, menuArt: art, menuTitle: title, keySize } = layout;
     const titleBottom = title.y + title.height + presentation.motion.identityTravel;
     const room = Math.max(0, panel.y - titleBottom);
     const margin = Math.min(4, room * .1), bank = Math.min(10, room * .25);
     const artLeft = art.x - presentation.motion.identityTravel - 4;
-    const turnX = Math.max(panel.width, (panel.width + artLeft) / 2);
+    const turnX = Math.max(panel.width, artLeft);
     const moreTop = h - keySize;
     const boundary = (wet: boolean): Curve[] => {
       const top = panel.y - margin - (wet ? bank : 0);
@@ -40,10 +44,9 @@ export function cauldronVessel(layout: Layout, screen: 'menu' | 'game'): ShoreGe
   const edge = screen === 'game' ? transpose ? layout.dock.x : layout.dock.y : layout.menuPanel.y;
   const leafLimit = screen === 'game'
     ? Math.max(...layout.cells.map(({ anchor: a }) => (transpose ? a.x + a.width : a.y + a.height) + presentation.geometry.waterClearance))
-    : Math.max(layout.menuArt.y + layout.menuArt.height + presentation.motion.identityTravel,
-      layout.menuTitle.y + layout.menuTitle.height + presentation.motion.identityTravel);
+    : identityBottom;
   const room = Math.max(0, edge - leafLimit), margin = Math.min(4, room * .1), bank = Math.min(10, room * .35);
-  const arc = Math.min(18, Math.max(0, room - margin - bank) * .5);
+  const arc = Math.min(screen === 'menu' ? w * .05 : 18, Math.max(0, room - margin - bank) * .5);
   const boundary = (wet: boolean): Curve[] => {
     const top = edge - margin - (wet ? bank : 0), crest = top - arc;
     const start = point(-bleed, top), left = point(0, top), middle = point(w / 2, crest), right = point(w, top), end = point(w + bleed, top);

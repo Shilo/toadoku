@@ -18,6 +18,8 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Current task and next phase
 
+- Isolated theme activation: the user explicitly authorized `docs/theme-implementation-handoff.md` on the separate `codex/themes` worktree. [Theme progress](docs/theme-progress.md) records its completed implementation and validation. Theme-deferral wording below remains applicable to gameplay/main; integration needs later coordination after gameplay completion. Do not edit or merge into the gameplay checkout.
+
 - Gameplay is explicitly activated. The maintained source now includes certified catalog data, Sudoku/session/hint modules, Quick Play/Progression/replays, direct Dewdrops rewards and transactional IndexedDB storage. [Gameplay progress](docs/gameplay-progress.md) records accepted slices and unfinished gates. Do not treat the historical presentation-only statements below as the current implementation or mark the full phase accepted before its required validation finishes.
 - Following interruption recovery, finish all prior gameplay tasks and acceptance, then pause and report back. Do not start any theme work, including after gameplay completion, until the user supplies fresh instructions. Preserve the maintained Pond appearance. The earlier Auto/Pond/Cauldron theme brief is reference for that later user-directed task, not permission to start automatically.
 

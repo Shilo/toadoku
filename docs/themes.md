@@ -1,5 +1,7 @@
 # Theme requirements and proposals
 
+Isolated activation update: the user authorized Auto/Pond/Cauldron work on `codex/themes` only. [Theme progress](theme-progress.md) records implementation, researched decisions, validation and integration limits. The [isolated handoff](theme-implementation-handoff.md) supersedes conflicting historical deferrals and shared-cell proposals below for that branch. Gameplay/main remains separate.
+
 Current scope is basic Pond only. Halloween and seasonal selection remain future requirements, explicitly deferred in [TODO.md](../TODO.md). Preserve modular theme boundaries without implementing the deferred theme now.
 
 Themes retain classic Sudoku rules and exactly the same frog and lily-pad sprites. Their definitions customize semantic UI colors, CSS gradients and background shapes, button styling, font roles, suitable motion parameters and localized text. Theme code stays independent of puzzle correctness and progress.

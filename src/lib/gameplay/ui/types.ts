@@ -13,6 +13,9 @@ export interface GameDialogProps {
   profile?: Profile;
   preferences: Preferences;
   preferencesAvailable?: boolean;
+  themeError?: boolean;
+  onThemeRetry?: () => void;
+  onThemeReload?: () => void;
   receipt?: CompletionReceipt;
   /** Explicit transient Quick choice, bound by the parent to the retained completed attempt. */
   continueBand?: Band;

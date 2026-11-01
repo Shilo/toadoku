@@ -11,7 +11,10 @@
   import { createLayout, rectStyle, LARGE } from './lib/layout';
   import { createNavigation, type Navigation, type Route, type OverlayState } from './lib/navigation';
   import { dictionaries, resolveLocale, type Locale } from './lib/i18n';
-  import { pond, themeStyle } from './lib/theme/pond';
+  import { themeStyle } from './lib/theme/tokens';
+  import { createThemeRuntime, type AppliedTheme } from './lib/theme/runtime';
+  import { nextLocalMidnight } from './lib/theme/policy';
+  import { themeCopy } from './lib/theme/copy';
   import type { GameController, GameState, StartRequest } from './lib/gameplay/game';
   import type { Band, Preferences, Role } from './lib/gameplay/contracts';
   import type { CloseReason, DialogView } from './lib/gameplay/ui/types';
@@ -50,7 +53,27 @@
   let backupSequence = 0;
   let routeRevision = 0;
   const panes = new Map<string, DialogView>();
-  const preferences = $derived(gameState.save?.preferences ?? { schemaVersion: 1 as const, language: locale, motion: 'system' as const, boardShape: 'fill' as const, theme: 'pond', appearance: 'light' });
+  const preferences = $derived(gameState.save?.preferences ?? { schemaVersion: 1 as const, language: locale, motion: 'system' as const, boardShape: 'fill' as const, theme: 'auto', appearance: 'light' });
+  let appliedTheme = $state.raw<AppliedTheme>();
+  let themeError = $state(false), systemDark = $state(false);
+  let themeTimer: ReturnType<typeof setTimeout> | undefined;
+  const themeText = $derived(themeCopy[locale]);
+  const themeRuntime = createThemeRuntime({
+    onChange: theme => { appliedTheme = theme; themeError = false; },
+    onError: () => { themeError = true; },
+  });
+  $effect(() => { requestTheme(); });
+  function requestTheme(date = new Date()) {
+    themeError = false;
+    void themeRuntime.request(preferences.theme, preferences.appearance, date, systemDark);
+  }
+  function refreshTheme() {
+    if (disposed) return;
+    const now = new Date();
+    requestTheme(now);
+    clearTimeout(themeTimer);
+    themeTimer = setTimeout(refreshTheme, Math.max(1, nextLocalMidnight(now).getTime() - now.getTime()));
+  }
   const layout = $derived(createLayout(width, height, preferences.boardShape));
   const inGame = $derived(route === 'board' || route === 'more' && overlay?.base === 'board');
   const selected = $derived(gameState.attempt?.selection ?? 0);
@@ -137,8 +160,12 @@
     nav = createNavigation(window, (next, pane) => { void renderRoute(next, pane); });
     stopMotion = createMotionClock(value => time = value);
     void boot();
+    const darkMedia = matchMedia('(prefers-color-scheme: dark)');
+    const appearanceChanged = () => { systemDark = darkMedia.matches; };
+    appearanceChanged(); darkMedia.addEventListener('change', appearanceChanged);
+    refreshTheme();
     const timer = setInterval(() => controller?.checkpoint(), 1000);
-    return () => { disposed = true; bootSequence++; cancelBackupOperation(); clearInterval(timer); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
+    return () => { disposed = true; clearTimeout(themeTimer); themeRuntime.dispose(); darkMedia.removeEventListener('change', appearanceChanged); bootSequence++; cancelBackupOperation(); clearInterval(timer); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
   });
   async function focusCell() {
     await tick(); if (route !== 'board' || !gameState.canStudy) return;
@@ -361,17 +388,18 @@
     element.addEventListener('mousedown', guard, true); element.addEventListener('click', guard, true);
     return () => { element.removeEventListener('mousedown', guard, true); element.removeEventListener('click', guard, true); };
   }
-  function visibility() { documentVisible = !document.hidden; }
-  async function pageShown() { if (controller?.state.attempt) await controller.checkAuthority(); documentVisible = !document.hidden; }
+  function visibility() { documentVisible = !document.hidden; if (documentVisible) refreshTheme(); }
+  async function pageShown() { refreshTheme(); if (controller?.state.attempt) await controller.checkAuthority(); documentVisible = !document.hidden; }
 </script>
 
-<svelte:window onkeydown={handleKey} onpointerdown={() => keyboard = false} onpagehide={() => documentVisible = false} onpageshow={pageShown} />
+<svelte:window onkeydown={handleKey} onpointerdown={() => keyboard = false} onpagehide={() => documentVisible = false} onpageshow={pageShown} onfocus={refreshTheme} />
 <svelte:document onvisibilitychange={visibility} />
-<svelte:head><title>Toadodu</title><meta name="theme-color" content={pond.water.deep} /></svelte:head>
+<svelte:head><title>Toadodu</title><meta name="theme-color" content={appliedTheme?.tokens.water.deep ?? '#0D6267'} /></svelte:head>
 
-<main class="world" lang={locale} style={themeStyle()} {@attach singleActivation}>
+<main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens) : undefined} {@attach singleActivation}>
+  {#if appliedTheme}
   <div class="scene" bind:clientWidth={width} bind:clientHeight={height}>
-    <Scene {layout} screen={inGame ? 'game' : 'menu'} {time} />
+    <Scene {layout} screen={inGame ? 'game' : 'menu'} {time} theme={appliedTheme.id} vessel={appliedTheme.definition.vessel} />
     {#if inGame}
       {#if gameState.canStudy && gameState.attempt}
         <section class="board" aria-label={a.board} bind:this={boardElement} style={rectStyle(layout.board)}>
@@ -383,7 +411,7 @@
               tabindex={selected === cell.id ? 0 : -1} style={rectStyle({...cell.rect,x:cell.rect.x-layout.board.x,y:cell.rect.y-layout.board.y})}
               onclick={() => dispatch({type:'select',cell:cell.id})} onfocus={() => { dispatch({type:'select',cell:cell.id}); focusedCell = cell.id; }} onblur={() => focusedCell = null}>
               <span class="anchor" style={rectStyle({ ...cell.anchor, x: cell.anchor.x - cell.rect.x, y: cell.anchor.y - cell.rect.y })}>
-                <Leaf id={cell.id} selected={selected === cell.id} focused={keyboard && focusedCell === cell.id} value={values[cell.id] || undefined} {notes} {time} diameter={cell.anchor.width} />
+                <Leaf facePath={appliedTheme.definition.cellPath} id={cell.id} selected={selected === cell.id} focused={keyboard && focusedCell === cell.id} value={values[cell.id] || undefined} {notes} {time} diameter={cell.anchor.width} />
                 {#if conflicts.has(cell.id)}<span class="conflict-mark" aria-hidden="true" style:font-size={`${cell.anchor.width * .22}px`}>!</span>{/if}
               </span>
             </button>
@@ -442,6 +470,7 @@
     {#if DialogComponent}
     <DialogComponent view={overlay.panel} {locale} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
       receipt={gameState.receipt} {continueBand} hint={gameState.canStudy ? gameState.hint : undefined} {hintProblem} busy={blocked || gameState.hintComputing} {closingBlocked} {saveState} {anchor} restorePreview={restorePreview?.summary} {restoreError} {exportError} {recoveryBusy} {recoveryProblem}
+      {themeError} onThemeRetry={refreshTheme} onThemeReload={reloadApplication}
       onCommand={command => dispatch(command)} onNavigate={navigatePanel} onClose={closeDialog} onPreference={changePreferences}
       onHint={async choice => { if (!blocked) await controller?.requestHint(choice); }} onContinue={continuePuzzle} onReplay={replay}
       onRestart={async () => { if (blocked || !controller) return; if (await controller.restart()) {focusReason='tool';historyClosing=true;nav?.closeAll();} }}
@@ -458,6 +487,17 @@
         <button class="cream" onclick={() => closeDialog('dismiss')}>{c.close}</button>
       </dialog>
     {/if}
+  {/if}
+  {/if}
+  {#if !appliedTheme || themeError && route !== 'more'}
+    <div class="theme-status" role="status">
+      <p>{themeError ? themeText.failed : themeText.loading}</p>
+      {#if themeError}
+        <button onclick={refreshTheme}>{themeText.retry}</button>
+        {#if gameState.attempt && gameState.saveState !== 'saved'}<p>{a.reloadWarning}</p><button disabled={recoveryBusy} onclick={exportRecovery}>{a.recovery}</button>{/if}
+        <button onclick={reloadApplication}>{a.reload}</button>
+      {/if}
+    </div>
   {/if}
   <div class="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 </main>
