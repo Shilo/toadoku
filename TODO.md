@@ -68,6 +68,7 @@ This section records completed prototype scope; it does not authorize further pr
 
 ## Design and gameplay decisions
 
+- [ ] Deferred: add Diabolical difficulty (source rating 5.0 or higher) as a separate level. The current catalog contains none. Preserve source/license provenance, certify the added puzzles, review hint coverage and define selection/progression behavior with compatible saved progress before implementation. See [difficulty ratings and current scope](docs/puzzle-sources.md#difficulty-ratings-and-the-three-labels).
 - [x] Validate top-down groups, nine-position enlarged notes, immutable clues, focus/selection/conflicts and fixed hitboxes through recorded desktop/emulated-phone checks. Physical-phone readability remains unverified.
 - [ ] Test full-allocation Fill space with 4px/8px spacing at actual portrait/landscape sizes, including safe areas and the Square alternative. Existing representative emulation passes do not certify physical hardware.
 - [x] Settle direct Dewdrops rewards, versioned progression schedule, certified catalog and completed-Leap replay policies.
