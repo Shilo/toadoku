@@ -1,9 +1,11 @@
 export const appCopy = {
   en: {
     board: 'Sudoku', conflict: 'Rule conflict', loading: 'Loading…',
-    featureLoadError: 'Could not open this menu. Retry or reload.', reload: 'Reload app',
+    featureLoadError: 'Could not open this menu. Try again.',
+    reopenHelp: 'If retry fails, finish saving or export recovery. Then close every Toadoku window and reopen.',
     reloadWarning: 'Reloading loses unsaved changes. Export recovery first.',
     loadError: 'Could not load this puzzle. Your progress is kept.',
+    puzzleUnavailable: 'Next puzzle unavailable. Connect to download, or prepare more in Settings. Your current puzzle is kept.',
     saveError: 'Not saved. Retry or export recovery in More.',
     newPuzzle: 'New puzzle', resume: 'Resume', resumeHere: 'Resume here', replay: 'Completed Leaps', start: 'Start',
     choose: 'Choose a mode to resume.', unscored: 'Play without saving', unscoredHelp: 'No saving. No Dewdrops.',
@@ -14,9 +16,11 @@ export const appCopy = {
   },
   de: {
     board: 'Sudoku', conflict: 'Regelkonflikt', loading: 'Wird geladen…',
-    featureLoadError: 'Menü nicht verfügbar. Erneut versuchen oder neu laden.', reload: 'App neu laden',
+    featureLoadError: 'Menü nicht verfügbar. Versuche es erneut.',
+    reopenHelp: 'Falls es weiter fehlschlägt, warte auf das Speichern oder exportiere die Notfalldatei. Schließe dann alle Toadoku-Fenster und öffne die App erneut.',
     reloadWarning: 'Neuladen verwirft ungespeicherte Änderungen. Exportiere zuerst die Notfalldatei.',
     loadError: 'Rätsel nicht verfügbar. Dein Fortschritt bleibt erhalten.',
+    puzzleUnavailable: 'Nächstes Rätsel nicht verfügbar. Verbinde dich zum Laden oder bereite in den Einstellungen weitere vor. Dein aktuelles Rätsel bleibt erhalten.',
     saveError: 'Nicht gespeichert. Unter Mehr erneut versuchen oder die Notfalldatei exportieren.',
     newPuzzle: 'Neues Rätsel', resume: 'Fortsetzen', resumeHere: 'Hier fortsetzen', replay: 'Abgeschlossene Sprünge', start: 'Starten',
     choose: 'Wähle einen Spieltyp zum Fortsetzen.', unscored: 'Ohne Speichern spielen', unscoredHelp: 'Kein Speichern. Keine Tautropfen.',
@@ -27,9 +31,11 @@ export const appCopy = {
   },
   es: {
     board: 'Sudoku', conflict: 'Conflicto de reglas', loading: 'Cargando…',
-    featureLoadError: 'No se pudo abrir este menú. Reintenta o recarga.', reload: 'Recargar aplicación',
+    featureLoadError: 'No se pudo abrir este menú. Vuelve a intentarlo.',
+    reopenHelp: 'Si sigue fallando, espera al guardado o exporta la recuperación. Después cierra todas las ventanas de Toadoku y vuelve a abrir.',
     reloadWarning: 'Recargar descarta los cambios sin guardar. Exporta primero la recuperación.',
     loadError: 'No se pudo cargar el sudoku. Se conserva tu progreso.',
+    puzzleUnavailable: 'El próximo sudoku no está disponible. Conéctate para descargar o prepara más en Ajustes. Se conserva tu sudoku actual.',
     saveError: 'Sin guardar. Reintenta o exporta la recuperación en Más.',
     newPuzzle: 'Nuevo sudoku', resume: 'Reanudar', resumeHere: 'Reanudar aquí', replay: 'Saltos completados', start: 'Empezar',
     choose: 'Elige un modo para reanudar.', unscored: 'Jugar sin guardar', unscoredHelp: 'Sin guardado. Sin gotas de rocío.',

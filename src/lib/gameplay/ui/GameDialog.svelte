@@ -22,7 +22,7 @@
   import { bandForPool, poolForLeap } from '../../modes';
   import type { CloseReason, DialogView, GameDialogProps } from './types';
   import type { SessionCommand } from '../../session';
-  let { view, locale, pwa, install, offline, offlineUnavailable, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
+  let { view, locale, pwa, install, offline, offlineUnavailable, puzzleProblem, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
     onCommand, onNavigate, onClose, onPreference, onHint, onContinue, onReplay, onRestart, onReplace, onExport, onRecovery, onResumeSaved, onRestore, onRestoreInput, onRetry }: GameDialogProps = $props();
   const c = $derived(uiCopy[locale]);
   let viewportWidth = $state(window.innerWidth), viewportHeight = $state(window.innerHeight);
@@ -122,6 +122,7 @@
     <h2 id="game-dialog-title" tabindex="-1">{title}</h2>
     <button class="icon-button close" disabled={closingBlocked} aria-label={c.close} onclick={() => onClose('dismiss')}><X size={22} /></button>
   </header>
+  {#if puzzleProblem && ['replace','result','replay'].includes(view)}<p role="alert">{puzzleProblem}</p>{/if}
   {#if view === 'more' && attempt?.scored === false || view === 'result' && receipt?.scored === false}<p class="eligibility">{c.unscoredIdentity}</p>{/if}
 
   {#if view === 'more'}

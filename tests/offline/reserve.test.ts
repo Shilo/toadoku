@@ -227,5 +227,21 @@ describe('verified offline reserve', () => {
     fixture.support.dispose(); fixture.loader.dispose();
   }, 20_000);
 
+  it('does not count records behind a routing-poisoned stored manifest, and explicit preparation repairs the canonical metadata', async () => {
+    const fixture = setup(); await fixture.support.prepare('default');
+    const poisoned = JSON.parse(JSON.stringify(manifest));
+    poisoned.pools.easy.shards[0].sha256 = '0'.repeat(64);
+    poisoned.pools.easy.shards[0].path = 'easy-0-0000000000000000.json';
+    fixture.store.manifest = new TextEncoder().encode(JSON.stringify(poisoned) + '\n');
+    await fixture.support.inspect();
+    expect(Object.values(fixture.support.state.counts).every(count => count === 0)).toBe(true);
+    const requests = fixture.requests.length;
+    await fixture.support.prepare('default');
+    expect(fixture.support.state.phase).toBe('ready');
+    expect(fixture.store.manifest).toEqual(manifestBytes);
+    expect(fixture.requests).toHaveLength(requests);
+    fixture.support.dispose(); fixture.loader.dispose();
+  }, 20_000);
+
 });
 

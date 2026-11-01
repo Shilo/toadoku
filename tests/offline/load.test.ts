@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { CatalogLoader } from '../../src/lib/catalog/load';
 import type { AttestedRecord, CatalogManifest } from '../../src/lib/catalog/types';
 import { verifyRetained } from '../../src/lib/offline/verify';
+import { decodeManifest } from '../../src/lib/catalog/decode';
+import { manifestMembership } from '../../src/lib/catalog/attestation';
 
 const manifestBytes = new Uint8Array(await readFile('public/catalog/v1/manifest.json'));
 const manifest = JSON.parse(new TextDecoder().decode(manifestBytes)) as CatalogManifest;
@@ -161,6 +163,33 @@ describe('offline loader priority and rejected bytes', () => {
       expect(oldBytes).toBe(owner === 'background' ? manifest.pools.easy.shards[0].bytes : 0);
       loader.dispose();
     }
+  });
+
+  it('rejects cached routing poison despite valid membership, fetches the canonical manifest once and repairs the next cold offline loader', async () => {
+    const poisoned = JSON.parse(JSON.stringify(manifest));
+    poisoned.pools.easy.shards[0].sha256 = '0'.repeat(64);
+    poisoned.pools.easy.shards[0].path = 'easy-0-0000000000000000.json';
+    expect(() => decodeManifest(poisoned)).not.toThrow();
+    expect(await manifestMembership(poisoned)).toBeDefined();
+    let bytes = new TextEncoder().encode(JSON.stringify(poisoned) + '\n'), saved: AttestedRecord | undefined;
+    expect(() => JSON.parse(new TextDecoder().decode(bytes))).not.toThrow();
+    const requests: string[] = [], cache = {
+      getManifest: async () => bytes.slice(), putManifest: async (input: Uint8Array) => { bytes = input.slice(); return true; },
+      getRecord: async () => saved && structuredClone(saved), putRecord: async (record: AttestedRecord) => { saved = structuredClone(record); return true; },
+    };
+    const loader = new CatalogLoader('https://test.invalid/catalog/v1/', { fetcher: async input => { requests.push(new URL(String(input)).pathname); return fixture(input); } });
+    loader.setOfflineCache(cache);
+    expect((await loader.getRecord('easy', 0)).kind).toBe('ready');
+    expect(requests.filter(path => path.endsWith('/manifest.json'))).toHaveLength(1);
+    expect(requests.some(path => path.includes('0000000000000000'))).toBe(false);
+    expect(await loader.ensureOfflineManifest()).toBe(true);
+    expect(bytes).toEqual(manifestBytes);
+    const cold = new CatalogLoader(loader.base, { fetcher: async () => { throw new Error('offline'); } });
+    cold.setOfflineCache(cache);
+    expect((await cold.getRecord('easy', 0)).kind).toBe('ready');
+    const wrongNetwork = new CatalogLoader(loader.base, { fetcher: async () => response(new TextEncoder().encode(JSON.stringify(poisoned))) });
+    expect(await wrongNetwork.initialize()).toMatchObject({ kind: 'corrupt', reason: expect.stringContaining('manifest hash') });
+    loader.dispose(); cold.dispose(); wrongNetwork.dispose();
   });
 
 });

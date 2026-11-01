@@ -48,7 +48,7 @@
     failed = false; preparingShell = true;
     try {
       const ready = await client.ensureShell();
-      if (id !== operation) return;
+      if (id !== operation || document.hidden) return;
       preparingShell = false;
       if (!ready) { failed = true; return; }
       await support.prepare(kind);
@@ -67,11 +67,14 @@
     try { retained = await navigator.storage?.persist?.() ?? false; } catch { retained = false; }
   }
   const count = (pool: keyof NonNullable<OfflineState['counts']>) => reserve?.counts[pool] ?? 0;
+  const needsReopen = $derived(!!delivery?.shellReady && navigator.serviceWorker?.controller?.scriptURL !== new URL('worker.js', new URL(import.meta.env.BASE_URL, location.href)).href);
   const updateText = $derived(!delivery ? c.loading : delivery.phase === 'waiting' ? c.updateReady :
     delivery.phase === 'downloading' ? c.downloading : delivery.phase === 'checking' ? c.checking :
     delivery.phase === 'failed' ? c.updateFailed : delivery.phase === 'unavailable' ? c.unavailable :
     delivery.shellReady ? c.current : c.idle);
 </script>
+
+<svelte:document onvisibilitychange={() => { if (document.hidden) cancel(); }} />
 
 <div class="pwa-pane">
   <section aria-labelledby="pwa-install-title">
@@ -85,7 +88,8 @@
   <section aria-labelledby="pwa-offline-title">
     <h3 id="pwa-offline-title">{c.offline}</h3>
     <p role="status">{delivery?.shellReady ? c.shellReady : c.shellMissing}</p>
-    <p>{reserve?.savedGame ? c.saved : c.noSaved}</p>
+    {#if needsReopen}<p>{c.reopenOffline}</p>{/if}
+    {#if reserve?.savedGame && !checking && reserve.phase !== 'failed'}<p>{c.saved}</p>{/if}
     {#if reserve}
       <h4>{c.coverage}</h4>
       <dl><div><dt>{c.easy}</dt><dd>{count('easy')}</dd></div><div><dt>{c.medium}</dt><dd>{Math.min(count('medium-low'), count('medium-high'))}</dd></div><div><dt>{c.hard}</dt><dd>{Math.min(count('hard-low'), count('hard-high'))}</dd></div></dl>
@@ -104,7 +108,7 @@
       {:else if reserve.phase === 'partial'}<p role="status">{c.partial}</p>{/if}
       <p>{c.stored}: {formatBytes(reserve.storedBytes,locale)}</p>
       <button class="secondary" disabled={working || checking} onclick={() => refresh()}>{c.inspect}</button>
-      <button class="secondary" disabled={working || checking || !reserve.storedBytes} onclick={clear}>{c.remove}</button>
+      <button class="secondary" disabled={working || checking || (!reserve.storedBytes && reserve.phase !== 'failed')} onclick={clear}>{c.remove}</button>
       <details><summary>{c.downloadHelp}</summary><p>{c.horizon}</p><p>{c.noAuto}</p><p>{c.background}</p><p>{c.guarantee}</p><p>{c.files}</p><p>{c.storeHelp}</p><p>{c.eviction}</p>
       {#if retained}<p>{c.persisted}</p>{:else if supportsPersistence}<button class="secondary" onclick={persist}>{c.persist}</button>{#if retentionAsked}<p role="status">{c.denied}</p>{/if}{/if}</details>
     {:else}<p role="status">{unavailable ? c.error : c.loading}</p>{/if}

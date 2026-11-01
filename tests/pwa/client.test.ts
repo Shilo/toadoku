@@ -69,4 +69,68 @@ describe('app-owned PWA bridge', () => {
     expect(register).not.toHaveBeenCalled();
   });
 
+  it('retries an explicitly requested failed initial registration after cooldown, while respecting visibility and online state', async () => {
+    register.mockRejectedValue(new Error('network failure'));
+    const pwa = client(); await pwa.start(); expect(register).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(295_000); expect(register).toHaveBeenCalledTimes(1);
+    Object.assign(document, { hidden: true }); await vi.advanceTimersByTimeAsync(10_000); expect(register).toHaveBeenCalledTimes(1);
+    Object.assign(document, { hidden: false }); Object.assign(navigator, { onLine: false });
+    await vi.advanceTimersByTimeAsync(5000); expect(register).toHaveBeenCalledTimes(1);
+    Object.assign(navigator, { onLine: true }); await vi.advanceTimersByTimeAsync(5000); expect(register).toHaveBeenCalledTimes(2);
+  });
+  it('does not register a menu-only first visitor from the condition timer', async () => {
+    const pwa = client(); await pwa.connectExisting(); await vi.advanceTimersByTimeAsync(300_000);
+    expect(register).not.toHaveBeenCalled();
+  });
+
+  it('re-registers a failed empty owned registration after cooldown and keeps its updatefound listener', async () => {
+    const failedWorker = Object.assign(new EventTarget(), { state: 'installing', scriptURL: new URL('worker.js', base).href });
+    const replacement = Object.assign(new EventTarget(), { state: 'installing', scriptURL: failedWorker.scriptURL });
+    const listening = vi.spyOn(replacement, 'addEventListener');
+    const update = vi.fn().mockRejectedValue(new Error('InvalidStateError'));
+    const reg = Object.assign(new EventTarget(), { scope: base.href, active: null, waiting: null, installing: failedWorker as typeof failedWorker | null, update });
+    register.mockResolvedValueOnce(reg).mockImplementationOnce(async () => { reg.installing = replacement; reg.dispatchEvent(new Event('updatefound')); return reg; });
+    const pwa = client(); await pwa.start();
+    failedWorker.state = 'redundant'; reg.installing = null; failedWorker.dispatchEvent(new Event('statechange'));
+    await vi.advanceTimersByTimeAsync(295_000); expect(register).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(5000); expect(register).toHaveBeenCalledTimes(2);
+    expect(update).not.toHaveBeenCalled(); expect(listening).toHaveBeenCalledWith('statechange', expect.any(Function));
+  });
+
+  it('coalesces manual checks and retains a failed check through healthy local readback until network retry succeeds', async () => {
+    const worker = Object.assign(new EventTarget(), { state: 'activated', scriptURL: new URL('worker.js', base).href,
+      postMessage(message: { type: string }, ports: MessagePort[]) { ports[0].postMessage({ protocol: 1, cacheName: 'owned', ready: true, buildId: build, bytes: 123 }); ports[0].close(); } });
+    let release!: () => void;
+    const update = vi.fn().mockImplementationOnce(() => new Promise<void>(done => { release = done; }));
+    const reg = Object.assign(new EventTarget(), { scope: base.href, active: worker, waiting: null, installing: null, update });
+    getRegistration.mockResolvedValue(reg);
+    const pwa = client(); await pwa.start();
+    const first = pwa.check(), second = pwa.check();
+    expect(update).toHaveBeenCalledTimes(1); expect(pwa.status.phase).toBe('checking');
+    release(); await Promise.all([first, second]); expect(pwa.status.phase).toBe('ready');
+    update.mockRejectedValueOnce(new Error('network failed'));
+    await pwa.check(); expect(pwa.status.phase).toBe('failed');
+    const key = 'toadoku:pwa:checks:1:' + base.pathname;
+    expect(JSON.parse(values.get(key)!)).toMatchObject({ failures: 1 });
+    await pwa.inspectShell(); expect(JSON.parse(values.get(key)!)).toMatchObject({ failures: 1 });
+    update.mockResolvedValue(undefined);
+    await vi.advanceTimersByTimeAsync(295_000); expect(update).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(5000); await vi.waitFor(() => expect(pwa.status.phase).toBe('ready'));
+    expect(update).toHaveBeenCalledTimes(3); expect(values.has(key)).toBe(false);
+  });
+  it.each([true, false])('manual repair requires a successful matching-build acknowledgement (%s)', async acknowledged => {
+    let ready = false; const messages: Array<{ type: string; buildId?: string }> = [];
+    const worker = Object.assign(new EventTarget(), { state: 'activated', scriptURL: new URL('worker.js', base).href,
+      postMessage(message: { type: string; buildId?: string }, ports: MessagePort[]) {
+        messages.push(message); if (message.type === 'TOADOKU_SHELL_REPAIR') ready = acknowledged;
+        ports[0].postMessage({ protocol: 1, cacheName: 'owned', ready, buildId: build, bytes: 123 }); ports[0].close();
+      } });
+    getRegistration.mockResolvedValue(Object.assign(new EventTarget(), { scope: base.href, active: worker, waiting: null, installing: null, update: vi.fn().mockResolvedValue(undefined) }));
+    const pwa = client(); await pwa.start(); expect(pwa.status.shellReady).toBe(false);
+    expect(await pwa.ensureShell()).toBe(acknowledged);
+    expect(messages.filter(message => message.type === 'TOADOKU_SHELL_REPAIR')).toEqual([{ type: 'TOADOKU_SHELL_REPAIR', protocol: 1, buildId: build }]);
+    await pwa.inspectShell(); expect(messages.filter(message => message.type === 'TOADOKU_SHELL_REPAIR')).toHaveLength(1);
+    expect(pwa.status.shellReady).toBe(acknowledged);
+  });
+
 });

@@ -41,6 +41,7 @@ if (hostedBase) {
     for (const file of current.files.filter(file => file.path?.startsWith('assets/'))) {
       if (!safePath(file.path) || !/^[a-f0-9]{64}$/.test(file.sha256) || !Number.isSafeInteger(file.bytes) || file.bytes < 0 || file.bytes > 4 * 1024 * 1024) throw new Error('Invalid hosted current asset');
       const old = entries.get(file.path);
+      if (old && now - old.lastCurrent <= age && (old.sha256 !== file.sha256 || old.bytes !== file.bytes)) throw new Error('Immutable supported asset URL changed bytes; publication refused');
       if (old?.sha256 === file.sha256 && old.bytes === file.bytes) entries.set(file.path, { ...old, lastCurrent: now });
       else {
         fetched += file.bytes; if (fetched > 8 * 1024 * 1024) throw new Error('Current hosted asset recovery exceeds 8 MiB');
@@ -52,7 +53,11 @@ if (hostedBase) {
   }
 }
 for (const [path, file] of entries) if (now - file.lastCurrent > age) entries.delete(path);
-for (const file of release.files.filter(file => file.path.startsWith('assets/'))) entries.set(file.path, { path: file.path, bytes: file.bytes, sha256: file.sha256, lastCurrent: now, source: join(root, file.path) });
+for (const file of release.files.filter(file => file.path.startsWith('assets/'))) {
+  const old = entries.get(file.path);
+  if (old && (old.sha256 !== file.sha256 || old.bytes !== file.bytes)) throw new Error('Immutable supported asset URL changed bytes; publication refused');
+  entries.set(file.path, { path: file.path, bytes: file.bytes, sha256: file.sha256, lastCurrent: now, source: join(root, file.path) });
+}
 const files = [...entries.values()].sort((a, b) => a.path.localeCompare(b.path));
 const bytes = files.reduce((sum, file) => sum + file.bytes, 0);
 if (!Number.isSafeInteger(bytes) || bytes > cap) throw new Error('Retained in-support assets exceed 256 MiB; publication refused');

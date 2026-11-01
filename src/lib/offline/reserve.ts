@@ -1,5 +1,6 @@
-import { decodeManifest } from '../catalog/decode';
+import { decodeManifest, sha256 } from '../catalog/decode';
 import { manifestMembership } from '../catalog/attestation';
+import { MANIFEST_V1_SHA256 } from '../catalog/manifest.v1';
 import { POOLS } from '../catalog/types';
 import type { CatalogManifest, PoolId } from '../catalog/types';
 import type { CatalogLoader, BackgroundAllowance } from '../catalog/load';
@@ -64,7 +65,7 @@ export class OfflineSupport {
   }
   private async trustedManifest(): Promise<CatalogManifest | undefined> {
     const bytes = await this.store.getManifest();
-    if (!bytes) return;
+    if (!bytes || bytes.byteLength > 128 * 1024 || await sha256(bytes) !== MANIFEST_V1_SHA256) return;
     try {
       const manifest = decodeManifest(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
       return await manifestMembership(manifest) ? manifest : undefined;

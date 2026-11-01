@@ -51,3 +51,29 @@ it('does not interpret missing existing host metadata as a safe empty deployment
   try { await expect(execute(process.execPath, ['tools/pwa/retain.mjs', f.root, f.previous, f.retained, `http://127.0.0.1:${address.port}/`])).rejects.toThrow(); }
   finally { await new Promise<void>(done => server.close(() => done())); }
 });
+
+it('refuses to overwrite a still-supported immutable URL with different bytes', async () => {
+  const f = await fixture(), old = Buffer.from('prior application bytes');
+  await writeFile(join(f.previous, 'assets/current.js'), old);
+  await writeFile(join(f.previous, 'retention.json'), JSON.stringify({ protocol: 1, files: [{ path: 'assets/current.js', bytes: old.length, sha256: hash(old), lastCurrent: Date.now() }] }));
+  await expect(execute(process.execPath, ['tools/pwa/retain.mjs', f.root, f.previous, f.retained])).rejects.toThrow();
+  expect(await readFile(join(f.previous, 'assets/current.js'), 'utf8')).toBe(old.toString());
+});
+
+it('refuses a hosted-current merge that would replace another supported byte identity', async () => {
+  const f = await fixture(), old = Buffer.from('supported predecessor'), changed = Buffer.from('changed at identical URL');
+  const path = 'assets/host-current.js';
+  await writeFile(join(f.previous, path), old);
+  await writeFile(join(f.previous, 'retention.json'), JSON.stringify({ protocol: 1, files: [{ path, bytes: old.length, sha256: hash(old), lastCurrent: Date.now() }] }));
+  const requests: string[] = [];
+  const server = createServer((request, response) => {
+    requests.push(request.url ?? ''); response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ protocol: 1, buildId: 'a'.repeat(64), files: [{ path, bytes: changed.length, sha256: hash(changed) }] }));
+  });
+  await new Promise<void>(done => server.listen(0, '127.0.0.1', done));
+  const address = server.address(); if (!address || typeof address === 'string') throw new Error('fixture address');
+  try {
+    await expect(execute(process.execPath, ['tools/pwa/retain.mjs', f.root, f.previous, f.retained, `http://127.0.0.1:${address.port}/toadoku/`])).rejects.toThrow();
+    expect(requests).toEqual(['/toadoku/release.json']);
+  } finally { await new Promise<void>(done => server.close(() => done())); }
+});

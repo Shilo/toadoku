@@ -14,6 +14,8 @@ export interface GameDialogProps {
   install?: InstallSupport;
   offline?: OfflineSupport;
   offlineUnavailable?: boolean;
+  /** Localized feedback for the current failed allocation request, never an authority input. */
+  puzzleProblem?: string;
   locale: 'en' | 'de' | 'es';
   attempt?: Attempt;
   replayAttempt?: Attempt;

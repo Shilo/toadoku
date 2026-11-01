@@ -1,3 +1,4 @@
+import { assertHostedMime } from './host-mime.mjs';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
@@ -15,8 +16,15 @@ for (let attempt = 0; attempt < 6; attempt++) {
     const responses = [];
     for (const file of current) {
       const response = await fetch(new URL(file.path, base), { redirect: 'error', headers: { 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(20_000) });
-      const body = Buffer.from(await response.arrayBuffer());
-      if (!response.ok || body.length !== file.bytes || createHash('sha256').update(body).digest('hex') !== file.sha256) throw new Error(`Hosting bytes not current: ${file.path}`);
+      let body;
+      try {
+        if (!response.ok || !response.body) throw new Error(`Hosting response failed: ${file.path}`);
+        assertHostedMime(file.path, response.headers.get('content-type'));
+        const reader = response.body.getReader(), parts = []; let received = 0;
+        try { while (true) { const part = await reader.read(); if (part.done) break; received += part.value.length; if (received > file.bytes) { await reader.cancel(); throw new Error(`Hosting response exceeds expected bytes: ${file.path}`); } parts.push(Buffer.from(part.value)); } } finally { reader.releaseLock(); }
+        body = Buffer.concat(parts);
+      } catch (error) { try { await response.body?.cancel(); } catch { /* Keep the original failure. */ } throw error; }
+      if (body.length !== file.bytes || createHash('sha256').update(body).digest('hex') !== file.sha256) throw new Error(`Hosting bytes not current: ${file.path}`);
       responses.push({ path: file.path, bytes: body.length, headers: Object.fromEntries(['cache-control', 'etag', 'age', 'content-type', 'content-encoding'].map(key => [key, response.headers.get(key)])) });
     }
     await mkdir(evidence.substring(0, evidence.lastIndexOf('/')) || '.', { recursive: true });

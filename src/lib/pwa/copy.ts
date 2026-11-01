@@ -2,6 +2,7 @@ import type { Locale } from '../i18n';
 
 const en = {
 
+  reopenOffline: 'Finish saving or export recovery, then close every Toadoku window and reopen once before going offline.',
   installHelp: 'Install from browser menu', downloadHelp: 'How downloads work', versionHelp: 'Version details',
   title: 'Install and offline', install: 'Installation', installButton: 'Install app',
 
@@ -81,6 +82,7 @@ type Copy = { [K in keyof typeof en]: string };
 
 const de: Copy = {
 
+  reopenOffline:'Speichere zuerst oder exportiere die Notfalldatei. Schließe dann alle Toadoku-Fenster und öffne die App einmal neu, bevor du offline gehst.',
   installHelp:'Über das Browsermenü installieren', downloadHelp:'So funktionieren Downloads', versionHelp:'Versionsdetails',
   title:'Installation und offline', install:'Installation', installButton:'App installieren',
 
@@ -154,6 +156,7 @@ const de: Copy = {
 
 const es: Copy = {
 
+  reopenOffline:'Antes de quedarte sin conexión, termina de guardar o exporta la recuperación. Cierra todas las ventanas de Toadoku y vuelve a abrir una vez.',
   installHelp:'Instalar desde el menú del navegador', downloadHelp:'Cómo funcionan las descargas', versionHelp:'Detalles de la versión',
   title:'Instalación y sin conexión', install:'Instalación', installButton:'Instalar aplicación',
 

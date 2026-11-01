@@ -2,6 +2,7 @@ import { decodeManifest, decodeShard, sha256, verifyRecordIdentity } from './dec
 import { context, inclusionProof, manifestMembership, merkleLevels, recordLeaf, verifyAttestedRecord } from './attestation';
 import type { AttestedRecord, CatalogManifest, CatalogRecord, CatalogResult, PoolId, ShardDescriptor, VerifiedShardCache } from './types';
 import type { OfflineCatalogCache } from '../offline/types';
+import { MANIFEST_V1_SHA256 } from './manifest.v1';
 import { verifyRetained } from '../offline/verify';
 class Corrupt extends Error {}
 type ReadPriority = 'foreground' | 'background';
@@ -119,6 +120,7 @@ export class CatalogLoader {
         let bytes: Uint8Array | undefined;
         try { bytes = await this.offline?.getManifest(); } catch { /* Optional offline storage. */ }
         const accept = async (candidate: Uint8Array) => {
+          if (candidate.byteLength > 128 * 1024 || await sha256(candidate) !== MANIFEST_V1_SHA256) throw new Corrupt('catalog manifest hash');
           const manifest = decodeManifest(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(candidate)));
           const membership = await manifestMembership(manifest);
           if (!membership) throw new Corrupt('untrusted manifest membership');

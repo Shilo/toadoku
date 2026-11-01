@@ -22,6 +22,7 @@ export function createPwaClient(base: URL): PwaClient {
   const script = new URL('worker.js', base).href;
   let status: PwaStatus = { phase: supported ? 'idle' : 'unavailable', runningBuild: build, shellReady: false };
   let registration: ServiceWorkerRegistration | undefined, starting: Promise<void> | undefined, checking: Promise<void> | undefined, refreshing: Promise<void> | undefined;
+  let setupRequested = false;
   let disposed = false, failures = 0, nextCheck = 0, lastAttempt = 0;
   const listeners = new Set<(status: PwaStatus) => void>(), cleanups: Array<() => void> = [];
   const backoffKey = `toadoku:pwa:checks:1:${base.pathname}`;
@@ -101,6 +102,7 @@ export function createPwaClient(base: URL): PwaClient {
   }
   async function start(manual = false) {
     if (!supported || disposed) return;
+    setupRequested = true;
     if (starting) return starting;
     if (!manual && Date.now() < nextCheck) { publish({ phase: 'failed', problem: 'Download paused after a failure. Prepare offline or check again to retry.' }); return; }
     if (manual) resetFailures();
@@ -137,7 +139,10 @@ export function createPwaClient(base: URL): PwaClient {
     return status.shellReady;
   }
   if (supported) {
-    const checkVisible = () => { void requestCheck(false); };
+    const checkVisible = () => {
+      if (setupRequested && (!registration || !registration.active && !registration.waiting && !registration.installing) && !document.hidden && navigator.onLine) void start();
+      else void requestCheck(false);
+    };
     window.addEventListener('focus', checkVisible); window.addEventListener('online', checkVisible); document.addEventListener('visibilitychange', checkVisible);
     const timer = setInterval(checkVisible, 5000);
     cleanups.push(() => { clearInterval(timer); window.removeEventListener('focus', checkVisible); window.removeEventListener('online', checkVisible); document.removeEventListener('visibilitychange', checkVisible); });

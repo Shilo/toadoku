@@ -39,6 +39,7 @@
   let shellTimer: ReturnType<typeof setTimeout> | undefined, shellStarted = false;
   let gameState = $state.raw<GameState>({ owned: false, canStudy: false, busy: false, hintComputing: false, saveState: 'saved', completionEvent: 0 });
   let booting = $state(true), bootError = $state(false), actionBusy = $state(false), backupBusy = $state(false), historyClosing = $state(false);
+  let puzzleLoadFailed = $state(false), startSequence = 0;
   let announcement = $state(''), pendingStart = $state.raw<StartRequest>();
   let quickContinue = $state.raw<{ attemptId: string; generation: string; band: Band }>();
   let saveFailed = $state(false);
@@ -180,6 +181,7 @@
   async function renderRoute(next: Route, pane?: OverlayState) {
     const previous = route;
     if (next !== route || pane?.id !== overlay?.id) {
+      puzzleLoadFailed = false;
       if (recoveryBusy) cancelBackupOperation();
       routeRevision++; controller?.cancelStart();
       if (overlay?.panel === 'hint' && pane?.id !== overlay.id) controller?.cancelHint();
@@ -257,10 +259,15 @@
   }
   async function start(request: StartRequest) {
     if (blocked || !controller) return;
-    const revision = routeRevision;
+    const revision = routeRevision, current = controller, operation = ++startSequence;
+    const relevant = () => !disposed && controller === current && routeRevision === revision && operation === startSequence;
+    puzzleLoadFailed = false;
     await loadOfflineSupport();
-    if (revision !== routeRevision || disposed || !controller) return;
-    if (await controller.start(request) && revision === routeRevision && !disposed) { pendingStart = undefined; nav?.go('board'); }
+    if (!relevant()) return;
+    const started = await current.start(request);
+    if (!relevant()) return;
+    if (started) { pendingStart = undefined; nav?.go('board'); }
+    else puzzleLoadFailed = true;
   }
   function chooseQuick(band: Band) {
     const existing = gameState.save?.attempts.find(attempt => attempt.role === 'quick');
@@ -359,9 +366,6 @@
           (document.activeElement === document.body || document.activeElement === trigger)) trigger.focus({ preventScroll: true });
       }
     }
-  }
-  function reloadApplication() {
-    location.reload();
   }
   async function restore(text: string, confirm: boolean) {
     if (blocked || !controller) return;
@@ -477,7 +481,7 @@
   {#if route === 'more' && overlay}
     {#if DialogComponent}
     <DialogComponent view={overlay.panel} {locale} {pwa} {install} {offline} {offlineUnavailable} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
-      receipt={gameState.receipt} {continueBand} hint={gameState.canStudy ? gameState.hint : undefined} {hintProblem} busy={blocked || gameState.hintComputing} {closingBlocked} {saveState} {anchor} restorePreview={restorePreview?.summary} {restoreError} {exportError} {recoveryBusy} {recoveryProblem}
+      puzzleProblem={puzzleLoadFailed ? a.puzzleUnavailable : undefined} receipt={gameState.receipt} {continueBand} hint={gameState.canStudy ? gameState.hint : undefined} {hintProblem} busy={blocked || gameState.hintComputing} {closingBlocked} {saveState} {anchor} restorePreview={restorePreview?.summary} {restoreError} {exportError} {recoveryBusy} {recoveryProblem}
       onCommand={command => dispatch(command)} onNavigate={navigatePanel} onClose={closeDialog} onPreference={changePreferences}
       onHint={async choice => { if (!blocked) await controller?.requestHint(choice); }} onContinue={continuePuzzle} onReplay={replay}
       onRestart={async () => { if (blocked || !controller) return; if (await controller.restart()) {focusReason='tool';historyClosing=true;nav?.closeAll();} }}
@@ -489,7 +493,7 @@
         {#if dialogError}
           <button class="cream" onclick={loadDialog}>{a.retry}</button>
           {#if gameState.attempt && gameState.saveState !== 'saved'}<p>{a.reloadWarning}</p><button class="cream" onclick={exportRecovery}>{a.recovery}</button>{/if}
-          <button class="cream" onclick={reloadApplication}>{a.reload}</button>
+          <p>{a.reopenHelp}</p>
         {/if}
         <button class="cream" onclick={() => closeDialog('dismiss')}>{c.close}</button>
       </dialog>
