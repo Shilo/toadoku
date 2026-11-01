@@ -1,6 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { openNativeHarness } from './harness';
 import { writeFileSync } from 'node:fs';
+
+test('native raw recovery preserves future corrupt graphs without writes or creation', async ({ page, browser }, testInfo) => {
+  page.on('console', message => { if (message.text().startsWith('RECOVERY_NATIVE')) console.log(message.text()); });
+  await openNativeHarness(page);
+  const report = await page.evaluate(async () => { const url = '/tests/storage/recovery-native.ts'; return (await import(url)).nativeRawRecoveryCase(); });
+  expect(report.noCreate).toBe(true); expect(report.cancellation).toBe(true); console.log(JSON.stringify(report));
+  writeFileSync(`prototypes/gameplay-validation/storage/raw-native-${testInfo.project.name}-${Date.now()}.json`,
+    JSON.stringify({ browser: testInfo.project.name, browserVersion: browser.version(), recordedAt: new Date().toISOString(), ...report }, null, 2));
+});
+
+test('native raw recovery capacity includes one and two retained full histories', async ({ page, browser }, testInfo) => {
+  test.setTimeout(240_000); await openNativeHarness(page);
+  page.on('console', message => { if (message.text().startsWith('RECOVERY_SCALE')) console.log(message.text()); });
+  const report = await page.evaluate(async () => { const url = '/tests/storage/recovery-native.ts'; return (await import(url)).nativeRawRecoveryCapacity(); });
+  const recorded = JSON.stringify({ browser: testInfo.project.name, browserVersion: browser.version(), recordedAt: new Date().toISOString(), ...report }, null, 2);
+  writeFileSync(`prototypes/gameplay-validation/storage/raw-capacity-${testInfo.project.name}-${Date.now()}.json`, recorded);
+  console.log(recorded);
+});
 test('native IndexedDB atomic storage, recovery and ownership', async ({ page }) => {
   await openNativeHarness(page);
   const outcomes = await page.evaluate(async () => {

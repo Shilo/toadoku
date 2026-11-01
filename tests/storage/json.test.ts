@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BACKUP_LIMITS, parseBoundedJson } from '../../src/lib/storage/json';
-import { databaseName } from '../../src/lib/storage/namespace';
+import { databaseName, recoveryDatabaseName } from '../../src/lib/storage/namespace';
 import { storageFailure } from '../../src/lib/storage/transaction';
 
 describe('bounded backup structural parsing', () => {
@@ -42,5 +42,9 @@ describe('bounded backup structural parsing', () => {
     for (const [name, reason] of cases) {
       expect(storageFailure(new DOMException(name, name)).issue).toEqual({ kind: 'unavailable', reason, detail: name });
     }
+  });
+  it('accepts only canonical recovery namespaces', () => {
+    for (const path of ['/', '/toadoku/', '/ñ/']) { const name = databaseName(`https://example.test${path}`); expect(recoveryDatabaseName(name)).toBe(name); }
+    for (const name of ['other:%2F', 'toadodu:%', 'toadodu:relative%2F', 'toadodu:%2Fmissing', 'toadodu:%2f', 'toadodu:/']) expect(() => recoveryDatabaseName(name)).toThrow('raw-recovery-namespace');
   });
 });

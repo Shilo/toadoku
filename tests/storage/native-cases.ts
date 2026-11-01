@@ -12,6 +12,7 @@ import { attempt, pools, preferences, profile } from './fixtures';
 import { bucketId, bucketKey } from '../../src/lib/storage/history-codec';
 
 let certified: { definitions: Definition[]; pools: PoolState[] } | undefined;
+export { fresh as recoveryTestDatabase };
 async function certifiedFixtures(): Promise<NonNullable<typeof certified>> {
   if (certified) return certified;
   const loader = new CatalogLoader(new URL('/catalog/v1/', location.origin));
@@ -231,7 +232,7 @@ export async function nativeEnvironmentCases(): Promise<string[]> {
     check(committed(await corrupt.repository.readPreferences()).language === 'en', 'corrupt profile destroyed independent settings');
     const saved = committed(await transact<unknown[]>(raw, ['quarantine'], 'readonly', context => context.request(context.store('quarantine').getAll(), values => context.result(values))));
     check(saved.length === 1 && Number.isNaN((saved[0] as { raw: { profile: { wallet: number }[] } }).raw.profile[0].wallet), 'quarantine did not preserve original corrupt value');
-    check(committed(await corrupt.repository.exportRecovery()).includes('toadodu-recovery'), 'corrupt recovery export unavailable');
+    check((await committed(await corrupt.repository.exportRecovery()).blob.text()).includes('toadodu-raw-recovery'), 'corrupt recovery export unavailable');
     raw.close();
   } finally { await corrupt.cleanup(); }
   return ['independent native connections', 'missed-notification epoch authority', 'injected essential/cache quota isolation', 'closed connection', 'future database preserved', 'quarantine original malformed value', 'independent preferences recovery'];
@@ -259,7 +260,7 @@ export async function nativeCorruptHistoryCases(): Promise<number> {
       check((await test.repository.readIssued(test.generation, value.definition.id, value.definition.groupId)).kind === 'corrupt', `corrupt history treated as unused: ${mutation}`);
       const request = await allocation(test.repository, test.generation, 'frontier'); request.attempt.definition = value.definition;
       check((await test.repository.allocate(request)).kind === 'corrupt', `allocation bypassed corrupt history: ${mutation}`);
-      const recovery = committed(await test.repository.exportRecovery());
+      const recovery = await committed(await test.repository.exportRecovery()).blob.text();
       check(recovery.includes('issued-pair'), 'history quarantine missing');
       raw.close(); count++;
     } finally { await test.cleanup(); }
@@ -450,7 +451,7 @@ export async function nativeMissingLayoutCase(): Promise<void> {
       check(committed(await test.repository.readPreferences()).language === 'en', 'layout corruption destroyed independent settings');
       committed(await transact(raw, ['meta'], 'readwrite', context => { context.store('meta').put({ generation: test.generation, layout: 'buckets-v9' }, [test.generation, 'layout']); context.result(true); }));
       check((await test.repository.readCurrent()).kind === 'unsupported-future', 'unknown physical layout was not preserved readonly');
-      check(committed(await test.repository.exportRecovery()).includes('buckets-v9'), 'future physical layout original not quarantined');
+      check((await committed(await test.repository.exportRecovery()).blob.text()).includes('buckets-v9'), 'future physical layout original not quarantined');
     } finally { raw.close(); }
   } finally { await test.cleanup(); }
 }

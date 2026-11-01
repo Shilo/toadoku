@@ -25,6 +25,7 @@ import { historyLayout, historySlot } from './history';
 import { bucketKey, decodeLayout, overflowKey, rowKey } from './history-codec';
 import type { PhysicalBackup } from './physical-backup';
 import { captureRestoreCounts, validatePreparedRestore } from './prepare-restore';
+import type { RawRecoveryArtifact, RawRecoveryOptions } from './raw-recovery';
 export { decodeBackup } from './backup';
 
 const ESSENTIAL = ['meta', 'settings', 'profile', 'attempts', 'roles', 'receipts', 'grants', 'intents', 'pools', 'issued', 'issuedBuckets', 'receiptBuckets'] as const;
@@ -304,12 +305,9 @@ export class Repository {
     });
   }
 
-  exportRecovery(): Promise<StorageResult<string>> {
-    return transact(this.database, [...ESSENTIAL, 'quarantine'], 'readonly', context => {
-      readMany(context, [context.store('meta').get('current'), context.store('quarantine').getAll()], values => {
-        context.result(JSON.stringify({ application: 'toadodu-recovery', schemaVersion: 1, active: values[0], quarantined: values[1] }));
-      });
-    });
+  async exportRecovery(options: RawRecoveryOptions = {}): Promise<StorageResult<RawRecoveryArtifact>> {
+    const { exportRawRecoveryName } = await import('./raw-recovery');
+    return exportRawRecoveryName(this.database.name, options);
   }
 
   async readIssued(generation: string, id: string, groupId: string): Promise<StorageResult<{ id?: IssuedRecord; group?: IssuedRecord }>> {
