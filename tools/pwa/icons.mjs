@@ -1,7 +1,7 @@
-import { chromium } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 process.env.PLAYWRIGHT_BROWSERS_PATH = resolve('prototypes/production-ui-evidence/browsers');
+const { chromium } = await import('@playwright/test');
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 512, height: 512 }, deviceScaleFactor: 1 });
