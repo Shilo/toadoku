@@ -13,7 +13,7 @@
   import { dictionaries, resolveLocale, type Locale } from './lib/i18n';
   import { themeStyle } from './lib/theme/tokens';
   import { createThemeRuntime, type AppliedTheme } from './lib/theme/runtime';
-  import { nextLocalMidnight } from './lib/theme/policy';
+  import { nextThemeRefresh } from './lib/theme/policy';
   import { themeCopy } from './lib/theme/copy';
   import { automaticThemeStatus, formatAutomaticThemeStatus } from './lib/theme/event';
   import type { GameController, GameState, StartRequest } from './lib/gameplay/game';
@@ -83,7 +83,7 @@
     const now = new Date();
     requestTheme(now);
     clearTimeout(themeTimer);
-    themeTimer = setTimeout(refreshTheme, Math.max(1, nextLocalMidnight(now).getTime() - now.getTime()));
+    themeTimer = setTimeout(refreshTheme, Math.max(1, nextThemeRefresh(now).getTime() - now.getTime()));
   }
   const layout = $derived(createLayout(width, height, preferences.boardShape));
   const baseMenuRow = $derived(route === 'menu' || route === 'more');

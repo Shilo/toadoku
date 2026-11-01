@@ -54,6 +54,8 @@ Lazy-load theme implementations and theme-specific fonts/assets. Keep only small
 
 Halloween is October 31 annually. Its window includes October 24 through November 7, inclusive. Outside supported events, Auto resolves to Pond. Use calendar boundaries rather than fixed millisecond offsets across daylight-saving changes. Do not hardcode today's date. Keep the policy small, deterministic and testable, including refresh/resume across a boundary.
 
+The implemented annual schedule lives in `src/lib/theme/calendar.ts`: each entry has a theme, localized event label, inclusive local start and exclusive local end, optionally with hours/minutes. Windows repeat yearly and can cross New Year. First active entry wins overlaps; Pond is the regular fallback. Selection and countdown share one resolved occurrence. The application refreshes at the next intraday boundary or local midnight and on resume, keeping minute countdown work separate from imports. See the [yearly-event recipe](theme-authoring.md#add-a-yearly-event) before adding an event.
+
 Persist the selected preference separately from Auto's effective result. Auto is the default for fresh settings. Preserve existing saved Pond choices: legacy defaults and intentional choices are indistinguishable, so any migration needs a separately justified decision. Unknown theme IDs must degrade safely. Do not silently introduce a storage-schema change while gameplay is frozen.
 
 ## Cauldron direction

@@ -46,7 +46,7 @@ Active text must satisfy the maintained contrast checks. Cauldron's three group 
 | [presentation.ts](../src/lib/theme/presentation.ts), [layout.ts](../src/lib/layout.ts) | Shared budgets and viewport allocation; theme definitions consume layout rather than allocating it |
 | [scene/types.ts](../src/lib/scene/types.ts), [scene contract](../src/lib/scene/README.md) | Required `liquid` and `vessel`, optional `bubbles`, frame/path types and complete containment rules |
 | Theme definition module | Complete light/dark tokens, optional local title font, required `cellPath`, optional `cellDetail` and scene functions |
-| [policy.ts](../src/lib/theme/policy.ts), [event.ts](../src/lib/theme/event.ts), [copy.ts](../src/lib/theme/copy.ts) | Small eager selection/calendar metadata and localized status; no eager theme renderer or font imports |
+| [calendar.ts](../src/lib/theme/calendar.ts), [policy.ts](../src/lib/theme/policy.ts), [event.ts](../src/lib/theme/event.ts), [copy.ts](../src/lib/theme/copy.ts) | Ordered annual event metadata, shared selection/deadlines and localized status; no eager theme renderer or font imports |
 
 Keep shared Scene/Leaf/board components free of theme-ID checks. Shared components receive functions and semantic CSS properties. Lazy-load theme modules and their fonts/assets; do not turn the system into a plugin framework or add a separate board implementation.
 
@@ -74,7 +74,27 @@ Persist the selected preference separately from the applied theme. Auto is the f
 
 Halloween currently includes October 24 through November 7, ending at local November 8. Calendar boundaries choose the event; countdown days are 24-hour durations with rounded-up remaining hours and a final less-than-one-hour label. Name the seasonal theme directly and associate its event, for example "Cauldron ends in 7 days and 4 hours (Halloween)." This describes the theme window, not the literal holiday date. Settings shows the actually applied theme, including when a desired theme is loading or failed; remaining-time copy names the expected seasonal theme. Fixed choices have no expiry. Refresh countdown text quietly each visible minute; that refresh must not retry imports. Re-resolve on midnight/resume.
 
-For a future event, explicitly define its annual window, local start/end boundaries, fallback and overlap priority before extending the small policy. Do not hardcode the current date, add fixed millisecond weeks across DST, or copy Halloween's deadline/labels into a new theme. New event rules need boundary/DST tests and all three locales.
+### Add a yearly event
+
+Annual events are data in `THEME_EVENTS` in [calendar.ts](../src/lib/theme/calendar.ts). An event for an existing theme needs one entry, not new selection or countdown branches:
+
+```ts
+{
+  id: 'halloween',
+  theme: 'cauldron',
+  label: { en: 'Halloween', de: 'Halloween', es: 'Halloween' },
+  start: { month: 10, day: 24 },
+  end: { month: 11, day: 8 },
+}
+```
+
+Months are 1-based and boundaries use the device's local time. Start is inclusive; end is exclusive, so this includes all of November 7. Year is omitted because the window repeats every year. Optional `hour` and `minute` fields support shorter annual windows, such as 09:30 through 11:00 on one date. Omitted time means midnight. If the end's nominal calendar position precedes the start, it belongs to the following year, supporting December-to-January windows.
+
+Auto uses the first active entry in list order. Overlaps require no priority numbers, sorting, randomness or extra saved state. The same resolved occurrence supplies the theme, localized event label and countdown deadline. When no window matches, `DEFAULT_THEME` supplies Pond. Explicit theme choices bypass the schedule and have no expiry.
+
+The application wakes at the next scheduled intraday boundary or local midnight, whichever comes first, and rechecks on resume/focus. Countdown minute updates remain independent and do not retry imports. This is a small annual-window resolver, not a general recurrence service: dates are fixed month/day values. Invalid dates and empty occurrences are skipped; February 29 occurrences run only in valid leap years. Native local `Date` behavior shifts nonexistent DST times forward and chooses the earlier repeated time; normalized empty windows are skipped. Use calendar boundaries rather than fixed millisecond weeks across DST.
+
+New event data needs localized labels and boundary/overlap/year-wrap tests. A new theme additionally needs the ID, lazy module and name registration described below; scheduling does not import its visual code eagerly. Moving-date holidays need an explicitly reviewed extension rather than incorrect fixed dates.
 
 ## Authoring and acceptance
 
