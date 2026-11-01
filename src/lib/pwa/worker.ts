@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { normalizePrecache, orphanShellCaches, ownedShellCache } from './policy';
+import { acceptableShellMime, normalizePrecache, orphanShellCaches, ownedShellCache } from './policy';
 import { PrecacheController } from 'workbox-precaching';
 import type { PrecacheEntry } from 'workbox-precaching';
 
@@ -20,10 +20,7 @@ const precache = new PrecacheController({ cacheName, plugins: [{
 precache.addToCacheList(manifest);
 const expected = precache.getURLsToCacheKeys();
 const byURL = new Map(manifest.map(entry => [new URL(entry.url, scope).href, entry]));
-function acceptableMime(url: string, mime: string): boolean {
-  const path = new URL(url).pathname;
-  return path.endsWith('.js') ? /(?:javascript|ecmascript)/i.test(mime) : path.endsWith('.css') ? /text\/css/i.test(mime) : path.endsWith('.html') ? /text\/html/i.test(mime) : /\.(?:json|webmanifest)$/.test(path) ? /json|manifest/i.test(mime) : path.endsWith('.png') ? /image\/png/i.test(mime) : path.endsWith('.svg') ? /image\/svg\+xml/i.test(mime) : path.endsWith('.ttf') ? /(?:font|octet-stream|truetype)/i.test(mime) : true;
-}
+const acceptableMime = acceptableShellMime;
 async function verified(response: Response | undefined, entry: PrecacheEntry): Promise<boolean> {
   if (!response || response.status !== 200 || response.redirected || !acceptableMime(new URL(entry.url, scope).href, response.headers.get('content-type') ?? '')) return false;
   const blob = await response.clone().blob();

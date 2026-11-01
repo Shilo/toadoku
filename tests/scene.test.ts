@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createLayout, type Rect } from '../src/lib/layout';
-import { boardWater, evaluate, menuShallows, shore, type Contour, type Point } from '../src/lib/scene/geometry';
+import { boardWater, evaluate, menuShallows, shore, protectedFaceRadius, type Contour, type Point } from '../src/lib/scene/geometry';
 import { pond } from '../src/lib/theme/pond';
 
 const sizes = [[344, 784], [784, 344], [377, 857], [857, 377], [1000, 700], [700, 1000], [480, 480], [304, 584], [292, 552], [344, 487.2], [487.2, 344]];
@@ -20,7 +20,7 @@ function winding(points: Point[], p: Point): number {
 const ownership = (shapes: { color: number; points: Point[] }[], p: Point) => [0, 1, 2].filter(color => shapes.filter(s => s.color === color).reduce((n, s) => n + winding(s.points, p), 0) !== 0);
 
 describe('shared three-color scene partition', () => {
-  it('preserves every nominal leaf circle with independent full motion reserve', () => {
+  it('preserves every actual visible face union with independent full motion reserve', () => {
     for (const [width, height] of sizes) {
       const layout = createLayout(width, height);
       for (let frame = 0; frame < 24; frame++) {
@@ -30,7 +30,7 @@ describe('shared three-color scene partition', () => {
         expect(water.layers.every(l => !/NaN|Infinity/.test(l.d))).toBe(true);
         expect(water.junctionRadii.every(r => r > 0)).toBe(true);
         for (const cell of layout.cells) {
-          const a = cell.anchor, radius = a.width / 2 + 1.5;
+          const a = cell.anchor, radius = protectedFaceRadius(a.width);
           const expected = (Math.floor(cell.row / 3) + Math.floor(cell.column / 3)) % 3;
           for (let angle = 0; angle < 16; angle++) {
             const p = { x: a.x + a.width / 2 + radius * Math.cos(angle * Math.PI / 8), y: a.y + a.height / 2 + radius * Math.sin(angle * Math.PI / 8) };

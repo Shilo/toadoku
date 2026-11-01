@@ -117,7 +117,7 @@ Use semantic mappings for defaults and selected/disabled/focus states. Do not ma
 
 ## 6. Layout and selected visual direction
 
-The product is Toadodu, a cute full-screen top-down pond. Quiet Flat is the overall scene treatment. B, Winding shallows, is the board composition; this does not select the older overall scene treatment also named B. Keep alternatives as history, with no public A/B selector.
+The product is Toadoku, a cute full-screen top-down pond. Quiet Flat is the overall scene treatment. B, Winding shallows, is the board composition; this does not select the older overall scene treatment also named B. Keep alternatives as history, with no public A/B selector.
 
 ### Board and dock
 

@@ -1,5 +1,6 @@
 import { assertCachedShellBudget } from './build.ts';
 import { validateCatalog } from './catalog-artifact.mjs';
+import { OFFLINE_THEME_PACKS, SHARED_OFFLINE_FONTS, THEME_FONT_BUDGET, assertThemeFontInventory } from './theme-packs.ts';
 import { createHash } from 'node:crypto';
 import { readFile, readdir, access } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -9,6 +10,17 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const releaseBytes = await readFile(join(root, 'release.json'));
 const release = JSON.parse(releaseBytes.toString('utf8'));
 if (release.protocol !== 1 || !/^[a-f0-9]{64}$/.test(release.buildId)) throw new Error('Invalid release identity');
+if (release.themePacks || release.files.some(file => /\.woff2?$/.test(file.path))) {
+  const policy = release.themePacks;
+  const expectedThemes = Object.keys(OFFLINE_THEME_PACKS).sort();
+  const expectedNotices = [...new Set(['Outfit-OFL.txt', ...Object.values(OFFLINE_THEME_PACKS).flatMap(pack => pack.notices)])].sort().map(file => `licenses/${file}`);
+  if (policy?.version !== 1 || policy.fontBudget !== THEME_FONT_BUDGET || JSON.stringify(policy.themes) !== JSON.stringify(expectedThemes) || JSON.stringify(policy.notices) !== JSON.stringify(expectedNotices)) throw new Error('Unsupported offline theme policy');
+  const sourceFonts = [...SHARED_OFFLINE_FONTS, ...Object.values(OFFLINE_THEME_PACKS).flatMap(pack => pack.fonts)];
+  const declared = new Set(await Promise.all(sourceFonts.map(async file => createHash('sha256').update(await readFile(`src/assets/fonts/${file}`)).digest('hex'))));
+  const fonts = release.files.filter(file => /\.(?:ttf|woff2?)$/.test(file.path)).map(({path,bytes,sha256}) => ({path,bytes,sha256}));
+  assertThemeFontInventory(fonts, declared);
+  if (JSON.stringify(policy.fonts) !== JSON.stringify(fonts) || expectedNotices.some(path => !release.files.some(file => file.path === path))) throw new Error('Incomplete offline theme closure');
+}
 const worker = await readFile(join(root, 'worker.js'), 'utf8');
 const start = worker.search(/\[\{"(?:integrity|revision|url)":/);
 if (start < 0) throw new Error('Actual injected inventory not found');

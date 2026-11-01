@@ -1,4 +1,4 @@
-# Toadodu
+# Toadoku
 
 ## Product
 
@@ -19,8 +19,10 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 ## Current task and next phase
 
 - Gameplay implementation and available-environment acceptance are complete. The maintained source includes 100,000 independently certified puzzles, Sudoku/session/hint modules, Quick Play/Progression/replays, direct Dewdrops rewards and transactional IndexedDB storage. [Gameplay acceptance](docs/gameplay-acceptance.md) records actual gates and external hardware/release limits; [progress](docs/gameplay-progress.md) retains the challenged decisions and historical failures. Presentation-only statements below describe completed history.
-- Pause and report gameplay completion. Do not start or integrate theme work in this checkout until the user supplies fresh instructions. Preserve the maintained Pond appearance. The separate theme worktree and earlier Auto/Pond/Cauldron brief do not authorize automatic integration.
-- PWA implementation and available-environment acceptance are complete in the separate `codex/pwa-offline` worktree based on `ecc8c30`. Read [actual acceptance, limits and external Android/hosting gates](docs/pwa-acceptance.md) and [challenged decisions](docs/pwa-progress.md). Delivery does not authorize merging, pushing, publishing or importing concurrent main/theme changes. Reconcile shared source and rerun affected checks on any subsequently authorized combined build. The [handoff](docs/pwa-implementation-handoff.md), [research](docs/research/pwa-readiness-audit.md) and [matrix](docs/pwa-validation-matrix.md) retain the phase specification.
+- Theme implementation and reviewed main integration are complete. The merged feature branch/worktree were safely removed after acceptance. Preserve accepted gameplay, concurrent documentation and the separate PWA worktree. [Theme progress](docs/theme-progress.md) records implementation; [integration](docs/theme-integration.md) records validation, ancestry, preview rehosting and cleanup. UI/dock fonts are Almendra for Pond and Germania One for Cauldron; all grid/notes/enlarged editor figures use shared Outfit. Further theme changes need fresh user instructions.
+- The PWA implementation passed isolated acceptance. The user now authorizes a simplicity review, maintainer/icon documentation, tested theme/PWA integration into main, and a subsequent independent review by the original gameplay chat. Read [PWA acceptance](docs/pwa-acceptance.md), [system walkthrough](docs/pwa-system.md), [icon recipe](docs/pwa-icons.md) and [phase specification](docs/pwa-implementation-handoff.md). No push or publication is authorized.
+- Theme visual boundary: preserve the established Quiet Flat C design and Winding shallows B within all themes. The first isolated ImageGen comparison was rejected by the user as a heavy redesign. Use maintained screens and current design documentation as authority; seasonal adaptation must retain the established composition, soft controls and fixed geometry.
+- Accepted theme scope adds orange Cauldron stew, dedicated simmer motion, pale squash faces, one concave pot curve, a narrow third ground lip, complete control boundaries and Auto status/countdown. Preserve the gameplay grid design. Landscape retains the right 5x2 dock; existing bottom-dock allocations may use one row only with 596px usable width for ten 56px keys. Main-menu actions share one responsive height, capped at 64px, while submenu/identity/shore reservations stay fixed. Current theme contracts supersede historical two-ground-color/exact-row wording below.
 
 - Historical preparation produced the [autonomous gameplay handoff](docs/gameplay-implementation-handoff.md), its data/state/validation specifications and receiving-agent prompt. That brief now governs the explicitly activated gameplay phase and supersedes historical UI-only restrictions.
 - Every plan in the activated gameplay phase must be researched online and challenged before execution, including the lead's own overall/architecture/integration plans, each specialist plan, test plans and every proposed fix or material revision. Assign a named specialist to challenge lead-authored plans. Record evidence-supported agreement, review actual implementations reciprocally, test integrated journeys personally with Codex browser, and commit accepted green slices periodically. See the [mandatory research/challenge loop](docs/gameplay-implementation-handoff.md#6-mandatory-research-and-reciprocal-challenge-loop).
@@ -43,7 +45,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
-- More stays disabled in the completed prototype reference. The accepted tracked gameplay has functional tools/Settings, modes, storage and rewards with three active roles rather than arbitrary save slots. External hardware/release limits remain explicit. Theme integration awaits fresh user instructions.
+- More stays disabled in the completed prototype reference. The accepted tracked gameplay has functional tools/Settings, modes, storage and rewards with three active roles rather than arbitrary save slots. External hardware/release limits remain explicit. Current theme integration follows the fresh authorization above.
 - The tracked UI integrates fresh water, pads, shore and floating modules. Physical hardware validation remains deferred. See [production progress](docs/production-ui-progress.md) and the separate [prototype record](docs/prototype-progress.md).
 - No store, purchases or upgrades.
 
@@ -64,6 +66,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 ## Working rules
 
 - KISS, YAGNI, DRY. Add only what the task needs.
+- Follow **simplicity-first design**: strong defaults, no setup for ordinary play, and minimal necessary features/settings. Keep frequent actions easy to reach; use progressive disclosure for necessary infrequent options through clear secondary access. Preserve accessibility, timely feedback/recovery and consequential disclosures. Use concise, familiar labels. Read the short [usability guide](docs/usability-principles.md) when changing features, settings, navigation or copy. Its linked usability research is optional.
 - Use Conventional Commits.
 - Use unit tests for logic/state; reserve browser tests for critical flows and visual validation. Batch actions; avoid redundant screenshots and reruns.
 - No em dashes or personal context in project files.
@@ -82,7 +85,7 @@ For gameplay, start with the [autonomous gameplay handoff](docs/gameplay-impleme
 | --- | --- |
 | Layout, pads, controls, menus | [UI/UX](docs/ui-ux.md), [menu flow](docs/menu.md) |
 | Visual constraints and artwork | [Design](docs/design.md) |
-| Tokens, backgrounds, appearance | [Themes](docs/themes.md) |
+| Tokens, backgrounds, appearance, future themes | [Theme authoring](docs/theme-authoring.md), [themes](docs/themes.md) |
 | Pad cutouts or animated water | [Future visual research](docs/future-visual-research.md) |
 | Stack, modules, validation | [Architecture](docs/architecture.md) |
 | Rules, catalogs, deduction patterns | [Data/correctness](docs/gameplay-data-and-correctness.md), [source audit](docs/research/gameplay-readiness-audit.md) |

@@ -1,14 +1,24 @@
-# Toadodu
+# Toadoku
 
-A colorful, immersive frog Sudoku game for mobile and desktop browsers. GitHub Pages and offline PWA delivery remain later work.
+A colorful frog Sudoku game for mobile and desktop browsers, built with Svelte, TypeScript and Vite.
 
-Maintained Pond presentation/navigation shell using Svelte 5, TypeScript and Vite. This phase contains an immutable example board, selection and accessible navigation. It contains no Sudoku rules, editable numbers, saves, economy, PWA or deployment infrastructure.
+Play Quick Play or Progression with 100,000 independently certified puzzles, notes, undo, hints, saved progress and Dewdrops rewards. Settings remember language, board shape, motion, appearance and theme. English, German and Spanish are supported. Pond and Cauldron share the same game; Auto follows the seasonal schedule.
 
-The next complete gameplay phase is prepared in the [autonomous implementation handoff](docs/gameplay-implementation-handoff.md), including a copy-ready receiving-agent prompt. Read its [source/readiness audit](docs/research/gameplay-readiness-audit.md), [data/correctness specification](docs/gameplay-data-and-correctness.md), [state/persistence specification](docs/gameplay-state-and-persistence.md) and [validation matrix](docs/gameplay-validation-matrix.md). These specify future implementation and certification, not results already achieved. Every plan, including the lead's plans and all fixes, requires primary online research and reciprocal specialist challenge before execution.
+See [gameplay acceptance](docs/gameplay-acceptance.md), [theme authoring](docs/theme-authoring.md) and [PWA acceptance](docs/pwa-acceptance.md) for actual checks and remaining device/hosting limits. Historical handoffs preserve the earlier specifications and challenged decisions.
+
+## Installation, offline play and updates
+
+Ordinary online play needs no setup. Installation is optional: open Settings, then Install and offline, and use the browser's installation option when available.
+
+Before a trip, choose Prepare offline play to save upcoming puzzles. More offline options contains the longer-trip download and storage cleanup. Downloads can be cancelled without losing puzzles already saved. After first setup, save and close every Toadoku window, then reopen once before going offline. Keep a backup of important progress because browsers can remove local data.
+
+Updates download without interrupting games. When an update is ready, finish saving, close every Toadoku window and reopen. No automatic game reload occurs.
+
+Maintainers: [how the PWA works](docs/pwa-system.md), [make or replace installation icons](docs/pwa-icons.md), [integration and review](docs/pwa-integration.md). The Pages workflow is provided; publishing still requires the documented real-device and hosting checks.
 
 ## Local workflow
 
-Use Node 24 or newer compatible Node release. The locked toolchain was verified with Node 25.0.0 and npm 11.16.0.
+Use Node >=24.11. The locked toolchain was verified with Node 25.0.0 and npm 11.16.0.
 
 ```powershell
 npm ci
@@ -23,9 +33,9 @@ npm run preview
 
 The browser tests start their own development server on port 5179 when needed. Browser binaries, temporary runner caches, screenshots and test output stay under ignored `prototypes/production-ui-evidence/`. The preserved `prototypes/pond-visual-v1/` is never a runtime dependency. Unit tests do not require a browser download.
 
-The app takes an independent locale input, defaulting to the browser language. For local review use `?lang=en`, `?lang=de` or `?lang=es`. No Settings or preference persistence is implemented. Main-menu More and unavailable actions remain disabled. Gameplay More provides Resume and Back to main menu. Arrow keys, Home and End move the logical selection; Tab reaches More.
+For local language review use `?lang=en`, `?lang=de` or `?lang=es`. Saved preferences take precedence after loading. Arrow keys, Home and End move the logical selection; Tab reaches More. Gameplay More keeps solving tools beside menu actions, without an extra dock key.
 
-Vite emits relative asset references for repository-subpath hosting. The browser suite independently serves `dist/` at `/toadoku/`, exercises navigation and verifies local fonts/licenses. No hosting/deployment configuration is included.
+Vite defaults to relative assets; `TOADOKU_BASE` configures the deployed base. Offline support runs in production builds, not the development server. After building, run `node tools/pwa/validate.mjs dist`; use the focused PWA browser journeys for real installation, offline and update checks. The workflow in `.github/workflows/pages.yml` validates and retains supported release assets before deployment.
 
 See [production progress and acceptance](docs/production-ui-progress.md), [asset provenance](docs/production-assets.md) and the [original implementation handoff](docs/production-ui-handoff.md). Final human-made artwork, physical-device validation and final tiny-note typography remain open.
 

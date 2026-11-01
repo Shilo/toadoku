@@ -186,17 +186,18 @@ for (const band of ['Easy','Medium','Hard'] as const) test(`real ${band} Quick P
   await page.screenshot({ path: `${evidence}/quick-${band.toLowerCase()}-continued.png` });
 });
 
-test('real preferences preserve the puzzle, conceal paused panes and keep readable tools timed', async ({ page }) => {
+test('real preferences preserve the visible puzzle and keep readable settings and tools timed', async ({ page }) => {
   test.setTimeout(60000); await page.setViewportSize({ width: 360, height: 800 }); await page.goto('/'); await quick(page, 'Easy');
   const original = roleAttempt(await snapshot(page), 'quick'), puzzle = await domPuzzle(page), cell = puzzle.givens.indexOf('0');
   await digit(page, cell, Number(puzzle.solution[cell])); const paths = await page.locator('.cell .face path').evaluateAll(nodes => nodes.map(n => n.getAttribute('d')));
   await more(page); const before = roleAttempt(await snapshot(page), 'quick').elapsedMs;
   await expect.poll(async () => roleAttempt(await snapshot(page), 'quick').elapsedMs, { timeout: 5000 }).toBeGreaterThan(before);
-  await page.getByRole('dialog').getByRole('button', { name: 'Settings', exact: true }).click(); await expect(page.locator('.cell')).toHaveCount(0);
+  await page.getByRole('dialog').getByRole('button', { name: 'Settings', exact: true }).click(); await board(page);
   await page.getByRole('combobox', { name: 'Board shape', exact: true }).focus(); await expect(page.getByRole('combobox', { name: 'Board shape', exact: true })).toBeFocused(); await page.getByRole('combobox', { name: 'Board shape', exact: true }).selectOption('square'); await expect(page.getByRole('combobox', { name: 'Board shape', exact: true })).toBeEnabled(); await expect(page.getByRole('combobox', { name: 'Board shape', exact: true })).toBeFocused();
   await page.getByRole('combobox', { name: 'Motion', exact: true }).selectOption('reduced'); await expect(page.getByRole('combobox', { name: 'Motion', exact: true })).toBeEnabled();
   await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('de'); await expect(page.getByRole('combobox', { name: 'Sprache', exact: true })).toBeEnabled();
-  const paused = roleAttempt(await snapshot(page), 'quick').elapsedMs; await page.waitForTimeout(1200); expect(roleAttempt(await snapshot(page), 'quick').elapsedMs).toBe(paused);
+  const readable = roleAttempt(await snapshot(page), 'quick').elapsedMs;
+  await expect.poll(async () => roleAttempt(await snapshot(page), 'quick').elapsedMs, { timeout: 5000 }).toBeGreaterThan(readable);
   await page.getByRole('combobox', { name: 'Sprache', exact: true }).selectOption('es'); await expect(page.getByRole('combobox', { name: 'Idioma', exact: true })).toBeEnabled();
   await closeDialogs(page); await board(page); const bounds = await page.locator('.board').boundingBox(), dock = await page.locator('.dock').boundingBox(); expect(bounds!.width).toBe(bounds!.height); expect(dock!.y - bounds!.y - bounds!.height).toBe(8);
   expect(await page.locator('.cell .face path').evaluateAll(nodes => nodes.map(n => n.getAttribute('d')))).toEqual(paths);

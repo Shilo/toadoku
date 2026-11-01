@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { automaticCheckAllowed, normalizePrecache, orphanShellCaches, restoredBackoff, ownedShellCache } from '../../src/lib/pwa/policy';
+import { acceptableShellMime, automaticCheckAllowed, normalizePrecache, orphanShellCaches, restoredBackoff, ownedShellCache } from '../../src/lib/pwa/policy';
 const prefix = 'toadoku:pwa:1:%2Ftoadoku%2F:';
 const cache = (id: string) => prefix + id.repeat(64);
+
+it('matches real executable/font media types and rejects header-parameter tricks or unknown assets', () => {
+  for (const [path, type] of [['a.js','Text/JavaScript; charset=utf-8'],['a.woff2','font/woff2'],['a.woff','application/font-woff'],['a.ttf','application/octet-stream'],['manifest.webmanifest','application/manifest+json'],['license.txt','text/plain']]) expect(acceptableShellMime(path,type)).toBe(true);
+  for (const [path, type] of [['a.js','text/plain; charset=javascript'],['a.woff2','text/html'],['a.css','text/plain'],['a.woff','application/not-font'],['a.unknown','application/octet-stream'],['a.js','application/notjavascript'],['a.json','text/manifest']]) expect(acceptableShellMime(path,type)).toBe(false);
+});
 describe('PWA cache ownership and automatic bandwidth policy', () => {
   it('never treats adjacent projects, legacy formats or arbitrary suffixes as owned', () => {
     expect(ownedShellCache(cache('a'), prefix)).toBe(true);

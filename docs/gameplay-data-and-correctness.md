@@ -33,6 +33,8 @@ The [Norvig explanation](https://www.norvig.com/sudoku.html) is useful for topol
 
 ## 3. Established source and immutable provenance
 
+For the implemented catalog's source links, the reason for selecting 100,000 puzzles, retained files and rebuild/expansion instructions, see [Puzzle sources and catalog maintenance](puzzle-sources.md).
+
 Default source: Sudoku Exchange at revision `d8c8ebaee0c08c412cfba96af1923dfa61c83317`. The [readiness audit](research/gameplay-readiness-audit.md#2-researched-catalog-candidate) records source URLs, license, Git blobs, byte sizes and the distinction between metadata counts and actual certification.
 
 The source files supply an upstream short ID, givens and a Sukaku rating. They do not supply solutions. Derive solutions through the import pipeline. Retain the bank's data dedication/attribution and distinguish it from QQWing GPL and Sukaku LGPL implementation licenses. Neither generator nor grader must become a runtime dependency.

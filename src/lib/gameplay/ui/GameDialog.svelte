@@ -18,13 +18,17 @@
   import Droplet from '@lucide/svelte/icons/droplet';
   import Footprints from '@lucide/svelte/icons/footprints';
   import Sprout from '@lucide/svelte/icons/sprout';
+  import { appCopy } from '../app-copy';
+  import { themeCopy } from '../../theme/copy';
+  import { THEME_CHOICES as themeChoices, APPEARANCE_CHOICES as appearanceChoices } from '../../theme/policy';
   import { uiCopy, describeHint, formatElapsed } from './copy';
   import { bandForPool, poolForLeap } from '../../modes';
   import type { CloseReason, DialogView, GameDialogProps } from './types';
   import type { SessionCommand } from '../../session';
-  let { view, locale, pwa, install, offline, offlineUnavailable, puzzleProblem, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
+  let { view, locale, pwa, install, offline, offlineUnavailable, puzzleProblem, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, themeError = false, activeThemeId, automaticThemeInfo, onThemeRetry, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
     onCommand, onNavigate, onClose, onPreference, onHint, onContinue, onReplay, onRestart, onReplace, onExport, onRecovery, onResumeSaved, onRestore, onRestoreInput, onRetry }: GameDialogProps = $props();
   const c = $derived(uiCopy[locale]);
+  const themeText = $derived(themeCopy[locale]);
   let viewportWidth = $state(window.innerWidth), viewportHeight = $state(window.innerHeight);
   let selectedLeap = $state(1), confirmReplay = $state(false), restoreText = $state(''), previewedText = $state(''), fileError = $state(false), fileName = $state('');
   let fileReadId = 0, hintRequestId = 0;
@@ -146,6 +150,26 @@
     </div>
   {:else if view === 'settings'}
     <div class="pane settings-pane">
+      {#if themeError}
+        <p role="status">{themeText.failed}</p>
+        <button class="secondary" onclick={onThemeRetry}>{themeText.retry}</button>
+        {#if attempt && saveState !== 'saved'}<p>{appCopy[locale].reloadWarning}</p><button class="secondary" disabled={recoveryBusy || !onRecovery} onclick={event => exportWithFocus(event,() => onRecovery?.())}>{c.emergencyExport}</button>{/if}
+        <p>{appCopy[locale].reopenHelp}</p>
+      {/if}
+      <label>{themeText.theme}<select aria-describedby={preferences.theme === 'auto' && automaticThemeInfo && (automaticThemeInfo.transition || automaticThemeInfo.remaining) ? 'automatic-theme-description' : undefined} value={preferences.theme} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, theme: event.currentTarget.value })}>
+        {#if !themeChoices.includes(preferences.theme as typeof themeChoices[number])}<option value={preferences.theme} disabled>{themeText.unknown}</option>{/if}
+        {#each themeChoices as choice (choice)}<option value={choice}>{themeText[choice]}{#if choice === 'auto' && activeThemeId}&nbsp;·&nbsp;{themeText[activeThemeId]}{/if}</option>{/each}
+      </select></label>
+      {#if preferences.theme === 'auto' && automaticThemeInfo && (automaticThemeInfo.transition || automaticThemeInfo.remaining)}
+        <p id="automatic-theme-description" class="theme-summary">
+          {#if automaticThemeInfo.transition && !themeError}<span>{automaticThemeInfo.transition}</span>{/if}
+          {#if automaticThemeInfo.remaining}<span>{automaticThemeInfo.remaining}</span>{/if}
+        </p>
+      {/if}
+      <label>{themeText.appearance}<select value={preferences.appearance} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, appearance: event.currentTarget.value })}>
+        {#if !appearanceChoices.includes(preferences.appearance as typeof appearanceChoices[number])}<option value={preferences.appearance} disabled>{themeText.unknown}</option>{/if}
+        {#each appearanceChoices as choice (choice)}<option value={choice}>{themeText[choice]}</option>{/each}
+      </select></label>
       <label>{c.language}<select value={preferences.language} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, language: event.currentTarget.value as 'en' | 'de' | 'es' })}><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option></select></label>
       <label>{c.motion}<select value={preferences.motion} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, motion: event.currentTarget.value as 'system' | 'reduced' | 'full' })}><option value="system">{c.system}</option><option value="reduced">{c.reduced}</option><option value="full">{c.full}</option></select></label>
       <label>{c.boardShape}<select value={preferences.boardShape} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, boardShape: event.currentTarget.value as 'fill' | 'square' })}><option value="fill">{c.fill}</option><option value="square">{c.square}</option></select></label>
@@ -206,8 +230,8 @@
 </dialog>
 
 <style>
-  .game-dialog { position: fixed; box-sizing: border-box; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: var(--dialog-radius); background: var(--control-face); color: var(--control-ink); font: 500 1rem/1.3 var(--font-ui); width: min(448px, calc(100vw - 16px)); max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow: auto; overflow-wrap: anywhere; overscroll-behavior: contain; }
-  .game-dialog::backdrop { background: rgb(23 63 53 / 18%); }
+  .game-dialog { position: fixed; box-sizing: border-box; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: var(--dialog-radius); background: var(--dialog-surface); color: var(--dialog-ink); font: 500 1rem/1.3 var(--font-ui); width: min(448px, calc(100vw - 16px)); max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow: auto; overflow-wrap: anywhere; overscroll-behavior: contain; }
+  .game-dialog::backdrop { background: var(--dialog-backdrop); }
   .popover { --popover-width: min(384px, calc(100vw - 16px)); --popover-right: clamp(8px, var(--anchor-right, 8px), calc(100vw - var(--popover-width) - 8px)); --popover-bottom: clamp(8px, var(--anchor-bottom, 8px), max(8px, calc(100dvh - 180px))); margin: 0; width: var(--popover-width); inset: auto var(--popover-right) var(--popover-bottom) auto; max-height: max(0px, calc(100dvh - var(--popover-bottom) - 8px)); }
   .sheet { margin: auto; }
   header { display: flex; align-items: center; gap: 4px; min-height: 44px; }
@@ -217,7 +241,7 @@
   h4 { margin: 8px 0 4px; }
   p { margin: 8px 0; }
   button, select, input { box-sizing: border-box; color: inherit; font: inherit; }
-  button { cursor: pointer; border: 0; border-radius: 12px; min-height: 44px; padding: 8px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; white-space: normal; overflow-wrap: anywhere; }
+  button { cursor: pointer; border: 0; border-radius: var(--button-radius); min-height: 44px; padding: 8px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; white-space: normal; overflow-wrap: anywhere; }
   button:disabled { cursor: default; opacity: .48; }
   button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--control-focus); outline-offset: 2px; }
   button :global(svg) { flex-shrink: 0; }
@@ -227,14 +251,15 @@
   .more-groups section { min-width: 0; }
   .more-groups section + section { border-left: 1px solid var(--control-lip); padding-left: 8px; }
   .tool-row { width: 100%; justify-content: flex-start; text-align: left; padding: 8px 4px; gap: 4px; background: transparent; }
-  .tool-row:hover:not(:disabled), .tool-row[aria-pressed="true"] { background: var(--leaf-face); }
+  .tool-row:hover:not(:disabled), .tool-row[aria-pressed="true"] { background: var(--leaf-face); color: var(--leaf-ink); }
   .tool-row span:not(.toggle) { flex: 1; min-width: 0; }
   .toggle { display: inline-grid; place-items: center; border: 1px solid currentColor; border-radius: 12px; height: 20px; min-width: 24px; font-size: .85rem; }
-  [aria-pressed="true"] .toggle { background: var(--leaf-ink); color: var(--control-face); }
+  [aria-pressed="true"] .toggle { background: var(--control-selected-face); color: var(--control-selected-ink); }
   .pane { display: flex; flex-direction: column; gap: 8px; }
   .pane p { margin: 0; }
   .pane > :first-child { margin-top: 8px; }
-  .primary { background: var(--leaf-ink); color: var(--control-face); width: 100%; }
+  .primary, .secondary, .large-keys button, select, input:not(.file-input), .file-label { box-shadow: inset 0 0 0 var(--control-edge-width) var(--control-edge); }
+  .primary { background: var(--control-selected-face); color: var(--control-selected-ink); width: 100%; box-shadow: inset 0 0 0 var(--control-edge-width) var(--control-selected-edge); }
   .secondary { background: var(--control-lip); width: 100%; }
   label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .file-label { position: relative; min-height: 44px; box-sizing: border-box; justify-content: center; padding: 8px; border-radius: 12px; background: var(--control-lip); cursor: pointer; overflow-wrap: anywhere; }
@@ -242,7 +267,9 @@
   .file-label[data-disabled="true"] { opacity: .48; cursor: default; }
   .file-input { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; clip-path: inset(50%); overflow: hidden; }
   .file-name { overflow-wrap: anywhere; }
-  select, input { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: 8px; background: var(--control-face); }
+  select, input { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: 8px; background: var(--control-face); color: var(--control-ink); }
+  .theme-summary { font-size: var(--type-summary); line-height: var(--line-summary); }
+  .theme-summary span { display: block; }
   .session-info { border-top: 1px solid var(--control-lip); }
   summary { min-height: 44px; box-sizing: border-box; padding: 8px; cursor: pointer; }
   summary:focus-visible { outline: 2px solid var(--control-focus); outline-offset: -2px; border-radius: 8px; }
@@ -252,13 +279,13 @@
   .metric-label { display: inline-flex; align-items: center; gap: 4px; }
   .metric-label :global(svg), .reward-amount :global(svg) { flex-shrink: 0; }
   dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-  .large-cell { background: var(--leaf-face); border-radius: 32px; width: 160px; height: 160px; align-self: center; display: grid; place-items: center; }
+  .large-cell { color: var(--leaf-ink); background: var(--leaf-face); border-radius: 32px; width: 160px; height: 160px; align-self: center; display: grid; place-items: center; font-family: var(--font-grid); }
   .large-cell strong { font-size: 64px; }
   .note-specimen { width: 120px; height: 120px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); font-size: 24px; text-align: center; }
   .note-specimen span { display: grid; place-items: center; }
   .large-keys { display: grid; grid-template-columns: repeat(3, minmax(44px, 1fr)); gap: 4px; }
-  .large-keys button { background: var(--control-lip); font-size: 1.5rem; min-height: 48px; }
-  .large-keys button[aria-pressed="true"] { background: var(--leaf-ink); color: var(--control-face); }
+  .large-keys button { background: var(--control-lip); font-family: var(--font-grid); font-size: 1.5rem; min-height: 48px; }
+  .large-keys button[aria-pressed="true"] { background: var(--control-selected-face); color: var(--control-selected-ink); box-shadow: inset 0 0 0 var(--control-edge-width) var(--control-selected-edge); }
   .inline-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
   .reward-total { display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .reward-amount { display: inline-flex; align-items: center; gap: 8px; }

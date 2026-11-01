@@ -1,9 +1,11 @@
 import type { Locale } from '../i18n';
 
 const en = {
+  appFilesExtra: "App files download separately.",
+  offlineOptions: 'More offline options', smallTarget: 'Save 3 upcoming puzzles for each difficulty.',
 
   reopenOffline: 'Finish saving or export recovery, then close every Toadoku window and reopen once before going offline.',
-  installHelp: 'Install from browser menu', downloadHelp: 'How downloads work', versionHelp: 'Version details',
+  installHelp: 'Install from browser menu', downloadHelp: 'How downloads work', versionHelp: "Update options",
   title: 'Install and offline', install: 'Installation', installButton: 'Install app',
 
   browser: 'Play here, or install from your browser menu.', available: 'Your browser can install Toadoku.',
@@ -36,9 +38,9 @@ const en = {
 
   coverage: 'Upcoming puzzles at last check', easy: 'Easy', medium: 'Medium', hard: 'Hard',
 
-  horizon: 'Quick Play, Progression and replays share these puzzles. Another window or a restored backup can change the counts.',
+  horizon: "Other games, windows or restored backups can change these counts.",
 
-  guarantee: 'Medium and Hard counts cover either internal difficulty pool. A complete travel pack covers 60 scheduled Progression puzzles from any Leap, without extra Quick Play or replays.',
+  guarantee: "A full travel pack covers a 60-puzzle Progression run. Quick Play and replays use the same reserve.",
 
   prepare: 'Prepare offline play', travel: 'Prepare a longer trip', inspect: 'Check saved puzzles',
 
@@ -46,7 +48,7 @@ const en = {
 
   travelHelp: 'Travel pack: targets 25 per difficulty. Download limit: about 12.6 MB per action.',
 
-  estimate: 'Estimated additional puzzle files', files: 'App files download separately. Each small puzzle file is fully checked before use.',
+  estimate: "Estimated puzzle download", files: 'App files download separately. Each small puzzle file is fully checked before use.',
 
   noAuto: 'Extra puzzle packs download only when you ask. Online games fetch the exact next puzzle when needed.',
 
@@ -58,7 +60,7 @@ const en = {
 
   cancel: 'Cancel preparation', cancelHelp: 'Cancel stops puzzle downloads. App installation or update files may finish separately.',
 
-  remove: 'Remove extra puzzles', stored: 'Stored puzzle records', storeHelp: 'Up to 512 records and 1 MiB, plus metadata and the small recent-file cache. Removing extras keeps saved games and rewards.',
+  remove: 'Remove extra puzzles', stored: 'Stored puzzle records', storeHelp: "Removing extra puzzles keeps saved games and rewards.",
 
   eviction: 'Your browser can remove local files. Keep a backup of progress before travelling.',
 
@@ -81,9 +83,11 @@ const en = {
 type Copy = { [K in keyof typeof en]: string };
 
 const de: Copy = {
+  appFilesExtra: "App-Dateien werden separat geladen.",
+  offlineOptions: 'Weitere Offline-Optionen', smallTarget: 'Speichere die nächsten 3 Rätsel pro Schwierigkeit.',
 
   reopenOffline:'Speichere zuerst oder exportiere die Notfalldatei. Schließe dann alle Toadoku-Fenster und öffne die App einmal neu, bevor du offline gehst.',
-  installHelp:'Über das Browsermenü installieren', downloadHelp:'So funktionieren Downloads', versionHelp:'Versionsdetails',
+  installHelp:'Über das Browsermenü installieren', downloadHelp:'So funktionieren Downloads', versionHelp: "Update-Optionen",
   title:'Installation und offline', install:'Installation', installButton:'App installieren',
 
   browser:'Hier spielen oder über das Browsermenü installieren.', available:'Dein Browser kann Toadoku installieren.',
@@ -112,9 +116,9 @@ const de: Copy = {
 
   coverage:'Nächste Rätsel bei letzter Prüfung', easy:'Leicht', medium:'Mittel', hard:'Schwer',
 
-  horizon:'Schnellspiel, Fortschritt und Wiederholungen teilen diese Rätsel. Andere Fenster oder Backups können die Zahlen ändern.',
+  horizon: "Andere Spiele, Fenster oder wiederhergestellte Sicherungen können diese Zahlen ändern.",
 
-  guarantee:'Mittel und Schwer decken beide internen Bereiche ab. Ein vollständiges Reisepaket deckt ab jedem Sprung 60 Fortschrittsrätsel ab, ohne zusätzliche Schnellspiele oder Wiederholungen.',
+  guarantee: "Ein vollständiges Reisepaket reicht für einen Fortschrittslauf mit 60 Rätseln. Schnelles Spiel und Wiederholungen nutzen denselben Vorrat.",
 
   prepare:'Offline-Spiel vorbereiten', travel:'Längere Reise vorbereiten', inspect:'Gespeicherte Rätsel prüfen',
 
@@ -122,7 +126,7 @@ const de: Copy = {
 
   travelHelp:'Reisepaket: 25 je Schwierigkeit. Download-Grenze: etwa 12,6 MB je Vorgang.',
 
-  estimate:'Geschätzte zusätzliche Rätseldateien', files:'App-Dateien laden getrennt. Jede kleine Rätseldatei wird vor der Nutzung vollständig geprüft.',
+  estimate: "Geschätzter Rätsel-Download", files:'App-Dateien laden getrennt. Jede kleine Rätseldatei wird vor der Nutzung vollständig geprüft.',
 
   noAuto:'Zusätzliche Rätselpakete laden nur auf Wunsch. Online lädt das Spiel bei Bedarf das genaue nächste Rätsel.',
 
@@ -134,7 +138,7 @@ const de: Copy = {
 
   cancel:'Vorbereitung abbrechen', cancelHelp:'Abbrechen stoppt Rätseldateien. App-Installation oder Updates können getrennt fertigladen.',
 
-  remove:'Zusätzliche Rätsel entfernen', stored:'Gespeicherte Rätseldaten', storeHelp:'Bis zu 512 Einträge und 1 MiB, dazu Metadaten und der kleine Cache zuletzt geladener Dateien. Entfernen behält Spielstände und Tautropfen.',
+  remove:'Zusätzliche Rätsel entfernen', stored:'Gespeicherte Rätseldaten', storeHelp: "Gespeicherte Spiele und Belohnungen bleiben beim Entfernen erhalten.",
 
   eviction:'Der Browser kann lokale Dateien entfernen. Sichere deinen Fortschritt vor der Reise.',
 
@@ -155,9 +159,11 @@ const de: Copy = {
 };
 
 const es: Copy = {
+  appFilesExtra: "Los archivos de la aplicación se descargan aparte.",
+  offlineOptions: 'Más opciones sin conexión', smallTarget: 'Guarda los próximos 3 sudokus por dificultad.',
 
   reopenOffline:'Antes de quedarte sin conexión, termina de guardar o exporta la recuperación. Cierra todas las ventanas de Toadoku y vuelve a abrir una vez.',
-  installHelp:'Instalar desde el menú del navegador', downloadHelp:'Cómo funcionan las descargas', versionHelp:'Detalles de la versión',
+  installHelp:'Instalar desde el menú del navegador', downloadHelp:'Cómo funcionan las descargas', versionHelp: "Opciones de actualización",
   title:'Instalación y sin conexión', install:'Instalación', installButton:'Instalar aplicación',
 
   browser:'Juega aquí o instala desde el menú del navegador.', available:'Tu navegador puede instalar Toadoku.',
@@ -185,9 +191,9 @@ const es: Copy = {
 
   coverage:'Próximos sudokus en la última comprobación', easy:'Fácil', medium:'Medio', hard:'Difícil',
 
-  horizon:'Juego rápido, Progresión y repeticiones comparten estos sudokus. Otra ventana o una copia restaurada puede cambiar las cifras.',
+  horizon: "Otras partidas, ventanas o copias restauradas pueden cambiar estas cifras.",
 
-  guarantee:'Medio y Difícil cubren ambos grupos internos. Un paquete de viaje completo cubre 60 sudokus de Progresión desde cualquier salto, sin partidas rápidas ni repeticiones adicionales.',
+  guarantee: "Un paquete de viaje completo cubre una partida de Progresión de 60 sudokus. Partida rápida y repeticiones usan la misma reserva.",
 
   prepare:'Preparar juego sin conexión', travel:'Preparar un viaje largo', inspect:'Comprobar sudokus guardados',
 
@@ -195,7 +201,7 @@ const es: Copy = {
 
   travelHelp:'Paquete de viaje: 25 por dificultad. Límite de descarga: unos 12,6 MB por acción.',
 
-  estimate:'Archivos adicionales estimados', files:'Los archivos de la aplicación se descargan aparte. Cada archivo pequeño de sudokus se verifica por completo antes de usarlo.',
+  estimate: "Descarga estimada de sudokus", files:'Los archivos de la aplicación se descargan aparte. Cada archivo pequeño de sudokus se verifica por completo antes de usarlo.',
 
   noAuto:'Los paquetes adicionales solo se descargan si lo pides. Online se descarga el próximo sudoku exacto cuando hace falta.',
 
@@ -207,7 +213,7 @@ const es: Copy = {
 
   cancel:'Cancelar preparación', cancelHelp:'Cancelar detiene los sudokus. La instalación o los archivos de actualización pueden terminar por separado.',
 
-  remove:'Eliminar sudokus adicionales', stored:'Datos de sudokus guardados', storeHelp:'Hasta 512 registros y 1 MiB, más metadatos y el pequeño caché de archivos recientes. Eliminar conserva partidas y gotas de rocío.',
+  remove:'Eliminar sudokus adicionales', stored:'Datos de sudokus guardados', storeHelp: "Eliminar sudokus extra conserva las partidas guardadas y las recompensas.",
 
   eviction:'El navegador puede eliminar archivos locales. Guarda una copia de tu progreso antes de viajar.',
 

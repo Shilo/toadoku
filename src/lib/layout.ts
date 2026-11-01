@@ -4,10 +4,10 @@ export interface CellGeometry {
 }
 export interface Layout {
   width: number; height: number; landscape: boolean; allocation: Rect; board: Rect; dock: Rect;
-  cells: CellGeometry[]; keySize: number; menuPanel: Rect; menuReserve: number; menuActionHeight: number;
+  cells: CellGeometry[]; keySize: number; dockSingleRow: boolean; menuPanel: Rect; menuReserve: number; menuActionHeight: number;
   menuTitle: Rect; menuArt: Rect; titleFontSize: number;
 }
-import { pond } from './theme/pond';
+import { presentation as pond } from './theme/presentation';
 export const SMALL = pond.spacing.small;
 export const LARGE = pond.spacing.large;
 export const rectStyle = (r: Rect) => `left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px`;
@@ -16,7 +16,11 @@ export const rectStyle = (r: Rect) => `left:${r.x}px;top:${r.y}px;width:${r.widt
 export function createLayout(width: number, height: number, shape: 'fill' | 'square' = 'fill'): Layout {
   const landscape = width > height;
   const keySize = Math.min(80, (Math.min(width, height) - 4 * SMALL) / 5);
-  const dockDepth = 2 * keySize + SMALL;
+  const rowHeight = 56;
+  const rowDiameter = (Math.min(width, height - rowHeight - LARGE) - 2 * LARGE - 6 * SMALL) / 9;
+  // The longest localized save badge needs 48px of inner width at 11px type.
+  const dockSingleRow = !landscape && width >= 10 * 56 + 9 * SMALL && rowDiameter >= 32;
+  const dockDepth = dockSingleRow ? rowHeight : 2 * keySize + SMALL;
   const allocation: Rect = { x: 0, y: 0, width: landscape ? width - dockDepth - LARGE : width, height: landscape ? height : height - dockDepth - LARGE };
   const dock: Rect = landscape
     ? { x: allocation.width + LARGE, y: 0, width: dockDepth, height }
@@ -53,5 +57,5 @@ export function createLayout(width: number, height: number, shape: 'fill' | 'squ
   const titleY = landscape ? LARGE : (identityHeight - titleHeight - artHeight - LARGE) / 2;
   const menuTitle = { x: titleX, y: titleY, width: titleWidth, height: titleHeight };
   const menuArt = { x: landscape ? width - titleX - artWidth : (width - artWidth) / 2, y: landscape ? 0 : titleY + titleHeight + LARGE, width: artWidth, height: artHeight };
-  return { width, height, landscape, allocation, board, dock, cells, keySize, menuPanel, menuReserve, menuActionHeight, menuTitle, menuArt, titleFontSize };
+  return { width, height, landscape, allocation, board, dock, cells, keySize, dockSingleRow, menuPanel, menuReserve, menuActionHeight, menuTitle, menuArt, titleFontSize };
 }

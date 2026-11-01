@@ -23,13 +23,14 @@ try{
   await blank.press(String(entered%2+1));entered++;if(entered%25===0)await sampleHeap();
  }
  await expect.poll(()=>page.evaluate(async()=> (await navigator.serviceWorker.getRegistration())?.active?.state),{timeout:180000}).toBe('activated');
- mark('input-during-shell-install',{entered,boardAt,metrics:await page.evaluate(()=>window.__downloadPerf)});
+ const shellMetrics=await page.evaluate(()=>window.__downloadPerf),shellInputs=shellMetrics.inputs.filter(e=>e.at>=boardAt),percentile=(key)=>[...shellInputs].sort((a,b)=>a[key]-b[key])[Math.floor((shellInputs.length-1)*.95)]?.[key],shellMaxTask=Math.max(0,...shellMetrics.tasks.filter(e=>e.start>=boardAt).map(e=>e.duration));assert(shellInputs.length>0);assert(percentile('dispatch')<=100);assert(percentile('paint')<=100);assert(shellMaxTask<=200);mark('input-during-shell-install',{entered,boardAt,dispatchP95:percentile('dispatch'),nextFrameP95:percentile('paint'),postBoardMaxTask:shellMaxTask,metrics:shellMetrics});
  }
- async function closeDialogs(){for(let depth=0;depth<8&&await page.getByRole('dialog').count();depth++)await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click();}
- async function panel(idle=true){await page.locator('.dock .more').click();await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Install and offline',exact:true}).click();if(idle)await expect(page.getByRole('button',{name:'Prepare a longer trip',exact:true})).toBeEnabled({timeout:30000});else await expect(page.getByRole('button',{name:'Cancel preparation',exact:true})).toBeVisible();}
+ async function closeDialogs(){for(let depth=0;depth<8&&await page.getByRole('dialog').count();depth++){const title=await page.locator('#game-dialog-title').textContent();await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click();await page.waitForFunction(previous=>{const node=document.querySelector('#game-dialog-title');return !node||node.textContent!==previous;},title);}await expect(page.getByRole('dialog')).toHaveCount(0);}
+ async function options(){const details=page.locator('details').filter({has:page.getByText('More offline options',{exact:true})});if(await details.count()&&await details.getAttribute('open')===null)await details.locator('summary').click();}
+ async function panel(idle=true){await page.locator('.dock .more').click();await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Install and offline',exact:true}).click();if(idle)await expect(page.getByRole('button',{name:'Prepare offline play',exact:true})).toBeEnabled({timeout:30000});else await expect(page.getByRole('button',{name:'Cancel preparation',exact:true})).toBeVisible();}
  await panel();
  if(resumeProfile){
-  const remove=page.getByRole('button',{name:'Remove extra puzzles',exact:true});if(await remove.isEnabled())await remove.click();
+  await options();const remove=page.getByRole('button',{name:'Remove extra puzzles',exact:true});if(await remove.isEnabled())await remove.click();
   await expect.poll(()=>page.evaluate(async()=>{const db=await new Promise((done,fail)=>{const r=indexedDB.open('toadodu:'+encodeURIComponent('/toadoku/')+':offline-v1');r.onsuccess=()=>done(r.result);r.onerror=()=>fail(r.error);});try{return await new Promise((done,fail)=>{const tx=db.transaction('records','readonly'),r=tx.objectStore('records').count();tx.oncomplete=()=>done(r.result);tx.onabort=()=>fail(tx.error);});}finally{db.close();}})).toBe(0);
   await page.evaluate(async()=>{const db=await new Promise((done,fail)=>{const r=indexedDB.open('toadodu:'+encodeURIComponent('/toadoku/'));r.onsuccess=()=>done(r.result);r.onerror=()=>fail(r.error);});try{await new Promise((done,fail)=>{const tx=db.transaction('cache','readwrite');tx.objectStore('cache').clear();tx.oncomplete=done;tx.onabort=()=>fail(tx.error);});}finally{db.close();}});
   await expect(page.getByRole('button',{name:'Prepare a longer trip',exact:true})).toBeEnabled();mark('resumed-preparation-tail',{profile:resolve(resumeProfile)});
@@ -39,7 +40,7 @@ try{
  let heldPath;const gate=new Promise(done=>releaseGate=done);
  host.state.fault=pathname=>{if(!heldPath&&/\/catalog\/v1\/(?:easy|medium-(?:low|high)|hard-(?:low|high))-\d+-[a-f0-9]+\.json$/.test(pathname)){heldPath=pathname;return {wait:gate};}};
  const preparingAt=await page.evaluate(()=>performance.now()),networkBefore=host.state.requests.length;
- await page.getByRole('button',{name:'Prepare a longer trip',exact:true}).click();
+ await options();await expect(page.getByRole('button',{name:'Prepare a longer trip',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Prepare a longer trip',exact:true}).click();
  await expect.poll(()=>heldPath,{timeout:30000}).toBeTruthy();await sampleHeap();
  const filename=heldPath.split('/').at(-1),heldPool=Object.keys(manifest.pools).find(pool=>manifest.pools[pool].shards.some(shard=>shard.path===filename));
  assert(heldPool);const band=heldPool.startsWith('hard')?'Easy':'Hard';

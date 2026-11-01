@@ -3,6 +3,7 @@ import type { InstallSupport } from '../../pwa/install';
 import type { OfflineSupport } from '../../offline/reserve';
 import type { Attempt, Band, CompletionReceipt, HintPayload, Preferences, Profile } from '../contracts';
 import type { SessionCommand } from '../../session';
+import type { ThemeId } from '../../theme/policy';
 export type DialogView = 'more' | 'settings' | 'notes' | 'hint' | 'result' | 'pause' | 'replay' | 'backup' | 'restart' | 'replace' | 'recover' | 'pwa';
 export type CloseReason = 'dismiss' | 'tool' | 'undo' | 'menu';
 export type DialogSaveState = 'saved' | 'saving' | 'unsaved' | 'conflict' | 'unavailable';
@@ -22,6 +23,10 @@ export interface GameDialogProps {
   profile?: Profile;
   preferences: Preferences;
   preferencesAvailable?: boolean;
+  themeError?: boolean;
+  activeThemeId?: ThemeId;
+  automaticThemeInfo?: { active: string; transition?: string; remaining?: string };
+  onThemeRetry?: () => void;
   receipt?: CompletionReceipt;
   /** Explicit transient Quick choice, bound by the parent to the retained completed attempt. */
   continueBand?: Band;

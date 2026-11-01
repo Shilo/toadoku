@@ -12,11 +12,11 @@ Current gameplay implementation supersedes the historical preparation notes belo
 | `src/lib/storage/` | Validated IndexedDB generations, writer/revision authority, exactly-once receipts, physical history buckets, worker backup/restore and explicit unscored recovery play |
 | `src/lib/gameplay/` | Save coalescing and asynchronous gameplay/disclosure/completion/navigation integration; lazy bootstrap, hint worker and dialog |
 | `src/lib/gameplay/ui/` | Concise English/German/Spanish tools, Settings, enlarged notes, results and recovery presentation |
-| `src/lib/layout.ts`, `src/lib/scene/`, `src/lib/leaves/`, `src/lib/theme/` | Shared geometry, noninteractive decoration and maintained Pond styling; no gameplay authority |
+| `src/lib/layout.ts`, `src/lib/scene/`, `src/lib/leaves/`, `src/lib/theme/` | Shared layout and safety budgets, noninteractive decoration and lazy theme/token/font definitions; no gameplay authority |
 
 The application uses Svelte, TypeScript and Vite without SvelteKit, a required backend or WebAssembly. There is no runtime puzzle generation. Current active and retained-result roles preserve verified puzzle/policy snapshots for local resume; after Continue or replacement, compact receipts retain pinned definition/policy while obsolete full attempts are removed. Missing next shards fail recoverably. Service-worker application-shell caching, installability and deployment are separate work, so cold offline launch is not claimed.
 
-The current Pond system is preserved while gameplay acceptance finishes. The separately authorized Auto/Pond/Cauldron theme task is queued afterwards. Themes never own Sudoku rules, hitboxes, state or rewards.
+Gameplay/main preserves its own Pond implementation while acceptance finishes. Auto/Pond/Cauldron is implemented on the separately authorized `codex/themes` worktree; it is not merged into gameplay. The [theme authoring guide](theme-authoring.md) maps the actual lazy token/renderer/font contracts and future extension process. Themes never own Sudoku rules, hitboxes, state or rewards.
 
 ## Historical preparation context
 

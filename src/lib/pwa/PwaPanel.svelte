@@ -72,6 +72,7 @@
     delivery.phase === 'downloading' ? c.downloading : delivery.phase === 'checking' ? c.checking :
     delivery.phase === 'failed' ? c.updateFailed : delivery.phase === 'unavailable' ? c.unavailable :
     delivery.shellReady ? c.current : c.idle);
+  const updateNeedsAttention = $derived(!!delivery && ['waiting', 'downloading', 'failed', 'unavailable'].includes(delivery.phase));
 </script>
 
 <svelte:document onvisibilitychange={() => { if (document.hidden) cancel(); }} />
@@ -93,11 +94,9 @@
     {#if reserve}
       <h4>{c.coverage}</h4>
       <dl><div><dt>{c.easy}</dt><dd>{count('easy')}</dd></div><div><dt>{c.medium}</dt><dd>{Math.min(count('medium-low'), count('medium-high'))}</dd></div><div><dt>{c.hard}</dt><dd>{Math.min(count('hard-low'), count('hard-high'))}</dd></div></dl>
-      <p>{c.defaultHelp}</p>
+      <p>{c.smallTarget}</p><p>{c.appFilesExtra}</p>
       {#if small}<p>{c.estimate}: {formatBytes(small.bytes, locale)}</p>{/if}
       <button class="primary" disabled={working || checking || !client || delivery?.phase === 'unavailable'} onclick={() => prepare('default')}>{c.prepare}</button>
-      {#if travel}<p>{c.travel}: {formatBytes(travel.bytes, locale)}. {c.travelHelp}</p>{/if}
-      <button class="secondary" disabled={working || checking || !travel || !client || delivery?.phase === 'unavailable'} onclick={() => prepare('travel')}>{c.travel}</button>
       {#if working}
         <p role="status">{preparingShell ? c.waiting : c.preparing}</p>
         {#if !preparingShell}<progress value={reserve.completed} max={Math.max(1,reserve.total)} aria-label={c.progress}></progress><p>{reserve.completed} / {reserve.total} · {c.bytes}: {formatBytes(reserve.downloadedBytes,locale)}</p>{/if}
@@ -106,19 +105,21 @@
       {:else if reserve.phase === 'ready'}<p role="status">{c.ready}</p>
       {:else if reserve.phase === 'cancelled'}<p role="status">{c.cancelled}</p>
       {:else if reserve.phase === 'partial'}<p role="status">{c.partial}</p>{/if}
+      <details><summary>{c.offlineOptions}</summary>
+      {#if travel}<p>{c.travel}: {formatBytes(travel.bytes, locale)}. {c.travelHelp}</p>{/if}
+      <button class="secondary" disabled={working || checking || !travel || !client || delivery?.phase === 'unavailable'} onclick={() => prepare('travel')}>{c.travel}</button>
       <p>{c.stored}: {formatBytes(reserve.storedBytes,locale)}</p>
-      <button class="secondary" disabled={working || checking} onclick={() => refresh()}>{c.inspect}</button>
       <button class="secondary" disabled={working || checking || (!reserve.storedBytes && reserve.phase !== 'failed')} onclick={clear}>{c.remove}</button>
-      <details><summary>{c.downloadHelp}</summary><p>{c.horizon}</p><p>{c.noAuto}</p><p>{c.background}</p><p>{c.guarantee}</p><p>{c.files}</p><p>{c.storeHelp}</p><p>{c.eviction}</p>
+      <p>{c.defaultHelp}</p><p>{c.files}</p><p>{c.horizon}</p><p>{c.noAuto}</p><p>{c.background}</p><p>{c.guarantee}</p><p>{c.storeHelp}</p><p>{c.eviction}</p>
       {#if retained}<p>{c.persisted}</p>{:else if supportsPersistence}<button class="secondary" onclick={persist}>{c.persist}</button>{#if retentionAsked}<p role="status">{c.denied}</p>{/if}{/if}</details>
     {:else}<p role="status">{unavailable ? c.error : c.loading}</p>{/if}
     {#if failed || reserve?.phase === 'failed'}<p role="alert">{c.error}</p>{/if}
   </section>
-  <section aria-labelledby="pwa-update-title">
-    <h3 id="pwa-update-title">{c.update}</h3>
-    <p role="status">{updateText}</p>
-    <details><summary>{c.versionHelp}</summary><p>{c.updateHelp}</p><dl><div><dt>{c.build}</dt><dd>{delivery?.runningBuild ?? '…'}</dd></div><div><dt>{c.lastCheck}</dt><dd>{delivery?.lastCheck ? new Date(delivery.lastCheck).toLocaleTimeString(locale) : c.never}</dd></div></dl></details>
-    <button class="secondary" disabled={!client || delivery?.phase === 'checking' || delivery?.phase === 'unavailable'} onclick={() => client?.check()}>{c.check}</button>
+  <section aria-label={c.update}>
+    {#if updateNeedsAttention}<h3>{c.update}</h3><p role="status">{updateText}</p>{/if}
+    <details><summary>{c.versionHelp}</summary>{#if !updateNeedsAttention}<p role="status">{updateText}</p>{/if}<p>{c.updateHelp}</p>
+    {#if delivery?.phase !== 'failed'}<button class="secondary" disabled={!client || delivery?.phase === 'checking' || delivery?.phase === 'unavailable'} onclick={() => client?.check()}>{c.check}</button>{/if}</details>
+    {#if delivery?.phase === 'failed'}<button class="secondary" onclick={() => client?.check()}>{c.check}</button>{/if}
   </section>
 </div>
 
@@ -132,11 +133,13 @@
   dl { margin:0; }
   dl div { display:flex; gap:8px; justify-content:space-between; }
   dd { margin:0; overflow-wrap:anywhere; text-align:right; }
-  button { box-sizing:border-box; font:inherit; border:0; border-radius:12px; min-height:44px; padding:8px; cursor:pointer; overflow-wrap:anywhere; }
+  button { box-sizing:border-box; font:inherit; border:0; border-radius:var(--button-radius); min-height:44px; padding:8px; cursor:pointer; overflow-wrap:anywhere; }
   button:disabled { cursor:default; opacity:.48; }
   button:focus-visible, summary:focus-visible { outline:2px solid var(--control-focus); outline-offset:2px; }
-  .primary { background:var(--leaf-ink); color:var(--control-face); }
-  .secondary { background:var(--control-lip); color:var(--control-ink); }
+  .primary { background:var(--control-selected-face); color:var(--control-selected-ink); box-shadow:inset 0 0 0 var(--control-edge-width) var(--control-selected-edge); }
+  .secondary { background:var(--control-lip); color:var(--control-ink); box-shadow:inset 0 0 0 var(--control-edge-width) var(--control-edge); }
   progress { width:100%; accent-color:var(--leaf-ink); }
-  details p { margin-top:8px; }
+  details p, details button { margin-top:8px; }
+  details button { width:100%; }
+  summary { min-height:44px; box-sizing:border-box; padding:8px 0; cursor:pointer; }
 </style>

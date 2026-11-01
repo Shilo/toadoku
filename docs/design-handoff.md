@@ -36,7 +36,7 @@ Excluded: puzzle generation/validation/solving, number entry, functional tools, 
 
 ## Product and delivery
 
-**Toadodu** is a full-screen, cute top-down frog Sudoku game with classic 9x9 rules and familiar upright digits. There is no conventional grid/frame, dashboard, permanent gameplay HUD or decorative gameplay frog. Quick Play and randomized Progression are the planned initial modes.
+**Toadoku** is a full-screen, cute top-down frog Sudoku game with classic 9x9 rules and familiar upright digits. There is no conventional grid/frame, dashboard, permanent gameplay HUD or decorative gameplay frog. Quick Play and randomized Progression are the planned initial modes.
 
 The approved eventual stack is Svelte, TypeScript and Vite, JavaScript delivery on GitHub Pages with installable PWA/offline play and no required backend or WebAssembly. Separate rules, sessions, themes, localization, persistence and presentation. English, German, Spanish and local preferences/progress are eventual requirements, not implemented by this visual prototype.
 

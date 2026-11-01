@@ -1,4 +1,4 @@
-import { pond } from '../theme/pond';
+import { presentation as pond } from '../theme/presentation';
 
 /** Stable integer mixing, independent of display size and rendering order. */
 export function seededUnit(seed: number, channel = 0): number {

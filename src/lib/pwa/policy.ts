@@ -1,3 +1,20 @@
+/** Match the actual media type, never a substring hidden in a header parameter. */
+export function acceptableShellMime(url: string, header: string): boolean {
+  const path = new URL(url, 'https://offline.invalid/').pathname;
+  const extension = path.slice(path.lastIndexOf('.') + 1).toLowerCase();
+  const type = header.split(';', 1)[0].trim().toLowerCase();
+  const accepted: Record<string, readonly string[]> = {
+    js: ['text/javascript', 'application/javascript', 'text/ecmascript', 'application/ecmascript'],
+    css: ['text/css'], html: ['text/html'], png: ['image/png'], svg: ['image/svg+xml'], webp: ['image/webp'], txt: ['text/plain'],
+    ttf: ['font/ttf', 'application/x-font-ttf', 'application/font-sfnt', 'application/octet-stream'],
+    woff: ['font/woff', 'application/font-woff', 'application/x-font-woff', 'application/octet-stream'],
+    woff2: ['font/woff2', 'application/font-woff2', 'application/octet-stream'],
+  };
+  return extension === 'json' || extension === 'webmanifest'
+    ? /^application\/(?:[a-z0-9!#$&^_.+-]+\+)?json$/.test(type)
+    : accepted[extension]?.includes(type) === true;
+}
+
 /** Cache ownership is app + deployment scope + exact Workbox release revision. */
 export function ownedShellCache(name: string, prefix: string): boolean {
   return name.startsWith(prefix) && /^[a-f0-9]{64}$/.test(name.slice(prefix.length));

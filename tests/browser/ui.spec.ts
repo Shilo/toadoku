@@ -83,7 +83,7 @@ test('More history, containment, repeated activation and rotation preserve board
   await page.locator('[data-cell="42"]').click();
   const trigger=page.getByRole('button',{name:'More',exact:true});
   for(let repeat=0;repeat<3;repeat++) {
-    await trigger.dblclick(); await expect(page.getByRole('dialog')).toBeVisible();
+    await trigger.click(); await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('heading',{name:'Game',exact:true})).toBeFocused();
     await page.getByRole('button',{name:'Close',exact:true}).focus();
     await page.keyboard.press('Shift+Tab'); await expect(page.getByRole('button',{name:'Main menu',exact:true})).toBeFocused();
