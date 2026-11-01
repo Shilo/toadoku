@@ -163,6 +163,13 @@ describe('strict storage snapshots', () => {
     expect(same({ optional: undefined, x: [1, 2] }, { x: [1, 2] })).toBe(true);
     expect(same({ base: 100 }, { base: 101 })).toBe(false);
     expect(same({ x: 1 }, { y: 1 })).toBe(false); expect(same({}, { x: 1 })).toBe(false);
+    const left = JSON.parse('{"generation":"generation","essentialRevision":0,"__proto__":{}}') as Record<string, unknown>;
+    Object.freeze(left['__proto__']); Object.freeze(left);
+    const right = Object.freeze({ generation: 'generation', essentialRevision: 0, zz: 123 });
+    const before = structuredClone([left, right]);
+    expect(same(left, structuredClone(left))).toBe(true);
+    expect(same(left, right)).toBe(false); expect(same(right, left)).toBe(false);
+    expect([left, right]).toEqual(before);
     expect(same([1, 2], [2, 1])).toBe(false); expect(same([1], [1, 2])).toBe(false);
     expect(same([], {})).toBe(false); expect(same({}, [])).toBe(false); expect(same(null, {})).toBe(false);
     const hole = Array(1); expect(same(hole, hole)).toBe(false); expect(same([1], hole)).toBe(false);

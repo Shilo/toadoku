@@ -2,7 +2,7 @@
 
 Status: **in progress, not final acceptance**. Finish all gameplay tasks and required checks, then pause and report to the user. Theme work must wait for fresh user instructions, even after gameplay completion. This record does not waive a gate or claim that an interrupted run completed.
 
-The current committed application checkpoint is `b7de860bf597305f5e0c0d378256e84df109e9b7`, including session-array fix `a12b62c`. The later duplicate-Undo regression and mutation-coordinate correction pass 351 critical tests in 49 files at unchanged per-file 100% coverage. Their fresh application checkouts and frozen mutation adjudication remain pending. Earlier integration/storage/foundation slices are recorded in the progress ledger. Final acceptance must distinguish unchanged runtime evidence from later test revisions.
+The current committed application/test checkpoint is `0b3fae7a9d1c123bcfd5e28cc07895be0dba376f`, including session-array fix `a12b62c`, duplicate-Undo regression and mutation-coordinate correction. It passes 351 critical tests in 49 files at unchanged per-file 100% coverage and both fresh application checkouts. Frozen mutation adjudication remains pending. Earlier integration/storage/foundation slices are recorded in the progress ledger. Final acceptance must distinguish unchanged runtime evidence from later test revisions.
 
 ## Contracts and data
 
@@ -33,10 +33,10 @@ Duplicate filtering covers exact givens, digit relabeling and D4 transformations
 | Sessions | Independent 2,000 x 250-command model, all 49 adjacent command pairs, compound undo/time/knowledge boundaries | Finish current reducer mutation audit |
 | Modes/rewards | Independent formula/boundary tests, genuine 60-completion UI journey, completed replay/frontier and explicit Quick choice checks; lead personally completed every progression boundary | Finish final source-bound mutation review |
 | Native storage | Three-engine transaction/failure matrix, deliberate guard mutants, S-KEY001/002 physical-binding regressions, 100,000-issued/10,000-receipt normal roundtrips, raw future/corrupt recovery and two-generation capacity | Final pure mutation evidence; repeat native checks only for genuinely affected runtime changes |
-| Pure coverage | Post-batch 349 tests in 49 files: all 24 critical files have 100% coverage across 2,174 statements, 1,919 branches, 336 functions and 1,303 lines; summary SHA `e0cadd14e21b7b7037264a0db134dc6c59aa8640a3318ff24f5938ac9d0999ec` | Complete the separately required mutation gate |
+| Pure coverage | Final capped run: 351 tests in 49 files, all 24 critical files at 100% across 2,174 statements, 1,919 branches, 336 functions and 1,303 lines; summary SHA `e0cadd14e21b7b7037264a0db134dc6c59aa8640a3318ff24f5938ac9d0999ec` | Complete the separately required mutation gate |
 | Mutation | Raw per-module reports and exact reviewed fingerprints retained; missing modules/survivors are not accepted | Complete every configured source, meaningful survivors, timeout audit and source-bound report/plan union |
 | UI/browser | Preserved UI regression fifteen cases and built subpath case; full 35-journey Chromium run, three-engine affected presentation/focus/recovery checks, exact frozen builds and lead screenshots | Reuse unchanged visual/transaction evidence; inspect only genuinely affected runtime changes |
-| Build/types/unit | Both `b7de860` clean checkouts pass fresh installation, zero-error/warning type checks, all 376 unit tests in 56 files and production build | Final mutation acceptance and clean committed working tree |
+| Build/types/unit | Both `0b3fae7` clean checkouts pass fresh installation, zero-error/warning type checks, all 378 unit tests in 56 files and production build | Final mutation acceptance and clean committed working tree |
 
 The pre-crash combined eighteen-journey Chromium repetition and separate sixty-completion repetition passed against their recorded frozen build. An earlier Continue timeout had no retained diagnostic trace; its cause is not established and it is not erased by later passes. Later fixes have their own actual counterexamples and regression evidence. No unexplained timeout is treated as proof of a product defect or a passing final gate.
 
