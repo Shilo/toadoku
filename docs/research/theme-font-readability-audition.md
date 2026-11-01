@@ -1,8 +1,20 @@
 # Decorative theme font readability audition
 
-Reviewed 2026-11-01 on isolated `codex/themes`. The initial audition below preceded acceptance. The user subsequently approved the adjusted Almendra Pond and Germania One Cauldron recommendations and explicitly requested themed numbers with before/after views. The approved production implementation and numeral follow-up are recorded next; historical candidate scores remain evidence, not a claim of measured human reading speed.
+Reviewed 2026-11-01 on isolated `codex/themes`. The initial audition preceded acceptance. The user approved Almendra Pond and Germania One Cauldron, tried themed numbers, then explicitly restored shared Outfit for the grid while retaining themed dock keys. The final decision below governs. Historical candidate scores are expert raster judgments, not measured human reading speed.
 
-## Accepted implementation and numeral follow-up
+## Final shared-grid decision
+
+The user requested a checkpoint commit before changing the number policy. `ea1931d` preserves the decorative UI/numeral implementation; `55ccea6` restores shared Outfit for all grid digits, notes and the enlarged cell editor while keeping bottom/right dock 1-9 and More in each theme's UI font. The optional families, real face metadata, UI size profiles and unchanged baked titles remain accepted.
+
+Grid numbers now scale proportionally at 0.68D, capped at 36px, compared with the former 0.64D/32px. The invisible text frame is 0.72D square with a circular 50% clip: actual paint is bounded by the guaranteed 0.36D opaque disk. Cell allocations, rounded faces, 81 targets, ten keys and note geometry remain unchanged. A hard minimum no longer forces oversized figures into very small cells; dock labels retain 17px minimum. No theme-specific digit baseline offsets remain. Shared solid 1px conflict underlines use -0.05em offset with ink skipping, plus the unchanged exclamation/color cues. Actual conflicted 1/4/7/8/9 were entered through normal commands and inspected on both themes at 280px and 320px.
+
+The final containment diagnostic uses actual Outfit 500/600, all 1-9 figures, normal/conflict states, both themes at native 280x568, 320x568, 360x800, 800x360 and 1280x720, plus an explicit 17px specimen in the 320 allocation. Diagnostic-only `filter: opacity(.99)` normalizes LCD rendering to observed grayscale; the production renderer is unchanged. Masked/unmasked PNG channels may differ by at most 2/255. A deliberately tiny 5% circle must produce a difference greater than 100/255, guarding against a false pass. Native fallback is tested separately by blocking Outfit, confirming actual Segoe UI Semibold through Chromium platform-font inspection and allowing observed faint antialiasing up to 4/255. This fallback smoke is current-platform evidence, not certification of every installed font. The actual colored faces and readable conflict cues are reviewed independently of this normalized diagnostic.
+
+Matching final before/after captures use the former UI/grid/dock treatment versus the final larger shared grid and themed keys. Gameplay/editor pairs cover both themes at five native sizes, with main-menu/Settings pairs at 360 and 1280. The same puzzle, notes and selection are preserved within each pair. Raw screenshots/scripts/results are under ignored `prototypes/font-live-audition/final/`; durable copies are indexed by the current theme readiness receipt. Earlier decorative-grid captures remain historical evidence. Physical-phone readability and broader browser/zoom checks remain unclaimed.
+
+Validation after the shared-grid change: all 433 unit tests in 62 files passed with one worker; all 18 theme-polish browser journeys passed; built-subpath/font/license checks passed; Svelte check reported zero errors/warnings and TypeScript node checking passed. The independent reviewer corrected one stale Cauldron unit assertion to check the circular paint mask instead of unpainted square corners, then approved the final geometry and real conflict captures.
+
+## Earlier decorative numeral follow-up, superseded
 
 Production uses one optional family with a nonempty list of real faces: Almendra 400/700 for Pond and Germania One 400 for Cauldron, retaining audited native bold synthesis for the latter. Accepted alphabetic sizes are Pond body 16px, summary 14.4px, small labels 12.1px; Cauldron body/summary 17.6px and small labels 13px. Controls and fixed title/subtitle geometry remain unchanged.
 

@@ -1,5 +1,28 @@
 # Isolated theme implementation progress
 
+## Final shared-grid and baked-title handoff, 2026-11-01
+
+The user's final direction is implemented: one optional decorative UI/dock family per theme, shared readable Outfit for the grid/notes/enlarged cell editor, modestly larger grid figures, and a mandatory baked title recipe for future themes. This supersedes the temporary themed-grid policy and all older frozen readiness sections below. Work remains isolated on `codex/themes`; the gameplay/main coordinator acknowledged its merge/cleanup hold and owns the reviewed integration requested by the user. This session does not modify or merge the gameplay checkout or touch the concurrent PWA checkout.
+
+### Commits and final behavior
+
+- `ea1931d`: the requested first checkpoint, preserving Almendra 400/700 Pond and Germania One 400 Cauldron, atomic optional-family face loading, licensed derivatives and the reviewed decorative-numeral experiment.
+- `55ccea6`: the requested second commit, restoring shared Outfit to all grid/editor numbers while dock 1-9 and More retain `--font-ui`. Cell figures increase from 0.64D/32px to 0.68D/36px. The circular text mask uses the guaranteed 0.36D opaque disk, preserving rounded faces, 81 cell targets, ten controls, grouping, selection/notes and saved logical state. Small cells scale proportionally rather than forcing a clipping minimum. Conflict numbers retain a visible fine underline, exclamation and color.
+- The documentation-only commit introducing this section is the requested third commit. It makes [baking every future title](theme-authoring.md#bake-a-title-for-every-future-theme) explicit, including a hypothetical Christmas recipe. It reconciles current font roles, source/notice requirements, generator extension points, deterministic checks, accessible/lazy rendering and proof that no second title font downloads. No Christmas theme/event is implemented. Current title modules and Outfit asset bytes remain unchanged.
+
+Pond UI uses Almendra regular/bold, 23,688 bytes combined; Cauldron UI uses Germania One regular, 9,124 bytes. The shared Outfit subset is 4,616 bytes. Existing baked title modules are 6,386/9,445 raw bytes, approximately 2.4/3.3KB separately compressed with Brotli. Full display fonts are regeneration inputs and are never requested by production. UI fonts remain optional, lazy and whole-family atomic: a missing face, failed download or timeout uses the explicit readable system stack without a stale or partially registered family.
+
+### Accepted validation and evidence
+
+- Full unit suite: 433 tests in 62 files, one worker. Focused token/runtime/typography/leaf/scene checks: 43 tests. Both passed after the final source change.
+- Theme-polish browser suite: all 18 journeys passed with one worker, covering defaults, annual Auto boundaries/countdown, localized controls, theme/font recovery, overlays, repeated clicks, responsive rows and state/geometry preservation. Built repository-subpath/font/license verification passed.
+- Svelte diagnostics: zero errors and warnings; node TypeScript check passed. Leaf autofixer reported no findings. Existing App/dialog suggestions about lifecycle effects and bindings were reviewed in the earlier slices and are unchanged by this typography work.
+- Shared Outfit ink: all 1-9 figures at actual 500/600 weights, normal/conflict states, both themes at 280/320/360/800/1280 native allocations, plus a 17px probe. A diagnostic-only grayscale filter and deliberately clipped positive control distinguish missing ink from LCD/scenery antialiasing. The custom-font threshold is 2/255; the separately identified native fallback smoke allows 4/255. This is a containment diagnostic, not a human readability percentage.
+- Real-command conflicted 1/4/7/8/9 captures were reviewed on colored Pond/Cauldron faces at 280 and 320. Matched before/after menu/Settings/gameplay/editor captures preserve the same puzzle state within each pair. Independent source/asset and final visual reviews found no remaining blocker after updating the stale Cauldron rectangle-corner test to the actual circle contract.
+- The lead's final Codex browser review resumed the isolated saved puzzle with its real conflicting 9, inspected the restored larger Outfit grid with themed keys in both Cauldron and Pond, and switched themes without losing the entry. Current desktop screenshots replace the earlier decorative-grid native review captures. Physical hardware, arbitrary tiny-window readability, full cross-browser/zoom testing and phone GPU performance remain unclaimed.
+
+Ignored scripts, raw comparisons, font sources and test evidence are preserved in a refreshed external archive before cleanup. The external `toadoku-theme-merge-readiness.json` records the exact post-documentation tip, clean state, archive hash and source commit, avoiding a self-referential hash here. The older `d8f222e` archive is immutable historical evidence, not the new readiness receipt. The coordinator should independently resolve `codex/themes`, preserve accepted gameplay/usability/PWA work, replay its ordinary reviewed merge against this final tip and complete merged-source acceptance before any theme-only branch/worktree cleanup.
+
 ## Reopened decorative typography implementation, 2026-11-01
 
 The user approved the audition's Almendra Pond and Germania One Cauldron recommendations, then explicitly requested themed gameplay numerals with matching before/after views for both themes. This supersedes the frozen readiness below. The gameplay/main coordinator acknowledged a hold on its staged merge and all feature cleanup; this work remains isolated on `codex/themes`.
