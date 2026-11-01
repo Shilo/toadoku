@@ -8,7 +8,7 @@ export default defineConfig({
     apply: 'build',
     async closeBundle() {
       await mkdir('dist/licenses', { recursive: true });
-      await Promise.all(['Outfit-OFL.txt', 'Baloo2-OFL.txt', 'Fraunces-OFL.txt', 'Chewy-LICENSE.txt', 'Creepster-OFL.txt'].map(file => copyFile(`src/assets/fonts/${file}`, `dist/licenses/${file}`)));
+      await Promise.all(['Outfit-OFL.txt', 'Almendra-OFL.txt', 'GermaniaOne-OFL.txt', 'Chewy-LICENSE.txt', 'Creepster-OFL.txt'].map(file => copyFile(`src/assets/fonts/${file}`, `dist/licenses/${file}`)));
     }
   }],
   base: './',

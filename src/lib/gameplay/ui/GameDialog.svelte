@@ -262,7 +262,7 @@
   .file-input { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; clip-path: inset(50%); overflow: hidden; }
   .file-name { overflow-wrap: anywhere; }
   select, input { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: 8px; background: var(--control-face); color: var(--control-ink); }
-  .theme-summary { font-size: .9rem; line-height: 1.4; }
+  .theme-summary { font-size: var(--type-summary); line-height: var(--line-summary); }
   .theme-summary span { display: block; }
   .session-info { border-top: 1px solid var(--control-lip); }
   summary { min-height: 44px; box-sizing: border-box; padding: 8px; cursor: pointer; }

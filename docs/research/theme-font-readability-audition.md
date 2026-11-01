@@ -1,6 +1,18 @@
 # Decorative theme font readability audition
 
-Reviewed 2026-11-01 on isolated `codex/themes`. This is an actual-application audition, not acceptance of new production font defaults. Baloo 2 and Fraunces remain the production choices. The shared Notes pencil correction is the only application change from this evaluation.
+Reviewed 2026-11-01 on isolated `codex/themes`. The initial audition below preceded acceptance. The user subsequently approved the adjusted Almendra Pond and Germania One Cauldron recommendations and explicitly requested themed numbers with before/after views. The approved production implementation and numeral follow-up are recorded next; historical candidate scores remain evidence, not a claim of measured human reading speed.
+
+## Accepted implementation and numeral follow-up
+
+Production uses one optional family with a nonempty list of real faces: Almendra 400/700 for Pond and Germania One 400 for Cauldron, retaining audited native bold synthesis for the latter. Accepted alphabetic sizes are Pond body 16px, summary 14.4px, small labels 12.1px; Cauldron body/summary 17.6px and small labels 13px. Controls and fixed title/subtitle geometry remain unchanged.
+
+Primary cell digits, dock numbers and enlarged numeric editors now use the theme family. Both reviewers judged themed dock/enlarged figures readable at 4/5; Cauldron's main figures also scored 4. Pond's old-style figures required a common baseline adjustment before grid acceptance. Tiny themed nine-note faces were rejected at existing 4.84/5.57px phone sizes: fine Almendra details and condensed Germania forms lose distinctions. In-board notes alone retain Outfit; 24px enlarged notes remain themed. These are expert raster judgments, not hardware/user-study results or a WCAG font certification.
+
+Matched real-application captures use identical puzzle values, conflict/selection and nine manual notes for each before/after pair. Eight contexts cover both themes at 320x568 DPR1, 360x800 DPR3, 800x360 DPR3 and 1280x720 DPR1. Menu/Settings pairs at 360 and 1280 supplement gameplay/editor pairs at all four sizes. Before is the previous Baloo 2/Fraunces UI plus shared Outfit numbers; after is actual production derivatives and metrics. Scripts/results/screens are ignored under `prototypes/font-live-audition/final/`; earlier rejected themed tiny-note comparisons remain under `numerals/`.
+
+The original Almendra 7 lost its lower tip in the unchanged clipped paint box; the tested original 3 already matched and must not be reported as clipped. A shared upward lift preserves old-style relationships: Pond 0.09em, Cauldron 0.04em. Their small conflict waves also clipped, so the final profile uses a fine solid 1px underline at 0.03em offset with the existing exclamation/color cues. Enlarging the paint box, shrinking all digits and adding a separate wave that overlaps the exclamation were rejected. Failed/absent fonts receive zero custom lift and the original decoration.
+
+The integrated ink regression isolates mounted numeral paint from decorative SVG edge antialiasing. It checks all 1-9 figures at 400/700, normal/conflict states, both themes and all four allocations. Clipped/unclipped PNG pixels may differ by at most 2/255 per channel for clipping-layer antialiasing; the actual cut wave differed by 211/255. Target rectangles and saved logical state remain equal after these diagnostic DOM-only specimens. Actual colored captures separately assess recognition, centering and conflict cues. Native-font failure and partial regular-success/bold-failure exercise whole-family system fallback and recovery.
 
 ## Method and score meaning
 

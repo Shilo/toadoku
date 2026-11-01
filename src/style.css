@@ -42,17 +42,17 @@ h2 { font-size: var(--type-control-max); line-height: var(--line-ui); margin: 0;
 dialog { color: var(--dialog-ink); background: var(--dialog-surface); border: var(--space-small) solid var(--dialog-edge); border-radius: var(--dialog-radius); padding: var(--space-large); width: min(360px, calc(100% - 2 * var(--space-large) - env(safe-area-inset-left) - env(safe-area-inset-right))); max-height: calc(100% - 2 * var(--space-large) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overflow: auto; box-shadow: var(--window-shadow); }
 dialog::backdrop { background: var(--dialog-backdrop); }
 dialog h2 { margin-bottom: var(--space-large); }
-dialog p { margin: 0 0 var(--space-large); font-size: var(--type-control-min); font-weight: 400; }
+dialog p { margin: 0 0 var(--space-large); font-size: var(--type-body); font-weight: 400; }
 dialog .cream { display: block; width: 100%; min-height: 56px; margin-top: var(--space-small); }
 .cell[data-clue="false"] .digit { font-weight: 500; }
-.cell[data-conflict="true"] .digit { text-decoration: underline wavy; text-underline-offset: .1em; }
+.cell[data-conflict="true"] .digit { text-decoration-line: underline; text-decoration-style: var(--digit-underline-style, wavy); text-underline-offset: var(--digit-underline-offset, .1em); text-decoration-thickness: 1px; }
 .conflict-mark { position: absolute; left: 50%; top: 72%; translate: -50% -50%; color: var(--leaf-ink); font-family: var(--font-solving); font-weight: 900; line-height: 1; pointer-events: none; }
 .more, .menu-more { display: flex; align-items: center; justify-content: center; flex-direction: column; }
-.notes-mode { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; letter-spacing: 0; line-height: 1.1; max-width: 100%; }
+.notes-mode { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--type-small-label); letter-spacing: 0; line-height: 1.1; max-width: 100%; }
 .more.has-state { padding: 4px; gap: 2px; }
 .more-symbols { display: inline-flex; align-items: center; justify-content: center; gap: 2px; flex-shrink: 0; }
 .more-symbols > svg { flex-shrink: 0; }
-.save-label { display: flex; align-items: center; justify-content: center; gap: 2px; max-width: 100%; font-size: 11px; line-height: 1; letter-spacing: 0; flex-shrink: 0; }
+.save-label { display: flex; align-items: center; justify-content: center; gap: 2px; max-width: 100%; font-size: var(--type-small-label); line-height: 1; letter-spacing: 0; flex-shrink: 0; }
 .save-label > span { min-width: 0; overflow-wrap: anywhere; }
 .save-label > svg { flex-shrink: 0; }
 .concealed { position: absolute; z-index: var(--layer-objects); background: var(--water-deep); color: var(--title-ink); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; padding: 8px; text-align: center; }

@@ -1,4 +1,5 @@
-import balooUrl from '../../assets/fonts/Baloo2-UI.woff2?url';
+import regularUrl from '../../assets/fonts/Almendra-UI-Regular.woff2?url';
+import boldUrl from '../../assets/fonts/Almendra-UI-Bold.woff2?url';
 import type { ThemeDefinition } from './runtime';
 import type { ThemeTokens } from './tokens';
 import { themeStyle as mapThemeStyle } from './tokens';
@@ -26,6 +27,8 @@ export const pond = {
   },
   typography: {
     titleInk: '#FFF5D9', controlMin: 16, controlMax: 22,
+    bodySize: 16, summarySize: 14.4, smallLabelSize: 12.1, summaryLineHeight: 1.4,
+    digitBaselineShift: .09, digitUnderlineStyle: 'solid', digitUnderlineOffset: .03,
     digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11, titleMin: 44, titleMax: 80,
     uiWeight: 600, digitWeight: 600, noteWeight: 500,
     uiLineHeight: 1.15, titleLineHeight: 1.05, numberLineHeight: 1,
@@ -66,7 +69,7 @@ export const pondDark: ThemeTokens = {
   dialog: { surface: '#203D36', edge: '#A7C4B4', ink: '#FFF5D9', backdrop: 'rgb(12 28 24 / 45%)' },
 };
 export const definition: ThemeDefinition = {
-  light: pond, dark: pondDark, font: { family: 'ToadokuPondUI', url: balooUrl, weight: '400 700' }, wordmark,
+  light: pond, dark: pondDark, font: { family: 'ToadokuPondUI', faces: [{ url: regularUrl, weight: '400' }, { url: boldUrl, weight: '700' }] }, wordmark,
   liquid: pondLiquid, vessel: shore,
   cellPath: id => leafShape(id).path,
 };

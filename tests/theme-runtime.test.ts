@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { pond, definition as pondDefinition } from '../src/lib/theme/pond';
-import { createThemeRuntime, type AppliedTheme, type ThemeDefinition } from '../src/lib/theme/runtime';
+import { createThemeRuntime, loadThemeFont, type AppliedTheme, type ThemeDefinition } from '../src/lib/theme/runtime';
 import { nextLocalMidnight, resolveAppearance, resolveTheme } from '../src/lib/theme/policy';
 import { themeStyle } from '../src/lib/theme/tokens';
 import { presentation } from '../src/lib/theme/presentation';
@@ -13,9 +13,9 @@ function deferred<T>() {
 }
 const light = { ...pond, id: 'pond', water: { ...pond.water, deep: '#123456' } };
 const dark = { ...pond, id: 'pond', water: { ...pond.water, deep: '#654321' } };
-const definition: ThemeDefinition = { ...pondDefinition, light, dark, font: { family: 'TestUI', url: '/ui.woff2', weight: '400 700' } };
+const definition: ThemeDefinition = { ...pondDefinition, light, dark, font: { family: 'TestUI', faces: [{ url: '/ui.woff2', weight: '400 700' }] } };
 const date = new Date(2026, 9, 31, 12);
-afterEach(() => { vi.useRealTimers(); });
+afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('local calendar theme policy', () => {
   it.each([2024, 2026, 2027, 2032])('uses all inclusive annual edges in %i', year => {
@@ -68,6 +68,43 @@ describe('local calendar theme policy', () => {
 });
 
 describe('atomic lazy theme publication', () => {
+  it('loads all family faces off-document and registers only after every face succeeds', async () => {
+    const regular = deferred<void>(), bold = deferred<void>(), add = vi.fn();
+    const descriptors: string[] = [];
+    vi.stubGlobal('document', { fonts: { add } });
+    vi.stubGlobal('FontFace', class {
+      constructor(_family: string, _source: string, options: { weight: string }) { descriptors.push(options.weight); }
+      load() { return (descriptors.length === 1 ? regular : bold).promise; }
+    });
+    const loading = loadThemeFont({ family: 'TwoFaces', faces: [{ url: '/regular', weight: '400' }, { url: '/bold', weight: '700' }] });
+    bold.resolve(); await Promise.resolve(); expect(add).not.toHaveBeenCalled();
+    regular.resolve(); const register = await loading;
+    expect(add).not.toHaveBeenCalled(); register();
+    expect(add).toHaveBeenCalledTimes(2); expect(descriptors).toEqual(['400', '700']);
+  });
+  it('never registers a partial family after another face fails, and rejects empty families', async () => {
+    const add = vi.fn();
+    vi.stubGlobal('document', { fonts: { add } });
+    vi.stubGlobal('FontFace', class {
+      source: string;
+      constructor(_family: string, source: string) { this.source = source; }
+      load() { return this.source.includes('bold') ? Promise.reject(Error('bold failed')) : Promise.resolve(); }
+    });
+    await expect(loadThemeFont({ family: 'Partial', faces: [{ url: '/regular' }, { url: '/bold' }] })).rejects.toThrow('bold failed');
+    await expect(loadThemeFont({ family: 'Empty', faces: [] } as unknown as NonNullable<ThemeDefinition['font']>)).rejects.toThrow('theme-font-empty');
+    expect(add).not.toHaveBeenCalled();
+  });
+  it('does not reuse a cached family after any face URL or weight changes', async () => {
+    let next = definition;
+    const loadFont = vi.fn(async () => {});
+    const runtime = createThemeRuntime({ load: async () => next, loadFont, onChange: () => {} });
+    await runtime.request('pond', 'light', date);
+    next = { ...definition, font: { family: 'TestUI', faces: [{ url: '/ui.woff2', weight: '400' }, { url: '/bold.woff2', weight: '700' }] } };
+    await runtime.request('pond', 'dark', date);
+    next = { ...definition, font: { family: 'TestUI', faces: [{ url: '/ui.woff2', weight: '400' }, { url: '/new-bold.woff2', weight: '700' }] } };
+    await runtime.request('cauldron', 'light', date);
+    expect(loadFont).toHaveBeenCalledTimes(3); runtime.dispose();
+  });
   it('waits for font readiness before one coherent publication and dedupes successful keys', async () => {
     const font = deferred<void>(), events: AppliedTheme[] = [];
     const load = vi.fn(async () => definition), loadFont = vi.fn(() => font.promise);
@@ -160,7 +197,7 @@ describe('atomic lazy theme publication', () => {
   });
   it('does not reuse an already registered theme family when the next font fails or is absent', async () => {
     const { font: _font, ...withoutFont } = definition;
-    const failed = { ...definition, font: { family: 'OtherUI', url: '/other.woff2' } };
+    const failed: ThemeDefinition = { ...definition, font: { family: 'OtherUI', faces: [{ url: '/other.woff2' }] } };
     let next: ThemeDefinition = definition;
     const events: AppliedTheme[] = [], loadFont = vi.fn().mockResolvedValueOnce(undefined).mockRejectedValue(Error('font'));
     const runtime = createThemeRuntime({ load: async () => next, loadFont, onChange: theme => events.push(theme) });

@@ -1,5 +1,11 @@
 # Isolated theme implementation progress
 
+## Reopened decorative typography implementation, 2026-11-01
+
+The user approved the audition's Almendra Pond and Germania One Cauldron recommendations, then explicitly requested themed gameplay numerals with matching before/after views for both themes. This supersedes the frozen readiness below. The gameplay/main coordinator acknowledged a hold on its staged merge and all feature cleanup; this work remains isolated on `codex/themes`.
+
+The optional font remains one family, with real regular/bold faces loaded together before atomic publication. Almendra uses actual 400/700; Germania One has actual 400 and the already audited native bold synthesis. Body/summary/small-label sizes follow the accepted live profiles. Primary cell/dock/enlarged numerals now follow the theme. Tiny in-board notes retain the clearer shared Outfit subset after both decorative candidates lost distinctions at 4.84/5.57px. Matching six-context numeral evidence and the bounded Pond old-style digit clipping probe are under ignored `prototypes/font-live-audition/numerals/`. Final validation and updated readiness are pending.
+
 ## Final merge-readiness handoff, 2026-11-01
 
 Status: implementation and requested auditions are complete on the isolated theme branch. Ready for the coordinating gameplay/main session's reviewed integration of the current source. This is not a merge, deployment, final-art approval or acceptance of the proposed decorative font replacements. No optional redesign work is active. The coordinator reported fresh user authorization to review/merge and remove only the successfully merged theme branch/worktree; that coordinator owns those actions. This theme session does not modify main, merge, remove worktrees or touch the concurrent PWA worktree.

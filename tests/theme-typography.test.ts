@@ -5,11 +5,13 @@ import { definition as pond } from '../src/lib/theme/pond';
 import { definition as cauldron } from '../src/lib/theme/cauldron';
 import { wordmark as pondWordmark } from '../src/lib/theme/wordmarks/pond';
 import { wordmark as cauldronWordmark } from '../src/lib/theme/wordmarks/cauldron';
+import { themeStyle } from '../src/lib/theme/tokens';
 
 it('pins the verified language subsets and unchanged solving glyph derivative', () => {
   for (const [file, hash] of Object.entries({
-    'Baloo2-UI.woff2': '7dd1e14afb82d04391029fe14c89610a104c4a6d7d60cf044f066a5b8cefc606',
-    'Fraunces-UI.woff2': 'ea65187915d697aec1579b38c6117e750833c9ba24e6c7c1e2eb39cf3dbe477f',
+    'Almendra-UI-Regular.woff2': 'aba7222a1f2a33dfea57e6cbcbbfd6f419d12e9e9928b230cc21d6df74c393c1',
+    'Almendra-UI-Bold.woff2': '44b897ad02022672bb9f378c8f433808d6a9d43b588c6395d2de591ee203d3f3',
+    'GermaniaOne-UI.woff2': 'f5330179ba66616e96494fe6b52336e8abc9dc8cffebf43c4f7ca330afc9e8dc',
     'Outfit-Solving.woff2': '94521752365c23a599f084d01f8e21fa9f8ac0b120607f55f3cd9cf60e00d564',
   })) {
     const bytes = readFileSync(`src/assets/fonts/${file}`);
@@ -31,13 +33,16 @@ it('keeps baked wordmarks inside their natural em frames without font downloads'
   }
 });
 
-it('gives each theme one optional UI font, independent of its baked branding and shared solving face', () => {
-  expect(pond.font).toMatchObject({ family: 'ToadokuPondUI', weight: '400 700' });
-  expect(cauldron.font).toMatchObject({ family: 'ToadokuCauldronUI', weight: '400 700' });
+it('gives each theme one optional UI and numeral family with honest native faces', () => {
+  expect(pond.font).toMatchObject({ family: 'ToadokuPondUI', faces: [{ weight: '400' }, { weight: '700' }] });
+  expect(cauldron.font).toMatchObject({ family: 'ToadokuCauldronUI', faces: [{ weight: '400' }] });
   for (const definition of [pond, cauldron]) {
     expect(definition).not.toHaveProperty('titleFont');
     expect(definition.light.typography).not.toHaveProperty('title');
     expect(definition.light.typography).not.toHaveProperty('ui');
   }
   expect(pond.wordmark.path).not.toBe(cauldron.wordmark.path);
+  expect(themeStyle(pond.light)).toContain('--digit-baseline-shift:0em');
+  expect(themeStyle(pond.light, '"ToadokuPondUI", system-ui', true)).toContain('--digit-baseline-shift:0.09em');
+  expect(themeStyle(cauldron.light, '"ToadokuCauldronUI", system-ui', true)).toContain('--digit-baseline-shift:0.04em');
 });

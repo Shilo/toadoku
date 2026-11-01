@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import type { Attempt, Preferences, Profile } from '../../src/lib/gameplay/contracts';
 import { dictionaries, type Locale } from '../../src/lib/i18n';
 import { themeCopy } from '../../src/lib/theme/copy';
@@ -7,6 +8,10 @@ import { uiCopy } from '../../src/lib/gameplay/ui/copy';
 import { appCopy } from '../../src/lib/gameplay/app-copy';
 
 const evidence = 'prototypes/theme-polish';
+// Use the test runner's bundled decoder, without adding an application dependency.
+const { PNG } = createRequire(import.meta.url)('playwright-core/lib/utilsBundle') as {
+  PNG: { sync: { read(bytes: Buffer): { width: number; height: number; data: Buffer } } };
+};
 interface Snapshot { preferences: Preferences; profile: Profile; attempt?: Attempt }
 async function snapshot(page: Page): Promise<Snapshot> {
   return page.evaluate(async () => {
@@ -508,15 +513,17 @@ test('stationary repeated clicks keep More responsive and accept intentional not
   await expect.poll(async () => (await snapshot(page)).attempt!.notes[cell]).toBe(1);
 });
 
-test('one optional theme UI font preserves shared solving numerals and system recovery', async ({ page, browser }) => {
+test('one optional theme family styles UI and primary numerals with shared tiny notes and system recovery', async ({ page, browser }) => {
   const audit = async (target: Page, family: string) => {
     if (family !== 'system-ui') await expect.poll(() => target.evaluate(family => [...document.fonts]
       .some(face => face.family.replaceAll('"', '') === family && face.status === 'loaded'), family)).toBe(true);
     const result = await target.locator('.world').evaluate(world => {
       const expected = getComputedStyle(world).fontFamily, wrong: string[] = [];
       const probe = document.createElement('span'); probe.style.fontFamily = 'var(--font-solving)'; world.append(probe);
-      const solving = getComputedStyle(probe).fontFamily; probe.remove();
-      const expectedFor = (node: Element) => node.closest('.cell,.dock .numeric,.large-cell,.large-keys button') ? solving : expected;
+      const solving = getComputedStyle(probe).fontFamily;
+      probe.style.fontFamily = 'var(--font-note)';
+      const notes = getComputedStyle(probe).fontFamily; probe.remove();
+      const expectedFor = (node: Element) => node.matches('.note') ? notes : expected;
       const walker = document.createTreeWalker(world, NodeFilter.SHOW_TEXT); let node: Node | null;
       while ((node = walker.nextNode())) {
         const parent = node.parentElement;
@@ -526,9 +533,10 @@ test('one optional theme UI font preserves shared solving numerals and system re
       for (const field of world.querySelectorAll('button,input,select,textarea,option')) {
         if (getComputedStyle(field).fontFamily !== expectedFor(field)) wrong.push(`${field.tagName}: ${getComputedStyle(field).fontFamily}`);
       }
-      return { expected, solving, wrong };
+      return { expected, solving, notes, wrong };
     });
-    expect(result.expected).toContain(family); expect(result.solving).toContain('ToadokuSolving'); expect(result.wrong).toEqual([]);
+    expect(result.expected).toContain(family); expect(result.solving).toBe(result.expected);
+    expect(result.notes).toContain('ToadokuSolving'); expect(result.wrong).toEqual([]);
   };
   await page.goto('/'); await ready(page);
   for (const theme of ['pond', 'cauldron']) for (const appearance of ['light', 'dark']) {
@@ -559,6 +567,45 @@ test('one optional theme UI font preserves shared solving numerals and system re
     await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.loading); await audit(fault, 'system-ui');
     release(); await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.failed); await audit(fault, 'system-ui');
   } finally { release(); await context.close(); }
+});
+
+test('theme numeral ink stays complete inside the unchanged paint boxes at both weights and conflict states', async ({ page }) => {
+  await page.goto('/'); await ready(page); await quick(page);
+  // Isolate ink from liquid edge antialiasing between SVG and clipping layers.
+  const diagnostic = await page.addStyleTag({ content: '.board,.cell{background:white!important}.leaf svg,.focus-dew{visibility:hidden!important}.digit{color:black!important}.floating{transform:none!important}' });
+  for (const theme of ['pond', 'cauldron']) {
+    await settings(page); await choose(page, 'Theme', theme); await closeDialogs(page);
+    for (const [width, height, fontSize] of [[320, 568, 17], [320, 568], [360, 800], [800, 360], [1280, 720]]) {
+      await page.setViewportSize({ width, height });
+      await expect(page.locator('svg.scene[data-scene="game"]')).toHaveAttribute('viewBox', `0 0 ${width - 16} ${height - 16}`);
+      const sizeProbe = fontSize ? await page.addStyleTag({ content: `.digit{font-size:${fontSize}px!important}` }) : undefined;
+      const targets = await bounds(page), logicalBefore = logical((await snapshot(page)).attempt!);
+      for (const weight of ['400', '700']) for (const conflict of [false, true]) {
+        // A diagnostic of actual mounted glyphs, not a change to session data.
+        await page.locator('.digit').evaluateAll((nodes, { weight, conflict }) => nodes.slice(0, 9).forEach((n, i) => {
+          n.textContent = String(i + 1); (n as HTMLElement).style.fontWeight = weight;
+          n.closest('.cell')!.setAttribute('data-conflict', String(conflict));
+        }), { weight, conflict });
+        const clipped = await page.locator('.board').screenshot();
+        const proof = await page.addStyleTag({ content: '.digit{overflow:visible!important}' });
+        const unclipped = await page.locator('.board').screenshot(); await proof.evaluate(n => (n as HTMLElement).remove());
+        const a = PNG.sync.read(clipped), b = PNG.sync.read(unclipped);
+        expect([a.width, a.height]).toEqual([b.width, b.height]);
+        // Clip-layer antialiasing can change a boundary channel by 1/255.
+        // Missing ink produces much larger differences, which must fail.
+        let delta = 0;
+        for (let i = 0; i < a.data.length; i++) delta = Math.max(delta, Math.abs(a.data[i] - b.data[i]));
+        if (delta > 2) {
+          await writeFile(`${evidence}/ink-clipped.png`, clipped); await writeFile(`${evidence}/ink-unclipped.png`, unclipped);
+        }
+        expect(delta, `${theme} ${width} ${fontSize ?? 'native'}px weight ${weight} conflict ${conflict}`).toBeLessThanOrEqual(2);
+      }
+      expect(await bounds(page)).toEqual(targets);
+      expect(logical((await snapshot(page)).attempt!)).toEqual(logicalBefore);
+      await sizeProbe?.evaluate(n => (n as HTMLElement).remove());
+    }
+  }
+  await diagnostic.evaluate(n => (n as HTMLElement).remove());
 });
 
 test('theme UI fonts retain readable English, German and Spanish controls at all target allocations', async ({ page }) => {
@@ -604,7 +651,7 @@ test('failed theme font uses the system stack after a previous font was register
   await page.clock.setFixedTime(new Date('2026-10-15T12:00:00-07:00'));
   await page.goto('/'); await ready(page); await quick(page);
   const before = (await snapshot(page)).attempt!, rectangles = await bounds(page);
-  const fontRoute = /\/Fraunces-UI.*\.woff2/;
+  const fontRoute = /\/GermaniaOne-UI.*\.woff2/;
   await page.route(fontRoute, route => route.request().resourceType() === 'font' ? route.abort('failed') : route.continue());
   await settings(page); await choose(page, 'Theme', 'cauldron');
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
@@ -617,6 +664,30 @@ test('failed theme font uses the system stack after a previous font was register
   await expect(page.locator('.world')).toHaveCSS('font-family', /ToadokuCauldronUI/);
   await closeDialogs(page);
   expect(await bounds(page)).toEqual(rectangles); expect(logical((await snapshot(page)).attempt!)).toEqual(logical(before));
+});
+
+test('a failed bold face falls back as a whole family without leaving partial typography or metrics', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-31T12:00:00-07:00'));
+  await page.goto('/'); await ready(page); await quick(page);
+  const before = logical((await snapshot(page)).attempt!), rectangles = await bounds(page);
+  const bold = /\/Almendra-UI-Bold.*\.woff2/;
+  await page.route(bold, route => route.request().resourceType() === 'font' ? route.abort('failed') : route.continue());
+  await settings(page); await choose(page, 'Theme', 'pond');
+  await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
+  await expect(page.locator('.world')).toHaveCSS('font-family', /system-ui/);
+  const failed = await page.locator('.world').evaluate(world => ({
+    shift: getComputedStyle(world).getPropertyValue('--digit-baseline-shift'),
+    style: getComputedStyle(world).getPropertyValue('--digit-underline-style'),
+    partial: [...document.fonts].filter(face => face.family === 'ToadokuPondUI').length,
+    prior: [...document.fonts].some(face => face.family === 'ToadokuCauldronUI' && face.status === 'loaded'),
+  }));
+  expect(failed).toEqual({ shift: '0em', style: 'wavy', partial: 0, prior: true });
+  await page.unroute(bold); await choose(page, 'Theme', 'cauldron'); await choose(page, 'Theme', 'pond');
+  await expect(page.locator('.world')).toHaveCSS('font-family', /ToadokuPondUI/);
+  expect(await page.evaluate(() => [...document.fonts].filter(face => face.family === 'ToadokuPondUI' && face.status === 'loaded').map(face => face.weight).sort())).toEqual(['400', '700']);
+  expect(await page.locator('.world').evaluate(n => getComputedStyle(n).getPropertyValue('--digit-baseline-shift'))).toBe('0.09em');
+  await closeDialogs(page); expect(await bounds(page)).toEqual(rectangles);
+  expect(logical((await snapshot(page)).attempt!)).toEqual(before);
 });
 
 test('submenu headings use the ground foreground in both themes and appearances', async ({ page }) => {
@@ -680,7 +751,7 @@ test('the regular-font Sudoku descriptor fits the protected title area in portra
   const fallbackContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: 'en-US', reducedMotion: 'reduce' });
   try {
     const fallback = await fallbackContext.newPage(); let blockedFonts = 0;
-    await fallback.route(/\/(?:Baloo2|Fraunces)-UI.*\.woff2/, route => {
+    await fallback.route(/\/(?:Almendra|GermaniaOne)-UI.*\.woff2/, route => {
       // Vite also serves a JavaScript ?url import at this path. Fault only the
       // actual font payload so this exercises font fallback, not chunk failure.
       if (route.request().resourceType() !== 'font') return route.continue();

@@ -4,11 +4,12 @@ import type { Layout } from '../layout';
 import type { LiquidFrame, SceneBubble, VesselRenderer } from '../scene/types';
 import { SYSTEM_UI_FONT, type Wordmark } from './typography';
 
-export interface ThemeFont { readonly family: string; readonly url: string; readonly weight?: string }
+export interface ThemeFontFace { readonly url: string; readonly weight?: string }
+export interface ThemeFont { readonly family: string; readonly faces: readonly [ThemeFontFace, ...ThemeFontFace[]] }
 export interface ThemeDefinition {
   readonly light: ThemeTokens;
   readonly dark: ThemeTokens;
-  /** One optional UI font. Solving numerals remain shared; branding is baked vector data. */
+  /** One optional family for UI and primary numerals; branding is baked vector data. */
   readonly font?: ThemeFont;
   readonly wordmark: Wordmark;
   readonly cellPath: (id: number) => string;
@@ -40,9 +41,13 @@ export const loadThemeDefinition = async (id: ThemeId): Promise<ThemeDefinition>
 const FONT_WAIT_MS = 5000;
 /** Font failures are supported fallback typography, while chunk failures retain the old theme. */
 export async function loadThemeFont(font: ThemeFont): Promise<() => void> {
-  const face = new FontFace(font.family, `url("${font.url}")`, { weight: font.weight ?? '400', display: 'swap' });
-  await face.load();
-  return () => { document.fonts.add(face); };
+  if (!font.faces.length) throw new Error('theme-font-empty');
+  const faces = await Promise.all(font.faces.map(async face => {
+    const loaded = new FontFace(font.family, `url("${face.url}")`, { weight: face.weight ?? '400', display: 'swap' });
+    await loaded.load();
+    return loaded;
+  }));
+  return () => { for (const face of faces) document.fonts.add(face); };
 }
 
 function boundedFont(font: ThemeFont, load: ThemeFontLoader): Promise<void | (() => void)> {
@@ -60,7 +65,7 @@ export function createThemeRuntime(options: ThemeRuntimeOptions) {
   let pendingKey: string | undefined, pending: Promise<void> | undefined;
   const fonts = new Map<string, Promise<void | (() => void)>>();
   function readyFont(font: ThemeFont) {
-    const key = `${font.family}:${font.url}:${font.weight ?? '400'}`;
+    const key = JSON.stringify([font.family, font.faces.map(face => [face.url, face.weight ?? '400'])]);
     let ready = fonts.get(key);
     if (!ready) {
       ready = boundedFont(font, loadFont).catch(error => { fonts.delete(key); throw error; });

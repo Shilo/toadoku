@@ -1,7 +1,7 @@
 import type { ThemeTokens } from './tokens';
 import type { ThemeDefinition } from './runtime';
 import { presentation } from './presentation';
-import frauncesUrl from '../../assets/fonts/Fraunces-UI.woff2?url';
+import regularUrl from '../../assets/fonts/GermaniaOne-UI.woff2?url';
 import { wordmark } from './wordmarks/cauldron';
 import { medallionShape, squashRindPath } from '../leaves/medallion';
 import { cauldronVessel as vessel, cauldronLiquid, cauldronBubbles, cauldronLiquidProfile } from '../scene/cauldron';
@@ -25,6 +25,8 @@ export const cauldron: ThemeTokens = {
   },
   typography: {
     ...presentation.typography,
+    bodySize: 17.6, summarySize: 17.6, smallLabelSize: 13, summaryLineHeight: 1.3,
+    digitBaselineShift: .04, digitUnderlineStyle: 'solid', digitUnderlineOffset: .03,
     titleInk: '#FFF0CA', digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11,
     uiWeight: 600, digitWeight: 600, noteWeight: 500, numberLineHeight: 1,
   },
@@ -51,7 +53,7 @@ export const cauldronDark: ThemeTokens = {
 };
 export const definition: ThemeDefinition = {
   light: cauldron, dark: cauldronDark,
-  font: { family: 'ToadokuCauldronUI', url: frauncesUrl, weight: '400 700' }, wordmark,
+  font: { family: 'ToadokuCauldronUI', faces: [{ url: regularUrl, weight: '400' }] }, wordmark,
   cellPath: id => medallionShape(id).path, cellDetail: squashRindPath, vessel,
   liquid: cauldronLiquid, bubbles: cauldronBubbles,
 };
