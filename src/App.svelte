@@ -298,7 +298,7 @@
       const result = await controller.exportBackup();
       if (request !== backupSequence || overlay?.id !== pane || disposed) return;
       exportError = result.kind !== 'committed';
-      if (result.kind === 'committed') download(result.value.text, 'toadodu-backup.json');
+      if (result.kind === 'committed') download(result.value.text, 'toadoku-backup.json');
     } catch { if (request === backupSequence && !disposed) exportError = true; }
     finally { if (request === backupSequence) backupBusy = false; }
   }
@@ -321,7 +321,7 @@
       if (controller && (controller.state.attempt || controller.state.save)) local = controller.exportRecovery().text;
       const needsStored = bootError || !controller || /^(corrupt|unsupported-future):/.test(gameState.problem ?? '');
       if (!needsStored && local) {
-        if (current()) download(local, 'toadodu-emergency-recovery.json');
+        if (current()) download(local, 'toadoku-emergency-recovery.json');
         return;
       }
       const { exportRawRecovery } = await import('./lib/storage/raw-recovery');
@@ -335,12 +335,12 @@
           ',"database":', recovered.value.blob, '}',
         ], { type: 'application/json' }) : recovered.value.blob;
         if (artifact.size > recovered.value.summary.bytes + 2 * 1024 * 1024 + 256) throw new Error('Recovery bundle exceeds its bounded format');
-        download(artifact, 'toadodu-stored-recovery.json');
-      } else if (local) { download(local, 'toadodu-emergency-recovery.json'); recoveryProblem = 'partial'; }
+        download(artifact, 'toadoku-stored-recovery.json');
+      } else if (local) { download(local, 'toadoku-emergency-recovery.json'); recoveryProblem = 'partial'; }
       else recoveryProblem = 'unavailable';
     } catch {
       if (!current()) return;
-      if (local) { download(local, 'toadodu-emergency-recovery.json'); recoveryProblem = 'partial'; }
+      if (local) { download(local, 'toadoku-emergency-recovery.json'); recoveryProblem = 'partial'; }
       else recoveryProblem = 'unavailable';
     } finally {
       if (request === backupSequence) {
@@ -394,7 +394,7 @@
 
 <svelte:window onkeydown={handleKey} onpointerdown={() => keyboard = false} onpagehide={() => documentVisible = false} onpageshow={pageShown} onfocus={refreshTheme} />
 <svelte:document onvisibilitychange={visibility} />
-<svelte:head><title>Toadodu</title><meta name="theme-color" content={appliedTheme?.tokens.water.deep ?? '#0D6267'} /></svelte:head>
+<svelte:head><title>Toadoku</title><meta name="theme-color" content={appliedTheme?.tokens.water.deep ?? '#0D6267'} /></svelte:head>
 
 <main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens) : undefined} {@attach singleActivation}>
   {#if appliedTheme}
@@ -430,11 +430,11 @@
         <button class={['cream', 'more', {'has-state': !!saveBadge}]} bind:this={moreButton} disabled={historyClosing} aria-label={`${copy.more}${gameState.attempt?.notesMode ? `, ${c.notes}` : ''}${saveBadge ? `, ${saveBadge}` : ''}`} aria-haspopup="dialog" onclick={() => nav?.openMore()}><span class="more-symbols"><Ellipsis aria-hidden="true" size={saveBadge ? 20 : 28} />{#if saveBadge && gameState.attempt?.notesMode}<Pencil aria-hidden="true" size={12} />{/if}</span>{#if saveBadge}<span class="save-label"><span>{saveBadge}</span></span>{:else if gameState.attempt?.notesMode}<span class="notes-mode"><Pencil aria-hidden="true" size={12} />{c.notes}</span>{/if}</button>
       </nav>
     {:else}
-      <section class="identity" aria-label="Toadodu">
-        <h1 style={`${rectStyle(layout.menuTitle)};font-size:${layout.titleFontSize}px;transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>Toadodu</h1>
+      <section class="identity" aria-label="Toadoku">
+        <h1 style={`${rectStyle(layout.menuTitle)};font-size:${layout.titleFontSize}px;transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>Toadoku</h1>
         <div class="art-slot" style={`${rectStyle(layout.menuArt)};transform:translate(${artFloat.x}px,${artFloat.y}px)`}><img class="menu-art" src={menuSketch} alt={copy.art} width="1254" height="1254" draggable="false" decoding="async" /></div>
       </section>
-      <nav class="menu-panel" aria-label={route === 'quick' ? copy.quick : route === 'progression' ? copy.progression : 'Toadodu'} bind:this={menuElement} style={`${rectStyle(layout.menuPanel)};--action:${layout.menuActionHeight}px`}>
+      <nav class="menu-panel" aria-label={route === 'quick' ? copy.quick : route === 'progression' ? copy.progression : 'Toadoku'} bind:this={menuElement} style={`${rectStyle(layout.menuPanel)};--action:${layout.menuActionHeight}px`}>
         {#if route === 'menu' || route === 'more'}
           <button class="cream" disabled={blocked} onclick={() => nav?.go('quick')}>{copy.quick}</button>
           <button class="cream" disabled={blocked || gameState.durability === 'ephemeral'} onclick={() => nav?.go('progression')}>{copy.progression}</button>

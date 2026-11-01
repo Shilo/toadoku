@@ -50,7 +50,7 @@ Returning to Easy may become tedious as skills improve. This loop offers variety
 
 Paid replays make reward balance important: easier puzzles can pay more per minute even when harder puzzles pay more per completion. Calibrate the scoring proposal before deciding amounts. Do not add farming restrictions, daily limits or prestige multipliers without discussion.
 
-Clicker Heroes uses Ascension and Transcendence resets with lasting resources. Toadodu draws inspiration from reset terminology and persistent earned currency; no power bonuses or additional reset layers are approved. [Official developer interview](https://blog.clickerheroes.com/the-evolution-and-success-of-clicker-heroes-interview-with-playsaurus/).
+Clicker Heroes uses Ascension and Transcendence resets with lasting resources. Toadoku draws inspiration from reset terminology and persistent earned currency; no power bonuses or additional reset layers are approved. [Official developer interview](https://blog.clickerheroes.com/the-evolution-and-success-of-clicker-heroes-interview-with-playsaurus/).
 
 ## Open decisions
 

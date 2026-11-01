@@ -44,7 +44,7 @@ The observation that Hard feels manageable is useful feedback, but it does not e
 
 ## What existing games demonstrate
 
-| Structure | Publisher example | Useful lesson for Toadodu |
+| Structure | Publisher example | Useful lesson for Toadoku |
 | --- | --- | --- |
 | Choose difficulty and play | Easybrain describes six difficulty levels and familiar notes, hints and checks | A direct play option should remain available without unlocks |
 | Daily puzzle and archive | Sudoku.com offers a date-based challenge calendar | Adds a recurring ritual without changing Sudoku rules |

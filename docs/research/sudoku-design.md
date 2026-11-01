@@ -6,19 +6,19 @@
 
 > Current direction selects Quiet Flat C, removes the gameplay frog and puts primary input at the bottom. Earlier mascot/frog-cell and seasonal-accessory ideas below are not the selected gameplay approach. See [UI and UX](../ui-ux.md).
 
-Research date: October 30, 2026. The observations below come from publisher pages and official web standards. Proposed Toadodu designs are recommendations, not claims about those products.
+Research date: October 30, 2026. The observations below come from publisher pages and official web standards. Proposed Toadoku designs are recommendations, not claims about those products.
 
 ## The reference and the rules
 
 The verified [Meowdoku publisher listing](https://play.google.com/store/apps/details?id=com.oakever.meowdoku) describes colored territories, one cat per region, row and column, and a no-touch rule. It uses double taps to place cats, offers offline play and daily puzzles, and presents a minimalist character-led identity. It is a different puzzle from classic number Sudoku. Many similarly named browser sites are independent fan implementations, so their behavior should not be attributed to the original app.
 
-Toadodu should borrow its friendly characters, focused play surface and satisfying feedback while preserving the classic 9 by 9 number puzzle. Each row, column and 3 by 3 box contains digits 1 through 9 once. Given clues remain fixed. Digits stay visible; a frog never replaces a digit or introduces a new rule. The [Sudoku.com rules](https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/) confirm this familiar structure.
+Toadoku should borrow its friendly characters, focused play surface and satisfying feedback while preserving the classic 9 by 9 number puzzle. Each row, column and 3 by 3 box contains digits 1 through 9 once. Given clues remain fixed. Digits stay visible; a frog never replaces a digit or introduces a new rule. The [Sudoku.com rules](https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/) confirm this familiar structure.
 
 ## Common Sudoku patterns and the first release
 
 The live [Sudoku.com interface](https://sudoku.com/) provides difficulty selection, cell-then-number entry, undo, erase, notes, hints and a timer. [Arkadium's player documentation](https://support.arkadium.com/support/solutions/articles/44002863192--sudoku-how-to-play-menu-tips-scoring) similarly exposes undo, notes and erase near the board, placing less frequent settings in an upper-right menu. These overlapping patterns are a strong baseline.
 
-| Interaction | Toadodu recommendation | Reason |
+| Interaction | Toadoku recommendation | Reason |
 | --- | --- | --- |
 | Entry | Select a cell, then tap a digit, or type 1 to 9 | Familiar and predictable on both inputs |
 | Selection | Outline selected cell; softly highlight row, column, box and matching digits | Helps scanning without altering puzzle logic |

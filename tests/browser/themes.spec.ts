@@ -45,13 +45,16 @@ function logical(value: Attempt) {
 async function ready(page: Page) {
   await expect(page.locator('.world')).toHaveAttribute('data-theme', /pond|cauldron/);
   await expect(page.getByRole('button', { name: 'Quick Play', exact: true })).toBeEnabled();
+  await expect(page).toHaveTitle('Toadoku');
+  await expect(page.getByRole('heading', { name: 'Toadoku', exact: true })).toBeVisible();
 }
 async function settings(page: Page) {
   if (await page.locator('.dock').count()) {
     await page.locator('.dock .more').click();
     await page.getByRole('dialog').getByRole('button', { name: /^(Settings|Einstellungen|Ajustes)$/ }).click();
   } else await page.locator('.menu-more').click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('heading', { name: /^(Settings|Einstellungen|Ajustes)$/ })).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('combobox', { name: /^(Theme|Thema|Tema)$/ })).toBeVisible();
 }
 async function closeDialogs(page: Page) {
   for (let i = 0; i < 4 && await page.getByRole('dialog').count(); i++) {
@@ -184,6 +187,13 @@ for (const [width, height] of [[320, 568], [360, 800], [800, 360], [1280, 720]])
   test(`emulated ${width}x${height} themes, dialogs and three locales remain usable with reduced motion`, async ({ page }) => {
     await page.setViewportSize({ width, height }); await page.clock.setFixedTime(new Date('2026-10-31T12:00:00-07:00'));
     await page.goto('/'); await ready(page);
+    const titleFits = async () => page.locator('h1').evaluate(title => {
+      const range = document.createRange(); range.selectNodeContents(title);
+      const glyph = range.getBoundingClientRect(), anchor = title.getBoundingClientRect();
+      return { left: glyph.left - anchor.left, right: anchor.right - glyph.right,
+        viewportLeft: glyph.left, viewportRight: window.innerWidth - glyph.right };
+    });
+    for (const distance of Object.values(await titleFits())) expect(distance).toBeGreaterThanOrEqual(-.5);
     await page.screenshot({ path: `${evidence}/cauldron-${width}x${height}-menu.png` });
     await settings(page); await roundCorners(page);
     for (const locale of ['de', 'es', 'en'] as const) {
@@ -194,7 +204,9 @@ for (const [width, height] of [[320, 568], [360, 800], [800, 360], [1280, 720]])
       await expect(page.getByRole('dialog').getByRole('heading', { name: uiCopy[locale].settings, exact: true })).toBeVisible();
     }
     await choose(page, 'Theme', 'pond'); await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
-    await closeDialogs(page); await quick(page); const pondBounds = await bounds(page);
+    await closeDialogs(page);
+    for (const distance of Object.values(await titleFits())) expect(distance).toBeGreaterThanOrEqual(-.5);
+    await quick(page); const pondBounds = await bounds(page);
     await settings(page); await choose(page, 'Theme', 'cauldron'); await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
     await closeDialogs(page); expect(await bounds(page)).toEqual(pondBounds);
     await expect(page.locator('.dock button')).toHaveCount(10);

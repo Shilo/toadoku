@@ -34,6 +34,8 @@ test('built bundle runs under repository subpath with local assets and notices',
   await page.clock.setFixedTime(new Date('2026-10-15T12:00:00-07:00'));
   await page.goto(`${origin}/toadoku/?lang=de`);
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
+  await expect(page).toHaveTitle('Toadoku');
+  await expect(page.getByRole('heading', {name:'Toadoku',exact:true})).toBeVisible();
   expect(requests.some(url => /cauldron-|Creepster-Regular/.test(url))).toBe(false);
   await expect.poll(()=>page.getByRole('img',{name:dictionaries.de.art}).evaluate(e=>(e as HTMLImageElement).naturalWidth)).toBe(1254);
   await page.getByRole('button',{name:'Schnellspiel',exact:true}).click();

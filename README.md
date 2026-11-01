@@ -1,4 +1,4 @@
-# Toadodu
+# Toadoku
 
 A colorful, immersive frog Sudoku game for mobile and desktop browsers. GitHub Pages and offline PWA delivery remain later work.
 
