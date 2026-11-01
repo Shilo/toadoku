@@ -63,7 +63,16 @@ Required by the [implementation handoff](pwa-implementation-handoff.md). These a
 | U09 | Rollback C to a compatible earlier release, missing predecessor files and incompatible schema/catalog metadata. Never downgrade/mutate/delete essential saves blindly; preserve supported old definitions/trust roots and show explicit recovery for unsupported versions. |
 | U10 | Cache pruning with old clients, overlapping worker installation, an abandoned staged build and adjacent same-origin app. Delete only owned disposable entries under the documented retention policy; never global unregister/delete-all. |
 
-## E. Delivery, adversarial tests and final acceptance
+## E. Fast online play, downloads and responsiveness
+
+| ID | Required evidence |
+| --- | --- |
+| P01 | Paired accepted pre-PWA production baseline and new build under equivalent network/CPU/cache conditions. Set numerical allowed regressions before acceptance measurements. Cover first uncontrolled visit, repeat visit and installation, including optional precache competition. Record transferred requests/bytes and time to useful menu/first playable board, not paint alone; no material regression against the agreed limits. Use a small justified repeat count and report variance/measurement limits. |
+| P02 | Input/navigation/new-puzzle requests while refill, integrity verification, decoding and storage run under a representative slower connection/device or labelled simulation. Measure input delay/long tasks and peak memory, enforce bounded work, and test slow in-flight/shared fetches. Foreground requests do not wait behind an entire pack; cancelling background work retains any foreground consumer. Do not claim async fetching, streaming or priority hints alone prove responsiveness. |
+| P03 | Exhaust automatic download allowance or retained-storage capacity, then request an uncached online puzzle. Correct preferred data loads on demand without requiring offline preparation; successful optional retention is not a play prerequisite. Test request deduplication, eviction, retries, partial/aborted work, repeated sessions and low-water refill. Separate foreground/manual/automatic limits and demonstrate no silent unlimited transfer loop or artificial online catalog restriction. |
+| P04 | Measured first-visit/revisit/install/refill/travel/online-cache-miss/update costs support the chosen budget. Report compressed transfer, logical bytes, disk and peak memory separately, including measurement uncertainty. Larger travel action shows additional size, honest progress and cancellation. Save-Data/slow or unknown connection, hidden/closed app, network recovery and unchanged-catalog app updates follow the documented policy without unsupported Wi-Fi/background-download claims. |
+
+## F. Delivery, adversarial tests and final acceptance
 
 | ID | Required evidence |
 | --- | --- |
@@ -73,6 +82,6 @@ Required by the [implementation handoff](pwa-implementation-handoff.md). These a
 | R04 | Custom Actions workflow builds/tests complete artifacts, serializes publication, identifies release versions and supports tested retention/rollback. Verify actual authorized Pages response bytes/headers and repository-base scope; local fake headers are labelled simulations. |
 | R05 | Lead Codex browser review covers a compact integrated install/offline/update journey and representative responsive surfaces. Capture meaningful screenshots and actual build identities, reset temporary viewport overrides, review implementations reciprocally and commit green slices. |
 | R06 | Real Android browser-closed offline launch and online update/installed-window behavior are recorded with device/browser versions, or explicitly remain external release gates. Do not relabel desktop emulation, a warm tab or a synthetic beforeinstallprompt as physical installation. |
-| R07 | Final docs include decisions/challenges, actual passes/failures, dependency and release hashes, supported offline horizon, measured budgets/freshness, hosting limitations and exact commands. Branch is committed/clean, integration instructions identify shared theme changes, and no merge/publish occurs without subsequent user direction. |
+| R07 | Final docs include decisions/challenges, actual passes/failures, dependency and release hashes, supported offline horizon, measured budgets/freshness, hosting limitations and exact commands. Both acceptance documentation and final user report end with the handoff's plain-language answers and actual numbers for upfront/later downloads, playable offline counts, caps/refill, online uncached puzzles, responsiveness, travel and updates. Independently check claims against evidence. Branch is committed/clean, integration instructions identify shared theme changes, and no merge/publish occurs without subsequent user direction. |
 
 Acceptance means every applicable feasible gate has evidence and no known unresolved safety/readiness/update blocker remains. Explain any real external release limitation separately. A high test count, an installed icon or a service-worker ready event cannot substitute for the other layers.

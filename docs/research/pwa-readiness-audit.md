@@ -84,3 +84,17 @@ These agreements accept the implementation brief, not a finished architecture or
 Cora and Rowan read the complete brief, audit and matrix independently. Rowan accepted the reserve/authority, durable-readiness and update barriers and rechecked the tagged registration-helper claims. Cora accepted those controls but challenged an implicit requirement to test Auto/event themes on a Pond-only branch. Lead agreed, while rejecting any exception for existing selected-theme assets. The brief and O12 now require Pond closure unconditionally, make absent theme capabilities conditional on the approved integration target, and retain a later combined-build gate without authorizing theme implementation or merge.
 
 Preparation validation checks all five authored/updated documents and 66 local link targets, wording hygiene and diff whitespace. These are documentation checks only. No PWA code, installation, service worker, offline journey, deployment or new implementation worktree was produced or claimed by this preparation task.
+
+### Download-cost and online-performance revision
+
+Following the user's concerns, Lead proposed a measurable online-first download contract and a plain-language completion report instead of leaving "bounded reserve" undefined. Cora independently challenged this plan before execution. Agreement: distinguish foreground requests, automatic refill and explicit travel budgets; storage limits do not bound cumulative transfer. First useful play cannot depend on a complete reserve. Foreground misses must not sit behind an entire background queue or lose a shared fetch when preparation is cancelled. Reject universal zero-overhead/preemption promises and a mandatory streaming parser; measure buffering, CPU work, storage and input latency under pre-agreed paired-baseline thresholds. Absent connection hints are unknown, not unmetered consent. These decisions add brief sections 5/9 and matrix P01-P04/R07, with actual implementation choices still subject to receiving-agent challenge.
+
+Primary support for the revision:
+
+- [Workbox deployment guidance](https://developer.chrome.com/docs/workbox/service-worker-deployment) warns that early/large precaching competes with critical loading and consumes unnecessary data. Schedule optional work against useful application readiness, not just a generic load event.
+- [Long-task guidance](https://web.dev/articles/optimize-long-tasks) explains why parsing and other main-thread work can delay input. Background network activity alone proves neither bounded memory nor responsive verification/storage.
+- [Save-Data API](https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData) is not universally available. Feature detection cannot establish that an unknown connection is unmetered.
+
+No default download amount, bandwidth figure or performance pass is claimed here. The implementing agent must choose and test actual limits, account for later/retried transfers, explain online requests outside the offline pack, and end its delivery with measured answers in ordinary language.
+
+Cora reviewed the actual three-document revision and accepted it with one prompt-wording correction: "must not delay" sounded like a zero-overhead guarantee. Lead agreed and aligned it to no offline-preparation prerequisite plus the agreed measured load/input limits. The report likewise describes on-demand fetching without implying zero network latency. Documentation link/wording/whitespace checks pass; no app or runtime test behavior changed.

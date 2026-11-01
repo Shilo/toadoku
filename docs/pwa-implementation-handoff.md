@@ -66,6 +66,19 @@ Readiness counts must describe **genuinely playable eligible upcoming allocation
 
 Measure candidate small/default/travel budgets, for example 10/25/50 playable allocations per pool, rather than fixing these suggestions as requirements. Decide default, low-water refill, travel size, byte/count limits, concurrency, cancellation and cleanup from measured cost and UX. Predictive lookahead can touch many shuffled shards; include the cost of bytes transferred but not retained. A smaller defensible guarantee is better than a large misleading counter.
 
+### Fast online play and download costs
+
+Offline preparation must not become a prerequisite for ordinary online play. Independently challenge registration/precache timing, automatic preparation versus explicit travel downloads, and every proposed budget against quick first visits and slower connections. Compare with the same accepted production app before PWA changes. Select numerical performance and download limits before acceptance measurements; require no material regression against those agreed limits, not an impossible promise of zero overhead everywhere.
+
+- Separate the bytes/time needed for an interactive menu and first playable puzzle from the later complete offline dependency pack and extra puzzles. Start playing as soon as required current-game resources are verified; never wait for the full offline reserve. Delay optional first-install precaching/refill until useful interactivity, not merely a paint or `window.load` event that can precede dynamic bootstrap. Research scheduling against actual request traces.
+- While online, a requested puzzle not stored locally must load its exact certified preferred data on demand. A full reserve, successful optional cache write, reserve capacity limit or automatic-download budget must not gate this request. Preserve existing save/error contracts. Retain or evict the fetched data under the documented policy; do not substitute an easier cached puzzle or force the player to prepare offline mode.
+- Prioritize gameplay requests over optional downloads and coordinate shared requests. An existing FIFO queue or a slow in-flight refill must not trap a new game behind the entire pack. Test slow/failed shared requests; cancelling preparation must preserve a foreground consumer. Network priority hints are not guaranteed preemption. Choose bounded scheduling, cancellation and timeout behavior from evidence.
+- Define separate limits for retained storage, automatic network use and manual travel downloads. State automatic startup amount, low-water triggers, per-session/time-window allowances, retries/backoff, concurrent transfers, cancellation and behavior after hiding/closing/reopening. A storage cap alone does not bound repeated downloads; account for retries, discarded/aborted work and cache-eviction/refill loops. Foreground player-requested puzzles remain available online after the automatic allowance is exhausted.
+- Explain whether the implementation downloads whole small files progressively, streams response bytes, or uses another approach. Do not confuse streaming with free bandwidth, lower total downloads or verified partial puzzles. Keep buffering, decoding, integrity checks, storage batches and peak memory bounded. Measure responsiveness while these run; asynchronous fetching alone does not prevent CPU freezes. Use workers/yielding only where measurements justify them, without requiring a complex custom parser.
+- Challenge data-saving/slow-connection behavior and explicit travel-download choice. Feature-detect optional network hints; missing Save-Data information does not establish unmetered Wi-Fi or permission for a large download. Show estimated additional size before a larger explicit download, meaningful progress and cancellation. Label unknown totals/estimates honestly and explain what cancellation retains. Do not promise downloads continue after the browser closes.
+
+Measure first-visit, repeat-visit, installation, automatic refill, explicit travel preparation, uncached online puzzle and app-update scenarios separately. Distinguish actual compressed transfer, decoded file bytes, persistent storage and temporary memory. State which units/bytes enforce each limit and any inability to measure wire overhead precisely. Update downloads must be included in overall bandwidth accounting; an unchanged catalog must not be downloaded again for each app release.
+
 ### Persistence, readiness and exhaustion
 
 - Keep essential saves and disposable downloads distinct. Cache clearing removes only this app's disposable downloads, never settings, active attempts, histories, receipts, restore/recovery generations or backups.
@@ -136,6 +149,22 @@ Deliver `docs/pwa-progress.md`, design decisions, `docs/pwa-acceptance.md`, an i
 
 Acceptance requires no known unresolved PWA-related data loss, duplicate reward, false offline-readiness, stale-release trap, broken required lazy feature or unsafe cross-project cleanup. End with a clean committed branch and reviewable integration instructions. Do not implement unrelated themes/features or silently merge/publish.
 
+### Required plain-language completion report
+
+End both `docs/pwa-acceptance.md` and the final user report with a concise explanation of the implemented behavior. Do not leave answers behind words such as "bounded", "streaming" or "cached assets", or send only links to technical logs. Fill in actual chosen limits, measurements and examples; unexplained placeholders and guessed bandwidth are not acceptance evidence.
+
+| Question to answer plainly | Required report content |
+| --- | --- |
+| How much downloads before I can play? | App/fonts/images, metadata and first-puzzle bytes, actual time to useful menu/board, and additional automatic bytes after play becomes available. Explain whether installing triggers extra downloads. |
+| How many puzzles are saved for offline play? | Default playable counts by difficulty/mode or a clearly limited play horizon, selected storage/network caps and actual disk usage. Explain what happens when a limit is reached; total cached records are not a playable guarantee. |
+| Does it download more later? | Exact refill triggers, amount/allowance and stopping conditions, including repeated visits, low-water refill, failed requests, app updates and any explicit travel action. Distinguish automatic from player-requested downloads. |
+| What happens online if the next puzzle is not saved? | How the correct puzzle is fetched on demand, expected measured delay, how shared/background work is handled and whether the result is kept. An offline-pack limit must not artificially restrict online catalog access. |
+| Will downloading freeze or slow the game? | Plain explanation of file-by-file/streamed behavior, verification, measured load/input effects against the pre-PWA baseline, cancellation/progress and tested slower-device/network limits. Acknowledge necessary foreground loading and real measurement limits. |
+| What does a larger travel download cost? | Additional transferred bytes and stored size, usable coverage, when the player sees/chooses the size, how to cancel/remove it and what still works if cancelled or exhausted. |
+| How do updates work? | When online changes are noticed/applied, how unfinished games and other open windows are protected, which unchanged files are reused and what remains available offline. State unresolved Android/hosting gates plainly. |
+
+Require independent challenge of this report against the actual implementation and test measurements. A claim of fast online play must have paired evidence under equivalent conditions, including the first uncontrolled visit and optional downloads running. Missing physical-device or real-host transfer measurements must be explicitly labelled, not replaced with uncompressed corpus size or an unsupported guarantee.
+
 ## 10. Copy-ready receiving-agent prompt
 
 ```text
@@ -149,16 +178,29 @@ Do not implement in main or modify the concurrent theme worktree.
 Work autonomously with named specialists. Research primary sources and actual
 code, challenge your own and every specialist/user/library assumption, and
 record evidence-supported decisions before material implementation/fix plans.
-Build Android in-app installation, verified bounded offline play and very
-frequent safe GitHub Pages updates. Do not preload the 100k corpus or weaken
+Build Android in-app installation, verified limited offline downloads and
+very frequent safe GitHub Pages updates. Do not preload the 100k corpus or weaken
 allocation, certification, persistence, scoring or recovery contracts.
+
+Keep ordinary online play fast. Challenge and measure upfront downloads,
+later automatic refill, optional travel downloads and on-demand online
+puzzles that are not saved locally. Offline preparation must not gate the first
+playable puzzle; meet the agreed load/input regression limits and preserve
+online access. Separate storage caps
+from bandwidth limits; prioritize gameplay and test responsiveness during
+download, verification and storage. Explain progress/cancellation and data use.
 
 Compare manual SW, Vite PWA generateSW and injectManifest; inspect compatible
 versions and real reload behavior. Prove cold offline launch, useful reserve
 readiness, worker/theme/font coverage, multi-tab update safety and A/B/C rapid
 deploy/rollback behavior. Follow docs/pwa-validation-matrix.md, use unit tests
 for logic and bounded real-browser tests for lifecycle/integration/visuals.
-Keep heavy jobs serial and resource-bounded. Review implementations reciprocally,
-commit green Conventional Commit slices, document actual evidence/limits, and
-deliver the completed branch for review without merging or publishing.
+Keep heavy jobs serial and resource-bounded. Review implementations reciprocally
+and commit green Conventional Commit slices. Record actual Android and hosting
+evidence or outstanding external gates without claiming emulation as hardware.
+End the documentation and final report with the required plain-language answers:
+actual initial/additional download sizes, offline counts, limits/refill timing,
+uncached online behavior, load/input effects, travel costs and update behavior.
+Independently challenge those answers against measured results. Deliver the
+completed branch for review without merging, pushing or publishing.
 ```
