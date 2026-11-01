@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeAttempt, decodeDisclosure, decodePool, decodeReceipt, mergeSnapshot, recomputeReward, same, validateDisclosureAnswers } from '../../src/lib/storage/decode';
+import { decodeAttempt, decodeDisclosure, decodePolicy, decodePool, decodeReceipt, mergeSnapshot, object, recomputeReward, same, validateDisclosureAnswers } from '../../src/lib/storage/decode';
 import { attempt, receipt, solution } from './fixtures';
 import { runInNewContext } from 'node:vm';
 
@@ -29,6 +29,13 @@ describe('strict storage snapshots', () => {
   });
   it('validates an original test definition and rejects boundary mutations', () => {
     expect(decodeAttempt(attempt())).toEqual(attempt());
+    const plain = Object.freeze({}), nullPrototype = Object.freeze(Object.create(null));
+    expect(object(plain)).toBe(plain); expect(object(nullPrototype)).toBe(nullPrototype);
+    let calls = 0;
+    const callable = () => { calls++; };
+    Object.setPrototypeOf(callable, Object.prototype); Object.freeze(callable);
+    expect(typeof callable).toBe('function'); expect(Object.getPrototypeOf(callable)).toBe(Object.prototype);
+    expect(() => object(callable)).toThrow(); expect(calls).toBe(0);
     const mutations: ((value: ReturnType<typeof attempt>) => void)[] = [
       value => { value.entries.pop(); }, value => { value.entries[1] = 1; },
       value => { value.notes[0] = 512; }, value => { value.elapsedMs = -1; },
@@ -121,6 +128,17 @@ describe('strict storage snapshots', () => {
     const complete = attempt(); complete.entries[0] = Number(solution[0]); complete.commandSeq = 1; complete.logicalRevision = 1;
     complete.status = 'completed'; complete.receiptId = complete.id;
     expect(decodeAttempt(complete).status).toBe('completed');
+    const hard = Object.freeze({ rewardVersion: 2, scheduleVersion: 1, band: 'hard', base: 400, targetMs: 2_400_000 });
+    const unsupportedBand = Object.freeze({ ...hard, band: 'other' });
+    expect(decodePolicy(hard)).toEqual(hard); expect(() => decodePolicy(unsupportedBand)).toThrow();
+    const replay = attempt('generation', 'replay'), replayReceipt = receipt(replay);
+    expect(decodeAttempt(replay).role).toBe('replay'); expect(decodeReceipt(replayReceipt).role).toBe('replay');
+    expect(replay.binding).toBeDefined(); expect(replayReceipt.grantId).toBeUndefined();
+    const invalidAttempt = Object.freeze({ ...structuredClone(replay), role: 'other' });
+    const invalidReceipt = Object.freeze({ ...structuredClone(replayReceipt), role: 'other' });
+    const before = structuredClone([invalidAttempt, invalidReceipt]);
+    expect(() => decodeAttempt(invalidAttempt)).toThrow(); expect(() => decodeReceipt(invalidReceipt)).toThrow();
+    expect([invalidAttempt, invalidReceipt]).toEqual(before);
     for (const [pool, band, ratingTenths, base, targetMs, leap] of [
       ['medium-low', 'medium', 15, 200, 1_200_000, 7], ['hard-low', 'hard', 25, 400, 2_400_000, 25],
     ] as const) {
@@ -171,6 +189,11 @@ describe('strict storage snapshots', () => {
     expect(same(left, right)).toBe(false); expect(same(right, left)).toBe(false);
     expect([left, right]).toEqual(before);
     expect(same([1, 2], [2, 1])).toBe(false); expect(same([1], [1, 2])).toBe(false);
+    const array = Object.freeze([1]), arrayLike = Object.freeze({ 0: 1, length: 1 });
+    const indexedBefore = structuredClone([array, arrayLike]);
+    expect(same(array, [1])).toBe(true);
+    expect(same(array, arrayLike)).toBe(false); expect(same(arrayLike, array)).toBe(false);
+    expect([array, arrayLike]).toEqual(indexedBefore);
     expect(same([], {})).toBe(false); expect(same({}, [])).toBe(false); expect(same(null, {})).toBe(false);
     const hole = Array(1); expect(same(hole, hole)).toBe(false); expect(same([1], hole)).toBe(false);
     const cycle: { value?: unknown } = {}; cycle.value = cycle; expect(same(cycle, cycle)).toBe(false);

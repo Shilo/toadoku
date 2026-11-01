@@ -53,6 +53,11 @@ it('classifies mismatched physical counts and malformed primary keys as corrupti
   corrupt(() => collectHistory('buckets-v1', generation, 'receipt', [], [], [emptyBucket(generation, 'receipt', value.attemptId)], []));
   const invalid: IDBValidKey[] = ['not-a-tuple', [generation], [generation, value.attemptId, 'extra'], ['foreign', value.attemptId], [generation, 0], [generation, [value.attemptId]]];
   for (const key of invalid) corrupt(() => collectHistory('rows-v1', generation, 'receipt', [value], [key], [], []));
+  const trailingHole = [generation, value.attemptId]; trailingHole.length = 3; Object.freeze(trailingHole);
+  expect(Reflect.ownKeys(trailingHole)).toEqual(['0', '1', 'length']);
+  corrupt(() => collectHistory('rows-v1', generation, 'receipt', [value], [trailingHole], [], []));
+  corrupt(() => collectHistory('rows-v1', generation, 'issued', [issued], [[generation, 0]], [], []));
+  expect(trailingHole.length).toBe(3); expect(2 in trailingHole).toBe(false);
   for (const index of [0, 1]) {
     const key = [generation, value.attemptId]; Object.defineProperty(key, index, { enumerable: false });
     corrupt(() => collectHistory('rows-v1', generation, 'receipt', [value], [key], [], []));
@@ -74,4 +79,9 @@ it('preserves equal concrete and group projections and rejects a divergent count
   const keys = [[generation, `id:${issued.id}`], [generation, `group:${issued.groupId}`]];
   expect(collectHistory('rows-v1', generation, 'issued', [issued, structuredClone(issued)], keys, [], [])).toEqual([issued]);
   corrupt(() => collectHistory('rows-v1', generation, 'issued', [issued, { ...issued, issues: 2 }], keys, [], []));
+  const malformed = [[generation, 'id:' + issued.id], [generation, 'wrong:' + issued.groupId]];
+  const before = structuredClone(malformed);
+  malformed.forEach(Object.freeze); Object.freeze(malformed);
+  corrupt(() => collectHistory('rows-v1', generation, 'issued', [issued, structuredClone(issued)], malformed, [], []));
+  expect(malformed).toEqual(before);
 });

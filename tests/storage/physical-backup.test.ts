@@ -49,6 +49,7 @@ it('rejects future, unknown, mixed and foreign physical envelope data', () => {
     (value: any) => { delete value.history; },
     (value: any) => { value.base.receipts = []; },
     (value: any) => { delete value.base.pools; },
+    (value: any) => { delete value.base.schemaVersion; value.base.extra = true; },
     (value: any) => { value.history.extra = 1; },
     (value: any) => { value.history.generation = 'foreign'; },
     (value: any) => { value.history.generation = 'foreign'; value.history.issuedBuckets = []; value.history.issuedBucketKeys = []; },
@@ -135,6 +136,15 @@ it('binds every metadata key to its unchanged logical value and keeps public Bac
   for (const name of ['preferences', 'profile'] as const) { const value = structuredClone(valid); Object.assign(value.base[name], { generation: value.history.generation }); expect(() => materializeBackup(value)).not.toThrow(); }
   const extra = structuredClone(valid); Object.assign(extra.metadataKeys, { unknown: [] }); corrupt(() => materializeBackup(extra));
   const missing = structuredClone(valid); delete (missing.metadataKeys as Partial<typeof missing.metadataKeys>).roles; corrupt(() => materializeBackup(missing));
+  const unmatched = physical();
+  expect(unmatched.base.attempts).toEqual([]);
+  unmatched.metadataKeys.attempts.push([unmatched.history.generation, 'orphan-key']);
+  const unmatchedBefore = structuredClone(unmatched);
+  corrupt(() => materializeBackup(unmatched)); expect(unmatched).toEqual(unmatchedBefore);
+  const numeric = physical(); numeric.base.pools[0].pool = 1 as never;
+  (numeric.metadataKeys.pools[0] as unknown[])[1] = 1;
+  const numericBefore = structuredClone(numeric);
+  corrupt(() => materializeBackup(numeric)); expect(numeric).toEqual(numericBefore);
   const tooMany = structuredClone(valid);
   tooMany.base.roles.push({ generation: valid.history.generation, role: 'fourth' as never, revision: 0, lastIntentSeq: 0 });
   tooMany.metadataKeys.roles.push([valid.history.generation, 'fourth']); corrupt(() => materializeBackup(tooMany));

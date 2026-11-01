@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import data from './residuals.v1.json';
 import type { Conclusion, Deduction } from '../../src/lib/gameplay/contracts.ts';
+import { findDeduction } from '../../src/lib/hints/detect.ts';
 import { validateWitness } from '../../src/lib/hints/witness.ts';
 import { exactCover } from '../../tools/catalog/oracle-exact-cover.ts';
 
@@ -96,4 +97,41 @@ describe('strict witness residual regressions', () => {
     expect(validateWitness(values, deduction)).toBe(fixture.category === 'valid');
     expect({ values, deduction }).toEqual(before);
   });
+
+  // Original algebraic completions provide constructive models; neither board is claimed unique.
+  for (const fixture of [
+    { name: 'detects three-site pointing with real outside candidates', technique: 'pointing', firstRow: '891234567',
+      givens: [[9, 2], [10, 3], [11, 4], [18, 5], [19, 6], [20, 7]],
+      sourceCells: [0, 1, 2, 9, 10, 11, 18, 19, 20], units: [18, 0], removed: [3, 4, 5, 6, 7, 8] },
+    { name: 'detects claiming into the top-left box', technique: 'claiming', firstRow: '123456789',
+      givens: [[3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9]],
+      sourceCells: [0, 1, 2, 3, 4, 5, 6, 7, 8], units: [0, 18], removed: [9, 10, 11, 18, 19, 20] },
+  ] as const) it(fixture.name, () => {
+    const shifts = [0, 3, 6, 1, 4, 7, 2, 5, 8];
+    const completion = Array.from({ length: 81 }, (_, cell) => Number(fixture.firstRow[(cell % 9 + shifts[Math.floor(cell / 9)]) % 9]));
+    const values = Array<number>(81).fill(0);
+    for (const [cell, digit] of fixture.givens) values[cell] = digit;
+    expect(completion).toHaveLength(81);
+    expect(completion.every(digit => Number.isInteger(digit) && digit >= 1 && digit <= 9)).toBe(true);
+    expect(consistent(completion)).toBe(true);
+    expect(values.every((digit, cell) => digit === 0 || digit === completion[cell])).toBe(true);
+    expect(fixture.sourceCells.filter(cell => candidates(values, cell).includes(1))).toEqual([0, 1, 2]);
+    for (const cell of fixture.removed) expect(candidates(values, cell)).toContain(1);
+    const valuesBefore = values.slice(); Object.freeze(values);
+    const deduction = findDeduction(values, 0, fixture.technique);
+    expect(deduction).toBeDefined();
+    if (!deduction) throw Error('Expected the named intersection deduction');
+    const proofBefore = structuredClone(deduction);
+    expect(deduction.technique).toBe(fixture.technique);
+    expect(deduction.witness.units).toEqual(fixture.units);
+    expect(new Set(deduction.witness.cells)).toEqual(new Set([0, 1, 2]));
+    expect(deduction.witness.cells).toHaveLength(3); expect(deduction.witness.digits).toEqual([1]);
+    expect(deduction.placements).toEqual([]); expect(deduction.eliminations).toHaveLength(6);
+    expect(new Set(deduction.eliminations.map(({ cell, digit }) => cell + ':' + digit)))
+      .toEqual(new Set(fixture.removed.map(cell => cell + ':1')));
+    expect(validateWitness(values, deduction)).toBe(true);
+    for (const conclusion of deduction.eliminations) expect(impossible(values, conclusion)).toBe(true);
+    expect(values).toEqual(valuesBefore); expect(deduction).toEqual(proofBefore);
+  });
+
 });

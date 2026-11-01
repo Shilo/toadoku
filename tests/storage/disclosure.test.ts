@@ -31,7 +31,7 @@ describe('bounded proof preflight never mistakes technical failure for assistanc
     for (const options of [{ nodeBudget: 0 }, { shouldAbort: () => true }, { shouldAbort: () => { throw new Error('cancel'); } },
       ...[NaN, Infinity, -1, 0.5, Number.MAX_SAFE_INTEGER + 1].map(nodeBudget => ({ nodeBudget })), { shouldAbort: false as never }]) {
       const original = structuredClone(game.assistance);
-      expect(validateDisclosureProof(game, disclosure, options).kind).toBe('unavailable'); expect(game.assistance).toEqual(original);
+      expect(validateDisclosureProof(game, disclosure, options)).toMatchObject({ kind: 'unavailable', reason: 'abort' }); expect(game.assistance).toEqual(original);
     }
   });
 });
