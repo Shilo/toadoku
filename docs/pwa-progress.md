@@ -33,7 +33,7 @@ Primary sources: [lifecycle](https://web.dev/articles/service-worker-lifecycle),
 
 ## Evidence status
 
-Implementation in progress. No Android, hosting, performance, offline or update acceptance is claimed by this planning record.
+The planning paragraphs above are historical. Implementation and available-environment acceptance are complete in the isolated branch; [actual final acceptance](pwa-acceptance.md) supersedes this initial status. Physical Android and authorized HTTPS hosting remain external release gates.
 
 ## Implementation reviews and first executable slice
 
@@ -48,3 +48,11 @@ The root cause was an unchallenged library append step: Vite PWA adds a second `
 Lead and Cora also challenged release identity across Windows/Linux checkouts. Narrow LF attributes bind worker/build identity inputs consistently; the upstream ISC notice remains byte-preserved. No vendored skills, catalog bytes, oracle, rule implementation or theme work changed.
 
 Deployment review challenged two additional hazards: a successful publication followed by a failed verification job must still retain that publication's old assets, and a build that stayed current for sixty days must not expire its files at its first replacement. The revised pipeline uses conservative monotonic archived assets and verified currently hosted release metadata before age pruning. It refuses publication when required history or its 256 MiB support budget cannot be established. Local fault tests and source review remain required before acceptance.
+
+## Completed available-environment acceptance
+
+Cora owned delivery/lifecycle, Rowan owned verified disposable reserves, Sage independently owned actual production-browser QA, and the lead owned integration/UI and personal Codex browser review. All plans, defects and material fixes were challenged against primary sources and actual code before acceptance. Their linked ledgers preserve the real SRI duplicate, first-activation, routing-poison, exhaustion-guidance and measurement failures with scoped passing continuations.
+
+Final gates: 441 full unit tests/67 files, three additional client protocol models, fifteen affected delivery tests, zero type errors/warnings, complete production artifact/corpus-reuse verification and two affected production-browser tests. Native profiles cover process-cold offline first-use, sixty offline Progression completions and exactly-once rewards, three retained roles, byte/count/storage/corruption failures, foreground demand during preparation, cancellation, delayed/frozen multiple windows, rapid A/B/C, scoped neighbor preservation, compatible rollback, root/subpath and exact app-file eviction/failed-write/repair. The lead independently reopened final A with its owned HTTP host stopped, resumed the saved digit and computed an offline hint. Review host 5196 was stopped only after verifying its process identity; no other task listener was touched.
+
+The final report was independently challenged by all three specialists. Corrections distinguish actual received bytes from complete requested images, decoded admission allowances from physical wire caps, compact records from whole-origin storage, initial registration from update cadence, and boundary lookahead from fresh sample record counts. Corrected paired loading measurements meet pre-agreed limits. [Acceptance](pwa-acceptance.md) ends with the actual user-facing costs/limits and external gates. This branch is delivered for review without merge, push, deployment or automatic theme integration; concurrent main/theme changes are preserved.

@@ -66,3 +66,7 @@ This explicit temporary exception does not approve AI illustrations as final pro
 - [W3C WCAG 2.2 contrast minimum](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html): luminance contrast, normal text thresholds and inactive-control exception.
 
 Module acceptance still requires the lead's review and integrated browser evidence; unit checks alone cannot establish visual fidelity, focus discovery, localization fit or final typography.
+
+## Installation icons
+
+The PWA uses Lucide Sprout from the pinned `@lucide/svelte` 1.66.0 package as a human-authored functional installation symbol, with cream/green styling. `public/pwa/icon.svg` and generated 192/512/maskable PNGs retain the adjacent ISC notice in `public/pwa/`. `tools/pwa/icons.mjs` reproduces the raster derivatives. This adds no AI illustration and does not replace or approve the provisional menu artwork.

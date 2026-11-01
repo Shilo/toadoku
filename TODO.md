@@ -13,8 +13,9 @@
 ## PWA installation, offline play and frequent updates
 
 - [x] Prepare the [isolated-worktree implementation handoff](docs/pwa-implementation-handoff.md), [primary-source/reference-app research](docs/research/pwa-readiness-audit.md) and [validation matrix](docs/pwa-validation-matrix.md), including a copy-ready receiving-agent prompt.
-- [ ] When invoked by the user, implement in a new worktree/branch with independently challenged plans, measured bounded offline reserves, in-app installation and safe frequent-release discovery/activation. Do not preload the full corpus or alter theme work automatically.
-- [ ] Prove cold offline dependency coverage, allocation authority, durable readiness and rapid multi-build/multi-tab updates. Record actual Android/hosting evidence or explicit remaining external release gates; deliver the committed branch for review before integration/publication.
+- [x] Implement PWA in the separate `codex/pwa-offline` managed worktree with challenged plans, bounded verified reserves, in-app installation and safe frequent-release discovery/activation. Preserve Pond and the corpus; no automatic theme integration.
+- [x] Prove available-environment cold offline dependency coverage, allocation authority, durable readiness and rapid multi-build/multi-tab updates. Deliver committed branch and [actual measurements/acceptance](docs/pwa-acceptance.md) for review.
+- [ ] Complete external Android hardware and authorized HTTPS Pages installation/rollout/rollback/account-capacity checks; reconcile and retest the exact later theme-integrated build before publication.
 
 ## Production UI handoff and next phase
 
@@ -48,7 +49,7 @@ This section records completed prototype scope; it does not authorize further pr
 - [x] Review menu alternatives and retain direct solving-tool access without a nested Tools step.
 - [x] Restore Notes, Undo, Erase and Hint access, sticky Notes state, accessible dismissal/focus and session information.
 - [x] Expose persistent Fill space / Square through Settings.
-- [ ] Implement concise in-app installation/readiness/update controls through the [PWA handoff](docs/pwa-implementation-handoff.md); keep them outside solving Tools and the permanent gameplay dock.
+- [x] Implement concise in-app installation/readiness/update controls in Settings, outside solving Tools and the permanent gameplay dock. See [PWA acceptance](docs/pwa-acceptance.md).
 
 ## Themes and art
 

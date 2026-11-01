@@ -1,0 +1,150 @@
+# PWA acceptance record
+
+Status: implementation and available-environment acceptance complete. External hardware/authorized hosting release gates remain explicit below. No merge, push or publication has occurred.
+
+## Source and scope
+
+- Base: committed main `ecc8c309d022e2137085b9cffeb62febf7f21b79`.
+- Managed worktree: `C:\Users\shilo\.codex\worktrees\pwa-offline\toadoku`, branch `codex/pwa-offline`.
+- Named reviews: [lead ledger](pwa-progress.md), [Cora delivery/lifecycle review](pwa-cora-review.md), [Rowan offline review and invariant map](pwa-rowan-review.md), [Sage independent QA](pwa-qa-review.md).
+- Pond, classic rules, selection version 1, storage structure 2, reward policy 2 and schedule 1 are preserved. No theme integration, backend or WebAssembly was added.
+- Other tasks advanced main and theme checkouts during this phase, including usability guidance and theme integration. Their changes were left untouched; this branch remains based on the requested `ecc8c30` and does not import them.
+
+## Chosen limits and behavior
+
+A MiB is 1,048,576 bytes; MB below means 1,000,000 bytes. Network allowance is separate from retained storage and browser disk overhead.
+
+| Item | Implemented policy |
+| --- | --- |
+| Optional automatic puzzle downloads | Zero. No startup pack, low-water refill, daily refill or restart-triggered pack. |
+| Small explicit preparation | Three upcoming allocations in each of five pools. A 2 MiB uncompressed admission allowance per action, including conservative metadata reservation when needed. |
+| Explicit travel preparation | Twenty-five upcoming allocations per pool; a 12 MiB uncompressed admission allowance per action. A complete pack covers 60 scheduled Progression allocations from any Leap, without extra Quick/replay/replacement consumption. |
+| Network admission | Each new optional shard read reserves its maximum 96 KiB before becoming shareable. A refetch is charged again; a cache hit or joining a demanded read is not a new optional transfer. Cancelled queued work can consume unused allowance conservatively. These allowances are not hard wire-byte caps: browser buffering or an aborting stream chunk can overshoot actual admission accounting. |
+| Actual progress | Records verified/stored and actual received decoded puzzle bytes. These are not the larger pessimistic allowance reservations. |
+| Puzzle transfer concurrency | One foreground lane and one optional lane. Identical in-flight files share references; cancelling the pack does not cancel a foreground consumer. The 20-second timeout begins when the network read starts, not while queued. No automatic pack retry. |
+| Record retention | At most 512 attested records and 1 MiB serialized record JSON, each at most 4 KiB. No automatic record eviction. Clear extras before preparing a new horizon when full. |
+| Other disposable data | Trusted manifest at most 128 KiB; existing recent cache at most sixteen certified shards. Essential games, receipts, wallet, histories and recovery generations are separate. |
+| App files | Generated complete Pond dependency closure, including unopened lazy features/workers, fonts/icons/notices. At most 4 MiB per resource and 8 MiB including release metadata per build; at most 24 MiB cached response bodies across protected releases, plus browser overhead. |
+| Initial automatic setup | First usable board plus two seconds while visible, or explicit preparation/check. First-time menu-only visits without a registration do not automatically install the shell. Existing registrations can discover updates at the menu. Prompt acceptance alone downloads no puzzle pack; install metadata/icons can still transfer. |
+| Update discovery | Startup with an existing registration, foreground/reconnection and a five-second condition tick; application calls to the browser update method are at least sixty seconds apart per window. Initial registration, manual actions and browser-native checks are separate; the first timer check can follow initial setup within five seconds. Hidden/offline work is skipped. |
+| Failed checks/setup | Five-minute, thirty-minute, then twenty-four-hour cooldowns; automatic retry resumes after the cooldown. Explicit Check/Prepare can retry sooner. Restored deadlines are bounded to twenty-four hours and future last-attempt timestamps reset rather than retaining a backward-clock throttle. |
+| Update activation | Normal browser waiting. No skipWaiting, claim, controller-change reload or app Reload button. Finish saving or export recovery, close every Toadoku window, then reopen. Frozen/unresponsive clients cannot be treated as safe acknowledgements. |
+| Successful update bandwidth | No daily byte allowance. Only verified changed/missing bytes are fetched into the next shell; each shell is capped. Continuous maximum-size releases can still be expensive. Browser-native update requests are outside the bridge's rate guarantee. |
+
+Counts describe a freshly checked upcoming horizon, not raw downloaded records. Medium/Hard display the smaller count of their two constituent pools. Exact allocation and transactional reservation remain authoritative. Another window, restore, corruption or consumption can change availability. If the next exact puzzle is absent offline, the existing puzzle/result remains intact and the UI explains connection/preparation. Online the correct puzzle is fetched regardless of offline-pack limits or optional write failure.
+
+Opening offline controls can fetch the 127,753-byte catalog manifest before Prepare. Puzzle files are downloaded one small file at a time with bounded stream reading, then decoded, hashed and fully attested. Partial files are unusable. The application does not stream playable partial puzzles. Cancellation retains verified records already written; optional work stops when hidden and does not resume automatically. App-file installation/update can finish separately. The pinned Workbox installer also awaits app entries individually; browser HTTP caching, native worker checks and internal buffering remain outside the puzzle scheduler. Repeating preparation reuses retained verified records and recent files; files evicted from the sixteen-file cache may download again, even when another record from that shard was previously saved. After first setup an uncontrolled page must be saved and closed/reopened before relying on offline first-use features.
+
+## Measurements with actual evidence boundaries
+
+Measurements use desktop Chromium 156.0.8078.4. Physical Android results are not substituted by viewport/DPR or CPU/network simulation.
+
+| Scenario | Actual observation |
+| --- | --- |
+| Final paired load test | Three samples each; aggregate 200,000 response-body bytes/s, 150 ms response latency, page CPU 4x, 360x800 CSS px/DPR 3. |
+| Useful menu, baseline / PWA median | 1.466 s / 1.445 s. |
+| First usable board, baseline / PWA median | 2.969 s / 2.943 s. PWA range 2.917 to 2.949 s. |
+| Early uncontrolled repeat, baseline / PWA median | Menu 1.446 s / 1.507 s; board 1.816 s / 1.736 s. |
+| Bytes received by useful menu | PWA 140 to 146 kB encoded body bytes; baseline 128 to 142 kB. This includes partial illustration transfer. |
+| Bytes received by first usable PWA board | 462 to 466 kB encoded body bytes, including partially received illustration bytes. Baseline 435 to 470 kB. This is not the complete requested image or full shell size. |
+| First catalog metadata | 127,753 decoded bytes; 43,469 local gzip body bytes. |
+| One requested puzzle file | Current certified shards are at most 67,480 decoded bytes. Compression depends on the server: one native request was 67,469 decoded / 32,833 fixture gzip bytes. The older 32,765-byte maximum was a level-9 certificate calculation, not this fixture maximum. |
+| Startup tasks/input | Largest observed PWA startup task 98 to 104 ms; trusted digit dispatch p95 2.1 to 2.7 ms. During preparation, 100 trusted inputs had dispatch p95 5.5 ms and next-frame p95 14.7 ms; largest optional task 52 ms. |
+| Automatic shell setup | Registration appeared about 2.03 s after usable board; complete setup reached activation at 16.28 s after board on the shaped connection. Gameplay remained enabled. That recorded build requested 35 more files after the board: 1,938,630 decoded / 1,459,176 fixture gzip bytes, including worker checks and repeated shell bytes. The original illustration response also continued independently. |
+| Controlled cold repeats | Three real close/reopen cycles after setup: menu 0.238 to 0.252 s; resumed board 0.457 to 0.487 s. These are separate from the paired uncontrolled repeat. |
+| Foreground/input while preparing | Exact uncached Hard puzzle completed in 0.943 s while an optional Easy response was held. Cancelling stopped further optional requests, retained acknowledged records and did not cancel demanded reads. Sampled page heap peaked at 24,964,228 bytes; worker/GPU/browser memory was not measured. |
+| Small pack, menu-first native run | Fifteen future records, 27,375 serialized bytes; manifest 127,753 / 43,469 gzip bytes; fifteen recent shards 1,006,318 decoded / 488,508 gzip bytes. Origin estimate grew from 28,936 to 3,132,435 bytes. |
+| Closed-profile disk observation | IndexedDB files 1,052,804 bytes; Cache Storage files 2,048,960 bytes, including browser/LSM/metadata effects. These are not exact per-store quotas. |
+| Travel candidates before choosing size | Across five fresh-cursor/no-exclusion seeds, 25 per pool touched 104 to 111 shards: 6.96 to 7.37 MB decoded, 3.38 to 3.58 MB local gzip. Ten per pool cost 3.01 to 3.21 MB decoded; fifty cost 11.77 to 12.39 MB. Epoch wrap/exclusions can require more files; a conservative admission stop may require another explicit action to finish the horizon. |
+| Actual complete travel pack | 25/25/25 conservative difficulty counts; 102 shards, 6,828,155 decoded / 3,314,508 fixture gzip bytes, about 228 kB record JSON. Unshaped preparation took 2.398 s. Manifest was fetched before that action. Whole-origin estimate was 6,520,105 bytes (including browser overhead), not merely the compact record size. |
+
+Timing is recorded in the page from actual visible/enabled controls with two animation frames, not the automation selector's later polling return. The initial apparent 453 ms regression was traced to Playwright's coarse selector retry step; those failed measurements are retained and superseded, not silently discarded. Both baseline and PWA were rerun with the same corrected observer and unchanged pre-agreed limits: median first-load overhead at most max(250 ms, 10%); repeat at most max(150 ms, 10%); input/frame p95 at most 100 ms and no added optional-preparation task above 200 ms.
+
+Local gzip bodies, decoded files, socket/CDP observations, page heap, origin estimates and physical profile files are distinct quantities. None proves actual Pages wire overhead, phone memory/thermals or browser-internal SRI buffering.
+
+## Invariants mapped to gates
+
+| Matrix IDs | Evidence and result |
+| --- | --- |
+| A01-A02 | Managed worktree/base/branch records; primary-source/manual/generateSW/injectManifest comparison, exact compatible versions and actual helper inspection. Passed. |
+| A03-A04/A06 | Actual injected inventory normalization/SRI, complete dependency and all 491 catalog-file validation, failure markers, metadata-inclusive budget and negative artifact tests. Passed on their recorded builds. |
+| A05 | Actual `/` and `/toadoku/` production builds pass manifest/worker/base paths, saved-game cold offline resume and missing-asset behavior. Adjacent scoped worker/cache/database sentinels survive staging and rollback. Both affected built-bundle/failed-feature browser assertions pass. Actual custom-domain hosting remains external. |
+| I01/R06 | Physical Android installation, browser-closed airplane-mode installed launch and installed-window update remain external gates. ADB is installed but reports no attached device. |
+| I02-I04 | Synthetic install state models are explicitly synthetic; actual Codex browser showed honest absent-prompt fallback. Lead inspected EN/DE/ES, Escape/Back, 360x800/800x360, 28 px equal radii and preserved Pond. Lead also clicked the actual browser retention request: it returned not granted, displayed that outcome and kept verified counts (2/3/3) and the saved puzzle usable. No human screen-reader or phone claim. |
+| O01-O02/O06 | Actual closed persistent browser profile offline launch, first Hint/Reveal/Settings/Backup/raw worker, completed reward exactly once, all sixty progression boundaries, rollover and all three roles pass. Sixty unique receipts sum to 20,400 Dewdrops. |
+| O03-O05 | Independent traversal models, dynamic role exclusions and blocked-hole fault; measured 1/3/10/25/50 horizons; exact online/optional-cap separation pass. No allocation from preparing bytes. |
+| O07 | Generation/pool/clear-revision changes, stale inspections and cancelled-write races covered by fresh models/native metadata cases. Allocation CAS and unchanged essential storage authority are retained. |
+| O08 | Real exhausted profile upgraded safely, then offline exact replacement failed with visible connection/Settings guidance and unchanged attempt/history/pools/wallet. Passed. |
+| O09-O11 | Canonical-manifest routing poison, strict DTO/proof/hash/MIME/timeout failures, actual 512/1MiB boundaries, removal and scoped synthetic quota/transaction aborts pass. Native exact owned app-entry eviction makes readiness false; a scoped worker cache-write fault refuses repair without changing essential saves; restoring writes and explicit preparation repairs full closure, then a process-cold offline launch reads the 9,874-byte raw recovery worker. The successful continuation uses the original evicted profile; wrong-text and wrong-profile harness failures remain separate. Synthetic faults are not real disk-full evidence. |
+| O12 | Complete current Pond/font closure passes. Combined-theme pack metadata and repeat combined-build testing are later integration gates; themes were not merged. |
+| U01-U10 | First activation, uncontrolled old document, delayed real IndexedDB save, frozen second client, rapid C while B downloads/waits, old unused Hint worker, close-all activation, compatible rollback and scoped neighbor preservation pass. B mixed-host integrity failure is rejected. An isolated native update-method trace records a 64.597 s invocation gap and verified B waiting 65.331 s after serving B. Opportunistic 1.543/3.029 s discoveries remain separately attributed to native/queued checks, not the app timer. No forced activation path exists. |
+| P01 | Corrected paired load medians pass the pre-agreed thresholds. Exact sample identities and raw traces are retained. |
+| P02-P04 | Native foreground miss during a held optional response, trusted input, cancellation and closed-profile cancellation readback pass (four records / 7,284 JSON bytes). A held real app-file response plus explicitly labelled headless visibility-event simulation produces zero puzzle-file requests/counts after hidden, visible, then shell release. Sampled page heap excludes workers/browser internals. |
+| R01-R03 | Full units pass: 441 tests in 67 files, 56.14 s with at most two workers. Type checks report zero errors/warnings. Meaningful negative/model/native faults pass. Coverage and final affected-browser results are recorded below after their affected runs. |
+| R04 | Read-only guarded custom Pages workflow and local retention/rollback/artifact faults pass. Actual publishing/headers/CDN visibility/account quota remain external. |
+| R05/R07 | Lead personally reviewed real PWA controls, truthful failure, preparation/consumption, languages/layout and two controlled windows. Closing one retained the old build; closing the last and reopening moved 7471ce... to 12c2cd... with saved cell 1 intact. Lead then updated to final fixture A `61d4d07b...`, stopped the verified owned HTTP host, closed/reopened its application window, resumed entry 1 and computed a real offline logical hint. This is a window-reopen review, separate from QA browser-process cold tests. Temporary viewports were reset. Independent final report challenges by Cora/Rowan/Sage corrected costs, boundary records and cadence; reviewed changes are committed on the isolated branch; final status is checked after the documentation commit. |
+
+Unchanged corpus reuse is content-bound, not a fresh 100,000-solver run: six tool/importer/oracle files, four runtime membership/decoder/types/trust files, the four-file production solver input, source lock, canonical selection and every emitted shard match the accepted certificate. The new gate verifies all 488 shards totaling 32,441,127 bytes. Old global 6,605-mutant gameplay captures are not represented as current PWA mutation acceptance.
+
+Historical failures remain in the ledgers: first SRI duplicate-entry install failure, first-activation race, routing poison, missing exhaustion feedback, several test-selector/allocation polling mistakes, interrupted installed-repeat timing and the superseded coarse-poll performance failure. Passing exact-profile continuations are attributed separately from failed original invocations.
+
+## Delivery and external limits
+
+The workflow builds/tests/validates before upload, serializes publication, retains checksummed hashed assets for thirty days after last-current observation under a 256 MiB limit, verifies actual current hosting metadata before pruning, stages a monotonic archive, and prepares complete compact rollback snapshots. It refuses unknown/corrupt history, immutable URL byte conflicts, incomplete output or supported assets above the cap. Full current-byte post-deploy probes plus four retained-JS samples are prepared; samples do not prove every old hosted byte.
+
+Automatic approval review rejected broader `actions: write` permission and automatic remote artifact deletion as unauthorized cleanup. No such permission or deletion is included or executed. The accepted alternative is a read-only 400 MiB repository-artifact capacity gate before uploads. Account-wide shared quota is not verified; at the cap publication stops for reviewed manual artifact management or a capacity decision. The workflow is therefore safe within capacity, not self-maintaining unlimited minute-rate CI. A full 1.89 MB current-byte probe every minute for thirty days alone is about 81.5 GB logical bytes, before players/retained samples; actual host compression and limits require authorized deployment evidence.
+
+Outstanding release checks: real Android Chrome installation/standalone identity and airplane-mode launch/update; authorized HTTPS Pages headers/bytes/rapid rollout/rollback and actual account capacity; later exact combined-theme asset closure. No connected Android device or configured authorized deployment URL was available. No Pages settings, remote refs, other checkouts or player data were changed by this task.
+
+## Reproduction and integration
+
+Run from this managed worktree with Node >=24.11 and the pinned lockfile. Heavy jobs are serial, unit workers at most two and browser workers one; evidence lives under ignored `prototypes/pwa-validation/`.
+
+```text
+npm ci
+npm run check
+npm test -- --maxWorkers=2
+npm run build
+node tools/pwa/validate.mjs dist
+node tests/offline/costs.mjs
+node tests/pwa/builds.mjs review
+node tests/pwa/journeys.mjs offline prototypes/pwa-validation/releases/review/A
+node tests/pwa/journeys.mjs updates prototypes/pwa-validation/releases/review/A prototypes/pwa-validation/releases/review/B prototypes/pwa-validation/releases/review/C
+node tests/pwa/journeys.mjs travel prototypes/pwa-validation/releases/review/A
+node tests/pwa/store-native.mjs prototypes/pwa-validation/releases/review/A
+node tests/pwa/manifest-native.mjs prototypes/pwa-validation/releases/review/A
+```
+
+Final affected command: `node tools/test.mjs browser --config tests/pwa/affected.playwright.config.ts --grep "failed actual feature chunk|built bundle" --workers=1`: two production-browser cases pass in 9.2 s. That command builds the actual default-relative production output. `node tools/pwa/validate.mjs dist` passes all inventory/catalog gates on build `2a642bc3bf57a8b15d7deb323607f03154af49afd384ed8049e19a2ab87dcd0e`, worker SHA-256 `0d1d4bd9a115212e291ba68dfbfe6fef927b5127c5fa1863fa8ce3e2245a703a`, worker 22,368 bytes. Its 32 resources total 1,889,379 bytes, or 1,896,257 including cached release metadata. This differs from explicit `/toadoku/` marker-A lifecycle fixtures by configured base/fixture identity, not an untested source change.
+
+Final Svelte autofixer passes without issues on App, GameDialog and PwaPanel. Advisory suggestions about effects/subscriptions, DOM references and the private routing Map were reviewed: they bridge external asynchronous services and focus measurements, while the Map is not template state. No speculative refactor was applied. A helper that tried parsing the tool's JavaScript-formatted output as JSON failed; the retained tool outputs themselves report `issues: []`, verified separately.
+
+Exact additional native commands are `node tests/pwa/hidden-shell.mjs <A>`, `node tests/pwa/journeys.mjs inflight <A> <B> <C>`, `node tests/pwa/journeys.mjs polling <A> <B>` and `node tests/pwa/root-smoke.mjs <root-relative-build>`. Lifecycle reports: `hidden-shell-1793523125930/results.json`, `journeys/updates-1793523135344/results.json`, `journeys/inflight-1793523194027/results.json`, `journeys/polling-1793523326920/results.json`, `root-smoke-1793523222469/results.json`, plus `shell-repair-1793523622068/results.json`. The original load measurements use `performance/{baseline-frame,pwa-frame}/results.json`; later UI-only changes were in the unopened lazy dialog, with the affected final build/browser gates repeated. Timing source/build identities remain attached to each capture. Reconcile App, dialog/types, navigation, package/lock, Vite, asset metadata and this acceptance with current main and the separate theme branch during a subsequently authorized integration. Since isolation, another task advanced main to `712e16b` and integrated themes there. This branch deliberately stays based on `ecc8c30`; those changes were neither imported nor overwritten. Current broad asset discovery proves Pond only; do not automatically precache all future theme packs. Repeat affected checks on the exact combined build.
+
+## Exact fixture and decision coverage identities
+
+The final runtime/delivery fixes are committed as `7d12558`. A final whitespace-only EOF cleanup in the newly added manifest pin followed the native fixture capture; rebuilding that committed runtime and validating it produced the identical default build/worker hashes recorded above. App behavior and emitted bytes are unchanged. The final documentation/test commit is the branch tip.
+
+Final native lifecycle fixtures are frozen under `prototypes/pwa-validation/releases/final-reviewed/`. They share the actual final application source; B/C change a localized lazy message and add a harmless copied hint-worker console marker, so both lazy JS and an unopened worker really differ. Production source contains no markers. The capture records source commit plus patch and a full relevant source-file SHA inventory, including newly added files. Older patch-only captures do not alone contain untracked inputs; their copied B/C source and emitted hashes remain retained.
+
+Canonical source-inventory JSON SHA-256: `b4d10f2344eec7fd9046900185aee98b9b40cb2581879aa8a04b1e98c269bf0e`; actual pretty inventory-file SHA-256: `e06c48d82a465f354eadd5499350d8c694fc6c8a22439a592524299878c54e5d`; lockfile SHA-256: `4d8de0d97cc5b12a04d16527db33e9813f027e576a34731f271c69beebe0792c`.
+
+| Fixture | Build identity | Worker SHA-256 |
+| --- | --- | --- |
+| A | `61d4d07ba0a956a33b706e11d5d2dad547952d6ce98e7dc16ce5ae4d987372fd` | `6fe03593940f5b25c5d02e955fdc4f6411252ce6a38e616e087932d76ebc8947` |
+| B | `165471641f1d7a3e2f48be0f39651a0eec078e990dea953c7198fe096a87e5e8` | `d4107a5e123d3aa8e6eedc11066fbbc112d7b14457d6e62ee6cb7e2114c31388` |
+| C | `79d52f4b6a7fdf452a8fbbda2aa04ef912215e0f11113a3c7205c367a80202ab` | `0a2e349f065005786a45df5a82d692edd4ef3ee148546452e106a008cf5d8042` |
+
+Full-unit validation ran 441 tests in 67 files with two workers (directly observed output; `unit/observed-full-and-coverage-summary.json` is a labelled summary, not a raw redirected log); the subsequent test-only protocol additions passed eleven client models and fifteen delivery tests. The seven-file decision coverage run passed 94 tests: 86.85% statements, 81.13% branches, 89.78% functions and 96.05% lines. The affected client-only addition raises that file to 87.80% statements, 83.69% branches and 96.87% lines. These are separate instrumented runs, not a claimed new combined percentage. Defensive getters, unsupported APIs and exceptional schema paths remain uncovered. Native worker/IndexedDB lifecycle evidence complements this scope; neither file is included in those coverage percentages. No claim of 100% coverage or a new global gameplay mutation run is made.
+
+`unit/client-coverage-final.log`, `unit/delivery-final.log`, `unit/check-final.log` and `coverage[-client-final]/coverage-summary.json` retain actual outputs. Local `delivery-smoke-1793523066996/results.json` passes validate, retain, validate, snapshot, validate: the complete rollback snapshot contains 523 files / 34,486,666 bytes, including the catalog. Hosting probes now reject wrong MIME families as well as wrong bytes; local wrong-MIME regressions are not actual HTTPS hosting evidence.
+
+## Plain-language completion answers
+
+- **Before playing:** the useful menu received 140 to 146 kB; the first board 462 to 466 kB, including part of the existing illustration. On the simulated slower connection, median menu/board times were 1.445/2.943 seconds versus 1.466/2.969 before PWA. These are desktop simulation results, not phone or Pages measurements.
+- **Later automatic downloads:** no extra puzzle packs download automatically. App caching starts two seconds after the first usable board or when requested. One measured setup added 1.46 MB compressed across 35 requests, with the original illustration continuing separately. A release caches at most 8 MiB of app files, plus worker/protocol traffic; visible online windows request update checks about once a minute, with longer waits after failures. Initial setup, manual checks and browser-native checks are separate. There is no daily limit on successful updates.
+- **Offline puzzles and storage:** small preparation targets three next puzzles per difficulty; our fresh sample stored fifteen records across five internal pools. Travel targets twenty-five; our fresh sample stored 125 records, and boundary lookahead can need more; a completed pack supports sixty scheduled Progression games when other modes do not consume it. Our test completed sixty, then exercised Quick Play/replay. Displayed counts are the freshly checked minimum across the constituent difficulty pools. At most 512 records and 1 MiB of record text are retained, plus metadata, recent files and browser overhead. No automatic refill or record eviction occurs.
+- **Online puzzles:** an exact next puzzle missing locally downloads on demand. Optional preparation or its caps never restrict ordinary online selection from the certified 100,000-puzzle catalog. The active game is saved normally even when extra caching is full. If that puzzle is unavailable offline, the current game/result is kept and connection/preparation guidance appears.
+- **Loading and input:** optional puzzle work uses one background file at a time, alongside a foreground lane for play. During preparation, measured input dispatch/next-frame p95 were 5.5/14.7 ms; a demanded Hard puzzle loaded in 0.943 seconds while an optional response was held. Corrected paired measurements met the agreed loading limits.
+- **Travel, progress and cancellation:** the measured complete travel action downloaded 102 files, 6.83 MB decoded / 3.31 MB compressed, plus separately fetched metadata. Whole-origin storage was about 6.52 MB including overhead. Small/travel actions admit about 2.1/12.6 MB uncompressed work; these are conservative planning allowances, not exact phone-data caps. Counts advance only after complete verification and storage. Cancel or hiding the app stops optional preparation and keeps verified puzzles. An unchanged verified horizon needs no new puzzle-file transfer; evicted files may download again, and app/update checks are separate. Another explicit action can finish a partial pack.
+- **Updates and remaining checks:** new app files download without replacing an open game. Finish saving or export recovery, close every Toadoku tab/app window and reopen to activate. First setup also needs one close/reopen before relying on offline features. Android installation and real HTTPS Pages rollout/rollback remain external release checks: no device or authorized deployment was available. The committed branch is for review; nothing was merged, pushed or published.

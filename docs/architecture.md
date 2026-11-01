@@ -67,3 +67,9 @@ GitHub Pages, PWA, offline play, JavaScript delivery, and no required WebAssembl
 Validate engine rules and unique puzzles, session transitions, saved-state recovery, language completeness, theme independence, keyboard operation and responsive layouts. Motorola G31/G32 screens have 1080 by 2400 physical pixels; browser CSS dimensions require measurement. Desktop emulation is not physical-device testing.
 
 Implementation begins after the relevant decisions and ImageGen mockups have been discussed. See [workflow](process.md).
+
+## Implemented PWA boundary
+
+The isolated PWA phase adds `src/lib/pwa` for installation, verified complete app caching and waiting updates; `src/lib/offline` for bounded disposable attested records; and `tools/pwa` for complete artifact validation and guarded Pages retention/rollback. The certified exact catalog allocator remains authoritative. Foreground online misses bypass optional download limits. Essential sessions, wallet, receipts and recovery retain their existing database and transaction authority.
+
+`injectManifest` emits an application-owned worker and raw browser lifecycle bridge. App files and puzzle records have separate readiness checks and budgets. No forced activation or application reload is available. Finish saving or export recovery, close every window, and reopen to use a waiting release. See [actual acceptance, measurements and external release gates](pwa-acceptance.md); this implementation does not integrate the separate theme branch or publish Pages.

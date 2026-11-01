@@ -20,7 +20,7 @@ test.beforeAll(async()=>{
     if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}
     try {
       const bytes=await readFile(file);
-      const mime:Record<string,string>={'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf':'font/ttf','.txt':'text/plain','.png':'image/png'};
+      const mime:Record<string,string>={'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf':'font/ttf','.txt':'text/plain','.png':'image/png','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml'};
       res.writeHead(200,{'Content-Type':mime[extname(file)]??'application/octet-stream'}).end(bytes);
     }catch{res.writeHead(404).end();}
   });
@@ -60,7 +60,14 @@ test('built bundle runs under repository subpath with local assets and notices',
   expect(images).toHaveLength(1);
   expect(images[0]).toMatch(/^menu-sketch-.*\.png$/);
   expect(createHash('sha256').update(await readFile(`dist/assets/${images[0]}`)).digest('hex')).toBe('b4c53b629017faa5f57c9a72d3cb80d182268dd729b93e842ddd6be229ffedf1');
-  for(const file of assets.filter(f=>/\.(js|css)$/.test(f)))expect(await readFile(`dist/assets/${file}`,'utf8')).not.toMatch(/prototypes\/|menu-placeholder|serviceWorker\.register/);
+  for(const file of assets.filter(f=>/\.(js|css)$/.test(f)))expect(await readFile(`dist/assets/${file}`,'utf8')).not.toMatch(/prototypes\/|menu-placeholder/);
+  const manifest=JSON.parse(await readFile('dist/manifest.webmanifest','utf8'));
+  expect({id:manifest.id,scope:manifest.scope,start:manifest.start_url}).toEqual({id:'./',scope:'./',start:'./'});
+  await expect.poll(()=>page.evaluate(async()=>{
+    const registration=await navigator.serviceWorker.getRegistration(location.href);
+    return registration?.active?.scriptURL ?? registration?.installing?.scriptURL;
+  })).toBe(origin+'/toadoku/worker.js');
+  expect(await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration(location.href);return {scope:r?.scope,updateViaCache:r?.updateViaCache};})).toEqual({scope:origin+'/toadoku/',updateViaCache:'none'});
   for(const file of ['Chewy-LICENSE.txt','Outfit-OFL.txt'])expect(await readFile(`dist/licenses/${file}`)).toEqual(await readFile(`src/assets/fonts/${file}`));
   const dependencies=JSON.parse(await readFile('dist/licenses/dependencies.json','utf8')) as {name:string;identifier:string;text:string}[];
   expect(dependencies.map(d=>d.name).sort()).toEqual(['@lucide/svelte','clsx','svelte']);

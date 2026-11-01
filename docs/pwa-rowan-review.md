@@ -5,6 +5,7 @@
 Scope: `codex/pwa-offline`, based on committed main `ecc8c30`, separate managed worktree. Rowan owns `src/lib/offline/`, narrowly scoped catalog loader changes, corresponding tests and this review. Essential repository, selection version 1, catalog bytes, certificates, receipts, scoring and themes are unchanged.
 
 Primary sources checked during implementation:
+
 - [Browser quotas and eviction](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria): Cache Storage and IndexedDB share origin capacity; persistence permission does not replace backups.
 - [Workbox deployment](https://developer.chrome.com/docs/workbox/service-worker-deployment): large or early optional precaches can compete with useful loading.
 - [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController/abort): cancellation can stop fetch/body consumption; shared ownership must be preserved.
@@ -13,6 +14,7 @@ Primary sources checked during implementation:
 Lead challenged the original sixteen-shard cache: it discards write results, evicts promised bytes and cannot prove playable capacity. Agreement: retain the existing bounded demanded-shard cache for compatibility, but use a separately named disposable database for complete attested records plus trusted manifest bytes. No service-worker catalog cache duplicates whole shards. Compact records retain existing certification membership proofs and are checked again before use. Merely finding bytes never authorizes allocation or readiness.
 
 Rejected alternatives:
+
 - Whole-shard pinned reserves consume several megabytes for a few shuffled requested records and require a changed eviction contract.
 - Availability-aware allocation would alter certified traversal/freshness and require migration and broader gameplay validation. Existing exact ordinal selection stays authoritative.
 - Automatic background puzzle refill without known connection consent would repeatedly consume data; missing network hints do not establish an unmetered connection. Automatic optional puzzle downloads are zero. Demanded puzzles still load online, and explicit default/travel preparation is available.
@@ -31,7 +33,7 @@ Actual unchanged manifest/shards were read locally with production permutation s
 
 Lead/Cora/Sage challenged these choices and accepted default 3 per pool, explicit travel 25 per pool, subject to actual attained capacity and action budgets. Default preparation allows 2MiB decoded response budget; travel 12MiB. Each new shard attempt is charged the maximum 96KiB bounded response, plus up to 128KiB metadata, before starting. Stop at the allowance or first failure. Repeated explicit actions are new player-requested transfers, not an automatic allowance reset. Foreground requests remain available independently.
 
-Records are limited to 512 and 1MiB of serialized record JSON; each record at most4096 bytes. Trusted manifest is separate and at most128KiB. Existing demanded-shard cache retains at most16 shards of at most 96KiB each. Browser disk overhead and app-shell storage are additional measured acceptance quantities. No automatic eviction of retained records, including prepared records, occurs. Remove downloads clears only compact records and reserve metadata, retaining trusted manifest and every essential save.
+Records are limited to 512 and 1MiB of serialized record JSON; each record at most4096 bytes. Trusted manifest is separate and at most 128KiB. Existing demanded-shard cache retains at most16 shards of at most 96KiB each. Browser disk overhead and app-shell storage are additional measured acceptance quantities. No automatic eviction of retained records, including prepared records, occurs. Remove downloads clears only compact records and reserve metadata, retaining trusted manifest and every essential save.
 
 ## Coverage proof and independent challenge
 
@@ -42,6 +44,7 @@ For a horizon N, preparation includes raw permutation positions, including curre
 Cora challenged an unrestricted wrap heuristic. Sage independently required the explicit domain guard and an independent dynamic-exclusion model. Lead agreed. Sage owns the separate model and blocked-position fault test. Travel25 per pool can cover the60-Leap Progression-only schedule and following rollover within its attained counts; Quick/replay/replacement consumption shares those pools and can shorten this horizon. Never promise endless offline play.
 
 Actual-source review findings raised by Lead before acceptance:
+
 1. Bind compact records to the initialized manifest's catalog/certification/source tuple, even if a future binary trusts more than one root.
 2. Await explicit manifest persistence for preparation; a fire-and-forget write is not acknowledgement.
 3. Await cancelled preparation before clearing downloads, so a delayed acknowledged put cannot repopulate after removal.
@@ -57,6 +60,7 @@ These are required fixes, not passing evidence. Corresponding implementation/tes
 The first green application slice is `eb055c9`. Cora reviewed the actual final offline deltas and accepted them after the findings above were resolved. Sage independently checked more than 400,000 dynamic role-release/replacement paths, 1,000 travel paths, unsupported domains and an intentionally broken omission of blocked positions. No production selection helper is used by that model's reference walk.
 
 Actual fixes accepted through reciprocal review:
+
 - Compact records match the initialized manifest tuple, ordinal and exact plain-data allocation shape before existing identity/Merkle verification. Unknown fields, symbols, hidden properties and accessors are rejected.
 - Foreground optional compact writes are caught and are not awaited before returning a verified puzzle. Explicit preparation awaits manifest write acknowledgement and exact hash readback.
 - Requests have separate foreground/background lanes, with at most one network read in each lane. A shared file keeps reference-aware cancellation. The coordinator queues one background file at a time. A 20-second own timeout is reported as unavailable; explicit player cancellation remains aborted.
@@ -66,12 +70,14 @@ Actual fixes accepted through reciprocal review:
 - Storage opens time out after two seconds and late successes close their connection. Malformed inventory rows refuse further retention rather than evading size accounting.
 
 Actual commands:
+
 - `node tools/test.mjs unit --maxWorkers=2`:62 files, 412 tests, exit zero, 32.73 seconds.
 - `npm run check`: zero Svelte errors/warnings and TypeScript exit zero.
 - After the final fresh-inspection regression was added, `node tools/test.mjs unit tests/offline/reserve.test.ts --maxWorkers=1`:9 tests, exit zero, 36.94 seconds. The union is 413 tests; this does not claim all 413 ran in the earlier full invocation.
 - `node --check tests/pwa/store-native.mjs`: exit zero. Native execution evidence remains separately required.
 
 Ignored evidence logs and SHA-256:
+
 - `unit/first-integrated.log`: `b0283c7c30b96bfb54c6baffff2dd88493492469785998c59539121798945c06`.
 - `unit/first-check.log`: `1ffddf8cd63ccd1cba36a80354f2304168cb8b54d7cba31d93d4808c503ba8fb`.
 - `unit/fresh-readiness.log`: `0d4b9749bd2be9bc58a74d768d957d569ec8290f363ce9e0dc026d4c9798cad6`.
@@ -99,6 +105,7 @@ The reproducible cost command is `node tests/offline/costs.mjs`; it writes the f
 | R02 | Meaningful safety faults must produce failing evidence. | Blocked-position omission model; false write acknowledgement/corrupt readback; extra-field valid-proof record; exact online miss with refused optional storage; stale-clear races; malformed MIME and own timeout. These are independent behavioral counterexamples, not string snapshots of implementation. |
 
 Reproduction scopes:
+
 - Complete unit suite: `node tools/test.mjs unit --maxWorkers=2`.
 - Owned focused logic: `node tools/test.mjs unit tests/offline tests/catalog/load.test.ts tests/catalog/attestation.test.ts tests/pwa/reserve-model.test.ts --maxWorkers=1`.
 - Real browser storage: `node tests/pwa/store-native.mjs <frozen-production-build>`, using only owned port 5199 and its isolated persistent Chromium profile.
@@ -117,6 +124,7 @@ Sage challenged the first proposed fix of charging immediately before a queued f
 Each action owns its received-byte callback. If an old cancelled optional request continues for a foreground consumer, its later bytes cannot inflate the next preparation action's display. These received bytes are distinct from the pessimistic allowance reserved at admission.
 
 New meaningful tests:
+
 - Foreground LRU eviction forces a background refetch; the second admission is debited/refused and a simultaneous same-path foreground request succeeds.
 - A shared foreground-created request consumes no optional allowance. A shared background-created request has one admission and retains its original action's byte ownership after one consumer cancels.
 - At an actual epoch boundary the default closure needs more than twenty distinct files. A fresh action reserves 128KiB metadata and twenty 96KiB shard reads, then refuses the twenty-first before starting it. Verified partial records remain, the complete essential save is unchanged, inspection starts no retry and the problem is the explicit download limit.
@@ -135,6 +143,7 @@ No physical-link wire cap is claimed. The admission allowance bounds requested a
 Executed `node tests/pwa/store-native.mjs prototypes/pwa-validation/releases/activation-budget/A` with a fresh persistent desktop Chromium profile at owned port5199. The frozen build is `d4388e240b892c0dd43bbe2fe5ed99a736132854f653bfd8071d83bd040c2758`; worker SHA-256 is `eb7ca59efba1ffff4614e2e86338afb251627e9e67580940466d76a438707e8c`. This is desktop production-worker/IndexedDB evidence, not Android installation or actual Pages hosting.
 
 Actual default preparation from the menu:
+
 - 15 compact records, 27,375 serialized JSON bytes.
 - Trusted manifest 127,753 bytes.
 - Recent demanded/prepared file cache 15 shards, 1,006,318 logical bytes.
@@ -143,6 +152,7 @@ Actual default preparation from the menu:
 - Menu-to-prepared action takes 1,049.33ms on the unshaped local host. It sends 2,001,367 gzip/identity body bytes for 3,111,753 logical response bytes, including the separately prepared app closure, dialog/metadata and puzzle files. This is not the first-play download, not a phone result and not HTTP/TLS overhead. Source requests permit each part to be separated for final acceptance.
 
 Real native boundary/failure outcomes:
+
 1. A 512-record fixture occupies 931,840 JSON bytes. Despite refused optional retention, ordinary online allocation fetches the exact independently predicted Easy ordinal 205 and succeeds; count stays 512.
 2. A 256-record near-byte-cap fixture occupies 1,047,040 JSON bytes. Preparation refuses another record and reports counts 0/0/0.
 3. Removing extras preserves the entire paused essential-store snapshot byte for byte and reports 0/0/0. The trusted manifest remains.
@@ -158,6 +168,7 @@ Only the affected tail was resumed:
 It exits zero in 2.19 seconds, covering items 5/6. The original failed overall runner is preserved and is never called a complete passing invocation. Its completed prefix assertions and the exact-profile continuation jointly cover the native storage scope without repeating unchanged earlier gates.
 
 Ignored evidence:
+
 - Prefix and retained harness failure: `store-native/1793518031827/report.json`, SHA-256 `964a22a8e31327dc0436ba8c014c54da208f77b9ffe2f73abe7d3fab4657f0e4`.
 - Confirmed DOM screenshot: `store-native/1793518031827/confirmed-replacement-dialog.png`.
 - Passing affected continuation: `store-native/1793518154227/report.json`, SHA-256 `047c77729a73034f6b112a20b892da5aa924f7df1d9cc2377972dfbe4e34850e`.
@@ -165,4 +176,26 @@ Ignored evidence:
 - Unchanged certification fingerprints: `catalog-reuse.json`, SHA-256 `c62ccba4a22de83d0ace43444afaeef55ab5382161345e80026330ad3df12cf5`.
 
 Cora independently reviewed and accepted the final per-read admission implementation and its 34 affected tests/check scope. No remaining offline allocation/storage source blocker was found. Sage's broader cold solving, all-role/reward, travel, rapid-update and performance journeys remain separately attributed in the lead acceptance record.
+
+
+
+## Canonical manifest corruption correction
+
+Rowan found a new persistent-cache counterexample during final source review. Existing membership binds certified record roots and ordinal context, while delivery hashes/paths are outside those Merkle leaves. A valid JSON manifest whose first Easy descriptor is changed to hash `000...000` and path `easy-0-0000000000000000.json` still passes the unchanged strict decoder and membership check. Its SHA-256 becomes `10c3fb8826f665fd2e2c5fe65b26b80d6cc301287042f17a4ffc433c5fa840a1`. Previously, the new cache-first manifest path could retain this corrupt routing indefinitely even after the host was corrected.
+
+Lead and Cora independently accepted the minimal version-one fix: new `src/lib/catalog/manifest.v1.ts` pins the canonical manifest SHA-256 from the unchanged certificate. Loader acceptance and offline readiness both require at most 128KiB and that exact byte hash before decoding/membership. A poisoned cache falls back to one normal online manifest request. A wrong network manifest fails corrupt; it cannot replace trusted data. Explicit preparation still requires acknowledged persistence/readback. Existing certified attestation/decode/types/trust files are unchanged. Future catalogs or canonical serialization changes require an explicit reviewed new pin/version.
+
+Actual new regressions demonstrate valid JSON/schema/membership poison, online canonical repair exactly once, a newly constructed cold offline loader using repaired data, rejection of a wrong network manifest, and zero readiness behind poisoned metadata. The fixed source passes five affected files and 36 tests in 45.86 seconds, then `npm run check` reports zero Svelte errors/warnings and TypeScript exit zero in 5.29 seconds. Logs: `unit/manifest-pin.log`, `unit/manifest-pin-check.log`.
+
+Cora reviewed the actual final pin implementation and accepted it. Native metadata-only corruption/recovery remains a separate focused gate. Earlier native record/storage boundary evidence is reused only for its unchanged store/selection/transaction behavior, rather than falsely attributed to the later metadata pin.
+
+After these executable checks, only declared line endings were normalized bytewise to LF in the seven owned runtime files. A byte check confirms zero CRLF sequences and no BOM. No semantic code or certified input changed. Final production fixtures are frozen after that canonical-format step.
+
+
+
+The focused native manifest gate now passes: `node tests/pwa/manifest-native.mjs prototypes/pwa-validation/releases/acceptance-final/A`, exit zero in 4.39 seconds, Chromium 156.0.8078.4. Build `12c2cd6235b62d2193a011f1e6b1198d9936b0f54f39a30541a67698e920f98d`, worker SHA-256 `5e89069fda8d93ac51b4db38f020264c730c8cc1cd7aedfec09db1399970efd7`.
+
+A saved frontier was entered and acknowledged before preparation. After injecting schema/membership-plausible routing poison and closing the browser, cold offline launch came from the service worker, showed 0/0/0 usable reserve counts and retained the frontier definition, entries, notes/undo/assistance and wallet. A subsequent online requested Quick game fetched the canonical manifest exactly once: 127,753 decoded bytes, 43,469 gzip body bytes. It allocated the independently predicted ordinal 12435 and never requested the poisoned path. Polling observed acknowledged canonical bytes in IndexedDB. After another browser-closed offline launch, the next exact ordinal 6775 allocated from the repaired manifest and reserve, while the original frontier and wallet remained unchanged.
+
+Report: `manifest-native/1793520002637/report.json`, SHA-256 `97309180cc6b99619319d6e138b06b9831f1e3a46274f1a710bfd9b7aac5301d`. This evidence covers the metadata integrity/recovery delta. Later delivery-performance refinements may use a different app build identity; unchanged loader/store behavior must be attributed explicitly rather than calling every older browser artifact that later build.
 
