@@ -64,6 +64,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 ## Working rules
 
 - KISS, YAGNI, DRY. Add only what the task needs.
+- Follow **opinionated defaults and progressive disclosure**: read [usability principles](docs/usability-principles.md) before changing features, settings, navigation or copy. Make ordinary play work without configuration; justify each added control with a player need. Keep frequent actions easy to reach and labels concise. Put necessary advanced/infrequent options behind clearly labeled secondary access. Preserve accessible operation, consequential disclosures and honest failure feedback.
 - Use Conventional Commits.
 - Use unit tests for logic/state; reserve browser tests for critical flows and visual validation. Batch actions; avoid redundant screenshots and reruns.
 - No em dashes or personal context in project files.
