@@ -52,7 +52,9 @@ async function settings(page: Page) {
 }
 async function closeDialogs(page: Page) {
   for (let i = 0; i < 4 && await page.getByRole('dialog').count(); i++) {
+    const pane = await page.evaluate(() => history.state?.overlay);
     await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => history.state?.overlay)).not.toBe(pane);
   }
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }
@@ -342,6 +344,134 @@ test('responsive flat themes retain curves, all key edges and overlays in Fill a
   }
 });
 
+test('ordinary overlays retain the puzzle and key styles, while explicit Pause blurs and stops time', async ({ page }) => {
+  const start = new Date('2026-10-31T12:00:00-07:00');
+  await page.clock.install({ time: start }); await page.clock.pauseAt(start);
+  await page.goto('/'); await ready(page); await quick(page);
+  await page.locator('.cell[data-clue="false"]').first().click();
+  await page.keyboard.press('1');
+  await expect.poll(async () => (await snapshot(page)).attempt!.entries.some(value => value === 1)).toBe(true);
+  const initial = (await snapshot(page)).attempt!, cells = await bounds(page);
+  const firstCell = await page.locator('.cell').first().elementHandle();
+  await page.mouse.move(0, 0);
+  const keyStyles = () => page.locator('.dock > button').evaluateAll(buttons => buttons.map(button => {
+    const r = button.getBoundingClientRect(), s = getComputedStyle(button);
+    return { text: button.textContent, disabled: (button as HTMLButtonElement).disabled,
+      x: r.x, y: r.y, width: r.width, height: r.height, face: s.backgroundColor, edge: s.boxShadow };
+  }));
+  const keys = await keyStyles();
+  await page.locator('.dock').evaluate(dock => {
+    const observation = { disabled: false };
+    (window as any).dockObservation = observation;
+    new MutationObserver(() => {
+      if ([...dock.querySelectorAll('button')].some(button => button.disabled)) observation.disabled = true;
+    }).observe(dock, { attributes: true, subtree: true, attributeFilter: ['disabled'] });
+  });
+  const unchanged = async () => {
+    await page.mouse.move(0, 0);
+    expect(await bounds(page)).toEqual(cells);
+    expect(await keyStyles()).toEqual(keys);
+    expect(await firstCell!.evaluate(cell => cell.isConnected && cell === document.querySelector('.cell'))).toBe(true);
+    expect(logical((await snapshot(page)).attempt!)).toEqual(logical(initial));
+  };
+  const stillTimed = async () => {
+    const before = (await snapshot(page)).attempt!.elapsedMs;
+    await page.clock.runFor(2100);
+    // Durable time checkpoints are sampled at most once a second; the last
+    // acknowledged sample can precede the end of this 2.1-second interval.
+    await expect.poll(async () => (await snapshot(page)).attempt!.elapsedMs).toBeGreaterThanOrEqual(before + 1000);
+  };
+  await page.locator('.dock .more').click(); await expect(page.getByRole('dialog').getByText('Tools', { exact: true })).toBeVisible();
+  await unchanged(); await stillTimed();
+  await page.keyboard.press('2'); await unchanged(); // Native modal + app input guard.
+  await page.keyboard.press('Tab');
+  expect(await page.getByRole('dialog').evaluate(dialog => dialog.contains(document.activeElement))).toBe(true);
+  await page.getByRole('dialog').getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
+  await unchanged(); await stillTimed();
+  for (const action of ['Backup', 'Restart puzzle', 'New puzzle']) {
+    await page.getByRole('dialog').getByRole('button', { name: action, exact: true }).click();
+    await unchanged(); await stillTimed();
+    await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(page.getByRole('dialog').getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
+  }
+  await page.screenshot({ path: `${evidence}/persistent-board-settings-360x800.png` });
+  await page.getByRole('dialog').getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Pause', exact: true }).click();
+  await expect(page.locator('div.scene')).toHaveCSS('filter', 'blur(12px)');
+  await unchanged();
+  const paused = (await snapshot(page)).attempt!.elapsedMs;
+  await page.clock.runFor(3100);
+  expect((await snapshot(page)).attempt!.elapsedMs).toBe(paused);
+  await page.screenshot({ path: `${evidence}/persistent-board-paused-360x800.png` });
+  await page.getByRole('dialog').getByRole('button', { name: 'Resume', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('div.scene')).toHaveCSS('filter', 'none');
+  await unchanged(); await stillTimed();
+  await expect(page.locator('.dock .more')).toBeFocused();
+  expect(await page.evaluate(() => (window as any).dockObservation.disabled)).toBe(false);
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  await expect(page.locator('div.scene')).toHaveCSS('filter', 'blur(12px)');
+  const hidden = (await snapshot(page)).attempt!.elapsedMs;
+  await page.clock.runFor(2100);
+  expect((await snapshot(page)).attempt!.elapsedMs).toBe(hidden);
+  await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
+  await expect(page.locator('div.scene')).toHaveCSS('filter', 'none');
+  await unchanged(); await stillTimed();
+  const second = await page.context().newPage();
+  try {
+    await second.goto('/'); await ready(second);
+    await second.getByRole('button', { name: 'Quick Play', exact: true }).click();
+    await second.getByRole('button', { name: 'Resume', exact: true }).click();
+    await expect(second.locator('.cell')).toHaveCount(81);
+    await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
+    await expect(page.locator('.cell')).toHaveCount(0); // Stale writers never retain readable values.
+  } finally { await second.close(); }
+  await firstCell!.dispose();
+});
+
+test('lazy dialog loading and failure preserve Quick Play and its button styles', async ({ page }) => {
+  let release!: () => void, seen = 0;
+  const held = new Promise<void>(resolve => release = resolve);
+  await page.route('**/src/lib/gameplay/ui/GameDialog.svelte*', async route => {
+    seen++; await held; await route.abort('failed');
+  });
+  try {
+    await page.goto('/'); await ready(page);
+    await page.getByRole('button', { name: 'Quick Play', exact: true }).click();
+    const menu = await page.locator('.menu-panel').evaluate(panel => panel.outerHTML);
+    await page.locator('.menu-more').click();
+    await expect.poll(() => seen).toBe(1);
+    await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Loading…');
+    expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
+    await page.keyboard.press('1'); expect(await page.locator('.cell').count()).toBe(0);
+    release();
+    await expect(page.getByRole('dialog').getByRole('status')).toHaveText(appCopy.en.featureLoadError);
+    expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.locator('.menu-more')).toBeFocused();
+    expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
+  } finally { release(); }
+});
+
+test('submenu headings use the ground foreground in both themes and appearances', async ({ page }) => {
+  await page.goto('/'); await ready(page);
+  for (const theme of ['pond', 'cauldron']) for (const appearance of ['light', 'dark']) {
+    await settings(page); await choose(page, 'Theme', theme); await choose(page, 'Appearance', appearance);
+    await expect(page.locator('.world')).toHaveAttribute('data-theme', theme);
+    await expect(page.locator('.world')).toHaveAttribute('data-appearance', appearance);
+    await closeDialogs(page);
+    await page.getByRole('button', { name: 'Quick Play', exact: true }).click();
+    const ink = theme === 'pond' ? 'rgb(23, 63, 53)' : 'rgb(255, 240, 202)';
+    await expect(page.locator('.menu-panel h2')).toHaveCSS('color', ink);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await page.getByRole('button', { name: 'Progression', exact: true }).click();
+    await expect(page.locator('.menu-panel h2')).toHaveCSS('color', ink);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+  }
+});
+
 test('HUD rows keep localized labels and identity anchors while condensing only roomy bottom docks', async ({ page, browser }) => {
   await page.clock.setFixedTime(new Date('2026-10-31T12:00:00-07:00'));
   await page.goto('/'); await ready(page);
@@ -357,7 +487,9 @@ test('HUD rows keep localized labels and identity anchors while condensing only 
   };
   const close = async () => {
     for (let i = 0; i < 4 && await page.getByRole('dialog').count(); i++) {
+      const pane = await page.evaluate(() => history.state?.overlay);
       await page.getByRole('dialog').getByRole('button', { name: /^(Close|Schlie.+en|Cerrar)$/ }).click();
+      await expect.poll(() => page.evaluate(() => history.state?.overlay)).not.toBe(pane);
     }
     await expect(page.getByRole('dialog')).toHaveCount(0);
   };
@@ -375,21 +507,42 @@ test('HUD rows keep localized labels and identity anchors while condensing only 
       }));
       expect(geometry).toHaveLength(3);
       for (const button of geometry) {
-        expect(button.height).toBe(64); expect(button.y).toBeCloseTo(geometry[0].y);
+        expect(button.height).toBeCloseTo(Math.min(64, (Math.min(width, height) - 32) / 5), 1);
+        expect(button.y).toBeCloseTo(geometry[0].y, 1); // Native layout rounds fractional CSS pixels.
         for (const distance of [button.left, button.right, button.top, button.bottom]) expect(distance).toBeGreaterThanOrEqual(-.5);
       }
       const before = await identity();
       await page.getByRole('button', { name: dictionaries[locale].quick, exact: true }).click();
       await expect(page.getByRole('heading', { name: dictionaries[locale].quick, exact: true })).toBeVisible();
       expect(await identity()).toEqual(before);
+      await assertMenuOverlay();
       await page.getByRole('button', { name: dictionaries[locale].back, exact: true }).click();
       await page.getByRole('button', { name: dictionaries[locale].progression, exact: true }).click();
       await expect(page.getByRole('heading', { name: dictionaries[locale].progression, exact: true })).toBeVisible();
       expect(await identity()).toEqual(before);
+      await assertMenuOverlay();
       await page.getByRole('button', { name: dictionaries[locale].back, exact: true }).click();
       if (width === 320 && locale === 'de') await page.screenshot({ path: `${evidence}/menu-row-320x568-de.png` });
       if (locale === 'en') await page.screenshot({ path: `${evidence}/cauldron-menu-${width}x${height}.png` });
     }
+  }
+  async function assertMenuOverlay() {
+    const controls = page.locator('.menu-panel button, .menu-more');
+    const heights = await controls.evaluateAll(buttons => buttons.map(button => button.getBoundingClientRect().height));
+    for (const height of heights) expect(height).toBeCloseTo(heights[0], 1);
+    const menu = await page.locator('.menu-panel').evaluate(panel => panel.outerHTML);
+    const identityBefore = await identity();
+    const firstButton = await controls.first().elementHandle();
+    await openSettings();
+    expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
+    expect(await identity()).toEqual(identityBefore);
+    expect(await firstButton!.evaluate(button => button.isConnected && button === document.querySelector('.menu-panel button'))).toBe(true);
+    await page.getByRole('dialog').getByRole('button', { name: /^(Backup|Sicherung|Copia de seguridad)$/ }).click();
+    expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
+    await close();
+    await expect(page.locator('.menu-more')).toBeFocused();
+    expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
+    await firstButton!.dispose();
   }
   await page.getByRole('button', { name: dictionaries.es.quick, exact: true }).click();
   await page.getByRole('button', { name: dictionaries.es.easy, exact: true }).click();
@@ -409,6 +562,7 @@ test('HUD rows keep localized labels and identity anchors while condensing only 
     }));
     expect(rectangles).toHaveLength(10);
     expect(new Set(rectangles.map(r => r.y.toFixed(2))).size).toBe(rows);
+    for (const r of rectangles) expect(r.height).toBeCloseTo(rectangles[0].height, 1);
     if (rows === 1) for (const [i, r] of rectangles.entries()) {
       expect(r.width).toBeGreaterThanOrEqual(56 - .01); expect(r.height).toBe(56);
       if (i) expect(r.x - rectangles[i - 1].x - rectangles[i - 1].width).toBeCloseTo(4);
@@ -471,4 +625,11 @@ test('HUD rows keep localized labels and identity anchors while condensing only 
       if (locale === 'de') await recovery.screenshot({ path: `${evidence}/bottom-row-612x800-unscored-notes-de.png` });
     } finally { await context.close(); }
   }
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.locator('.dock .more').click();
+  await page.getByRole('dialog').getByRole('button', { name: uiCopy.es.mainMenu, exact: true }).click();
+  await page.getByRole('button', { name: dictionaries.es.quick, exact: true }).click();
+  await expect(page.locator('.menu-panel').getByRole('button', { name: appCopy.es.resume, exact: true })).toBeVisible();
+  await assertMenuOverlay(); // The retained attempt adds a third action row.
+  await page.screenshot({ path: `${evidence}/persistent-quick-resume-320x568-es.png` });
 });

@@ -9,7 +9,7 @@ export type { ThemeTokens } from './tokens';
 export const pond = {
   id: 'pond',
   water: { deep: '#0D6267', middle: '#329D9A', shallow: '#7ED1B8' },
-  ground: { wet: '#6D9F81', dry: '#B6BA86', rim: '#4D7E68' },
+  ground: { wet: '#6D9F81', dry: '#B6BA86', rim: '#4D7E68', ink: '#173F35' },
   decoration: { bubble: '#EFF7AC', bubbleEdge: '#173F35' },
   leaf: {
     face: '#D0F2A0', lip: '#87BB69', highlight: '#EFF7AC', ink: '#173F35',

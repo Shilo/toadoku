@@ -7,6 +7,7 @@ body { overscroll-behavior: none; }
 button { font: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .world { position: fixed; inset: 0; overflow: hidden; background: var(--water-deep); color: var(--control-ink); font-family: var(--font-ui); font-weight: var(--weight-ui); line-height: var(--line-ui); }
 .scene { position: absolute; left: calc(var(--space-large) + env(safe-area-inset-left)); right: calc(var(--space-large) + env(safe-area-inset-right)); top: calc(var(--space-large) + env(safe-area-inset-top)); bottom: calc(var(--space-large) + env(safe-area-inset-bottom)); }
+.scene.study-paused { filter: blur(12px); pointer-events: none; }
 .board, .cell, .anchor, .dock, .menu-panel, .menu-more { position: absolute; }
 .board { z-index: var(--layer-objects); }
 .cell { border: 0; border-radius: 0; background: transparent; padding: 0; cursor: pointer; outline: none; }
@@ -27,9 +28,9 @@ h1 { position: absolute; display: grid; place-items: center; white-space: nowrap
 .menu-panel { z-index: var(--layer-controls); display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-small); }
 .menu-panel > .cream { flex-shrink: 0; height: var(--action); }
 .menu-panel.base-row { flex-direction: row; align-items: flex-end; }
-.menu-panel.base-row > .cream { flex: 1; height: 64px; font-size: 18px; }
+.menu-panel.base-row > .cream { flex: 1; height: var(--action); font-size: 18px; }
 h2 { font-size: var(--type-control-max); line-height: var(--line-ui); margin: 0; }
-.menu-panel h2 { padding: var(--space-small) var(--space-large); }
+.menu-panel h2 { padding: var(--space-small) var(--space-large); color: var(--ground-ink); }
 .difficulty { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-small); height: var(--action); }
 .difficulty .cream { padding: var(--space-small); font-size: var(--type-control-min); }
 .menu-more { z-index: var(--layer-controls); }

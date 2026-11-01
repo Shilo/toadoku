@@ -2,7 +2,7 @@
 export interface ThemeTokens {
   readonly id: string;
   readonly water: { readonly deep: string; readonly middle: string; readonly shallow: string };
-  readonly ground: { readonly wet: string; readonly dry: string; readonly rim: string };
+  readonly ground: { readonly wet: string; readonly dry: string; readonly rim: string; readonly ink: string };
   readonly decoration: { readonly bubble: string; readonly bubbleEdge: string };
   readonly leaf: {
     readonly face: string; readonly lip: string; readonly highlight: string; readonly ink: string;
@@ -57,7 +57,7 @@ export interface ThemeTokens {
 export function themeStyle(theme: ThemeTokens): string {
   const roles: Record<string, string | number> = {
     'water-deep': theme.water.deep, 'water-middle': theme.water.middle, 'water-shallow': theme.water.shallow,
-    'ground-wet': theme.ground.wet, 'ground-dry': theme.ground.dry, 'ground-rim': theme.ground.rim,
+    'ground-wet': theme.ground.wet, 'ground-dry': theme.ground.dry, 'ground-rim': theme.ground.rim, 'ground-ink': theme.ground.ink,
     'bubble-color': theme.decoration.bubble, 'bubble-edge': theme.decoration.bubbleEdge,
     'leaf-face': theme.leaf.face, 'leaf-lip': theme.leaf.lip, 'leaf-highlight': theme.leaf.highlight,
     'leaf-ink': theme.leaf.ink, 'entry-ink': theme.leaf.entryInk,

@@ -58,7 +58,9 @@ async function settings(page: Page) {
 }
 async function closeDialogs(page: Page) {
   for (let i = 0; i < 4 && await page.getByRole('dialog').count(); i++) {
+    const pane = await page.evaluate(() => history.state?.overlay);
     await page.getByRole('dialog').getByRole('button', { name: /^(Close|Schlie.+en|Cerrar)$/ }).click();
+    await expect.poll(() => page.evaluate(() => history.state?.overlay)).not.toBe(pane);
   }
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }

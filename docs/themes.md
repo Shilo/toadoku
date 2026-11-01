@@ -14,7 +14,9 @@ Fresh defaults are Auto theme, System appearance, the first supported browser-pr
 
 Auto's [annual schedule](../src/lib/theme/calendar.ts) is an ordered metadata list containing actual event dates. A single shared rule derives each yearly window: seven local calendar days before until seven after, end excluded, totaling 14 calendar dates. First active entry wins an overlap; no active entry falls back to Pond. Selection and countdown share the resolved event. Add future event dates as data using the [authoring recipe](theme-authoring.md#add-a-yearly-event).
 
-User-authorized layout polish is bounded: main-menu base actions share an equal-height row, while the largest submenu reservation keeps identity/shore anchors fixed. Suitable wide bottom-dock allocations may use ten equal-height keys in one row. Narrow portrait keeps 2x5 and landscape retains the established right 5x2. The gameplay grid remains the existing flat Winding shallows design, with improved local curve clearance rather than an enclosing pot illustration.
+User-authorized layout polish is bounded: every main-menu action shares one responsive height across base, Quick Play and Progression, including More, while the largest submenu reservation keeps identity/shore anchors fixed. Suitable wide bottom-dock allocations may use ten equal-height keys in one row. Narrow portrait keeps 2x5 and landscape retains the established right 5x2. The gameplay grid remains the existing flat Winding shallows design, with improved local curve clearance rather than an enclosing pot illustration.
+
+Overlays preserve their underlying screen, mounted board and normal control appearance. Native modal behavior blocks background input; ordinary readable windows remain timed. Explicit Pause/restore and hidden-page presentation blur the retained scene while study is suspended. Ownership loss continues to conceal stale puzzle values. These shared product behaviors are independent of theme colors/materials.
 
 ## Historical Pond baseline and earlier proposals
 

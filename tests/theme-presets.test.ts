@@ -48,6 +48,7 @@ describe.each(presets)('%s semantic preset', (_, theme) => {
     const pairs = [
       [c.ink, c.face], [c.ink, c.lip], [c.ink, c.hoverFace], [c.ink, c.pressedFace], [c.selectedInk, c.selectedFace],
       [theme.dialog.ink, theme.dialog.surface],
+      [theme.ground.ink, theme.ground.dry],
       ...[l.face, l.selectedFace].flatMap(face => [l.ink, l.entryInk, l.noteInk, l.conflictInk].map(ink => [ink, face])),
     ];
     for (const [ink, face] of pairs) expect(contrast(ink, face), `${ink} on ${face}`).toBeGreaterThanOrEqual(4.5);

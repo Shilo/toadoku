@@ -32,11 +32,12 @@
   let route = $state<Route>('menu'), overlay = $state.raw<OverlayState>();
   let width = $state(window.innerWidth - 2 * LARGE), height = $state(window.innerHeight - 2 * LARGE), time = $state(0);
   let keyboard = $state(false), focusedCell = $state<number | null>(null);
-  let moreButton = $state<HTMLButtonElement>(), menuElement = $state<HTMLElement>(), boardElement = $state<HTMLElement>();
+  let moreButton = $state<HTMLButtonElement>(), menuMoreButton = $state<HTMLButtonElement>(), menuElement = $state<HTMLElement>(), boardElement = $state<HTMLElement>();
   let dockElement = $state<HTMLElement>();
   let controller = $state.raw<GameController>();
   let gameState = $state.raw<GameState>({ owned: false, canStudy: false, busy: false, hintComputing: false, saveState: 'saved', completionEvent: 0 });
   let booting = $state(true), bootError = $state(false), actionBusy = $state(false), backupBusy = $state(false), historyClosing = $state(false);
+  let checkingAuthority = $state(false);
   let announcement = $state(''), pendingStart = $state.raw<StartRequest>();
   let quickContinue = $state.raw<{ attemptId: string; generation: string; band: Band }>();
   let saveFailed = $state(false);
@@ -86,19 +87,24 @@
     themeTimer = setTimeout(refreshTheme, Math.max(1, nextLocalMidnight(now).getTime() - now.getTime()));
   }
   const layout = $derived(createLayout(width, height, preferences.boardShape));
-  const baseMenuRow = $derived(route === 'menu' || route === 'more');
-  const menuMoreSize = $derived(baseMenuRow ? 64 : layout.keySize);
+  const screen = $derived(route === 'more' ? overlay?.base ?? 'menu' : route);
+  const baseMenuRow = $derived(screen === 'menu');
+  const menuMoreSize = $derived(layout.menuActionHeight);
   const menuPanelRect = $derived(baseMenuRow
     ? { ...layout.menuPanel, y: layout.height - menuMoreSize, height: menuMoreSize,
       width: layout.landscape ? layout.menuPanel.width : layout.width - menuMoreSize - 4 } : layout.menuPanel);
-  const inGame = $derived(route === 'board' || route === 'more' && overlay?.base === 'board');
+  const inGame = $derived(screen === 'board');
   const selected = $derived(gameState.attempt?.selection ?? 0);
   const values = $derived(gameState.attempt ? getValues(gameState.attempt) : []);
   const conflicts = $derived(new Set(values.length ? findConflicts(values).flatMap(conflict => [...conflict.cells]) : []));
   const titleFloat = $derived(floatOffset(701, time, 'identity')), artFloat = $derived(floatOffset(702, time, 'identity'));
-  const blocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || gameState.busy || historyClosing || dialogLoading && route === 'more');
-  const closingBlocked = $derived(booting || actionBusy || gameState.busy && gameState.restorePhase !== 'staging' || historyClosing);
-  const concealed = $derived(!!gameState.restorePhase || !!overlay && ['settings','pause','backup','restart','replace','replay','recover'].includes(overlay.panel));
+  const sceneBlocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || gameState.busy);
+  const blocked = $derived(sceneBlocked || historyClosing || checkingAuthority || dialogLoading && route === 'more');
+  const closingBlocked = $derived(booting || actionBusy || checkingAuthority || gameState.busy && gameState.restorePhase !== 'staging' || historyClosing);
+  const studyPaused = $derived(!!gameState.restorePhase || overlay?.panel === 'pause');
+  // Native modal dialogs make the scene inert. Only explicit pause/restore
+  // obscures study; readable settings and tools keep active thinking time.
+  const boardVisible = $derived(!!gameState.attempt && gameState.owned);
   const saveState = $derived(bootError ? 'unavailable' : gameState.problem?.startsWith('conflict') ? 'conflict' : gameState.saveState === 'pending' ? 'saving' : gameState.saveState);
   const hintProblem = $derived.by(() => {
     if (!gameState.problem?.startsWith('hint-unavailable:')) return undefined;
@@ -109,7 +115,7 @@
   const continueBand = $derived(gameState.attempt?.role === 'quick' && gameState.attempt.status === 'completed' &&
     quickContinue?.attemptId === gameState.attempt.id && quickContinue.generation === gameState.attempt.generation ? quickContinue.band : undefined);
 
-  $effect(() => { controller?.setView({ board: inGame, concealed, visible: documentVisible }); });
+  $effect(() => { controller?.setView({ board: inGame, concealed: studyPaused, visible: documentVisible }); });
   $effect(() => {
     width; height; layout.landscape;
     const rect = dockElement?.getBoundingClientRect();
@@ -205,7 +211,10 @@
       if (focusReason === 'tool' || focusReason === 'undo') await focusCell(); else moreButton?.focus();
       focusReason = 'dismiss';
     } else if (next === 'board') await focusCell();
-    else if (next !== 'more') menuElement?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
+    else if (next !== 'more') {
+      if (previous === 'more') menuMoreButton?.focus({ preventScroll: true });
+      else menuElement?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
+    }
   }
   async function loadDialog() {
     if (DialogComponent || dialogLoading) return;
@@ -235,8 +244,9 @@
     if (closingBlocked || nav?.isClosing) return;
     if (overlay?.panel === 'backup' || recoveryBusy) cancelBackupOperation();
     const paneId = overlay?.id;
-    if (concealed && inGame && controller) {
-      actionBusy = true; await controller.checkAuthority(); actionBusy = false;
+    if (inGame && controller) {
+      checkingAuthority = true;
+      try { await controller.checkAuthority(); } finally { checkingAuthority = false; }
       if (overlay?.id !== paneId || gameState.restorePhase === 'activating') return;
     }
     focusReason = reason;
@@ -414,10 +424,10 @@
 
 <main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens) : undefined} {@attach singleActivation}>
   {#if appliedTheme}
-  <div class="scene" bind:clientWidth={width} bind:clientHeight={height}>
+  <div class={['scene', { 'study-paused': inGame && (studyPaused || !documentVisible) }]} bind:clientWidth={width} bind:clientHeight={height}>
     <Scene {layout} screen={inGame ? 'game' : 'menu'} {time} vessel={appliedTheme.definition.vessel} liquid={appliedTheme.definition.liquid} bubbles={appliedTheme.definition.bubbles} />
     {#if inGame}
-      {#if gameState.canStudy && gameState.attempt}
+      {#if boardVisible && gameState.attempt}
         <section class="board" aria-label={a.board} bind:this={boardElement} style={rectStyle(layout.board)}>
           {#each layout.cells as cell (cell.id)}
             {@const clue = gameState.attempt.definition.givens[cell.id] !== '0'}
@@ -433,7 +443,7 @@
             </button>
           {/each}
         </section>
-      {:else if !concealed}
+      {:else if !studyPaused}
         <section class="concealed" style={rectStyle(layout.board)} aria-label={c.paused}>
           <p>{gameState.attempt ? a.conflictView : a.choose}</p>
           {#if gameState.attempt}<button class="cream" disabled={blocked} onclick={() => gameState.conflictedChanges ? nav?.openPanel('recover') : resume(gameState.attempt!.role)}>{a.resumeHere}</button>{:else}<button class="cream" onclick={() => nav?.quit()}>{c.mainMenu}</button>{/if}
@@ -441,32 +451,32 @@
       {/if}
       <nav class={['dock', { landscape: layout.landscape, 'single-row': layout.dockSingleRow }]} aria-label={a.board} bind:this={dockElement} style={`${rectStyle(layout.dock)};--key:${layout.dockSingleRow ? layout.dock.height : layout.keySize}px`}>
         {#each [1,2,3,4,5,6,7,8,9] as number (number)}
-          <button class="cream numeric" disabled={blocked || !gameState.canStudy || gameState.attempt?.status !== 'playing'} aria-label={String(number)} onclick={() => dispatch({type:'enter',digit:number},true)}>{number}</button>
+          <button class="cream numeric" disabled={sceneBlocked || !boardVisible || gameState.attempt?.status !== 'playing'} aria-label={String(number)} onclick={() => dispatch({type:'enter',digit:number},true)}>{number}</button>
         {/each}
-        <button class={['cream', 'more', {'has-state': !!saveBadge}]} bind:this={moreButton} disabled={historyClosing} aria-label={`${copy.more}${gameState.attempt?.notesMode ? `, ${c.notes}` : ''}${saveBadge ? `, ${saveBadge}` : ''}`} aria-haspopup="dialog" onclick={() => nav?.openMore()}><span class="more-symbols"><Ellipsis aria-hidden="true" size={saveBadge ? 20 : 28} />{#if saveBadge && gameState.attempt?.notesMode}<Pencil aria-hidden="true" size={12} />{/if}</span>{#if saveBadge}<span class="save-label"><span>{saveBadge}</span></span>{:else if gameState.attempt?.notesMode}<span class="notes-mode"><Pencil aria-hidden="true" size={12} />{c.notes}</span>{/if}</button>
+        <button class={['cream', 'more', {'has-state': !!saveBadge}]} bind:this={moreButton} aria-label={`${copy.more}${gameState.attempt?.notesMode ? `, ${c.notes}` : ''}${saveBadge ? `, ${saveBadge}` : ''}`} aria-haspopup="dialog" onclick={() => nav?.openMore()}><span class="more-symbols"><Ellipsis aria-hidden="true" size={saveBadge ? 20 : 28} />{#if saveBadge && gameState.attempt?.notesMode}<Pencil aria-hidden="true" size={12} />{/if}</span>{#if saveBadge}<span class="save-label"><span>{saveBadge}</span></span>{:else if gameState.attempt?.notesMode}<span class="notes-mode"><Pencil aria-hidden="true" size={12} />{c.notes}</span>{/if}</button>
       </nav>
     {:else}
       <section class="identity" aria-label="Toadoku">
         <h1 style={`${rectStyle(layout.menuTitle)};font-size:${layout.titleFontSize}px;transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>Toadoku</h1>
         <div class="art-slot" style={`${rectStyle(layout.menuArt)};transform:translate(${artFloat.x}px,${artFloat.y}px)`}><img class="menu-art" src={menuSketch} alt={copy.art} width="1254" height="1254" draggable="false" decoding="async" /></div>
       </section>
-      <nav class={['menu-panel', { 'base-row': baseMenuRow }]} aria-label={route === 'quick' ? copy.quick : route === 'progression' ? copy.progression : 'Toadoku'} bind:this={menuElement} style={`${rectStyle(menuPanelRect)};--action:${layout.menuActionHeight}px`}>
-        {#if route === 'menu' || route === 'more'}
-          <button class="cream" disabled={blocked} onclick={() => nav?.go('quick')}>{copy.quick}</button>
-          <button class="cream" disabled={blocked || gameState.durability === 'ephemeral'} onclick={() => nav?.go('progression')}>{copy.progression}</button>
-        {:else if route === 'quick'}
+      <nav class={['menu-panel', { 'base-row': baseMenuRow }]} aria-label={screen === 'quick' ? copy.quick : screen === 'progression' ? copy.progression : 'Toadoku'} bind:this={menuElement} style={`${rectStyle(menuPanelRect)};--action:${layout.menuActionHeight}px`}>
+        {#if screen === 'menu'}
+          <button class="cream" disabled={sceneBlocked} onclick={() => nav?.go('quick')}>{copy.quick}</button>
+          <button class="cream" disabled={sceneBlocked || gameState.durability === 'ephemeral'} onclick={() => nav?.go('progression')}>{copy.progression}</button>
+        {:else if screen === 'quick'}
           <h2>{copy.quick}</h2>
-          <div class="difficulty">{#each ['easy','medium','hard'] as band (band)}<button class="cream" disabled={blocked || !controller} onclick={() => chooseQuick(band as Band)}>{copy[band as Band]}</button>{/each}</div>
-          {#if gameState.save?.attempts.some(attempt => attempt.role === 'quick')}<button class="cream" disabled={blocked} onclick={() => resume('quick')}>{a.resume}<ArrowRight size={20} /></button>{/if}
+          <div class="difficulty">{#each ['easy','medium','hard'] as band (band)}<button class="cream" disabled={sceneBlocked || !controller} onclick={() => chooseQuick(band as Band)}>{copy[band as Band]}</button>{/each}</div>
+          {#if gameState.save?.attempts.some(attempt => attempt.role === 'quick')}<button class="cream" disabled={sceneBlocked} onclick={() => resume('quick')}>{a.resume}<ArrowRight size={20} /></button>{/if}
           <button class="cream" onclick={() => {controller?.cancelStart();nav?.go('menu');}}>{copy.back}</button>
         {:else}
           <h2>{copy.progression}</h2>
-          <button class="cream" disabled={blocked || !controller} onclick={() => gameState.save?.attempts.some(attempt => attempt.role === 'frontier') ? resume('frontier') : start({role:'frontier',authorization:'initial'})}>{gameState.save?.attempts.some(attempt => attempt.role === 'frontier') ? a.resume : a.start}</button>
-          <button class="cream" disabled={blocked || !gameState.save?.profile.highestCompletedLeap} onclick={() => nav?.openPanel('replay')}>{a.replay}</button>
+          <button class="cream" disabled={sceneBlocked || !controller} onclick={() => gameState.save?.attempts.some(attempt => attempt.role === 'frontier') ? resume('frontier') : start({role:'frontier',authorization:'initial'})}>{gameState.save?.attempts.some(attempt => attempt.role === 'frontier') ? a.resume : a.start}</button>
+          <button class="cream" disabled={sceneBlocked || !gameState.save?.profile.highestCompletedLeap} onclick={() => nav?.openPanel('replay')}>{a.replay}</button>
           <button class="cream" onclick={() => {controller?.cancelStart();nav?.go('menu');}}>{copy.back}</button>
         {/if}
       </nav>
-      <button class="cream menu-more" aria-label={copy.more} disabled={blocked || !controller} onclick={() => nav?.openPanel('settings')} style={`right:0;bottom:0;width:${menuMoreSize}px;height:${menuMoreSize}px`}><Ellipsis size={28} /></button>
+      <button class="cream menu-more" bind:this={menuMoreButton} aria-label={copy.more} disabled={sceneBlocked || !controller} onclick={() => nav?.openPanel('settings')} style={`right:0;bottom:0;width:${menuMoreSize}px;height:${menuMoreSize}px`}><Ellipsis size={28} /></button>
       {#if booting || gameState.busy}
         <p class="scene-status" role="status">{a.loading}</p>
       {:else if bootError}

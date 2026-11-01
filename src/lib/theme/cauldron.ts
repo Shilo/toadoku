@@ -9,7 +9,7 @@ import { cauldronVessel as vessel, cauldronLiquid, cauldronBubbles, cauldronLiqu
 export const cauldron: ThemeTokens = {
   id: 'cauldron',
   water: { deep: '#4D190A', middle: '#BC5B1E', shallow: '#FFD08A' },
-  ground: { wet: '#1A1D22', dry: '#30363D', rim: '#899398' },
+  ground: { wet: '#1A1D22', dry: '#30363D', rim: '#899398', ink: '#FFF0CA' },
   decoration: { bubble: '#FFF0CA', bubbleEdge: '#4D190A' },
   leaf: {
     face: '#FFF0CA', lip: '#B66B25', highlight: '#FFF6DF', ink: '#301A13',
