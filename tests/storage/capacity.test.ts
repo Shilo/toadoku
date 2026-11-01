@@ -38,7 +38,7 @@ describe('essential state capacity', () => {
     const manifest = JSON.parse(readFileSync('public/catalog/v1/manifest.json', 'utf8')) as CatalogManifest;
     const loader = new CatalogLoader('https://storage-scale.test/catalog/v1/', { fetcher: async input => {
       const name = new URL(String(input)).pathname.split('/').at(-1)!;
-      return new Response(new Uint8Array(readFileSync(`public/catalog/v1/${name}`)));
+      return new Response(new Uint8Array(readFileSync(`public/catalog/v1/${name}`)), { headers: { 'content-type': 'application/json' } });
     } });
     const record = await loader.getRecord('easy', 0); expect(record.kind).toBe('ready');
     if (record.kind !== 'ready') throw new Error(record.reason);

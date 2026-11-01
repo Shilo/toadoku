@@ -17,7 +17,7 @@ beforeAll(async () => {
   initialPools = pools().map(pool => ({ ...pool, count: manifest.pools[pool.pool].count }));
   const loader = new CatalogLoader('https://ephemeral.test/catalog/v1/', { fetcher: async input => {
     const name = new URL(String(input)).pathname.split('/').at(-1)!;
-    return new Response(new Uint8Array(readFileSync(`public/catalog/v1/${name}`)));
+    return new Response(new Uint8Array(readFileSync(`public/catalog/v1/${name}`)), { headers: { 'content-type': 'application/json' } });
   } });
   const record = await loader.getRecord('easy', nextOrdinal(initialPools[0])!.ordinal);
   if (record.kind !== 'ready') throw new Error(record.reason); certified = record.value; loader.dispose();

@@ -1,12 +1,19 @@
+import type { PwaClient } from '../../pwa/client';
+import type { InstallSupport } from '../../pwa/install';
+import type { OfflineSupport } from '../../offline/reserve';
 import type { Attempt, Band, CompletionReceipt, HintPayload, Preferences, Profile } from '../contracts';
 import type { SessionCommand } from '../../session';
-export type DialogView = 'more' | 'settings' | 'notes' | 'hint' | 'result' | 'pause' | 'replay' | 'backup' | 'restart' | 'replace' | 'recover';
+export type DialogView = 'more' | 'settings' | 'notes' | 'hint' | 'result' | 'pause' | 'replay' | 'backup' | 'restart' | 'replace' | 'recover' | 'pwa';
 export type CloseReason = 'dismiss' | 'tool' | 'undo' | 'menu';
 export type DialogSaveState = 'saved' | 'saving' | 'unsaved' | 'conflict' | 'unavailable';
 export interface RestoreSummary { replaceWallet: number; importedWallet: number; activeAttempts: number; receipts: number; issued: number }
 type Action = void | Promise<void>;
 export interface GameDialogProps {
   view: DialogView;
+  pwa?: PwaClient;
+  install?: InstallSupport;
+  offline?: OfflineSupport;
+  offlineUnavailable?: boolean;
   locale: 'en' | 'de' | 'es';
   attempt?: Attempt;
   replayAttempt?: Attempt;

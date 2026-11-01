@@ -1,5 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import PwaPanel from '../../pwa/PwaPanel.svelte';
+  import { pwaCopy } from '../../pwa/copy';
   import X from '@lucide/svelte/icons/x';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import ArrowRight from '@lucide/svelte/icons/arrow-right';
@@ -20,7 +22,7 @@
   import { bandForPool, poolForLeap } from '../../modes';
   import type { CloseReason, DialogView, GameDialogProps } from './types';
   import type { SessionCommand } from '../../session';
-  let { view, locale, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
+  let { view, locale, pwa, install, offline, offlineUnavailable, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
     onCommand, onNavigate, onClose, onPreference, onHint, onContinue, onReplay, onRestart, onReplace, onExport, onRecovery, onResumeSaved, onRestore, onRestoreInput, onRetry }: GameDialogProps = $props();
   const c = $derived(uiCopy[locale]);
   let viewportWidth = $state(window.innerWidth), viewportHeight = $state(window.innerHeight);
@@ -33,7 +35,7 @@
   const notes = $derived(attempt?.notes[selected] ?? 0);
   const canErase = $derived(!frozen && !clue && !!(value || notes));
   const canRecover = $derived(!!onRecovery && (exportError || ['unsaved', 'conflict', 'unavailable'].includes(saveState)));
-  const title = $derived(view === 'more' ? c.game : view === 'settings' ? c.settings : view === 'notes' ? c.cell(Math.floor(selected / 9) + 1, selected % 9 + 1) : view === 'result' ? c.completed : view === 'pause' ? c.paused : view === 'replay' ? c.replay : view === 'backup' ? c.backup : view === 'restart' ? c.restartTitle : view === 'replace' ? c.replaceTitle : view === 'recover' ? c.recoverTitle : c.hint);
+  const title = $derived(view === 'pwa' ? pwaCopy[locale].title : view === 'more' ? c.game : view === 'settings' ? c.settings : view === 'notes' ? c.cell(Math.floor(selected / 9) + 1, selected % 9 + 1) : view === 'result' ? c.completed : view === 'pause' ? c.paused : view === 'replay' ? c.replay : view === 'backup' ? c.backup : view === 'restart' ? c.restartTitle : view === 'replace' ? c.replaceTitle : view === 'recover' ? c.recoverTitle : c.hint);
   const hintDescription = $derived(hint ? describeHint(hint, locale) : undefined);
   const popoverStyle = $derived.by(() => {
     if (view !== 'more' || !anchor) return '';
@@ -108,7 +110,7 @@
     if(document.activeElement!==document.body&&document.activeElement!==trigger)return;
     if(!trigger.disabled)trigger.focus();else dialog.querySelector<HTMLElement>('#game-dialog-title')?.focus();
   }
-  function backTarget(): DialogView { return view === 'backup' || view === 'restart' ? 'settings' : 'more'; }
+  function backTarget(): DialogView { return ['backup','restart','pwa'].includes(view) ? 'settings' : 'more'; }
 </script>
 
 <svelte:window bind:innerWidth={viewportWidth} bind:innerHeight={viewportHeight} />
@@ -150,10 +152,13 @@
         {#if attempt}<div><dt>{c[attempt.role]}</dt><dd>{c[attempt.policy.band]}</dd></div><div><dt>{c.elapsed}</dt><dd>{formatElapsed(attempt.elapsedMs)}</dd></div>{/if}
         {#if profile}<div><dt class="metric-label"><Sprout size={18} aria-hidden="true" /><span>{c.metamorphosis}</span></dt><dd>{profile.frontier.metamorphosis}</dd></div><div><dt class="metric-label"><Footprints size={18} aria-hidden="true" /><span>{c.leap}</span></dt><dd>{profile.frontier.leap}</dd></div><div><dt class="metric-label"><Droplet size={18} aria-hidden="true" /><span>{c.wallet}</span></dt><dd>{profile.wallet}</dd></div>{/if}
       </dl><p>{c.rewardHelp}</p></details>
+      <button class="secondary" disabled={busy} onclick={() => navigate('pwa')}><Download size={20} />{pwaCopy[locale].title}</button>
       <button class="secondary" disabled={busy} onclick={() => navigate('backup')}><Download size={20} />{c.backup}</button>
       {#if attempt}<button class="secondary" disabled={busy || frozen} onclick={() => navigate('restart')}><RotateCcw size={20} />{c.restart}</button>{/if}
       {#if attempt}<button class="secondary" disabled={busy || frozen} onclick={() => navigate('replace')}><ArrowRight size={20} /><span>{c.newPuzzle}</span></button>{/if}
     </div>
+  {:else if view === 'pwa'}
+    <PwaPanel {locale} client={pwa} {install} {offline} unavailable={offlineUnavailable} />
   {:else if view === 'notes' && attempt}
     <div class="pane notes-pane"><p>{clue ? c.clue : c.editable}</p>
       <div class="large-cell" aria-label={`${c.value}: ${value || c.empty}`}>

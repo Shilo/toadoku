@@ -5,7 +5,7 @@ import { CatalogLoader } from '../../src/lib/catalog/load';
 import { branch, inclusionProof, manifestMembership, merkleLevels, recordLeaf, shardLeaf, verifyAttestedRecord } from '../../src/lib/catalog/attestation';
 import type { AttestedRecord, CatalogManifest } from '../../src/lib/catalog/types';
 const sha = (value: Uint8Array) => createHash('sha256').update(value).digest('hex');
-const fetcher = (async (input: string | URL | Request) => new Response(new Uint8Array(await readFile(`public/catalog/v1/${new URL(String(input)).pathname.split('/').at(-1)}`)))) as typeof fetch;
+const fetcher = (async (input: string | URL | Request) => new Response(new Uint8Array(await readFile(`public/catalog/v1/${new URL(String(input)).pathname.split('/').at(-1)}`)), { headers: { 'content-type': 'application/json' } })) as typeof fetch;
 async function certifiedRecord() {
   const loader = new CatalogLoader('https://example.test/toadoku/catalog/v1/', { fetcher });
   const result = await loader.getRecord('easy', 0);

@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
+  import { createPwaClient, type PwaClient } from './lib/pwa/client';
+  import { createInstallSupport, type InstallSupport } from './lib/pwa/install';
+  import type { OfflineSupport } from './lib/offline/reserve';
   import Ellipsis from '@lucide/svelte/icons/ellipsis';
   import Pencil from '@lucide/svelte/icons/pencil';
   import ArrowRight from '@lucide/svelte/icons/arrow-right';
@@ -30,6 +33,10 @@
   let moreButton = $state<HTMLButtonElement>(), menuElement = $state<HTMLElement>(), boardElement = $state<HTMLElement>();
   let dockElement = $state<HTMLElement>();
   let controller = $state.raw<GameController>();
+  let pwa = $state.raw<PwaClient>(), install = $state.raw<InstallSupport>(), offline = $state.raw<OfflineSupport>();
+  let offlineUnavailable = $state(false);
+  let offlinePromise: Promise<void> | undefined, offlineSequence = 0;
+  let shellTimer: ReturnType<typeof setTimeout> | undefined, shellStarted = false;
   let gameState = $state.raw<GameState>({ owned: false, canStudy: false, busy: false, hintComputing: false, saveState: 'saved', completionEvent: 0 });
   let booting = $state(true), bootError = $state(false), actionBusy = $state(false), backupBusy = $state(false), historyClosing = $state(false);
   let announcement = $state(''), pendingStart = $state.raw<StartRequest>();
@@ -59,7 +66,7 @@
   const titleFloat = $derived(floatOffset(701, time, 'identity')), artFloat = $derived(floatOffset(702, time, 'identity'));
   const blocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || gameState.busy || historyClosing || dialogLoading && route === 'more');
   const closingBlocked = $derived(booting || actionBusy || gameState.busy && gameState.restorePhase !== 'staging' || historyClosing);
-  const concealed = $derived(!!gameState.restorePhase || !!overlay && ['settings','pause','backup','restart','replace','replay','recover'].includes(overlay.panel));
+  const concealed = $derived(!!gameState.restorePhase || !!overlay && ['settings','pause','backup','restart','replace','replay','recover','pwa'].includes(overlay.panel));
   const saveState = $derived(bootError ? 'unavailable' : gameState.problem?.startsWith('conflict') ? 'conflict' : gameState.saveState === 'pending' ? 'saving' : gameState.saveState);
   const hintProblem = $derived.by(() => {
     if (!gameState.problem?.startsWith('hint-unavailable:')) return undefined;
@@ -85,6 +92,13 @@
   }
   function accept(next: GameState) {
     gameState = next;
+    if (next.canStudy && next.attempt && !shellStarted && !shellTimer) {
+      shellTimer = setTimeout(() => {
+        shellTimer = undefined;
+        if (disposed || document.hidden || !controller?.state.canStudy) return;
+        shellStarted = true; void pwa?.start(); void loadOfflineSupport();
+      }, 2000);
+    }
     if (next.save) {
       locale = next.save.preferences.language;
       if (previousMotion !== next.save.preferences.motion) {
@@ -100,6 +114,23 @@
       if (inGame) nav?.openPanel('result');
     }
   }
+  async function loadOfflineSupport() {
+    if (offline || offlinePromise || !controller) return offlinePromise;
+    const current = controller, request = ++offlineSequence;
+    offlineUnavailable = false;
+    if (current.state.durability === 'ephemeral') { offlineUnavailable = true; return; }
+    offlinePromise = (async () => {
+      try {
+        const { createOfflineSupport } = await import('./lib/offline/reserve');
+        const support = await createOfflineSupport(current.repository, current.catalog);
+        if (disposed || request !== offlineSequence || current !== controller) support.dispose();
+        else offline = support;
+      } catch { if (request === offlineSequence && !disposed) offlineUnavailable = true; }
+      finally { if (request === offlineSequence) offlinePromise = undefined; }
+    })();
+    return offlinePromise;
+  }
+  function releaseOfflineSupport() { offlineSequence++; offline?.dispose(); offline = undefined; offlinePromise = undefined; }
   async function boot() {
     cancelBackupOperation();
     const request = ++bootSequence;
@@ -110,12 +141,12 @@
       if (disposed || request !== bootSequence) { if (result.kind === 'committed') void result.value.dispose(); return; }
       if (result.kind === 'committed') {
         const previous = controller;
-        unsubscribe?.(); controller = result.value; unsubscribe = controller.subscribe(accept); bootError = !controller.state.save;
+        releaseOfflineSupport(); unsubscribe?.(); controller = result.value; unsubscribe = controller.subscribe(accept); bootError = !controller.state.save; void loadOfflineSupport();
         if (previous && previous !== controller) void previous.dispose();
         if ((route === 'board' || route === 'more' && overlay?.base === 'board') && !controller.state.attempt) nav?.go('menu');
       } else bootError = true;
     } catch { if (!disposed && request === bootSequence) bootError = true; }
-    finally { if (!disposed && request === bootSequence) booting = false; }
+    finally { if (!disposed && request === bootSequence) { booting = false; void pwa?.connectExisting(); } }
   }
   async function playWithoutSaving() {
     if (blocked) return;
@@ -127,18 +158,20 @@
       const next = await bootstrapEphemeral(new URL(import.meta.env.BASE_URL, location.href), locale, forbidden);
       if (disposed || request !== bootSequence) { void next.dispose(); return; }
       const previous = controller;
-      unsubscribe?.(); controller = next; unsubscribe = controller.subscribe(accept); bootError = false;
+      releaseOfflineSupport(); unsubscribe?.(); controller = next; unsubscribe = controller.subscribe(accept); bootError = false;
       if (previous && previous !== next) void previous.dispose();
       nav?.go('quick');
     } catch { if (!disposed && request === bootSequence) bootError = true; }
     finally { if (!disposed && request === bootSequence) booting = false; }
   }
   onMount(() => {
+    install = createInstallSupport();
+    pwa = createPwaClient(new URL(import.meta.env.BASE_URL, location.href));
     nav = createNavigation(window, (next, pane) => { void renderRoute(next, pane); });
     stopMotion = createMotionClock(value => time = value);
     void boot();
     const timer = setInterval(() => controller?.checkpoint(), 1000);
-    return () => { disposed = true; bootSequence++; cancelBackupOperation(); clearInterval(timer); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
+    return () => { disposed = true; bootSequence++; if (shellTimer) clearTimeout(shellTimer); releaseOfflineSupport(); pwa?.dispose(); install?.dispose(); cancelBackupOperation(); clearInterval(timer); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
   });
   async function focusCell() {
     await tick(); if (route !== 'board' || !gameState.canStudy) return;
@@ -153,6 +186,7 @@
     }
     if (overlay?.panel === 'backup' && (pane?.id !== overlay.id || next !== 'more')) cancelBackupOperation();
     route = next; overlay = pane; historyClosing = false;
+    if (pane?.panel === 'pwa') void loadOfflineSupport();
     if (next === 'menu' || next === 'quick' || next === 'progression') quickContinue = undefined;
     if (pane) panes.set(pane.id, pane.panel);
     if (pane && !DialogComponent) void loadDialog();
@@ -224,6 +258,8 @@
   async function start(request: StartRequest) {
     if (blocked || !controller) return;
     const revision = routeRevision;
+    await loadOfflineSupport();
+    if (revision !== routeRevision || disposed || !controller) return;
     if (await controller.start(request) && revision === routeRevision && !disposed) { pendingStart = undefined; nav?.go('board'); }
   }
   function chooseQuick(band: Band) {
@@ -361,7 +397,7 @@
     element.addEventListener('mousedown', guard, true); element.addEventListener('click', guard, true);
     return () => { element.removeEventListener('mousedown', guard, true); element.removeEventListener('click', guard, true); };
   }
-  function visibility() { documentVisible = !document.hidden; }
+  function visibility() { documentVisible = !document.hidden; if (document.hidden) offline?.cancel(); }
   async function pageShown() { if (controller?.state.attempt) await controller.checkAuthority(); documentVisible = !document.hidden; }
 </script>
 
@@ -440,7 +476,7 @@
   </div>
   {#if route === 'more' && overlay}
     {#if DialogComponent}
-    <DialogComponent view={overlay.panel} {locale} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
+    <DialogComponent view={overlay.panel} {locale} {pwa} {install} {offline} {offlineUnavailable} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
       receipt={gameState.receipt} {continueBand} hint={gameState.canStudy ? gameState.hint : undefined} {hintProblem} busy={blocked || gameState.hintComputing} {closingBlocked} {saveState} {anchor} restorePreview={restorePreview?.summary} {restoreError} {exportError} {recoveryBusy} {recoveryProblem}
       onCommand={command => dispatch(command)} onNavigate={navigatePanel} onClose={closeDialog} onPreference={changePreferences}
       onHint={async choice => { if (!blocked) await controller?.requestHint(choice); }} onContinue={continuePuzzle} onReplay={replay}

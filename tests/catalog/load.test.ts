@@ -17,7 +17,7 @@ function fetchFixture(options: { status?: number; mutate?: (path: string, bytes:
       });
       const path = url.pathname.split('/').at(-1)!;
       const bytes = await readFile(`public/catalog/v1/${path}`);
-      return new Response(new Uint8Array(options.mutate?.(path, bytes) ?? bytes), { status: options.status ?? 200 });
+      return new Response(new Uint8Array(options.mutate?.(path, bytes) ?? bytes), { status: options.status ?? 200, headers: { 'content-type': 'application/json' } });
     } finally { active--; }
   }) as typeof fetch;
   return { requests, fetcher, maximum: () => maximum };

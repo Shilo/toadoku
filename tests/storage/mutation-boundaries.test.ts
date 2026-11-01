@@ -49,7 +49,7 @@ it('refuses swapping two fully certified definitions in one existing attempt', a
   // Pure Node fixture transport only. Native browser loader tests retain their default real fetch.
   const loader = new CatalogLoader('https://storage-mutation.test/catalog/v1/', { fetcher: (async input => {
     const name = new URL(String(input)).pathname.split('/').at(-1)!;
-    return new Response(new Uint8Array(await readFile(`public/catalog/v1/${name}`)));
+    return new Response(new Uint8Array(await readFile(`public/catalog/v1/${name}`)), { headers: { 'content-type': 'application/json' } });
   }) as typeof fetch });
   try {
     const first = await loader.getRecord('easy', 0), second = await loader.getRecord('easy', 1);
@@ -140,7 +140,7 @@ it('requires exact lexical hashes and refuses conversion hooks on unknown proven
 it('accepts actual certified records in all five source rating intervals', async () => {
   const loader = new CatalogLoader('https://storage-metadata.test/catalog/v1/', { fetcher: (async input => {
     const name = new URL(String(input)).pathname.split('/').at(-1)!;
-    return new Response(new Uint8Array(await readFile(`public/catalog/v1/${name}`)));
+    return new Response(new Uint8Array(await readFile(`public/catalog/v1/${name}`)), { headers: { 'content-type': 'application/json' } });
   }) as typeof fetch });
   try {
     for (const pool of ['easy', 'medium-low', 'medium-high', 'hard-low', 'hard-high'] as const) {
