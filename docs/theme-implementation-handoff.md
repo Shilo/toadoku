@@ -36,7 +36,7 @@ The user's subsequent correction requires preserving the established Quiet Flat 
 
 Build a small typed semantic token system. Theme swapping must update appearance coherently without changing gameplay state or geometry contracts. Cover:
 
-- Each theme may own one optional UI font, with a readable native system fallback when absent/failed. Pond uses a Nunito-derived face and Cauldron a Bitter-derived face. Solving digits/notes/numeric keys retain a shared Outfit-derived subset. The stylized Toadoku wordmark is baked vector data rather than another font download. Preserve fallbacks, colors, weights, accessibility and established geometry. See the current authoring guide and measured font-delivery comparison; these supersede the earlier global-UI-font and full-title-font decisions.
+- Each theme may own one optional UI font, with a readable native system fallback when absent/failed. Pond uses a Baloo 2-derived face and Cauldron a Fraunces-derived face. Solving digits/notes/numeric keys retain a shared Outfit-derived subset. The stylized Toadoku wordmark is baked vector data rather than another font download. Preserve fallbacks, colors, weights, accessibility and established geometry. See the current authoring guide and measured font-delivery comparison; these supersede the earlier global-UI-font and full-title-font decisions.
 - Three liquid/background colors and two shore/vessel/UI-surface colors.
 - Controls: faces, text/icons, highlights/shadows, pressed, selected, disabled, hover and keyboard focus states; button shape/radius/style.
 - Windows, sheets, dialogs and popovers: surfaces, text, shadow and radius. Each individual surface must have equal radii on all four corners, including mobile sheets.

@@ -1,6 +1,6 @@
 /* Licensed, renamed font subsets and reproducible provenance: docs/production-assets.md. */
 :root {
-  --font-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   --font-solving: "ToadokuSolving", ui-sans-serif, system-ui, sans-serif;
 }
 

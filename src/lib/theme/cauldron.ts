@@ -1,7 +1,7 @@
 import type { ThemeTokens } from './tokens';
 import type { ThemeDefinition } from './runtime';
 import { presentation } from './presentation';
-import bitterUrl from '../../assets/fonts/Bitter-UI.woff2?url';
+import frauncesUrl from '../../assets/fonts/Fraunces-UI.woff2?url';
 import { wordmark } from './wordmarks/cauldron';
 import { medallionShape, squashRindPath } from '../leaves/medallion';
 import { cauldronVessel as vessel, cauldronLiquid, cauldronBubbles, cauldronLiquidProfile } from '../scene/cauldron';
@@ -51,7 +51,7 @@ export const cauldronDark: ThemeTokens = {
 };
 export const definition: ThemeDefinition = {
   light: cauldron, dark: cauldronDark,
-  font: { family: 'ToadokuCauldronUI', url: bitterUrl, weight: '400 700' }, wordmark,
+  font: { family: 'ToadokuCauldronUI', url: frauncesUrl, weight: '400 700' }, wordmark,
   cellPath: id => medallionShape(id).path, cellDetail: squashRindPath, vessel,
   liquid: cauldronLiquid, bubbles: cauldronBubbles,
 };

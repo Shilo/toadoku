@@ -8,8 +8,8 @@ import { wordmark as cauldronWordmark } from '../src/lib/theme/wordmarks/cauldro
 
 it('pins the verified language subsets and unchanged solving glyph derivative', () => {
   for (const [file, hash] of Object.entries({
-    'Nunito-UI.woff2': '37e9b35cbe78473ad152c4b2ab6be67195bc18c4a44029c87c0bca1145a8ee4d',
-    'Bitter-UI.woff2': '316e25731901e02e1485c0e77ba7ddd517942687566437ecd5c61a7fea03d766',
+    'Baloo2-UI.woff2': '7dd1e14afb82d04391029fe14c89610a104c4a6d7d60cf044f066a5b8cefc606',
+    'Fraunces-UI.woff2': 'ea65187915d697aec1579b38c6117e750833c9ba24e6c7c1e2eb39cf3dbe477f',
     'Outfit-Solving.woff2': '94521752365c23a599f084d01f8e21fa9f8ac0b120607f55f3cd9cf60e00d564',
   })) {
     const bytes = readFileSync(`src/assets/fonts/${file}`);

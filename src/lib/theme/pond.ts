@@ -1,4 +1,4 @@
-import nunitoUrl from '../../assets/fonts/Nunito-UI.woff2?url';
+import balooUrl from '../../assets/fonts/Baloo2-UI.woff2?url';
 import type { ThemeDefinition } from './runtime';
 import type { ThemeTokens } from './tokens';
 import { themeStyle as mapThemeStyle } from './tokens';
@@ -66,7 +66,7 @@ export const pondDark: ThemeTokens = {
   dialog: { surface: '#203D36', edge: '#A7C4B4', ink: '#FFF5D9', backdrop: 'rgb(12 28 24 / 45%)' },
 };
 export const definition: ThemeDefinition = {
-  light: pond, dark: pondDark, font: { family: 'ToadokuPondUI', url: nunitoUrl, weight: '400 700' }, wordmark,
+  light: pond, dark: pondDark, font: { family: 'ToadokuPondUI', url: balooUrl, weight: '400 700' }, wordmark,
   liquid: pondLiquid, vessel: shore,
   cellPath: id => leafShape(id).path,
 };

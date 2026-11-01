@@ -23,7 +23,7 @@ import uharfbuzz as hb
 from fontTools import subset
 from fontTools.pens.boundsPen import BoundsPen
 from fontTools.pens.svgPathPen import SVGPathPen
-from fontTools.pens.recordingPen import RecordingPen
+from fontTools.pens.recordingPen import DecomposingRecordingPen, RecordingPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
@@ -36,10 +36,13 @@ EVIDENCE = ROOT / 'prototypes/theme-font-measurements'
 ASSETS = ROOT / 'src/assets/fonts'
 WORDMARKS = ROOT / 'src/lib/theme/wordmarks'
 SOURCES = {
-    'Nunito': ('ToadokuPondUI', 'bb55a5ca5c2042335b3991af27c4d0705d0ef41cac6164ac737fd8f2a1e85207',
-               '580df76c95a1ec5ab878ceb25bb3d85c6a076804e9c970c8c6972aea775fdf65'),
-    'Bitter': ('ToadokuCauldronUI', 'ef2b9a711fb02f1e5823b34da1b7450e0fc76793b7d733a8b41006e24916d4a7',
-              '152a1e283e23b42c4940da4c72f2f5bebaa17969cb77c76d7af05903846006f1'),
+    'Baloo2': ('ToadokuPondUI', 'Baloo2[wght].ttf',
+               'd47a6852548059b1db49a1319d06d499d546c3fa2237cf9eee9c43c8abb025c2',
+               'ad09b05dc8bc678c9daf7c4c5f7ef1f55e5726127f4330b2e98e40b9dffcb860', {}),
+    'Fraunces': ('ToadokuCauldronUI', 'Fraunces[SOFT,WONK,opsz,wght].ttf',
+                 '177ff6c0f14e5550a3c624247cd1189611d4eb65d000b14944c63d967958abbb',
+                 'bdf4c22802eaf804f998195871c6b8938aac2ac14b2d78a8bd66a6f1eced833b',
+                 {'opsz': 9, 'SOFT': 50, 'WONK': 0}),
 }
 TITLE_SOURCES = {
     'pond': ('Chewy', '7cf75ea288f82fd20badea8ab4da7a656a96a7277c170811e813b3d3d6294147'),
@@ -112,8 +115,8 @@ def rename(font: TTFont, family: str) -> None:
             font['name'].setName(values[name.nameID], name.nameID, name.platformID, name.platEncID, name.langID)
 
 
-def ui_font(name: str, family: str, expected: str, license_hash: str) -> dict:
-    data = source(name, f'{name}[wght].ttf', expected)
+def ui_font(name: str, family: str, filename: str, expected: str, license_hash: str, fixed_axes: dict) -> dict:
+    data = source(name, filename, expected)
     license_data = source(name, 'OFL.txt', license_hash)
     font = TTFont(io.BytesIO(data), recalcTimestamp=False)
     # The three supported alphabets fit Latin-1 plus capital sharp S. Preserve
@@ -131,18 +134,33 @@ def ui_font(name: str, family: str, expected: str, license_hash: str) -> dict:
     subsetter = subset.Subsetter(options=options)
     subsetter.populate(unicodes=requested)
     subsetter.subset(font)
-    font = instantiateVariableFont(font, {'wght': (400, 700)}, inplace=True)
+    source_axes = {axis.axisTag: axis for axis in font['fvar'].axes}
+    for tag, value in fixed_axes.items():
+        if tag not in source_axes or not source_axes[tag].minValue <= value <= source_axes[tag].maxValue:
+            raise ValueError(f'{name} invalid fixed axis: {tag}={value}')
+    font = instantiateVariableFont(font, {'wght': (400, 700), **fixed_axes}, inplace=True)
+    if [(axis.axisTag, axis.minValue, axis.maxValue) for axis in font['fvar'].axes] != [('wght', 400, 700)]:
+        raise ValueError(f'{name} must expose only the reviewed 400-700 weight axis')
     rename(font, family)
     missing = sorted({character for character in REQUIRED + unicodedata.normalize('NFD', REQUIRED)
                       if ord(character) not in font.getBestCmap()})
     if missing:
         raise ValueError(f'{name} is missing required EN/DE/ES characters: {missing}')
+    weight_outlines = []
+    for weight in [400, 500, 600, 700]:
+        glyphs = font.getGlyphSet(location={'wght': weight})
+        pen = RecordingPen()
+        glyphs[font.getBestCmap()[ord('a')]].draw(pen)
+        weight_outlines.append(repr(pen.value))
+    if len(set(weight_outlines)) != 4:
+        raise ValueError(f'{name} must retain genuine outlines for all four used weights')
     output = woff2(font)
     emit(ASSETS / f'{name}-UI.woff2', output)
     emit(ASSETS / f'{name}-OFL.txt', license_data)
     return {'source': sizes(data), 'output': sizes(output), 'family': family,
             'weight': [font['fvar'].axes[0].minValue, font['fvar'].axes[0].maxValue],
-            'mappedCodepoints': len(font.getBestCmap()), 'requiredLanguageCharacters': REQUIRED}
+            'mappedCodepoints': len(font.getBestCmap()), 'requiredLanguageCharacters': REQUIRED,
+            'fixedAxes': fixed_axes, 'realWeightOutlineChecks': [400, 500, 600, 700]}
 
 
 def number(value: float) -> str:
@@ -234,16 +252,16 @@ def verify_solving(original: TTFont, derived: TTFont) -> None:
                 raise ValueError(f'Solving glyph hinting changed: {char!r}')
 
 
-def verify_ui_shaping(name: str, family: str, expected: str, license_hash: str) -> dict:
+def verify_ui_shaping(name: str, family: str, filename: str, expected: str, license_hash: str, fixed_axes: dict) -> dict:
     """NFC/NFD language coverage plus default kerning/mark shaping at used weights."""
-    original = TTFont(io.BytesIO(source(name, f'{name}[wght].ttf', expected)), recalcTimestamp=False)
+    original = TTFont(io.BytesIO(source(name, filename, expected)), recalcTimestamp=False)
     derived = TTFont(ASSETS / f'{name}-UI.woff2', recalcTimestamp=False)
-    def shaping(font: TTFont, weight: int, text: str) -> list:
+    def shaping(font: TTFont, weight: int, text: str, pins: dict) -> list:
         font.flavor = None
         stream = io.BytesIO()
         font.save(stream)
         face = hb.Font(hb.Face(stream.getvalue()))
-        face.set_variations({'wght': weight})
+        face.set_variations({'wght': weight, **pins})
         buffer = hb.Buffer()
         buffer.add_str(text)
         buffer.guess_segment_properties()
@@ -255,7 +273,7 @@ def verify_ui_shaping(name: str, family: str, expected: str, license_hash: str) 
         if {ord(char) for char in text} - set(derived.getBestCmap()):
             raise ValueError(f'{name} shaping corpus contains missing glyphs')
         for weight in [400, 500, 600, 700]:
-            before, after = shaping(original, weight, text), shaping(derived, weight, text)
+            before, after = shaping(original, weight, text, fixed_axes), shaping(derived, weight, text, {})
             if len(before) != len(after):
                 raise ValueError(f'{name} shaped glyph count changed')
             maximum = max(maximum, max(abs(a - b) for p, q in zip(before, after) for a, b in zip(p, q)))
@@ -264,7 +282,53 @@ def verify_ui_shaping(name: str, family: str, expected: str, license_hash: str) 
     if maximum > 2:
         raise ValueError(f'{name} shaping normalization exceeds the reviewed bound: {maximum}')
     return {'maximumPositionRoundingUnits': maximum, 'unitsPerEm': derived['head'].unitsPerEm,
-            'forms': ['NFC', 'NFD'], 'weights': [400, 500, 600, 700]}
+            'forms': ['NFC', 'NFD'], 'weights': [400, 500, 600, 700], 'fixedAxes': fixed_axes}
+
+
+def verify_fixed_axis_outlines(name: str, family: str, filename: str, expected: str, license_hash: str, fixed_axes: dict) -> dict:
+    """Prove the baked axes retain sampled source shapes, not just advance widths."""
+    original = TTFont(io.BytesIO(source(name, filename, expected)), recalcTimestamp=False)
+    derived = TTFont(ASSETS / f'{name}-UI.woff2', recalcTimestamp=False)
+    text = REQUIRED + ' Quick Play Progression Einstellungen Zurück Progresión Español '
+    def contours(font: TTFont, location: dict) -> list:
+        font.flavor = None
+        stream = io.BytesIO()
+        font.save(stream)
+        face = hb.Font(hb.Face(stream.getvalue()))
+        face.set_variations(location)
+        buffer = hb.Buffer()
+        buffer.add_str(text)
+        buffer.guess_segment_properties()
+        hb.shape(face, buffer, {'kern': True, 'liga': True})
+        glyphs, order = font.getGlyphSet(location=location), font.getGlyphOrder()
+        result = []
+        for info in buffer.glyph_infos:
+            pen = DecomposingRecordingPen(glyphs)
+            glyphs[order[info.codepoint]].draw(pen)
+            result.append(pen.value)
+        return result
+    maximum = 0
+    for weight in [400, 500, 600, 700]:
+        before = contours(original, {'wght': weight, **fixed_axes})
+        after = contours(derived, {'wght': weight})
+        if len(before) != len(after):
+            raise ValueError(f'{name} pinned-axis shaped count changed')
+        for left, right in zip(before, after):
+            if len(left) != len(right):
+                raise ValueError(f'{name} pinned-axis contour topology changed')
+            for (operation, points), (new_operation, new_points) in zip(left, right):
+                if operation != new_operation or len(points) != len(new_points):
+                    raise ValueError(f'{name} pinned-axis contour topology changed')
+                for point, new_point in zip(points, new_points):
+                    if (point is None) != (new_point is None):
+                        raise ValueError(f'{name} pinned-axis contour endpoint changed')
+                    if point is not None:
+                        maximum = max(maximum, max(abs(a - b) for a, b in zip(point, new_point)))
+    if maximum > 3:
+        raise ValueError(f'{name} pinned-axis contour rounding exceeds the reviewed bound: {maximum}')
+    return {'fixedAxes': fixed_axes, 'weights': [400, 500, 600, 700],
+            'maximumCoordinateRoundingUnits': maximum, 'unitsPerEm': derived['head'].unitsPerEm,
+            'matchingSampledContourTopology': True}
 
 
 def main() -> None:
@@ -289,6 +353,8 @@ def main() -> None:
     emit(ASSETS / 'Outfit-Solving.woff2', outfit)
     report = {'sourceRevision': REVISION, 'toolVersions': {'fonttools': '4.60.1', 'brotli': '1.1.0', 'uharfbuzz': '0.52.0', 'pillow': '11.3.0'},
               'uiFonts': ui, 'uiShaping': {name: verify_ui_shaping(name, *parameters) for name, parameters in SOURCES.items()},
+              'fixedAxisOutlineProof': {name: verify_fixed_axis_outlines(name, *parameters)
+                                        for name, parameters in SOURCES.items() if parameters[-1]},
               'wordmarks': titles, 'outfit': {'originalTtf': sizes(outfit_source), 'fullWoff2': sizes(outfit_full),
                 'solvingWoff2': sizes(outfit), 'family': 'ToadokuSolving', 'characters': ' 0123456789!',
                 'outlineAdvanceHintingParityWeights': [100, 400, 500, 600, 700, 900]}}

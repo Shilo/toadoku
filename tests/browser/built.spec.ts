@@ -20,7 +20,7 @@ test.beforeAll(async()=>{
     if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}
     try {
       const bytes=await readFile(file);
-      const mime:Record<string,string>={'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf':'font/ttf','.txt':'text/plain','.png':'image/png'};
+      const mime:Record<string,string>={'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf':'font/ttf','.woff2':'font/woff2','.txt':'text/plain','.png':'image/png'};
       res.writeHead(200,{'Content-Type':mime[extname(file)]??'application/octet-stream'}).end(bytes);
     }catch{res.writeHead(404).end();}
   });
@@ -36,7 +36,7 @@ test('built bundle runs under repository subpath with local assets and notices',
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
   await expect(page).toHaveTitle('Toadoku');
   await expect(page.getByRole('heading', {name:'Toadoku',exact:true})).toBeVisible();
-  expect(requests.some(url => /cauldron-|Bitter-UI/.test(url))).toBe(false);
+  expect(requests.some(url => /cauldron-|Fraunces-UI/.test(url))).toBe(false);
   await expect.poll(()=>page.getByRole('img',{name:dictionaries.de.art}).evaluate(e=>(e as HTMLImageElement).naturalWidth)).toBe(1254);
   await page.getByRole('button',{name:'Schnellspiel',exact:true}).click();
   await page.getByRole('button',{name:'Leicht',exact:true}).click();
@@ -66,7 +66,7 @@ test('built bundle runs under repository subpath with local assets and notices',
   await expect(page.locator('.world')).toHaveAttribute('data-theme','cauldron');
   expect(await page.evaluate(()=>[...document.fonts].some(face => face.family === 'ToadokuCauldronUI' && face.status === 'loaded'))).toBe(true);
   expect(requests.some(url=>/\/cauldron-[^/]+\.js/.test(url))).toBe(true);
-  expect(requests.some(url=>/Bitter-UI-[^/]+\.woff2/.test(url))).toBe(true);
+  expect(requests.some(url=>/Fraunces-UI-[^/]+\.woff2/.test(url))).toBe(true);
   expect(errors).toEqual([]);expect(requests.every(url=>url.startsWith(`${origin}/toadoku/`))).toBe(true);
   const assets=await readdir('dist/assets');
   const images=assets.filter(f=>/\.(png|jpg|webp|svg|wasm)$/i.test(f));
@@ -74,7 +74,7 @@ test('built bundle runs under repository subpath with local assets and notices',
   expect(images[0]).toMatch(/^menu-sketch-.*\.png$/);
   expect(createHash('sha256').update(await readFile(`dist/assets/${images[0]}`)).digest('hex')).toBe('b4c53b629017faa5f57c9a72d3cb80d182268dd729b93e842ddd6be229ffedf1');
   for(const file of assets.filter(f=>/\.(js|css)$/.test(f)))expect(await readFile(`dist/assets/${file}`,'utf8')).not.toMatch(/prototypes\/|menu-placeholder|serviceWorker\.register/);
-  for(const file of ['Chewy-LICENSE.txt','Outfit-OFL.txt','Creepster-OFL.txt','Nunito-OFL.txt','Bitter-OFL.txt'])expect(await readFile(`dist/licenses/${file}`)).toEqual(await readFile(`src/assets/fonts/${file}`));
+  for(const file of ['Chewy-LICENSE.txt','Outfit-OFL.txt','Creepster-OFL.txt','Baloo2-OFL.txt','Fraunces-OFL.txt'])expect(await readFile(`dist/licenses/${file}`)).toEqual(await readFile(`src/assets/fonts/${file}`));
   const dependencies=JSON.parse(await readFile('dist/licenses/dependencies.json','utf8')) as {name:string;identifier:string;text:string}[];
   expect(dependencies.map(d=>d.name).sort()).toEqual(['@lucide/svelte','clsx','svelte']);
   expect(dependencies.filter(d=>d.name!=='@lucide/svelte').every(d=>d.identifier==='MIT'&&d.text.includes('Permission is hereby granted'))).toBe(true);

@@ -604,7 +604,7 @@ test('failed theme font uses the system stack after a previous font was register
   await page.clock.setFixedTime(new Date('2026-10-15T12:00:00-07:00'));
   await page.goto('/'); await ready(page); await quick(page);
   const before = (await snapshot(page)).attempt!, rectangles = await bounds(page);
-  const fontRoute = /\/Bitter-UI.*\.woff2/;
+  const fontRoute = /\/Fraunces-UI.*\.woff2/;
   await page.route(fontRoute, route => route.request().resourceType() === 'font' ? route.abort('failed') : route.continue());
   await settings(page); await choose(page, 'Theme', 'cauldron');
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
@@ -680,7 +680,7 @@ test('the regular-font Sudoku descriptor fits the protected title area in portra
   const fallbackContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: 'en-US', reducedMotion: 'reduce' });
   try {
     const fallback = await fallbackContext.newPage(); let blockedFonts = 0;
-    await fallback.route(/\/(?:Nunito|Bitter)-UI.*\.woff2/, route => {
+    await fallback.route(/\/(?:Baloo2|Fraunces)-UI.*\.woff2/, route => {
       // Vite also serves a JavaScript ?url import at this path. Fault only the
       // actual font payload so this exercises font fallback, not chunk failure.
       if (route.request().resourceType() !== 'font') return route.continue();
