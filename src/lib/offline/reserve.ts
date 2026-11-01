@@ -152,6 +152,8 @@ export class OfflineSupport {
     this.publish({ phase: 'preparing', completed: 0, total: 0, downloadedBytes: 0, problem: undefined });
     let received = 0;
     try {
+      const revision = await this.store.getRevision();
+      if (operation !== this.operation || abort.signal.aborted) return;
       const plan = await this.plan(kind, abort.signal);
       if (operation !== this.operation || abort.signal.aborted) return;
       this.publish({ plannedBytes: plan.bytes, total: plan.jobs.length });
@@ -173,12 +175,12 @@ export class OfflineSupport {
         if (operation !== this.operation || abort.signal.aborted) return;
         if (record.kind !== 'ready') throw new Error(record.reason.includes('offline-download-limit') ? 'offline-download-limit' : 'offline-download-' + record.kind);
         // Write success and independent readback, not cache presence, acknowledge readiness.
-        if (!await this.store.putRecord(record.value) || !await this.retained(job.pool, job.ordinal, plan.manifest)) throw new Error('offline-record-write');
+        if (!await this.store.putRecord(record.value, revision) || !await this.retained(job.pool, job.ordinal, plan.manifest)) throw new Error('offline-record-write');
         this.publish({ completed: ++completed, downloadedBytes: received });
         await yieldInput();
       }
       if (plan.fingerprint !== saveFingerprint(await this.current())) throw new Error('offline-state-changed');
-      if (!await this.store.replacePins(plan.keys)) throw new Error('offline-pin-write');
+      if (!await this.store.replacePins(plan.keys, revision)) throw new Error('offline-pin-write');
       this.publish({ phase: 'partial' });
       await this.inspecting;
       await this.inspect();

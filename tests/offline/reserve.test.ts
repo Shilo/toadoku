@@ -24,14 +24,15 @@ class MemoryStore implements OfflineStore {
     const record = this.records.get(recordKey(pool, ordinal));
     return record ? { ...structuredClone(record), ...(this.corruptRead ? { givens: '0'.repeat(81) } : {}) } : undefined;
   }
-  async putRecord(record: AttestedRecord) {
+  async getRevision() { return this.revision; }
+  async putRecord(record: AttestedRecord, expectedRevision: number) {
     this.writes++;
-    if (this.refuse) return false;
+    if (this.refuse || expectedRevision !== this.revision) return false;
     this.records.set(recordKey(record.pool, record.attestation.shardStart + record.attestation.recordIndex), structuredClone(record));
     this.afterWrite?.(); return true;
   }
   async inventory() { return { keys: [...this.records.keys()], bytes: new TextEncoder().encode(JSON.stringify([...this.records.values()])).length, revision: this.revision }; }
-  async replacePins(keys: readonly string[]) { return keys.every(key => this.records.has(key)); }
+  async replacePins(keys: readonly string[], expectedRevision: number) { return expectedRevision === this.revision && keys.every(key => this.records.has(key)); }
   async clear() { this.revision++; this.records.clear(); return true; }
   close() {}
 }
@@ -52,6 +53,54 @@ function setup(store = new MemoryStore()) {
   return { save, requests, loader, support, store };
 }
 describe('verified offline reserve', () => {
+  it('captures one generation before held planning and rejects stale writes after another connection clears', async () => {
+    const fixture = setup(), before = JSON.stringify(fixture.save);
+    let release!: () => void, started!: () => void, first = true, captures = 0;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    const ready = new Promise<void>(resolve => { started = resolve; });
+    const read = fixture.store.getManifest.bind(fixture.store);
+    fixture.store.getRevision = async () => { captures++; return fixture.store.revision; };
+    fixture.store.getManifest = async () => {
+      if (first) { first = false; started(); await held; }
+      return read();
+    };
+    const preparing = fixture.support.prepare('default'); await ready;
+    await fixture.store.clear(); release(); await preparing;
+    expect(captures).toBe(1);
+    expect(fixture.support.state.phase).toBe('failed');
+    expect(fixture.support.state.problem).toContain('offline-record-write');
+    expect(fixture.store.records.size).toBe(0);
+    expect(JSON.stringify(fixture.save)).toBe(before);
+    fixture.support.dispose(); fixture.loader.dispose();
+  });
+  it('cancellation during revision capture cannot start planning or downloads afterward', async () => {
+    const fixture = setup();
+    let release!: (revision: number) => void;
+    fixture.store.getRevision = () => new Promise<number>(resolve => { release = resolve; });
+    const preparing = fixture.support.prepare('default'); fixture.support.cancel();
+    release(0); await preparing;
+    expect(fixture.support.state.phase).toBe('cancelled');
+    expect(fixture.requests).toHaveLength(0);
+    fixture.support.dispose(); fixture.loader.dispose();
+  });
+  it('a fully retained zero-download plan cannot publish old pins after a clear', async () => {
+    const fixture = setup(); await fixture.support.prepare('default');
+    const before = JSON.stringify(fixture.save), records = new Map(fixture.store.records);
+    const replace = fixture.store.replacePins.bind(fixture.store);
+    fixture.store.replacePins = async (keys, revision) => {
+      await fixture.store.clear();
+      // A distinct fresh operation may legitimately recreate the same records.
+      for (const [key, record] of records) fixture.store.records.set(key, record);
+      return replace(keys, revision);
+    };
+    const requests = fixture.requests.length;
+    await fixture.support.prepare('default');
+    expect(fixture.requests).toHaveLength(requests);
+    expect(fixture.support.state.phase).toBe('failed');
+    expect(fixture.support.state.problem).toContain('offline-pin-write');
+    expect(JSON.stringify(fixture.save)).toBe(before);
+    fixture.support.dispose(); fixture.loader.dispose();
+  });
   it('does no automatic downloads; explicitly prepares three true upcoming allocations in every pool without essential writes', async () => {
     const fixture = setup(), before = JSON.stringify(fixture.save);
     expect(fixture.requests).toHaveLength(0);
@@ -133,9 +182,9 @@ describe('verified offline reserve', () => {
     const ready = new Promise<void>(resolve => { started = resolve; });
     class HeldStore extends MemoryStore {
       once = true;
-      override async putRecord(record: AttestedRecord) {
+      override async putRecord(record: AttestedRecord, expectedRevision: number) {
         if (this.once) { this.once = false; started(); await held; }
-        return super.putRecord(record);
+        return super.putRecord(record, expectedRevision);
       }
     }
     const fixture = setup(new HeldStore());

@@ -5,6 +5,7 @@ import type { AttestedRecord, PoolId } from '../catalog/types';
 import type { OfflineStore } from './types';
 
 const encodedSize = (value: string) => new TextEncoder().encode(value).byteLength;
+const validRevision = (value: unknown): value is number => Number.isSafeInteger(value) && Number(value) >= 0;
 function jsonRow(value: unknown): string | undefined {
   if (!value || typeof value !== 'object') return;
   const json = (value as { json?: unknown }).json;
@@ -50,20 +51,36 @@ export async function openOfflineStore(base: URL, factory: IDBFactory = indexedD
         return record.pool === pool && record.attestation?.shardStart + record.attestation?.recordIndex === ordinal ? record : undefined;
       } catch { return undefined; }
     },
-    async putRecord(record) {
+    async getRevision() {
+      const result = await transact<number>(database, ['meta'], 'readonly', context => {
+        context.request(context.store('meta').get('clear-revision'), value => {
+          const revision = value === undefined ? 0 : value;
+          if (!validRevision(revision)) throw new Error('offline-clear-revision');
+          context.result(revision);
+        });
+      });
+      if (result.kind !== 'committed') throw new Error('offline-revision-unavailable');
+      return result.value;
+    },
+    async putRecord(record, expectedRevision) {
+      if (!validRevision(expectedRevision)) return false;
       const json = JSON.stringify(record), size = encodedSize(json);
       if (size > OFFLINE_LIMITS.individualRecordBytes) return false;
       const id = recordKey(record.pool, record.attestation.shardStart + record.attestation.recordIndex);
-      const result = await transact<boolean>(database, ['records'], 'readwrite', context => {
-        context.request(context.store('records').getAll(undefined, OFFLINE_LIMITS.records + 1), rows => {
-          if (rows.length > OFFLINE_LIMITS.records || rows.some(row => !jsonRow(row))) { context.result(false); return; }
-          context.request(context.store('records').get(id), previous => {
-            const old = jsonRow(previous);
-            const used = rows.reduce((sum, row) => sum + encodedSize(jsonRow(row) ?? ''), 0);
-            if ((!previous && rows.length >= OFFLINE_LIMITS.records) || used - (old ? encodedSize(old) : 0) + size > OFFLINE_LIMITS.recordBytes) {
-              context.result(false); return;
-            }
-            context.store('records').put({ json }, id); context.result(true);
+      const result = await transact<boolean>(database, ['records','meta'], 'readwrite', context => {
+        context.request(context.store('meta').get('clear-revision'), value => {
+          const revision = value === undefined ? 0 : value;
+          if (!validRevision(revision) || revision !== expectedRevision) { context.result(false); return; }
+          context.request(context.store('records').getAll(undefined, OFFLINE_LIMITS.records + 1), rows => {
+            if (rows.length > OFFLINE_LIMITS.records || rows.some(row => !jsonRow(row))) { context.result(false); return; }
+            context.request(context.store('records').get(id), previous => {
+              const old = jsonRow(previous);
+              const used = rows.reduce((sum, row) => sum + encodedSize(jsonRow(row) ?? ''), 0);
+              if ((!previous && rows.length >= OFFLINE_LIMITS.records) || used - (old ? encodedSize(old) : 0) + size > OFFLINE_LIMITS.recordBytes) {
+                context.result(false); return;
+              }
+              context.store('records').put({ json }, id); context.result(true);
+            });
           });
         });
       }, true);
@@ -75,8 +92,8 @@ export async function openOfflineStore(base: URL, factory: IDBFactory = indexedD
           if (values.length > OFFLINE_LIMITS.records || values.some(row => !jsonRow(row))) throw new Error('offline-count-limit');
           context.request(context.store('records').getAllKeys(undefined, OFFLINE_LIMITS.records + 1), keys => {
             context.request(context.store('meta').get('clear-revision'), value => {
-              const revision = value ?? 0;
-              if (!Number.isSafeInteger(revision) || revision < 0) throw new Error('offline-clear-revision');
+              const revision = value === undefined ? 0 : value;
+              if (!validRevision(revision)) throw new Error('offline-clear-revision');
               context.result({ keys: keys.map(String), bytes: values.reduce((sum, row) => sum + encodedSize(jsonRow(row) ?? ''), 0), revision });
             });
           });
@@ -85,17 +102,21 @@ export async function openOfflineStore(base: URL, factory: IDBFactory = indexedD
       if (result.kind !== 'committed') throw new Error('offline-inventory-unavailable');
       return result.value;
     },
-    async replacePins(keys) {
-      if (keys.length > OFFLINE_LIMITS.records || new Set(keys).size !== keys.length) return false;
+    async replacePins(keys, expectedRevision) {
+      if (!validRevision(expectedRevision) || keys.length > OFFLINE_LIMITS.records || new Set(keys).size !== keys.length) return false;
       const result = await transact<boolean>(database, ['records','meta'], 'readwrite', context => {
-        let remaining = keys.length, present = true;
-        if (!remaining) { context.store('meta').put([], 'pins'); context.result(true); return; }
-        for (const key of keys) context.request(context.store('records').get(key), value => {
-          present &&= !!jsonRow(value);
-          if (--remaining === 0) {
-            if (present) context.store('meta').put([...keys], 'pins');
-            context.result(present);
-          }
+        context.request(context.store('meta').get('clear-revision'), value => {
+          const revision = value === undefined ? 0 : value;
+          if (!validRevision(revision) || revision !== expectedRevision) { context.result(false); return; }
+          let remaining = keys.length, present = true;
+          if (!remaining) { context.store('meta').put([], 'pins'); context.result(true); return; }
+          for (const key of keys) context.request(context.store('records').get(key), value => {
+            present &&= !!jsonRow(value);
+            if (--remaining === 0) {
+              if (present) context.store('meta').put([...keys], 'pins');
+              context.result(present);
+            }
+          });
         });
       }, true);
       return result.kind === 'committed' && result.value;
@@ -103,8 +124,8 @@ export async function openOfflineStore(base: URL, factory: IDBFactory = indexedD
     async clear() {
       const result = await transact<boolean>(database, ['records','meta'], 'readwrite', context => {
         context.request(context.store('meta').get('clear-revision'), value => {
-          const revision = value ?? 0;
-          if (!Number.isSafeInteger(revision) || revision < 0 || revision === Number.MAX_SAFE_INTEGER) throw new Error('offline-clear-revision');
+          const revision = value === undefined ? 0 : value;
+          if (!validRevision(revision) || revision === Number.MAX_SAFE_INTEGER) throw new Error('offline-clear-revision');
           context.store('records').clear(); context.store('meta').delete('pins');
           context.store('meta').put(revision + 1, 'clear-revision'); context.result(true);
         });

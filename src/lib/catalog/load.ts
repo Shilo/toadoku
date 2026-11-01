@@ -159,6 +159,12 @@ export class CatalogLoader {
   }
   async getRecord(pool: PoolId, ordinal: number, signal?: AbortSignal, priority: ReadPriority = 'foreground', allowance?: BackgroundAllowance): Promise<CatalogResult<AttestedRecord>> {
     if (signal?.aborted) return { kind: 'aborted', reason: 'canceled' };
+    const cache = this.offline;
+    // Snapshot optional retention before network work; never delay requested play on it.
+    const retentionRevision = (async () => {
+      try { return priority === 'foreground' ? await cache?.getRevision() : undefined; }
+      catch { return undefined; }
+    })();
     const initialized = await this.initialize(); if (initialized.kind !== 'ready') return initialized;
     if (signal?.aborted) return { kind: 'aborted', reason: 'canceled' };
     const data = initialized.value.pools[pool];
@@ -166,7 +172,7 @@ export class CatalogLoader {
     const descriptor = data.shards.find(s => ordinal >= s.start && ordinal < s.start + s.count)!;
     try {
       let retained: AttestedRecord | undefined;
-      try { retained = await this.offline?.getRecord(pool, ordinal); } catch { /* Disposable reads are optional. */ }
+      try { retained = await cache?.getRecord(pool, ordinal); } catch { /* Disposable reads are optional. */ }
       if (retained && await verifyRetained(retained, initialized.value, pool, ordinal)) {
         if (signal?.aborted) return { kind: 'aborted', reason: 'canceled' };
         return { kind: 'ready', value: retained };
@@ -190,10 +196,10 @@ export class CatalogLoader {
           recordSiblings: inclusionProof(levels, ordinal - descriptor.start), shardIndex, shardCount: this.membership!.shards.length, shardSiblings: inclusionProof(this.membership!.levels, shardIndex) } };
       if (!await verifyAttestedRecord(attested)) throw new Corrupt('record membership proof');
       if (signal?.aborted) return { kind: 'aborted', reason: 'canceled' };
-      if (this.offline) {
-        if (priority === 'background') { try { await this.offline.putRecord(attested); } catch { /* Preparation independently acknowledges storage. */ } }
-        else void this.offline.putRecord(attested).catch(() => false);
-      }
+      // Pack writes are acknowledged by OfflineSupport with its preparation token.
+      if (cache && priority === 'foreground') void retentionRevision.then(revision => {
+        if (revision !== undefined && cache === this.offline) return cache.putRecord(attested, revision);
+      }).catch(() => false);
       return { kind: 'ready', value: attested };
     } catch (e) { return this.resultError(e); }
   }

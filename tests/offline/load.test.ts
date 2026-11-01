@@ -17,6 +17,59 @@ async function certified() {
   return result.value;
 }
 describe('offline loader priority and rejected bytes', () => {
+  it('fences old foreground retention after clear while a new request can retain', async () => {
+    let revision = 0, saved: AttestedRecord | undefined;
+    const attempts: number[] = [];
+    let release!: () => void, started!: () => void;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    const ready = new Promise<void>(resolve => { started = resolve; });
+    const loader = new CatalogLoader('https://test.invalid/catalog/v1/', { fetcher: async input => {
+      if (!String(input).endsWith('manifest.json')) { started(); await held; }
+      return fixture(input);
+    } });
+    loader.setOfflineCache({
+      getRevision: async () => revision, getManifest: async () => manifestBytes, putManifest: async () => true,
+      getRecord: async () => undefined, putRecord: async (record, expected) => {
+        attempts.push(expected);
+        if (expected !== revision) return false;
+        saved = record; return true;
+      },
+    });
+    const request = loader.getRecord('easy', 0); await ready;
+    revision++; release();
+    expect((await request).kind).toBe('ready');
+    await vi.waitFor(() => expect(attempts).toEqual([0]));
+    expect(saved).toBeUndefined();
+    expect((await loader.getRecord('easy', 1)).kind).toBe('ready');
+    await vi.waitFor(() => expect(saved?.attestation.recordIndex).toBe(1));
+    expect(attempts).toEqual([0, 1]); loader.dispose();
+  });
+  it('does not block requested play on an unresolved or failed retention revision', async () => {
+    let reject!: (error: Error) => void, writes = 0;
+    const revision = new Promise<number>((_resolve, fail) => { reject = fail; });
+    const loader = new CatalogLoader('https://test.invalid/catalog/v1/', { fetcher: fixture });
+    loader.setOfflineCache({ getRevision: () => revision, getManifest: async () => manifestBytes,
+      putManifest: async () => true, getRecord: async () => undefined, putRecord: async () => { writes++; return true; } });
+    expect((await loader.getRecord('easy', 0)).kind).toBe('ready');
+    reject(new Error('optional storage unavailable'));
+    await Promise.resolve(); await Promise.resolve();
+    expect(writes).toBe(0); loader.dispose();
+  });
+  it('skips retention for mid-request cache attachment and leaves background writes to preparation', async () => {
+    let release!: () => void, started!: () => void, writes = 0;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    const ready = new Promise<void>(resolve => { started = resolve; });
+    const loader = new CatalogLoader('https://test.invalid/catalog/v1/', { fetcher: async input => {
+      if (!String(input).endsWith('manifest.json')) { started(); await held; }
+      return fixture(input);
+    } });
+    const request = loader.getRecord('easy', 0); await ready;
+    loader.setOfflineCache({ getRevision: async () => 0, getManifest: async () => manifestBytes,
+      putManifest: async () => true, getRecord: async () => undefined, putRecord: async () => { writes++; return true; } });
+    release(); expect((await request).kind).toBe('ready');
+    expect((await loader.getRecord('easy', 1, undefined, 'background')).kind).toBe('ready');
+    expect(writes).toBe(0); loader.dispose();
+  });
   it('foreground exact fetch bypasses a held background file; cancelling the shared background consumer preserves foreground ownership', async () => {
     let release!: () => void, heldStarted!: () => void;
     const held = new Promise<void>(resolve => { release = resolve; }), started = new Promise<void>(resolve => { heldStarted = resolve; });
@@ -104,12 +157,12 @@ describe('offline loader priority and rejected bytes', () => {
     const loader = new CatalogLoader('https://test.invalid/catalog/v1/', { fetcher: fixture });
     await loader.initialize();
     let bytes: Uint8Array | undefined, accept = false;
-    loader.setOfflineCache({ getManifest: async () => bytes, putManifest: async input => { if (accept) bytes = input.slice(); return accept; }, getRecord: async () => undefined, putRecord: async () => false });
+    loader.setOfflineCache({ getRevision: async () => 0, getManifest: async () => bytes, putManifest: async input => { if (accept) bytes = input.slice(); return accept; }, getRecord: async () => undefined, putRecord: async () => false });
     expect(await loader.ensureOfflineManifest()).toBe(false);
     accept = true;
     expect(await loader.ensureOfflineManifest()).toBe(true);
     bytes![0] ^= 1;
-    loader.setOfflineCache({ getManifest: async () => bytes, putManifest: async () => true, getRecord: async () => undefined, putRecord: async () => false });
+    loader.setOfflineCache({ getRevision: async () => 0, getManifest: async () => bytes, putManifest: async () => true, getRecord: async () => undefined, putRecord: async () => false });
     expect(await loader.ensureOfflineManifest()).toBe(false);
     loader.dispose();
   });
@@ -174,6 +227,7 @@ describe('offline loader priority and rejected bytes', () => {
     let bytes = new TextEncoder().encode(JSON.stringify(poisoned) + '\n'), saved: AttestedRecord | undefined;
     expect(() => JSON.parse(new TextDecoder().decode(bytes))).not.toThrow();
     const requests: string[] = [], cache = {
+      getRevision: async () => 0,
       getManifest: async () => bytes.slice(), putManifest: async (input: Uint8Array) => { bytes = input.slice(); return true; },
       getRecord: async () => saved && structuredClone(saved), putRecord: async (record: AttestedRecord) => { saved = structuredClone(record); return true; },
     };
