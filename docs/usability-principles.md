@@ -1,6 +1,6 @@
 # Usability principles
 
-Apply when changing features, settings, navigation or player-facing copy. Principles: **strong defaults** and **progressive disclosure** (essential choices first, secondary detail when needed).
+Product philosophy: **simplicity-first design**. Use strong defaults, minimal necessary features and progressive disclosure so ordinary play just works. Apply when changing features, settings, navigation or player-facing copy.
 
 - Make starting, resuming and solving work without setup. Preserve meaningful task choices, such as difficulty.
 - Omit unnecessary features/settings instead of hiding them. Add a control only for a concrete player task that existing behavior or a good default cannot adequately support.
@@ -14,4 +14,4 @@ For new features/settings or material interaction changes, briefly justify the t
 
 This guide alone authorizes no app changes. Future authorized simplification may reconsider existing features and placement, including More, while preserving correctness, accessibility and progress.
 
-**Agent context also uses progressive disclosure.** Keep mandatory rules and clear loading conditions in concise guides. Keep related rules together; avoid duplicate authority. Never defer constraints needed to act correctly. Linked [research and challenge](research/usability-research.md) is optional rationale, not additional instructions.
+Optional [research and challenge](research/usability-research.md): load only for rationale or evidence disputes.
