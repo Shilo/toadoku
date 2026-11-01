@@ -32,6 +32,12 @@ Visual tradeoffs remain explicit: short-landscape pot curvature is shallow to pr
 
 Activated by the user on 2026-10-31. Worktree: `C:/Users/shilo/.codex/worktrees/theme-implementation/toadoku`, branch `codex/themes`, base `7f13d59`. This branch does not accept gameplay, merge into main or modify the original checkout. Gameplay acceptance and later integration remain separate.
 
+## Defaults and countdown follow-up
+
+Later user-directed defaults/copy correction supersedes the original fresh-Light decision recorded below. Fresh appearance is now System in bootstrap and pre-load/recovery presentation; saved Light/Dark/System choices are untouched. Auto, System motion and Fill space already matched the requested defaults. Initial language now chooses the first supported tag in browser preference order, falling back to the browser's single language when its list is empty and to English when unsupported. Saved language and explicit initial URL precedence are preserved. [Navigator language ordering](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/languages) and [system color preference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-color-scheme) support this bounded policy; the independent reviewer challenged fallback ordering and verified the actual changes.
+
+Countdown wording now names the seasonal theme: "Cauldron ends in 7 days and 4 hours (Halloween)." German and Spanish equivalents retain the same meaning. Active-theme truth, Auto-only expiry, calendar policy and quiet refresh remain unchanged. Follow-up validation: 38 focused unit tests, two browser journeys, Svelte/TypeScript checks and build pass. Five disposable fresh browser contexts verify all defaults, language preference ordering/unsupported/empty fallback and URL initialization. System follows dark-to-light changes and reduced motion. Saved Spanish/Pond/Light/Full/Square survive reload while the browser remains German and dark. This does not claim live browser-language-change handling. Evidence: `prototypes/theme-polish/fresh-defaults-auto-system.png`.
+
 ## Historical implementation baseline
 
 | Plan | Author / challenger | Evidence, alternatives and decision |
@@ -86,7 +92,7 @@ Hardware Motorola/DPR3, actual browser zoom, Android scaling, sustained phone pe
 
 - Reopened polish implementation is `8e85f30`. Review the shared layout addition separately: only suitable existing bottom docks condense at 596px usable width; landscape allocation remains exact. Main-menu base controls use a 64px bottom row while the scene's maximum submenu reservation is unchanged. Theme switching still preserves the layout for the same viewport/board-shape choice.
 - Branch `codex/themes` is based on committed main `7f13d59`; foundation slice is `512aa76`. No gameplay checkout edits, ref rewrites, resets, stashes or merge were performed.
-- Integrate only after gameplay completion is reported and later coordination authorizes integration. Review narrow changes in `App.svelte`, `gameplay/bootstrap.ts` (fresh theme default only), `gameplay/ui/GameDialog.svelte` and its presentation props against the final gameplay source. No Sudoku/session/hint/catalog/scoring/storage-authority/schema changes belong to this branch.
+- Integrate only after gameplay completion is reported and later coordination authorizes integration. Review narrow changes in `App.svelte`, `gameplay/bootstrap.ts` (fresh theme/appearance defaults only), locale resolution, `gameplay/ui/GameDialog.svelte` and its presentation props against the final gameplay source. No Sudoku/session/hint/catalog/scoring/storage-authority/schema changes belong to this branch.
 - Reuse the unchanged certified gameplay evidence. Resolve future shared-file conflicts around Settings/preferences and default initialization without replacing newer gameplay behavior. The theme preference stays an opaque string under the existing CAS pipeline.
 - Dependencies/cache, build outputs, browser data and experiments are separate in this worktree. The disposable origin is port5195; no gameplay tab, viewport or saved data was used. Keep native scrollbar/platform and hardware/PWA limits above explicit.
 

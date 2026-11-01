@@ -13,7 +13,7 @@ function defaults(locale: Locale): RepositoryOptions['initial'] {
   const trusted = Object.values(CATALOG_TRUST).find(item => item.catalogVersion === '1' && item.certificationVersion === '1');
   if (!trusted) throw new Error('missing-catalog-certification');
   return {
-      preferences: { schemaVersion: 1, language: locale, motion: 'system', boardShape: 'fill', theme: 'auto', appearance: 'light' },
+      preferences: { schemaVersion: 1, language: locale, motion: 'system', boardShape: 'fill', theme: 'auto', appearance: 'system' },
       profile: { revision: 0, wallet: 0, lifetimeEarned: 0, frontier: { runId: crypto.randomUUID(), metamorphosis: 1, leap: 1, scheduleVersion: 1 }, highestCompletedLeap: 0 },
       pools: POOLS.map(pool => ({ selectionVersion: '1', catalogVersion: trusted.catalogVersion, pool, revision: 0,
         seed: crypto.getRandomValues(new Uint32Array(1))[0], epoch: 0, cursor: 0, lifetimeIssued: 0, count: trusted.pools[pool] })),

@@ -10,7 +10,10 @@ export const dictionaries: Record<Locale, Copy> = {
   de: { quick: 'Schnellspiel', progression: 'Fortschritt', easy: 'Leicht', medium: 'Mittel', hard: 'Schwer', newGame: 'Neues Spiel', continueGame: 'Fortsetzen', back: 'Zurück', more: 'Mehr', resume: 'Weiterspielen', mainMenu: 'Zurück zum Hauptmenü', paused: 'Eine kleine Pause', example: 'Beispielbrett. Nur Auswahl; Zahlen und Werkzeuge sind nicht verfügbar.', unavailable: 'In dieser Vorschau nicht verfügbar', art: 'Vorläufige Skizze eines Frosches auf einem Seerosenblatt', empty: 'leer', notes: 'Beispielnotizen', cell: (r,c) => `Zeile ${r}, Spalte ${c}` },
   es: { quick: 'Partida rápida', progression: 'Progresión', easy: 'Fácil', medium: 'Media', hard: 'Difícil', newGame: 'Nueva partida', continueGame: 'Continuar', back: 'Volver', more: 'Más', resume: 'Reanudar', mainMenu: 'Volver al menú principal', paused: 'Un pequeño descanso', example: 'Tablero de ejemplo. Solo selección; números y herramientas no disponibles.', unavailable: 'No disponible en esta vista previa', art: 'Boceto provisional de una rana sobre un nenúfar', empty: 'vacía', notes: 'notas de ejemplo', cell: (r,c) => `Fila ${r}, columna ${c}` }
 };
-export function resolveLocale(language: string): Locale {
-  const code = language.toLowerCase().split('-')[0];
-  return code === 'de' || code === 'es' ? code : 'en';
+export function resolveLocale(language: string | readonly string[]): Locale {
+  for (const tag of typeof language === 'string' ? [language] : language) {
+    const code = tag.toLowerCase().split('-')[0];
+    if (code === 'en' || code === 'de' || code === 'es') return code;
+  }
+  return 'en';
 }

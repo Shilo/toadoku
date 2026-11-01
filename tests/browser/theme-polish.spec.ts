@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import type { Attempt, Preferences, Profile } from '../../src/lib/gameplay/contracts';
-import { dictionaries } from '../../src/lib/i18n';
+import { dictionaries, type Locale } from '../../src/lib/i18n';
+import { themeCopy } from '../../src/lib/theme/copy';
 import { uiCopy } from '../../src/lib/gameplay/ui/copy';
 import { appCopy } from '../../src/lib/gameplay/app-copy';
 
@@ -126,19 +127,78 @@ async function renderedKeyEdges(page: Page, theme: string) {
 
 test.beforeAll(async () => { await mkdir(evidence, { recursive: true }); });
 
+test('fresh defaults follow system preferences and saved choices survive reload', async ({ browser }) => {
+  const cases: { browserLocale: string; languages?: string[]; expected: Locale; query?: string }[] = [
+    { browserLocale: 'de-DE', expected: 'de' },
+    { browserLocale: 'fr-FR', languages: ['fr-FR', 'es-MX'], expected: 'es' },
+    { browserLocale: 'fr-FR', languages: ['fr-FR', 'ja-JP'], expected: 'en' },
+    { browserLocale: 'de-DE', languages: [], expected: 'de' },
+    { browserLocale: 'de-DE', expected: 'es', query: '?lang=es' },
+  ];
+  for (const [index, entry] of cases.entries()) {
+    const context = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: entry.browserLocale,
+      colorScheme: 'dark', reducedMotion: 'reduce', viewport: { width: 360, height: 800 }, timezoneId: 'America/Los_Angeles' });
+    try {
+      if (entry.languages) await context.addInitScript(languages => {
+        Object.defineProperty(navigator, 'languages', { get: () => languages });
+      }, entry.languages);
+      const page = await context.newPage();
+      await page.clock.setFixedTime(new Date('2026-10-31T12:00:00-07:00'));
+      await page.goto(`/${entry.query ?? ''}`);
+      await expect(page.getByRole('button', { name: dictionaries[entry.expected].quick, exact: true })).toBeEnabled();
+      const defaults = { theme: 'auto', appearance: 'system', language: entry.expected, motion: 'system', boardShape: 'fill' };
+      await expect.poll(async () => (await snapshot(page)).preferences).toMatchObject(defaults);
+      await expect(page.locator('.world')).toHaveAttribute('lang', entry.expected);
+      await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
+      await expect(page.locator('.world')).toHaveAttribute('data-appearance', 'dark');
+      await page.locator('.menu-more').click();
+      const dialog = page.getByRole('dialog'), c = uiCopy[entry.expected], t = themeCopy[entry.expected];
+      for (const [name, value] of [[t.theme, 'auto'], [t.appearance, 'system'], [c.language, entry.expected], [c.motion, 'system'], [c.boardShape, 'fill']]) {
+        await expect(dialog.getByRole('combobox', { name, exact: true })).toHaveValue(value);
+      }
+      if (entry.expected === 'en') await page.screenshot({ path: `${evidence}/fresh-defaults-auto-system.png` });
+      if (index !== 0) continue;
+      await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+      await expect(page.locator('.world')).toHaveAttribute('data-appearance', 'light');
+      expect((await snapshot(page)).preferences.appearance).toBe('system');
+      await dialog.getByRole('button', { name: c.close, exact: true }).click();
+      const still = await sceneFrame(page, 'menu');
+      await page.evaluate(async () => { for (let i = 0; i < 12; i++) await new Promise(requestAnimationFrame); });
+      expect(await sceneFrame(page, 'menu')).toEqual(still);
+      await page.locator('.menu-more').click();
+      for (const [name, value] of [[t.theme, 'pond'], [t.appearance, 'light'], [c.motion, 'full'], [c.boardShape, 'square']]) {
+        const control = dialog.getByRole('combobox', { name, exact: true });
+        await expect(control).toBeEnabled(); await control.selectOption(value);
+        await expect(control).toBeEnabled();
+      }
+      await dialog.getByRole('combobox', { name: c.language, exact: true }).selectOption('es');
+      await expect(dialog.getByRole('combobox', { name: uiCopy.es.language, exact: true })).toBeEnabled();
+      const custom = { theme: 'pond', appearance: 'light', language: 'es', motion: 'full', boardShape: 'square' };
+      await expect.poll(async () => (await snapshot(page)).preferences).toMatchObject(custom);
+      await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+      await page.reload();
+      await expect(page.getByRole('button', { name: dictionaries.es.quick, exact: true })).toBeEnabled();
+      await expect(page.locator('.world')).toHaveAttribute('lang', 'es');
+      await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
+      await expect(page.locator('.world')).toHaveAttribute('data-appearance', 'light');
+      expect((await snapshot(page)).preferences).toMatchObject(custom);
+    } finally { await context.close(); }
+  }
+});
+
 test('Auto names its actual theme and updates remaining time on minutes and local midnight', async ({ page }) => {
   const start = new Date('2026-11-07T22:59:30-08:00');
   await page.clock.install({ time: start }); await page.clock.pauseAt(start);
   await page.goto('/'); await ready(page); await settings(page);
   const auto = page.getByRole('dialog').getByRole('combobox', { name: 'Theme', exact: true }).locator('option[value="auto"]');
   await expect(auto).toHaveText('Auto \u00b7 Cauldron');
-  await expect(page.locator('#automatic-theme-description')).toHaveText('Halloween ends in 2 hours.');
+  await expect(page.locator('#automatic-theme-description')).toHaveText('Cauldron ends in 2 hours (Halloween).');
   expect(await page.locator('#automatic-theme-description').getAttribute('aria-live')).toBeNull();
   expect(await page.locator('#automatic-theme-description').getAttribute('role')).toBeNull();
   await page.clock.fastForward(30_000);
-  await expect(page.locator('#automatic-theme-description')).toHaveText('Halloween ends in 1 hour.');
+  await expect(page.locator('#automatic-theme-description')).toHaveText('Cauldron ends in 1 hour (Halloween).');
   await page.clock.fastForward(60_000);
-  await expect(page.locator('#automatic-theme-description')).toHaveText('Halloween ends in less than 1 hour.');
+  await expect(page.locator('#automatic-theme-description')).toHaveText('Cauldron ends in less than 1 hour (Halloween).');
   await page.clock.fastForward(59 * 60_000);
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
   await expect(auto).toHaveText('Auto \u00b7 Pond');

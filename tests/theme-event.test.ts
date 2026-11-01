@@ -61,9 +61,9 @@ describe('automatic theme event metadata', () => {
 
 describe('localized automatic theme status', () => {
   it.each([
-    ['en', 'Active theme: Cauldron', 'Halloween ends in 2 days and 1 hour.'],
-    ['de', 'Aktives Thema: Kessel', 'Halloween: noch 2 Tage und 1 Stunde.'],
-    ['es', 'Tema activo: Caldero', 'Halloween termina en 2 d\u00edas y 1 hora.'],
+    ['en', 'Active theme: Cauldron', 'Cauldron ends in 2 days and 1 hour (Halloween).'],
+    ['de', 'Aktives Thema: Kessel', 'Kessel: noch 2 Tage und 1 Stunde (Halloween).'],
+    ['es', 'Tema activo: Caldero', 'Caldero termina en 2 d\u00edas y 1 hora (Halloween).'],
   ] as const)('names the active theme and duration in %s', (locale, active, remaining) => {
     const end = new Date(2026, 10, 8).getTime();
     const text = formatAutomaticThemeStatus(automaticThemeStatus(new Date(end - 49 * HOUR_MS), 'cauldron'), locale);
@@ -75,7 +75,7 @@ describe('localized automatic theme status', () => {
     const text = formatAutomaticThemeStatus(automaticThemeStatus(new Date(2026, 9, 31), 'pond', true), 'en');
     expect(text.active).toBe('Active theme: Pond');
     expect(text.transition).toBe(themeCopy.en.failed);
-    expect(text.remaining).toMatch(/^Halloween ends in /);
+    expect(text.remaining).toMatch(/^Cauldron ends in /);
     const pending = formatAutomaticThemeStatus(automaticThemeStatus(new Date(2026, 9, 31), 'pond'), 'en');
     expect(pending.active).toBe('Active theme: Pond');
     expect(pending.transition).toBe('Switching to Cauldron...');

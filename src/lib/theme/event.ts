@@ -57,6 +57,7 @@ export function formatAutomaticThemeStatus(status: AutomaticThemeStatus, locale:
   if (days) units.push(new Intl.NumberFormat(locale, { style: 'unit', unit: 'day', unitDisplay: 'long' }).format(days));
   if (hours) units.push(new Intl.NumberFormat(locale, { style: 'unit', unit: 'hour', unitDisplay: 'long' }).format(hours));
   const duration = lessThanHour ? copy.lessThanHour : new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(units);
-  const remaining = copy.eventRemaining.replace('{event}', copy.halloween).replace('{duration}', duration);
+  const remaining = copy.eventRemaining.replace('{theme}', copy[status.expectedId])
+    .replace('{event}', copy.halloween).replace('{duration}', duration);
   return { active, transition, remaining };
 }

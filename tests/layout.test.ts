@@ -45,6 +45,11 @@ it('anchors Square to the unchanged dock and centers on the perpendicular axis',
 });
 it('has complete dictionaries and safe browser locale defaults', () => {
   expect(resolveLocale('de-DE')).toBe('de'); expect(resolveLocale('fr-FR')).toBe('en');
+  expect(resolveLocale(['fr-FR', 'es-MX', 'de-DE'])).toBe('es');
+  expect(resolveLocale(['en-US', 'de-DE'])).toBe('en');
+  expect(resolveLocale(['DE-at', 'en-US'])).toBe('de');
+  expect(resolveLocale(['fr-FR', 'ja-JP'])).toBe('en');
+  expect(resolveLocale([])).toBe('en');
   for(const copy of Object.values(dictionaries)) expect(Object.keys(copy).sort()).toEqual(Object.keys(dictionaries.en).sort());
 });
 

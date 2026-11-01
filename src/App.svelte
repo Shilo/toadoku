@@ -26,7 +26,8 @@
   import { appCopy } from './lib/gameplay/app-copy';
   import menuSketch from './assets/menu-sketch.png';
 
-  let { locale = resolveLocale(new URLSearchParams(location.search).get('lang') ?? navigator.language) }: { locale?: Locale } = $props();
+  let { locale = resolveLocale(new URLSearchParams(location.search).get('lang')
+    ?? (navigator.languages.length ? navigator.languages : navigator.language)) }: { locale?: Locale } = $props();
   const copy = $derived(dictionaries[locale]), c = $derived(uiCopy[locale]), a = $derived(appCopy[locale]);
   let route = $state<Route>('menu'), overlay = $state.raw<OverlayState>();
   let width = $state(window.innerWidth - 2 * LARGE), height = $state(window.innerHeight - 2 * LARGE), time = $state(0);
@@ -54,7 +55,7 @@
   let backupSequence = 0;
   let routeRevision = 0;
   const panes = new Map<string, DialogView>();
-  const preferences = $derived(gameState.save?.preferences ?? { schemaVersion: 1 as const, language: locale, motion: 'system' as const, boardShape: 'fill' as const, theme: 'auto', appearance: 'light' });
+  const preferences = $derived(gameState.save?.preferences ?? { schemaVersion: 1 as const, language: locale, motion: 'system' as const, boardShape: 'fill' as const, theme: 'auto', appearance: 'system' });
   let appliedTheme = $state.raw<AppliedTheme>();
   let themeError = $state(false), systemDark = $state(false);
   let themeTimer: ReturnType<typeof setTimeout> | undefined, themeStatusTimer: ReturnType<typeof setTimeout> | undefined;

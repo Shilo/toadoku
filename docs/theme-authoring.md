@@ -58,9 +58,21 @@ Current shared controls use a 64px equal-height base-menu row. Maximum submenu r
 
 ## Auto and future events
 
+Fresh settings use these defaults. Existing saved choices take priority; changing a default never migrates those choices.
+
+| Preference | Fresh default |
+| --- | --- |
+| Theme | Auto |
+| Appearance | System, following the browser/OS light or dark preference |
+| Language | First supported browser-preferred language, in order: match English, German or Spanish; English fallback if none match |
+| Motion | System, respecting the reduced-motion preference |
+| Board shape | Fill space |
+
+Language detection uses ordered `navigator.languages`, falling back to `navigator.language` if the list is empty. A `lang` URL override can choose the initial locale; a saved language still wins when the repository loads. Do not infer language from location or timezone or overwrite a saved choice when browser preferences change.
+
 Persist the selected preference separately from the applied theme. Auto is the fresh default; existing saved Pond choices remain intentional. Unknown IDs resolve safely without rewriting saves. Appearance remains an independent system/light/dark choice. Use the existing preference transaction pipeline and keep storage schemas unchanged.
 
-Halloween currently includes October 24 through November 7, ending at local November 8. Calendar boundaries choose the event; countdown days are 24-hour durations with rounded-up remaining hours and a final less-than-one-hour label. Settings shows the actually applied theme, including when a desired theme is loading or failed. Refresh countdown text quietly each visible minute; that refresh must not retry imports. Re-resolve on midnight/resume.
+Halloween currently includes October 24 through November 7, ending at local November 8. Calendar boundaries choose the event; countdown days are 24-hour durations with rounded-up remaining hours and a final less-than-one-hour label. Name the seasonal theme directly and associate its event, for example "Cauldron ends in 7 days and 4 hours (Halloween)." This describes the theme window, not the literal holiday date. Settings shows the actually applied theme, including when a desired theme is loading or failed; remaining-time copy names the expected seasonal theme. Fixed choices have no expiry. Refresh countdown text quietly each visible minute; that refresh must not retry imports. Re-resolve on midnight/resume.
 
 For a future event, explicitly define its annual window, local start/end boundaries, fallback and overlap priority before extending the small policy. Do not hardcode the current date, add fixed millisecond weeks across DST, or copy Halloween's deadline/labels into a new theme. New event rules need boundary/DST tests and all three locales.
 
