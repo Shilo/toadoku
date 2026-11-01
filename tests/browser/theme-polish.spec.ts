@@ -508,32 +508,35 @@ test('stationary repeated clicks keep More responsive and accept intentional not
   await expect.poll(async () => (await snapshot(page)).attempt!.notes[cell]).toBe(1);
 });
 
-test('one global font covers every non-wordmark text surface and theme recovery', async ({ page, browser }) => {
-  const audit = async (target: Page) => {
-    await expect.poll(() => target.evaluate(() => document.fonts.check('600 16px Outfit')
-      && [...document.fonts].some(face => face.family.replaceAll('"', '') === 'Outfit' && face.status === 'loaded'))).toBe(true);
+test('one optional theme UI font preserves shared solving numerals and system recovery', async ({ page, browser }) => {
+  const audit = async (target: Page, family: string) => {
+    if (family !== 'system-ui') await expect.poll(() => target.evaluate(family => [...document.fonts]
+      .some(face => face.family.replaceAll('"', '') === family && face.status === 'loaded'), family)).toBe(true);
     const result = await target.locator('.world').evaluate(world => {
-      const expected = getComputedStyle(document.documentElement).fontFamily, wrong: string[] = [];
+      const expected = getComputedStyle(world).fontFamily, wrong: string[] = [];
+      const probe = document.createElement('span'); probe.style.fontFamily = 'var(--font-solving)'; world.append(probe);
+      const solving = getComputedStyle(probe).fontFamily; probe.remove();
+      const expectedFor = (node: Element) => node.closest('.cell,.dock .numeric,.large-cell,.large-keys button') ? solving : expected;
       const walker = document.createTreeWalker(world, NodeFilter.SHOW_TEXT); let node: Node | null;
       while ((node = walker.nextNode())) {
         const parent = node.parentElement;
         if (!node.textContent?.trim() || !parent || !parent.getClientRects().length || parent.closest('.title-lockup h1')) continue;
-        if (getComputedStyle(parent).fontFamily !== expected) wrong.push(`${parent.tagName}.${parent.className}: ${getComputedStyle(parent).fontFamily}`);
+        if (getComputedStyle(parent).fontFamily !== expectedFor(parent)) wrong.push(`${parent.tagName}.${parent.className}: ${getComputedStyle(parent).fontFamily}`);
       }
       for (const field of world.querySelectorAll('button,input,select,textarea,option')) {
-        if (getComputedStyle(field).fontFamily !== expected) wrong.push(`${field.tagName}: ${getComputedStyle(field).fontFamily}`);
+        if (getComputedStyle(field).fontFamily !== expectedFor(field)) wrong.push(`${field.tagName}: ${getComputedStyle(field).fontFamily}`);
       }
-      return { expected, wrong, override: (world as HTMLElement).style.getPropertyValue('--font-ui') };
+      return { expected, solving, wrong };
     });
-    expect(result.expected).toContain('Outfit'); expect(result.wrong).toEqual([]); expect(result.override).toBe('');
+    expect(result.expected).toContain(family); expect(result.solving).toContain('ToadokuSolving'); expect(result.wrong).toEqual([]);
   };
   await page.goto('/'); await ready(page);
   for (const theme of ['pond', 'cauldron']) for (const appearance of ['light', 'dark']) {
     await settings(page); await choose(page, 'Theme', theme); await choose(page, 'Appearance', appearance);
-    await expect(page.locator('.world')).toHaveAttribute('data-theme', theme); await audit(page);
-    const face = theme === 'pond' ? 'Chewy' : 'Creepster';
-    expect(await page.locator('.title-lockup h1').evaluate(title => getComputedStyle(title).fontFamily)).toContain(face);
-    await closeDialogs(page); await audit(page);
+    await expect(page.locator('.world')).toHaveAttribute('data-theme', theme);
+    const face = theme === 'pond' ? 'ToadokuPondUI' : 'ToadokuCauldronUI';
+    await audit(page, face); await expect(page.locator('.wordmark path')).toHaveAttribute('d', /\S+/);
+    await closeDialogs(page); await audit(page, face);
   }
   await quick(page);
   const blank = page.locator('.cell[data-clue="false"]').first(); await blank.click();
@@ -543,7 +546,8 @@ test('one global font covers every non-wordmark text surface and theme recovery'
   await expect(blank.locator('.note')).toHaveCount(1);
   for (const theme of ['pond', 'cauldron']) for (const appearance of ['light', 'dark']) {
     await settings(page); await choose(page, 'Theme', theme); await choose(page, 'Appearance', appearance);
-    await audit(page); await closeDialogs(page); await audit(page);
+    const face = theme === 'pond' ? 'ToadokuPondUI' : 'ToadokuCauldronUI';
+    await audit(page, face); await closeDialogs(page); await audit(page, face);
   }
   const context = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: 'en-US', reducedMotion: 'reduce' });
   let release!: () => void; const held = new Promise<void>(resolve => release = resolve);
@@ -552,9 +556,67 @@ test('one global font covers every non-wordmark text surface and theme recovery'
     await fault.clock.setFixedTime(new Date('2026-10-31T12:00:00-07:00'));
     await fault.route('**/src/lib/theme/cauldron.ts*', async route => { await held; await route.abort('failed'); });
     await fault.goto('/');
-    await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.loading); await audit(fault);
-    release(); await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.failed); await audit(fault);
+    await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.loading); await audit(fault, 'system-ui');
+    release(); await expect(fault.locator('.theme-status')).toContainText(themeCopy.en.failed); await audit(fault, 'system-ui');
   } finally { release(); await context.close(); }
+});
+
+test('theme UI fonts retain readable English, German and Spanish controls at all target allocations', async ({ page }) => {
+  await page.goto('/'); await ready(page);
+  const fittingButtons = async () => {
+    const overflow = await page.locator('.menu-panel button, .menu-more, dialog button').evaluateAll(buttons => buttons.flatMap(button => {
+      const b = button.getBoundingClientRect(), range = document.createRange(); range.selectNodeContents(button);
+      const r = range.getBoundingClientRect();
+      return r.left < b.left - .5 || r.right > b.right + .5 || r.top < b.top - .5 || r.bottom > b.bottom + .5
+        ? [{ text: button.textContent, button: b.toJSON(), content: r.toJSON() }] : [];
+    }));
+    expect(overflow).toEqual([]);
+  };
+  for (const theme of ['pond', 'cauldron']) {
+    await settings(page); await choose(page, 'Theme', theme); await closeDialogs(page);
+    for (const [width, height] of [[320, 568], [360, 800], [800, 360], [1280, 720]]) {
+      await page.setViewportSize({ width, height });
+      await expect(page.locator('svg.scene[data-scene="menu"]')).toHaveAttribute('viewBox', `0 0 ${width - 16} ${height - 16}`);
+      for (const locale of ['en', 'de', 'es'] as const) {
+        await page.locator('.menu-more').click();
+        const field = page.getByRole('dialog').getByRole('combobox', { name: /^(Language|Sprache|Idioma)$/ });
+        await field.selectOption(locale);
+        await expect(page.getByRole('dialog').getByRole('combobox', { name: uiCopy[locale].language, exact: true })).toBeEnabled();
+        await fittingButtons();
+        await page.getByRole('dialog').getByRole('button', { name: uiCopy[locale].close, exact: true }).click();
+        await expect(page.getByRole('dialog')).toHaveCount(0);
+        await fittingButtons();
+        await page.getByRole('button', { name: dictionaries[locale].quick, exact: true }).click(); await fittingButtons();
+        if ((width === 320 && locale !== 'en') || (width === 800 && locale === 'de')) await page.screenshot({ path: `${evidence}/${theme}-font-${locale}-${width}x${height}-quick.png` });
+        await page.getByRole('button', { name: dictionaries[locale].back, exact: true }).click();
+        await page.getByRole('button', { name: dictionaries[locale].progression, exact: true }).click(); await fittingButtons();
+        await page.getByRole('button', { name: dictionaries[locale].back, exact: true }).click();
+      }
+    }
+    await page.locator('.menu-more').click();
+    await page.getByRole('dialog').getByRole('combobox', { name: uiCopy.es.language, exact: true }).selectOption('en');
+    await expect(page.getByRole('dialog').getByRole('combobox', { name: 'Language', exact: true })).toBeEnabled();
+    await closeDialogs(page);
+  }
+});
+
+test('failed theme font uses the system stack after a previous font was registered and can recover', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-15T12:00:00-07:00'));
+  await page.goto('/'); await ready(page); await quick(page);
+  const before = (await snapshot(page)).attempt!, rectangles = await bounds(page);
+  const fontRoute = /\/Bitter-UI.*\.woff2/;
+  await page.route(fontRoute, route => route.request().resourceType() === 'font' ? route.abort('failed') : route.continue());
+  await settings(page); await choose(page, 'Theme', 'cauldron');
+  await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
+  const state = await page.locator('.world').evaluate(world => ({ family: getComputedStyle(world).fontFamily,
+    oldRegistered: [...document.fonts].some(face => face.family === 'ToadokuPondUI' && face.status === 'loaded') }));
+  expect(state.oldRegistered).toBe(true); expect(state.family).toContain('system-ui'); expect(state.family).not.toContain('ToadokuPondUI');
+  await expect(page.locator('.wordmark')).toHaveCount(0); // Branding stays menu-only.
+  await page.unroute(fontRoute);
+  await choose(page, 'Theme', 'pond'); await choose(page, 'Theme', 'cauldron');
+  await expect(page.locator('.world')).toHaveCSS('font-family', /ToadokuCauldronUI/);
+  await closeDialogs(page);
+  expect(await bounds(page)).toEqual(rectangles); expect(logical((await snapshot(page)).attempt!)).toEqual(logical(before));
 });
 
 test('submenu headings use the ground foreground in both themes and appearances', async ({ page }) => {
@@ -588,21 +650,21 @@ test('the regular-font Sudoku descriptor fits the protected title area in portra
       const fits = await title.evaluate(block => {
         const b = block.getBoundingClientRect(), heading = block.querySelector('h1')!, subtitle = block.querySelector('.subtitle')!;
         const h = heading.getBoundingClientRect(), s = subtitle.getBoundingClientRect();
-        const headingRange = document.createRange(), subtitleRange = document.createRange();
-        headingRange.selectNodeContents(heading); subtitleRange.selectNodeContents(subtitle);
+        const logo = heading.querySelector('svg')!.getBoundingClientRect(), subtitleRange = document.createRange();
+        subtitleRange.selectNodeContents(subtitle);
         const inside = (r: DOMRect) => r.left >= b.left - .5 && r.right <= b.right + .5 && r.top >= b.top - 1 && r.bottom <= b.bottom + 1;
         // Font ranges include ascender/descender whitespace outside the CSS
         // line box. Check allocation with line boxes and clipping with ranges.
         const textFits = (r: DOMRect) => r.left >= b.left - .5 && r.right <= b.right + .5
           && r.top >= 0 && r.bottom <= innerHeight;
         const ui = getComputedStyle(document.querySelector('.menu-panel button')!).fontFamily;
-        return { contained: [h, s].every(inside) && [headingRange.getBoundingClientRect(), subtitleRange.getBoundingClientRect()].every(textFits),
+        return { contained: [h, s, logo].every(inside) && [subtitleRange.getBoundingClientRect()].every(textFits),
           gap: s.top - h.bottom, size: parseFloat(getComputedStyle(subtitle).fontSize),
           normalFont: getComputedStyle(subtitle).fontFamily === ui,
           weight: getComputedStyle(subtitle).fontWeight, text: subtitle.textContent,
           viewport: b.left >= 0 && b.top >= 0 && b.right <= innerWidth && b.bottom <= innerHeight,
           artGap: document.querySelector('.art-slot')!.getBoundingClientRect().top - b.bottom,
-          bounds: [b, h, s, headingRange.getBoundingClientRect(), subtitleRange.getBoundingClientRect()].map(r => r.toJSON()) };
+          bounds: [b, h, s, logo, subtitleRange.getBoundingClientRect()].map(r => r.toJSON()) };
       });
       expect(fits, `${theme} ${width}x${height} ${JSON.stringify(fits.bounds)}`).toMatchObject({ contained: true, normalFont: true, weight: '700', text: 'SUDOKU', viewport: true });
       expect(fits.size).toBe(19); expect(fits.gap).toBeGreaterThanOrEqual(3.5);
@@ -618,7 +680,7 @@ test('the regular-font Sudoku descriptor fits the protected title area in portra
   const fallbackContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: 'en-US', reducedMotion: 'reduce' });
   try {
     const fallback = await fallbackContext.newPage(); let blockedFonts = 0;
-    await fallback.route(/\/(?:Chewy|Creepster)-Regular.*\.ttf/, route => {
+    await fallback.route(/\/(?:Nunito|Bitter)-UI.*\.woff2/, route => {
       // Vite also serves a JavaScript ?url import at this path. Fault only the
       // actual font payload so this exercises font fallback, not chunk failure.
       if (route.request().resourceType() !== 'font') return route.continue();
@@ -633,11 +695,10 @@ test('the regular-font Sudoku descriptor fits the protected title area in portra
         await expect(fallback.locator('svg.scene[data-scene="menu"]')).toHaveAttribute('viewBox', `0 0 ${width - 16} ${height - 16}`);
         expect(await fallback.locator('.title-lockup').evaluate(block => {
           const b = block.getBoundingClientRect();
-          return [...block.children].every(line => {
-            const range = document.createRange(); range.selectNodeContents(line);
-            const r = range.getBoundingClientRect();
+          return [block.querySelector('.wordmark')!, block.querySelector('.subtitle')!].every(line => {
+            const r = line.getBoundingClientRect();
             return r.left >= b.left && r.right <= b.right && r.top >= 0 && r.bottom <= innerHeight;
-          }) && ![...document.fonts].some(font => ['Chewy', 'Creepster'].includes(font.family));
+          }) && ![...document.fonts].some(font => ['ToadokuPondUI', 'ToadokuCauldronUI', 'Chewy', 'Creepster'].includes(font.family));
         })).toBe(true);
         if (width === 320) await fallback.screenshot({ path: `${evidence}/${theme}-subtitle-font-fallback.png` });
       }

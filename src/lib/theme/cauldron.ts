@@ -1,7 +1,8 @@
 import type { ThemeTokens } from './tokens';
 import type { ThemeDefinition } from './runtime';
 import { presentation } from './presentation';
-import creepsterUrl from '../../assets/fonts/Creepster-Regular.ttf?url';
+import bitterUrl from '../../assets/fonts/Bitter-UI.woff2?url';
+import { wordmark } from './wordmarks/cauldron';
 import { medallionShape, squashRindPath } from '../leaves/medallion';
 import { cauldronVessel as vessel, cauldronLiquid, cauldronBubbles, cauldronLiquidProfile } from '../scene/cauldron';
 
@@ -24,9 +25,8 @@ export const cauldron: ThemeTokens = {
   },
   typography: {
     ...presentation.typography,
-    title: '"Creepster", "Outfit", system-ui, sans-serif',
     titleInk: '#FFF0CA', digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11,
-    titleWeight: 400, uiWeight: 600, digitWeight: 600, noteWeight: 500, numberLineHeight: 1,
+    uiWeight: 600, digitWeight: 600, noteWeight: 500, numberLineHeight: 1,
   },
   spacing: presentation.spacing,
   surface: {
@@ -51,7 +51,7 @@ export const cauldronDark: ThemeTokens = {
 };
 export const definition: ThemeDefinition = {
   light: cauldron, dark: cauldronDark,
-  titleFont: { family: 'Creepster', url: creepsterUrl },
+  font: { family: 'ToadokuCauldronUI', url: bitterUrl, weight: '400 700' }, wordmark,
   cellPath: id => medallionShape(id).path, cellDetail: squashRindPath, vessel,
   liquid: cauldronLiquid, bubbles: cauldronBubbles,
 };

@@ -190,8 +190,7 @@ for (const [width, height] of [[320, 568], [360, 800], [800, 360], [1280, 720]])
     await page.setViewportSize({ width, height }); await page.clock.setFixedTime(new Date('2026-10-31T12:00:00-07:00'));
     await page.goto('/'); await ready(page);
     const titleFits = async () => page.locator('h1').evaluate(title => {
-      const range = document.createRange(); range.selectNodeContents(title);
-      const glyph = range.getBoundingClientRect(), anchor = title.getBoundingClientRect();
+      const glyph = title.querySelector('svg')!.getBoundingClientRect(), anchor = title.getBoundingClientRect();
       return { left: glyph.left - anchor.left, right: anchor.right - glyph.right,
         viewportLeft: glyph.left, viewportRight: window.innerWidth - glyph.right };
     });

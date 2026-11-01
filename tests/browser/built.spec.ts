@@ -36,7 +36,7 @@ test('built bundle runs under repository subpath with local assets and notices',
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
   await expect(page).toHaveTitle('Toadoku');
   await expect(page.getByRole('heading', {name:'Toadoku',exact:true})).toBeVisible();
-  expect(requests.some(url => /cauldron-|Creepster-Regular/.test(url))).toBe(false);
+  expect(requests.some(url => /cauldron-|Bitter-UI/.test(url))).toBe(false);
   await expect.poll(()=>page.getByRole('img',{name:dictionaries.de.art}).evaluate(e=>(e as HTMLImageElement).naturalWidth)).toBe(1254);
   await page.getByRole('button',{name:'Schnellspiel',exact:true}).click();
   await page.getByRole('button',{name:'Leicht',exact:true}).click();
@@ -58,14 +58,15 @@ test('built bundle runs under repository subpath with local assets and notices',
   await expect(page.locator('.cell')).toHaveCount(81);
   expect((await readAttempt()).id).toBe(originalId); expect(await page.locator('.cell').evaluateAll(es=>es.map(e=>e.getAttribute('aria-label')))).toEqual(originalEntries);
   await page.evaluate(()=>document.fonts.ready);
-  expect(await page.evaluate(()=>['Outfit','Chewy'].every(family => [...document.fonts].some(face => face.family.replaceAll('"','') === family && face.status === 'loaded')))).toBe(true);
+  expect(await page.evaluate(()=>['ToadokuSolving','ToadokuPondUI'].every(family => [...document.fonts].some(face => face.family.replaceAll('"','') === family && face.status === 'loaded')))).toBe(true);
+  expect(requests.some(url => /(?:Chewy|Creepster).*\.(?:ttf|woff2)/.test(url))).toBe(false);
   await page.getByRole('button',{name:'Mehr',exact:true}).click();
   await page.getByRole('button',{name:'Einstellungen',exact:true}).click();
   await page.getByRole('combobox',{name:'Thema',exact:true}).selectOption('cauldron');
   await expect(page.locator('.world')).toHaveAttribute('data-theme','cauldron');
-  expect(await page.evaluate(()=>[...document.fonts].some(face => face.family === 'Creepster' && face.status === 'loaded'))).toBe(true);
+  expect(await page.evaluate(()=>[...document.fonts].some(face => face.family === 'ToadokuCauldronUI' && face.status === 'loaded'))).toBe(true);
   expect(requests.some(url=>/\/cauldron-[^/]+\.js/.test(url))).toBe(true);
-  expect(requests.some(url=>/Creepster-Regular-[^/]+\.ttf/.test(url))).toBe(true);
+  expect(requests.some(url=>/Bitter-UI-[^/]+\.woff2/.test(url))).toBe(true);
   expect(errors).toEqual([]);expect(requests.every(url=>url.startsWith(`${origin}/toadoku/`))).toBe(true);
   const assets=await readdir('dist/assets');
   const images=assets.filter(f=>/\.(png|jpg|webp|svg|wasm)$/i.test(f));
@@ -73,7 +74,7 @@ test('built bundle runs under repository subpath with local assets and notices',
   expect(images[0]).toMatch(/^menu-sketch-.*\.png$/);
   expect(createHash('sha256').update(await readFile(`dist/assets/${images[0]}`)).digest('hex')).toBe('b4c53b629017faa5f57c9a72d3cb80d182268dd729b93e842ddd6be229ffedf1');
   for(const file of assets.filter(f=>/\.(js|css)$/.test(f)))expect(await readFile(`dist/assets/${file}`,'utf8')).not.toMatch(/prototypes\/|menu-placeholder|serviceWorker\.register/);
-  for(const file of ['Chewy-LICENSE.txt','Outfit-OFL.txt','Creepster-OFL.txt'])expect(await readFile(`dist/licenses/${file}`)).toEqual(await readFile(`src/assets/fonts/${file}`));
+  for(const file of ['Chewy-LICENSE.txt','Outfit-OFL.txt','Creepster-OFL.txt','Nunito-OFL.txt','Bitter-OFL.txt'])expect(await readFile(`dist/licenses/${file}`)).toEqual(await readFile(`src/assets/fonts/${file}`));
   const dependencies=JSON.parse(await readFile('dist/licenses/dependencies.json','utf8')) as {name:string;identifier:string;text:string}[];
   expect(dependencies.map(d=>d.name).sort()).toEqual(['@lucide/svelte','clsx','svelte']);
   expect(dependencies.filter(d=>d.name!=='@lucide/svelte').every(d=>d.identifier==='MIT'&&d.text.includes('Permission is hereby granted'))).toBe(true);

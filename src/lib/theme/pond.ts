@@ -1,9 +1,10 @@
-import chewyUrl from '../../assets/fonts/Chewy-Regular.ttf?url';
+import nunitoUrl from '../../assets/fonts/Nunito-UI.woff2?url';
 import type { ThemeDefinition } from './runtime';
 import type { ThemeTokens } from './tokens';
 import { themeStyle as mapThemeStyle } from './tokens';
 import { pondLiquid, shore } from '../scene/geometry';
 import { leafShape } from '../leaves/shape';
+import { wordmark } from './wordmarks/pond';
 export type { ThemeTokens } from './tokens';
 
 export const pond = {
@@ -24,10 +25,9 @@ export const pond = {
     edge: '#6D9F81', selectedEdge: '#A7C4B4', disabledEdge: '#A6BDB8',
   },
   typography: {
-    title: '"Chewy", "Outfit", system-ui, sans-serif',
     titleInk: '#FFF5D9', controlMin: 16, controlMax: 22,
     digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11, titleMin: 44, titleMax: 80,
-    titleWeight: 400, uiWeight: 600, digitWeight: 600, noteWeight: 500,
+    uiWeight: 600, digitWeight: 600, noteWeight: 500,
     uiLineHeight: 1.15, titleLineHeight: 1.05, numberLineHeight: 1,
   },
   spacing: { small: 4, large: 8 },
@@ -66,7 +66,7 @@ export const pondDark: ThemeTokens = {
   dialog: { surface: '#203D36', edge: '#A7C4B4', ink: '#FFF5D9', backdrop: 'rgb(12 28 24 / 45%)' },
 };
 export const definition: ThemeDefinition = {
-  light: pond, dark: pondDark, titleFont: { family: 'Chewy', url: chewyUrl },
+  light: pond, dark: pondDark, font: { family: 'ToadokuPondUI', url: nunitoUrl, weight: '400 700' }, wordmark,
   liquid: pondLiquid, vessel: shore,
   cellPath: id => leafShape(id).path,
 };

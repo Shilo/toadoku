@@ -2,13 +2,15 @@ import { resolveAppearance, resolveTheme, type AppearanceId, type ThemeId } from
 import type { ThemeTokens } from './tokens';
 import type { Layout } from '../layout';
 import type { LiquidFrame, SceneBubble, VesselRenderer } from '../scene/types';
+import { SYSTEM_UI_FONT, type Wordmark } from './typography';
 
-export interface ThemeTitleFont { readonly family: string; readonly url: string; readonly weight?: string }
+export interface ThemeFont { readonly family: string; readonly url: string; readonly weight?: string }
 export interface ThemeDefinition {
   readonly light: ThemeTokens;
   readonly dark: ThemeTokens;
-  /** Applies only to the main-menu Toadoku wordmark. UI typography is global. */
-  readonly titleFont?: ThemeTitleFont;
+  /** One optional UI font. Solving numerals remain shared; branding is baked vector data. */
+  readonly font?: ThemeFont;
+  readonly wordmark: Wordmark;
   readonly cellPath: (id: number) => string;
   readonly cellDetail?: (id: number) => string;
   readonly liquid: (layout: Layout, screen: 'menu' | 'game', time: number) => LiquidFrame;
@@ -20,10 +22,11 @@ export interface AppliedTheme {
   readonly appearance: AppearanceId;
   readonly tokens: ThemeTokens;
   readonly fontFallback: boolean;
+  readonly uiFontFamily: string;
   readonly definition: ThemeDefinition;
 }
 /** Registration is delayed until the winning request; timed-out/stale faces cannot swap later. */
-export type ThemeFontLoader = (font: ThemeTitleFont) => Promise<void | (() => void)>;
+export type ThemeFontLoader = (font: ThemeFont) => Promise<void | (() => void)>;
 export interface ThemeRuntimeOptions {
   load?: (id: ThemeId) => Promise<ThemeDefinition>;
   loadFont?: ThemeFontLoader;
@@ -36,13 +39,13 @@ export const loadThemeDefinition = async (id: ThemeId): Promise<ThemeDefinition>
 
 const FONT_WAIT_MS = 5000;
 /** Font failures are supported fallback typography, while chunk failures retain the old theme. */
-export async function loadThemeFont(font: ThemeTitleFont): Promise<() => void> {
+export async function loadThemeFont(font: ThemeFont): Promise<() => void> {
   const face = new FontFace(font.family, `url("${font.url}")`, { weight: font.weight ?? '400', display: 'swap' });
   await face.load();
   return () => { document.fonts.add(face); };
 }
 
-function boundedFont(font: ThemeTitleFont, load: ThemeFontLoader): Promise<void | (() => void)> {
+function boundedFont(font: ThemeFont, load: ThemeFontLoader): Promise<void | (() => void)> {
   let timer: ReturnType<typeof setTimeout>;
   return Promise.race([
     Promise.resolve().then(() => load(font)),
@@ -56,7 +59,7 @@ export function createThemeRuntime(options: ThemeRuntimeOptions) {
   let generation = 0, disposed = false, appliedKey: string | undefined;
   let pendingKey: string | undefined, pending: Promise<void> | undefined;
   const fonts = new Map<string, Promise<void | (() => void)>>();
-  function readyFont(font: ThemeTitleFont) {
+  function readyFont(font: ThemeFont) {
     const key = `${font.family}:${font.url}:${font.weight ?? '400'}`;
     let ready = fonts.get(key);
     if (!ready) {
@@ -82,15 +85,17 @@ export function createThemeRuntime(options: ThemeRuntimeOptions) {
           const definition = await load(id);
           if (!current()) return;
           let fontFallback = false, register: void | (() => void) = undefined;
-          if (definition.titleFont) {
-            try { register = await readyFont(definition.titleFont); }
+          if (definition.font) {
+            try { register = await readyFont(definition.font); }
             catch { fontFallback = true; }
           }
           if (!current()) return;
           register?.();
           const tokens = definition[appearance];
           appliedKey = fontFallback ? undefined : key;
-          options.onChange({ id, appearance, tokens, fontFallback, definition });
+          const uiFontFamily = definition.font && !fontFallback
+            ? `${JSON.stringify(definition.font.family)}, ${SYSTEM_UI_FONT}` : SYSTEM_UI_FONT;
+          options.onChange({ id, appearance, tokens, fontFallback, uiFontFamily, definition });
         } catch (error) {
           if (current()) options.onError?.(error);
         } finally {

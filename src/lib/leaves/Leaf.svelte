@@ -54,7 +54,7 @@
 
 <style>
   .leaf, .floating, .front, svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .leaf { display: block; pointer-events: none; color: var(--leaf-ink); font-family: var(--font-ui); }
+  .leaf { display: block; pointer-events: none; color: var(--leaf-ink); font-family: var(--font-solving); }
   svg { overflow: visible; }
   .lip { fill: var(--leaf-lip); transform: translateY(var(--leaf-default-lip-depth)); }
   .face { fill: var(--leaf-face); }

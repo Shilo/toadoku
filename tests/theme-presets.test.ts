@@ -4,6 +4,7 @@ import { definition as cauldronDefinition } from '../src/lib/theme/cauldron';
 import { themeStyle, type ThemeTokens } from '../src/lib/theme/tokens';
 import { presentation } from '../src/lib/theme/presentation';
 import { cauldronLiquidProfile } from '../src/lib/scene/cauldron';
+import { SYSTEM_UI_FONT } from '../src/lib/theme/typography';
 
 const presets = [
   ['pond/light', pondDefinition.light], ['pond/dark', pondDefinition.dark],
@@ -38,10 +39,10 @@ describe.each(presets)('%s semantic preset', (_, theme) => {
     expect(waterPeriod).toBe(theme.id === 'cauldron' ? cauldronLiquidProfile.period * 1000 : sharedPeriod);
     for (const [role, value] of Object.entries(presentation.surface)) expect(theme.surface[role as keyof typeof presentation.surface]).toBe(value);
     for (const [role, value] of Object.entries(presentation.typography)) expect(theme.typography[role as keyof typeof presentation.typography]).toBe(value);
-    expect(theme.typography.titleWeight).toBe(400);
-    expect(css['--weight-title']).toBe('400');
+    expect(css).not.toHaveProperty('--font-title');
+    expect(css).not.toHaveProperty('--weight-title');
     expect(theme.typography).not.toHaveProperty('ui');
-    expect(css).not.toHaveProperty('--font-ui'); // A theme cannot replace the global UI family.
+    expect(css['--font-ui']).toBe(SYSTEM_UI_FONT); // Only a resolved definition.font can supply another family.
     expect(theme.surface.dialogRadius).toBeGreaterThan(0);
     expect(theme.surface.buttonRadius).toBeGreaterThan(0);
   });

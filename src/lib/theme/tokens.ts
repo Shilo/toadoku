@@ -1,3 +1,5 @@
+import { SYSTEM_UI_FONT } from './typography';
+
 /** Presentation inputs only. Theme identity never owns layout or navigation state. */
 export interface ThemeTokens {
   readonly id: string;
@@ -18,11 +20,11 @@ export interface ThemeTokens {
     readonly hoverFace: string; readonly pressedFace: string; readonly selectedFace: string; readonly selectedInk: string;
   };
   readonly typography: {
-    readonly title: string; readonly titleInk: string;
+    readonly titleInk: string;
     readonly controlMin: number; readonly controlMax: number;
     readonly digitMin: number; readonly digitMax: number; readonly noteMin: number; readonly noteMax: number;
     readonly titleMin: number; readonly titleMax: number;
-    readonly titleWeight: number; readonly uiWeight: number; readonly digitWeight: number; readonly noteWeight: number;
+    readonly uiWeight: number; readonly digitWeight: number; readonly noteWeight: number;
     readonly uiLineHeight: number; readonly titleLineHeight: number; readonly numberLineHeight: number;
   };
   readonly spacing: { readonly small: number; readonly large: number };
@@ -54,7 +56,7 @@ export interface ThemeTokens {
 }
 
 /** Explicit unit mapping keeps ratios, lengths, timing and stacking unambiguous. */
-export function themeStyle(theme: ThemeTokens): string {
+export function themeStyle(theme: ThemeTokens, uiFontFamily = SYSTEM_UI_FONT): string {
   const roles: Record<string, string | number> = {
     'water-deep': theme.water.deep, 'water-middle': theme.water.middle, 'water-shallow': theme.water.shallow,
     'ground-wet': theme.ground.wet, 'ground-dry': theme.ground.dry, 'ground-rim': theme.ground.rim, 'ground-ink': theme.ground.ink,
@@ -72,12 +74,12 @@ export function themeStyle(theme: ThemeTokens): string {
     'control-disabled-lip': theme.control.disabledLip, 'control-focus': theme.control.focus,
     'control-edge': theme.control.edge, 'control-selected-edge': theme.control.selectedEdge, 'control-disabled-edge': theme.control.disabledEdge,
     'control-edge-width': `${theme.surface.controlEdgeWidth}px`,
-    'font-title': theme.typography.title, 'title-ink': theme.typography.titleInk,
+    'font-ui': uiFontFamily, 'title-ink': theme.typography.titleInk,
     'type-control-min': `${theme.typography.controlMin}px`, 'type-control-max': `${theme.typography.controlMax}px`,
     'type-digit-min': `${theme.typography.digitMin}px`, 'type-digit-max': `${theme.typography.digitMax}px`,
     'type-note-min': `${theme.typography.noteMin}px`, 'type-note-max': `${theme.typography.noteMax}px`,
     'type-title-min': `${theme.typography.titleMin}px`, 'type-title-max': `${theme.typography.titleMax}px`,
-    'weight-title': theme.typography.titleWeight, 'weight-ui': theme.typography.uiWeight, 'weight-digit': theme.typography.digitWeight,
+    'weight-ui': theme.typography.uiWeight, 'weight-digit': theme.typography.digitWeight,
     'weight-note': theme.typography.noteWeight, 'line-ui': theme.typography.uiLineHeight,
     'line-title': theme.typography.titleLineHeight, 'line-number': theme.typography.numberLineHeight,
     'space-small': `${theme.spacing.small}px`, 'space-large': `${theme.spacing.large}px`,

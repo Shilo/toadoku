@@ -4,6 +4,7 @@ import { createThemeRuntime, type AppliedTheme, type ThemeDefinition } from '../
 import { nextLocalMidnight, resolveAppearance, resolveTheme } from '../src/lib/theme/policy';
 import { themeStyle } from '../src/lib/theme/tokens';
 import { presentation } from '../src/lib/theme/presentation';
+import { SYSTEM_UI_FONT } from '../src/lib/theme/typography';
 
 function deferred<T>() {
   let resolve!: (value: T) => void, reject!: (error: unknown) => void;
@@ -12,7 +13,7 @@ function deferred<T>() {
 }
 const light = { ...pond, id: 'pond', water: { ...pond.water, deep: '#123456' } };
 const dark = { ...pond, id: 'pond', water: { ...pond.water, deep: '#654321' } };
-const definition: ThemeDefinition = { ...pondDefinition, light, dark, titleFont: { family: 'TestTitle', url: '/title.ttf' } };
+const definition: ThemeDefinition = { ...pondDefinition, light, dark, font: { family: 'TestUI', url: '/ui.woff2', weight: '400 700' } };
 const date = new Date(2026, 9, 31, 12);
 afterEach(() => { vi.useRealTimers(); });
 
@@ -75,7 +76,7 @@ describe('atomic lazy theme publication', () => {
     await vi.waitFor(() => expect(loadFont).toHaveBeenCalledOnce());
     expect(events).toEqual([]);
     font.resolve(); await request;
-    expect(events).toEqual([{ id: 'pond', appearance: 'dark', tokens: dark, fontFallback: false, definition }]);
+    expect(events).toEqual([{ id: 'pond', appearance: 'dark', tokens: dark, fontFallback: false, uiFontFamily: `"TestUI", ${SYSTEM_UI_FONT}`, definition }]);
     await runtime.request('pond', 'dark', date);
     expect(load).toHaveBeenCalledOnce();
     await runtime.request('pond', 'light', date);
@@ -144,8 +145,31 @@ describe('atomic lazy theme publication', () => {
     const runtime = createThemeRuntime({ load: async () => definition, loadFont, onChange: theme => events.push(theme) });
     await runtime.request('pond', 'light', date);
     expect(events[0].fontFallback).toBe(true); expect(events[0].tokens).toBe(light);
+    expect(events[0].uiFontFamily).toBe(SYSTEM_UI_FONT);
     await runtime.request('pond', 'light', date);
-    expect(events[1].fontFallback).toBe(false); expect(loadFont).toHaveBeenCalledTimes(2); runtime.dispose();
+    expect(events[1].fontFallback).toBe(false); expect(events[1].uiFontFamily).toContain('"TestUI"');
+    expect(loadFont).toHaveBeenCalledTimes(2); runtime.dispose();
+  });
+  it('uses system typography without any font download when a theme omits its optional font', async () => {
+    const { font: _font, ...withoutFont } = definition;
+    const events: AppliedTheme[] = [], loadFont = vi.fn();
+    const runtime = createThemeRuntime({ load: async () => withoutFont, loadFont, onChange: theme => events.push(theme) });
+    await runtime.request('pond', 'light', date);
+    expect(events[0].uiFontFamily).toBe(SYSTEM_UI_FONT); expect(events[0].fontFallback).toBe(false);
+    expect(loadFont).not.toHaveBeenCalled(); runtime.dispose();
+  });
+  it('does not reuse an already registered theme family when the next font fails or is absent', async () => {
+    const { font: _font, ...withoutFont } = definition;
+    const failed = { ...definition, font: { family: 'OtherUI', url: '/other.woff2' } };
+    let next: ThemeDefinition = definition;
+    const events: AppliedTheme[] = [], loadFont = vi.fn().mockResolvedValueOnce(undefined).mockRejectedValue(Error('font'));
+    const runtime = createThemeRuntime({ load: async () => next, loadFont, onChange: theme => events.push(theme) });
+    await runtime.request('pond', 'light', date); expect(events[0].uiFontFamily).toContain('"TestUI"');
+    next = failed; await runtime.request('cauldron', 'light', date);
+    expect(events[1].uiFontFamily).toBe(SYSTEM_UI_FONT); expect(events[1].fontFallback).toBe(true);
+    next = withoutFont; await runtime.request('pond', 'dark', date);
+    expect(events[2].uiFontFamily).toBe(SYSTEM_UI_FONT); expect(events[2].fontFallback).toBe(false);
+    expect(loadFont).toHaveBeenCalledTimes(2); runtime.dispose();
   });
   it('bounds a hanging font and never registers its late result', async () => {
     vi.useFakeTimers();

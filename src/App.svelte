@@ -441,7 +441,7 @@
 <svelte:document onvisibilitychange={visibility} />
 <svelte:head><title>Toadoku</title><meta name="theme-color" content={appliedTheme?.tokens.water.deep ?? '#0D6267'} /></svelte:head>
 
-<main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens) : undefined} {@attach preventDialogClickThrough}>
+<main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens, appliedTheme.uiFontFamily) : undefined} {@attach preventDialogClickThrough}>
   {#if appliedTheme}
   <div class={['scene', { 'study-paused': inGame && (studyPaused || !documentVisible) }]} bind:clientWidth={width} bind:clientHeight={height}>
     <Scene {layout} screen={inGame ? 'game' : 'menu'} {time} vessel={appliedTheme.definition.vessel} liquid={appliedTheme.definition.liquid} bubbles={appliedTheme.definition.bubbles} />
@@ -477,7 +477,12 @@
     {:else}
       <section class="identity" aria-label="Toadoku">
         <div class="title-lockup" style={`${rectStyle(layout.menuTitle)};transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>
-          <h1 style:font-size={`${titleNameSize}px`}>Toadoku</h1>
+          <h1 style:font-size={`${titleNameSize}px`}><span class="sr-only">Toadoku</span>
+            <svg class="wordmark" aria-hidden="true" focusable="false" viewBox={appliedTheme.definition.wordmark.viewBox}
+              style:width={`${appliedTheme.definition.wordmark.width / appliedTheme.definition.wordmark.unitsPerEm}em`}>
+              <path d={appliedTheme.definition.wordmark.path} />
+            </svg>
+          </h1>
           <p class="subtitle">SUDOKU</p>
         </div>
         <div class="art-slot" style={`${rectStyle(layout.menuArt)};transform:translate(${artFloat.x}px,${artFloat.y}px)`}><img class="menu-art" src={menuSketch} alt={copy.art} width="1254" height="1254" draggable="false" decoding="async" /></div>
