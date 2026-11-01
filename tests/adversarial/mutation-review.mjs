@@ -30,12 +30,21 @@ export function fingerprint(file, source, mutant) {
 
 export function inventoryFromPlan(plan, sources, root = process.cwd()) {
   const inventory = {};
+  // Stryker 10.1.1 events use zero-based coordinates; its report schema uses one-based coordinates.
+  const schemaPosition = position => {
+    const coordinate = value => {
+      if (!Number.isSafeInteger(value) || value < 0 || !Number.isSafeInteger(value + 1)) throw Error('Invalid zero-based plan coordinate');
+      return value + 1;
+    };
+    return { line: coordinate(position?.line), column: coordinate(position?.column) };
+  };
   for (const entry of plan.mutantPlans) {
     const mutant = entry.mutant;
     const file = normalized(mutant.relativeFileName ?? relative(root, mutant.fileName));
     if (typeof sources[file] !== 'string') throw Error(`Plan source missing from report: ${file}`);
     const target = inventory[file] ??= { sourceSha256: sourceHash(sources[file]), fingerprints: [] };
-    target.fingerprints.push(fingerprint(file, sources[file], mutant));
+    const location = { start: schemaPosition(mutant.location?.start), end: schemaPosition(mutant.location?.end) };
+    target.fingerprints.push(fingerprint(file, sources[file], { ...mutant, location }));
   }
   return inventory;
 }

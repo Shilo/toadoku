@@ -5,16 +5,18 @@ The declared Node minimum is 24.11.0, matching the locked toolchain; this enviro
 ```text
 npm ci
 npm run check
-npm test
+npm test -- --maxWorkers 2
 npm run build
 npm run test:browsers:install
 npm run test:browser
 npm run test:storage
 npm run test:models
-npm run test:coverage
+npm run test:coverage -- --maxWorkers 2
 ```
 
 `test:models` runs the independent 2,000-sequence, 250-command session model. `test:coverage` checks every configured critical pure file at 100% statements, branches, functions and lines, including the raw-recovery encoder. Narrow unreachable exclusions require the separately recorded proofs. Neither percentage proves correctness.
+
+Run heavy checks serially. Cap ordinary and coverage workers at two to limit CPU and memory use; this changes scheduling, not test scope or thresholds. Stryker separately uses two workers and its runner limits each Vitest instance to one worker.
 
 Browser tests use owned localhost test origins and isolated browser contexts. The ordinary browser configuration starts port 5179; native storage uses 5187 and all three installed engines. The native suite includes realistic retained-history capacity and deliberate failure/mutation cases. Do not run test setup against a real player's origin/database. Never kill an unknown listener to obtain a test port: use a recorded isolated configuration with identical assertions, timeouts and explicit base URLs instead. Custom browser contexts need their base URL passed explicitly.
 

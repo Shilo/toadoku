@@ -22,7 +22,8 @@ function fixture() {
   const log = `timestamp DEBUG ConfigReader Loaded config: ${JSON.stringify(config, null, 2)}\nrest of log`;
   const ownedFiles: string[] = [file], expectedFiles: string[] = [file];
   const executionInputs = { [file]: source, [test]: testSource, 'tests/helper.ts': 'independent helper source' } as Record<string, string>;
-  const job = { name: 'example', files: ownedFiles, report, plan: { mutantPlans: [{ plan: 'Run', mutant: { ...mutant, relativeFileName: file } }] }, log,
+  const job = { name: 'example', files: ownedFiles, report, plan: { mutantPlans: [{ plan: 'Run', mutant: { ...mutant, relativeFileName: file,
+    location: { start: { line: 0, column: 21 }, end: { line: 0, column: 22 } } } }] }, log,
     inventory: { version: 2, node, packages: structuredClone(packages), configs: structuredClone(configs), files: [file], sources: { [file]: sourceHash(source) }, tests: { [test]: sourceHash(testSource) },
       inputs: Object.fromEntries(Object.entries(executionInputs).map(([path, value]) => [path, sourceHash(value)])) }, hashes: {} };
   const options = { jobs: [job], expectedFiles, currentSources: { [file]: source }, currentTests: { [test]: testSource } as Record<string, string>, currentConfigs: configs,

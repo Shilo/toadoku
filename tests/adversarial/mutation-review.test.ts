@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 // Deliberately separate from app code and its mutation scope.
 // @ts-expect-error A plain JavaScript evidence tool has no application declaration module.
-import { adjudicate, fingerprint, originalAt, sourceHash } from './mutation-review.mjs';
+import { adjudicate, fingerprint, inventoryFromPlan, originalAt, sourceHash } from './mutation-review.mjs';
 
 const source = 'export const value = 1;\n';
 function fixture() {
@@ -75,6 +75,41 @@ describe('fail-closed exact mutation evidence accounting', () => {
       { start: { line: 1, column: 1 }, end: { line: 1, column: 99 } },
       { start: { line: 1, column: 2 }, end: { line: 1, column: 2 } },
     ]) expect(() => originalAt(source, location)).toThrow();
+  });
+  it('normalizes zero-based event positions once into immutable one-based report fingerprints', () => {
+    const file = 'src/example.ts', text = 'first\r\nsecond\r\n';
+    for (const location of [
+      { start: { line: 0, column: 0 }, end: { line: 0, column: 1 } },
+      { start: { line: 0, column: 2 }, end: { line: 1, column: 3 } },
+    ]) {
+      const mutant = { relativeFileName: file, mutatorName: 'StringLiteral', replacement: 'replacement', location };
+      const plan = { mutantPlans: [{ mutant }] }, before = structuredClone(plan);
+      const reportLocation = { start: { line: location.start.line + 1, column: location.start.column + 1 },
+        end: { line: location.end.line + 1, column: location.end.column + 1 } };
+      const inventory = inventoryFromPlan(plan, { [file]: text });
+      expect(inventory[file]).toEqual({ sourceSha256: sourceHash(text),
+        fingerprints: [fingerprint(file, text, { ...mutant, location: reportLocation })] });
+      expect(inventory[file].fingerprints[0]).not.toBe(fingerprint(file, text, { ...mutant,
+        location: { start: { ...reportLocation.start, column: reportLocation.start.column + 1 },
+          end: { ...reportLocation.end, column: reportLocation.end.column + 1 } } }));
+      expect(plan).toEqual(before);
+    }
+  });
+  it('rejects invalid or already shifted event ranges without coordinate guessing', () => {
+    const file = 'src/example.ts';
+    const invalid = [-1, 0.5, NaN, Infinity, Number.MAX_SAFE_INTEGER];
+    for (const axis of ['line', 'column'] as const) for (const value of invalid) {
+      const location = { start: { line: 0, column: 0 }, end: { line: 0, column: 1 } };
+      location.start[axis] = value;
+      const plan = { mutantPlans: [{ mutant: { relativeFileName: file, mutatorName: 'StringLiteral', replacement: '', location } }] };
+      expect(() => inventoryFromPlan(plan, { [file]: source })).toThrow();
+    }
+    for (const location of [
+      { start: { line: 1, column: 22 }, end: { line: 1, column: 23 } },
+      { start: { line: 0, column: 23 }, end: { line: 0, column: 24 } },
+      { start: { line: 0, column: 2 }, end: { line: 0, column: 1 } },
+    ]) expect(() => inventoryFromPlan({ mutantPlans: [{ mutant: { relativeFileName: file,
+      mutatorName: 'StringLiteral', replacement: '', location } }] }, { [file]: source })).toThrow();
   });
   it('requires actual nonempty proof text and canonical independent reviewer names', () => {
     for (const invalid of [{ proof: {} }, { proof: ' ' }, { projectContract: [] }, { contractProjection: '\t' },

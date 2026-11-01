@@ -129,7 +129,9 @@ describe('session editing and monotone history', () => {
     expect(restored.entries).toEqual(original.entries); expect(restored.notes).toEqual(original.notes);
     expect(edited).toEqual(editedBefore);
     const callable = Object.freeze(Object.assign(() => undefined, { ...edited.undo[0].changes[0] }));
-    for (const changes of [null, [callable]]) {
+    const duplicateChanges = [Object.freeze({ ...edited.undo[0].changes[0] }),
+      Object.freeze({ ...edited.undo[0].changes[0], beforeValue: 3 })];
+    for (const changes of [null, [callable], duplicateChanges]) {
       const state = structuredClone(edited); state.undo[0].changes = changes as never;
       if (changes) Object.freeze(changes);
       Object.freeze(state.entries); Object.freeze(state.notes); Object.freeze(state.undo[0]); Object.freeze(state.undo); Object.freeze(state);
