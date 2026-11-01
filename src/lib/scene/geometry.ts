@@ -1,4 +1,6 @@
 import type { Layout, Rect } from '../layout';
+import type { LiquidFrame } from './types';
+export type { LiquidFrame, SceneBubble } from './types';
 import { presentation as pond } from '../theme/presentation';
 
 export interface Point { x: number; y: number }
@@ -11,7 +13,7 @@ const segment = (a: Point, b: Point): Curve => [a, mix(a, b, 1 / 3), mix(a, b, 2
 const backwards = (c: Curve): Curve => [c[3], c[2], c[1], c[0]];
 const reverse = (curves: Curve[]): Curve[] => curves.slice().reverse().map(backwards);
 const pair = (p: Point) => `${p.x.toFixed(3)} ${p.y.toFixed(3)}`;
-const path = (curves: Curve[]) => `M${pair(curves[0][0])}${curves.map(c => `C${pair(c[1])} ${pair(c[2])} ${pair(c[3])}`).join('')}Z`;
+const path = (curves: Curve[]) => curves.length ? `M${pair(curves[0][0])}${curves.map(c => `C${pair(c[1])} ${pair(c[2])} ${pair(c[3])}`).join('')}Z` : '';
 
 export function evaluate(c: Curve, t: number): Point {
   const a = mix(c[0], c[1], t), b = mix(c[1], c[2], t), d = mix(c[2], c[3], t);
@@ -20,7 +22,29 @@ export function evaluate(c: Curve, t: number): Point {
 
 /** One canonical long-axis network, with every layout input coming from the
  * authoritative fixed cell/anchor allocation. Transposition changes no IDs. */
+export interface LiquidProfile {
+  readonly period: number;
+  readonly drift: number;
+  readonly bend: number;
+  readonly junction: number;
+  readonly lobes: boolean;
+}
+export const pondLiquidProfile: LiquidProfile = { period: 24, drift: .65, bend: .65, junction: .8, lobes: false };
+
+/** Full union of face, lip, selected lift, focus, digits/notes and independent float.
+ * An extra half pixel separates the liquid contour from that visible union. */
+export function protectedFaceRadius(diameter: number): number {
+  return pond.geometry.leafControlRadius * diameter
+    + Math.max(pond.surface.leafSelectedLift, pond.surface.leafLipDepth) + pond.motion.leafTravel;
+}
+
 export function boardWater(layout: Layout, time = 0): WaterGeometry {
+  return partitionWater(layout, time, pondLiquidProfile);
+}
+
+/** A shared partition kernel; profiles author flowing or rounded simmer contours.
+ * The local empty-disc fillets remain useful when the board becomes square. */
+export function partitionWater(layout: Layout, time: number, profile: LiquidProfile): WaterGeometry {
   const transpose = layout.board.width > layout.board.height;
   const map = (p: Point): Point => transpose ? point(p.y + layout.board.x, p.x + layout.board.y) : point(p.x + layout.board.x, p.y + layout.board.y);
   const unmap = (r: Rect): Rect => transpose
@@ -32,20 +56,36 @@ export function boardWater(layout: Layout, time = 0): WaterGeometry {
   const at = (row: number, column: number) => cells.find(c => c.row === row && c.column === column)!;
   const x = [0, ...[3, 6].map(c => (at(0, c - 1).rect.x + at(0, c - 1).rect.width + at(0, c).rect.x) / 2), w];
   const y = [0, ...[3, 6].map(r => (at(r - 1, 0).rect.y + at(r - 1, 0).rect.height + at(r, 0).rect.y) / 2), h];
-  // The corridor excludes full nominal disks plus 3px, twice the moving visual
-  // reserve. Cubic convex hulls stay in it for every real-valued phase.
+  const disks = cells.map(({ anchor: a }) => ({ x: a.x + a.width / 2, y: a.y + a.height / 2,
+    radius: protectedFaceRadius(a.width) + .5 }));
+  // Connecting spans stay in full strips outside all swept visible faces.
+  // Unlike the old nominal-anchor strip, this does not discard real leaf margins.
   const bands = [0, ...[3, 6].map((r, i) => {
     const top = at(r - 1, 0).anchor, bottom = at(r, 0).anchor;
-    return Math.max(.1, Math.min(y[i + 1] - top.y - top.height, bottom.y - y[i + 1]) - pond.geometry.waterClearance * 2);
+    return Math.max(.1, Math.min(y[i + 1] - top.y - top.height / 2 - protectedFaceRadius(top.width),
+      bottom.y + bottom.height / 2 - protectedFaceRadius(bottom.width) - y[i + 1]) - .5);
   }), 0];
-  const phase = time * 1000 / pond.motion.waterPeriod * Math.PI * 2;
+  const verticalBands = [0, ...[3, 6].map((c, i) => {
+    const left = at(0, c - 1).anchor, right = at(0, c).anchor;
+    return Math.max(.1, Math.min(x[i + 1] - left.x - left.width / 2 - protectedFaceRadius(left.width),
+      right.x + right.width / 2 - protectedFaceRadius(right.width) - x[i + 1]) - .5);
+  }), 0];
+  const phase = time / profile.period * Math.PI * 2;
   const nodes: { p: Point; tangent: Point; radius: number }[][] = y.map((yy, r) => x.map((xx, c) => {
     const interiorRow = r > 0 && r < 3;
     const drift = c * 1.3 + r * .9;
-    const dy = interiorRow ? bands[r] * .55 * (.7 * Math.sin(drift) + .3 * Math.sin(phase + c * .9 + r)) : 0;
-    const slope = interiorRow ? bands[r] * .55 / Math.max(1, w / 3) * (.91 * Math.cos(drift) + .27 * Math.cos(phase + c * .9 + r)) : 0;
-    const length = Math.hypot(1, slope);
-    return { p: point(xx, yy + dy), tangent: point(1 / length, slope / length), radius: interiorRow && c > 0 && c < 3 ? Math.min((x[c + 1] - x[c]) * .19, bands[r] * .6, (bands[r] - Math.abs(dy)) * .85) : 0 };
+    const dy = interiorRow ? bands[r] * profile.drift * (.7 * Math.sin(drift) + .3 * Math.sin(phase + c * .9 + r)) : 0;
+    const slope = interiorRow ? bands[r] * profile.drift / Math.max(1, w / 3) * (.91 * Math.cos(drift) + .27 * Math.cos(phase + c * .9 + r)) : 0;
+    const length = Math.hypot(1, slope), p = point(xx, yy + dy), tangent = point(1 / length, slope / length);
+    // Every pocket control lies in this empty disc. The cubic convex hull is
+    // therefore disjoint from every complete face/motion envelope at all times.
+    const clearance = Math.max(0, Math.min(...disks.map(d => Math.hypot(p.x - d.x, p.y - d.y) - d.radius)));
+    const radius = interiorRow && c > 0 && c < 3 ? Math.min(
+      clearance * profile.junction, (x[c + 1] - xx) * .28, (xx - x[c - 1]) * .28,
+      (y[r + 1] - yy) * .28, (yy - y[r - 1]) * .28,
+      Math.abs(tangent.y) < 1e-9 ? Infinity : Math.max(0, bands[r] - Math.abs(dy)) / Math.abs(tangent.y) * .95,
+    ) : 0;
+    return { p, tangent, radius };
   }));
   const horizontal: Curve[][][] = y.map((_, r) => x.slice(0, 3).map((__, c) => {
     const a = nodes[r][c], b = nodes[r][c + 1];
@@ -54,13 +94,23 @@ export function boardWater(layout: Layout, time = 0): WaterGeometry {
     const end = point(b.p.x - b.tangent.x * b.radius, b.p.y - b.tangent.y * b.radius);
     const reach = (p: Point, t: Point) => Math.min((end.x - start.x) / 3 / Math.abs(t.x), Math.abs(t.y) < 1e-9 ? Infinity : (t.y > 0 ? y[r] + bands[r] - p.y : p.y - y[r] + bands[r]) / Math.abs(t.y));
     const before = reach(start, a.tangent), after = reach(end, point(-b.tangent.x, -b.tangent.y));
+    if (profile.lobes) {
+      const middle = point((start.x + end.x) / 2, y[r] + bands[r] * profile.bend * Math.sin(phase + r * 1.4 + c * 2.1));
+      const handle = (end.x - start.x) / 6;
+      return [segment(a.p, start),
+        [start, point(start.x + a.tangent.x * Math.min(before, handle), start.y + a.tangent.y * Math.min(before, handle)), point(middle.x - handle, middle.y), middle] as Curve,
+        [middle, point(middle.x + handle, middle.y), point(end.x - b.tangent.x * Math.min(after, handle), end.y - b.tangent.y * Math.min(after, handle)), end] as Curve,
+        segment(end, b.p)];
+    }
     return [segment(a.p, start), [start, point(start.x + a.tangent.x * before, start.y + a.tangent.y * before), point(end.x - b.tangent.x * after, end.y - b.tangent.y * after), end] as Curve, segment(end, b.p)];
   }));
   const vertical: Curve[][][] = y.slice(0, 3).map((_, r) => x.map((__, c) => {
     const a = nodes[r][c], b = nodes[r + 1][c];
     if (c === 0 || c === 3) return [segment(a.p, b.p)];
     const start = point(a.p.x, a.p.y + a.radius), end = point(b.p.x, b.p.y - b.radius);
-    const bend = .95 * (.65 * Math.sin(r + c * 1.7) + .35 * Math.sin(phase + r * 1.8 + c));
+    const bend = verticalBands[c] * profile.bend * (profile.lobes
+      ? Math.sin(phase + r * 2.1 + c * 1.4)
+      : .65 * Math.sin(r + c * 1.7) + .35 * Math.sin(phase + r * 1.8 + c));
     const middle = point(start.x + bend, (start.y + end.y) / 2), reach = (end.y - start.y) / 6;
     return [segment(a.p, start), [start, point(start.x, start.y + reach), point(middle.x, middle.y - reach), middle] as Curve, [middle, point(middle.x, middle.y + reach), point(end.x, end.y - reach), end] as Curve, segment(end, b.p)];
   }));
@@ -153,9 +203,23 @@ export function menuWater(layout: Layout, time = 0): { color: number; d: string 
 }
 
 export interface ShoreGeometry {
-  wet: string; dry: string; transpose: boolean; leafLimit: number; dryLimit: number;
+  wet: string; dry: string; rim?: string; transpose: boolean; leafLimit: number; dryLimit: number;
   boundaries: { wet: Curve[]; dry: Curve[] };
   contours: { wet: Curve[]; dry: Curve[] };
+}
+/** A narrow closed band interpolated within the existing bank. Pairwise cubic
+ * differences are bounded by their control differences, so the entire band is
+ * no thicker than nominal and introduces no independently authored wave. */
+export function rimBand(wet: readonly Curve[], dry: readonly Curve[], nominal: number): Curve[] {
+  const distance = Math.max(...wet.flatMap((curve, i) => curve.map((p, j) => Math.hypot(p.x - dry[i][j].x, p.y - dry[i][j].y))));
+  if (distance < .01) return [];
+  const near = .1, far = near + Math.min(.7, nominal / distance);
+  const interpolate = (fraction: number) => wet.map((curve, i): Curve => [
+    mix(curve[0], dry[i][0], fraction), mix(curve[1], dry[i][1], fraction),
+    mix(curve[2], dry[i][2], fraction), mix(curve[3], dry[i][3], fraction),
+  ]);
+  const a = interpolate(near), b = interpolate(far);
+  return [...a, segment(a.at(-1)![3], b.at(-1)![3]), ...reverse(b), segment(b[0][0], a[0][0])];
 }
 /** No shore animation: independent water and leaf extrema cannot shift land.
  * The entire cubic hull is between the last protected leaf and control edge. */
@@ -184,7 +248,7 @@ export function shore(layout: Layout, screen: 'menu' | 'game'): ShoreGeometry {
       return [...boundary, segment(end, point(w + bleed, -bleed)), segment(point(w + bleed, -bleed), point(w + bleed, h + bleed)), segment(point(w + bleed, h + bleed), point(-bleed, h + bleed)), segment(point(-bleed, h + bleed), start)];
     };
     const contours = { wet: close(boundaries.wet), dry: close(boundaries.dry) };
-    return { wet: path(contours.wet), dry: path(contours.dry), transpose: false, leafLimit: 0, dryLimit: panel.y, boundaries, contours };
+    return { wet: path(contours.wet), dry: path(contours.dry), rim: path(rimBand(boundaries.wet, boundaries.dry, 1.5)), transpose: false, leafLimit: 0, dryLimit: panel.y, boundaries, contours };
   }
   const transpose = screen === 'game' && layout.landscape;
   const w = transpose ? layout.height : layout.width, h = transpose ? layout.width : layout.height;
@@ -204,5 +268,10 @@ export function shore(layout: Layout, screen: 'menu' | 'game'): ShoreGeometry {
   const boundaries = { wet: boundary(wetTop, amplitude), dry: boundary(dryTop, amplitude * .6) };
   const close = (b: Curve[]): Curve[] => [...b, segment(b.at(-1)![3], point(w + bleed, h + bleed)), segment(point(w + bleed, h + bleed), point(-bleed, h + bleed)), segment(point(-bleed, h + bleed), b[0][0])];
   const contours = { wet: close(boundaries.wet), dry: close(boundaries.dry) };
-  return { wet: path(contours.wet), dry: path(contours.dry), transpose, leafLimit, dryLimit: edge, boundaries, contours };
+  return { wet: path(contours.wet), dry: path(contours.dry), rim: path(rimBand(boundaries.wet, boundaries.dry, 1.5)), transpose, leafLimit, dryLimit: edge, boundaries, contours };
+}
+
+/** Authored Pond entry point, imported only by the lazy Pond definition. */
+export function pondLiquid(layout: Layout, screen: 'menu' | 'game', time: number): LiquidFrame {
+  return screen === 'game' ? boardWater(layout, time) : { layers: menuWater(layout, time) };
 }

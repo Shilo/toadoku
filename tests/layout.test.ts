@@ -47,3 +47,42 @@ it('has complete dictionaries and safe browser locale defaults', () => {
   expect(resolveLocale('de-DE')).toBe('de'); expect(resolveLocale('fr-FR')).toBe('en');
   for(const copy of Object.values(dictionaries)) expect(Object.keys(copy).sort()).toEqual(Object.keys(dictionaries.en).sort());
 });
+
+it('uses one bottom row only for roomy existing bottom layouts', () => {
+  for (const [width, height] of [[596, 784], [864, 869], [600, 600]]) {
+    const layout = createLayout(width, height);
+    expect(layout.landscape).toBe(false);
+    expect(layout.dockSingleRow).toBe(true);
+    expect(layout.dock.height).toBe(56);
+    expect((layout.dock.width - 9 * 4) / 10).toBeGreaterThanOrEqual(56);
+    expect(Math.min(...layout.cells.map(cell => cell.anchor.width))).toBeGreaterThanOrEqual(32);
+    expect(layout.board.y + layout.board.height + 8).toBeCloseTo(layout.dock.y);
+    expect(layout.dock.y + layout.dock.height).toBe(height);
+    expect(layout.cells.map(cell => cell.id)).toEqual(Array.from({ length: 81 }, (_, id) => id));
+  }
+  expect(createLayout(595, 784).dockSingleRow).toBe(false);
+  expect(createLayout(516, 784).dockSingleRow).toBe(false);
+  const portrait = createLayout(344, 784);
+  expect(portrait.dockSingleRow).toBe(false);
+  expect(portrait.keySize).toBeCloseTo(65.6);
+  expect(portrait.dock.height).toBeCloseTo(135.2);
+  expect(portrait.board.height).toBeCloseTo(640.8);
+  const landscape = createLayout(784, 344);
+  expect(landscape.dockSingleRow).toBe(false);
+  expect(landscape.keySize).toBeCloseTo(65.6);
+  expect(landscape.dock).toEqual({ x: 648.8, y: 0, width: 135.2, height: 344 });
+  expect(landscape.board).toEqual({ x: 0, y: 0, width: 640.8, height: 344 });
+});
+
+it('keeps maximum menu reservation and identity anchors when the bottom dock condenses', () => {
+  const layout = createLayout(864, 869), square = createLayout(864, 869, 'square');
+  expect(layout.keySize).toBe(80);
+  expect(layout.menuReserve).toBeCloseTo(237.3);
+  expect(layout.menuTitle).toMatchObject({ x: 288, width: 288, height: 84 });
+  expect(layout.menuTitle.y).toBeCloseTo(149.85);
+  expect(layout.menuArt.x).toBe(297);
+  expect(layout.menuArt.y).toBeCloseTo(241.85);
+  expect(layout.menuArt.width).toBe(270); expect(layout.menuArt.height).toBe(240);
+  expect(square.menuTitle).toEqual(layout.menuTitle); expect(square.menuArt).toEqual(layout.menuArt);
+  expect(square.menuReserve).toBe(layout.menuReserve);
+});

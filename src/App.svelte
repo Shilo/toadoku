@@ -15,6 +15,7 @@
   import { createThemeRuntime, type AppliedTheme } from './lib/theme/runtime';
   import { nextLocalMidnight } from './lib/theme/policy';
   import { themeCopy } from './lib/theme/copy';
+  import { automaticThemeStatus, formatAutomaticThemeStatus } from './lib/theme/event';
   import type { GameController, GameState, StartRequest } from './lib/gameplay/game';
   import type { Band, Preferences, Role } from './lib/gameplay/contracts';
   import type { CloseReason, DialogView } from './lib/gameplay/ui/types';
@@ -56,7 +57,10 @@
   const preferences = $derived(gameState.save?.preferences ?? { schemaVersion: 1 as const, language: locale, motion: 'system' as const, boardShape: 'fill' as const, theme: 'auto', appearance: 'light' });
   let appliedTheme = $state.raw<AppliedTheme>();
   let themeError = $state(false), systemDark = $state(false);
-  let themeTimer: ReturnType<typeof setTimeout> | undefined;
+  let themeTimer: ReturnType<typeof setTimeout> | undefined, themeStatusTimer: ReturnType<typeof setTimeout> | undefined;
+  let themeNow = $state.raw(new Date());
+  const selectedThemePreference = $derived(preferences.theme), selectedAppearancePreference = $derived(preferences.appearance);
+  const automaticThemeInfo = $derived(formatAutomaticThemeStatus(automaticThemeStatus(themeNow, appliedTheme?.id, themeError), locale));
   const themeText = $derived(themeCopy[locale]);
   const themeRuntime = createThemeRuntime({
     onChange: theme => { appliedTheme = theme; themeError = false; },
@@ -65,16 +69,27 @@
   $effect(() => { requestTheme(); });
   function requestTheme(date = new Date()) {
     themeError = false;
-    void themeRuntime.request(preferences.theme, preferences.appearance, date, systemDark);
+    void themeRuntime.request(selectedThemePreference, selectedAppearancePreference, date, systemDark);
+  }
+  function refreshThemeStatus() {
+    themeNow = new Date();
+    clearTimeout(themeStatusTimer);
+    if (!document.hidden && !disposed) themeStatusTimer = setTimeout(refreshThemeStatus, 60_000 - themeNow.getTime() % 60_000);
   }
   function refreshTheme() {
     if (disposed) return;
+    refreshThemeStatus();
     const now = new Date();
     requestTheme(now);
     clearTimeout(themeTimer);
     themeTimer = setTimeout(refreshTheme, Math.max(1, nextLocalMidnight(now).getTime() - now.getTime()));
   }
   const layout = $derived(createLayout(width, height, preferences.boardShape));
+  const baseMenuRow = $derived(route === 'menu' || route === 'more');
+  const menuMoreSize = $derived(baseMenuRow ? 64 : layout.keySize);
+  const menuPanelRect = $derived(baseMenuRow
+    ? { ...layout.menuPanel, y: layout.height - menuMoreSize, height: menuMoreSize,
+      width: layout.landscape ? layout.menuPanel.width : layout.width - menuMoreSize - 4 } : layout.menuPanel);
   const inGame = $derived(route === 'board' || route === 'more' && overlay?.base === 'board');
   const selected = $derived(gameState.attempt?.selection ?? 0);
   const values = $derived(gameState.attempt ? getValues(gameState.attempt) : []);
@@ -165,7 +180,7 @@
     appearanceChanged(); darkMedia.addEventListener('change', appearanceChanged);
     refreshTheme();
     const timer = setInterval(() => controller?.checkpoint(), 1000);
-    return () => { disposed = true; clearTimeout(themeTimer); themeRuntime.dispose(); darkMedia.removeEventListener('change', appearanceChanged); bootSequence++; cancelBackupOperation(); clearInterval(timer); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
+    return () => { disposed = true; clearTimeout(themeTimer); clearTimeout(themeStatusTimer); themeRuntime.dispose(); darkMedia.removeEventListener('change', appearanceChanged); bootSequence++; cancelBackupOperation(); clearInterval(timer); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
   });
   async function focusCell() {
     await tick(); if (route !== 'board' || !gameState.canStudy) return;
@@ -388,7 +403,7 @@
     element.addEventListener('mousedown', guard, true); element.addEventListener('click', guard, true);
     return () => { element.removeEventListener('mousedown', guard, true); element.removeEventListener('click', guard, true); };
   }
-  function visibility() { documentVisible = !document.hidden; if (documentVisible) refreshTheme(); }
+  function visibility() { documentVisible = !document.hidden; if (documentVisible) refreshTheme(); else clearTimeout(themeStatusTimer); }
   async function pageShown() { refreshTheme(); if (controller?.state.attempt) await controller.checkAuthority(); documentVisible = !document.hidden; }
 </script>
 
@@ -399,7 +414,7 @@
 <main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens) : undefined} {@attach singleActivation}>
   {#if appliedTheme}
   <div class="scene" bind:clientWidth={width} bind:clientHeight={height}>
-    <Scene {layout} screen={inGame ? 'game' : 'menu'} {time} theme={appliedTheme.id} vessel={appliedTheme.definition.vessel} />
+    <Scene {layout} screen={inGame ? 'game' : 'menu'} {time} vessel={appliedTheme.definition.vessel} liquid={appliedTheme.definition.liquid} bubbles={appliedTheme.definition.bubbles} />
     {#if inGame}
       {#if gameState.canStudy && gameState.attempt}
         <section class="board" aria-label={a.board} bind:this={boardElement} style={rectStyle(layout.board)}>
@@ -411,7 +426,7 @@
               tabindex={selected === cell.id ? 0 : -1} style={rectStyle({...cell.rect,x:cell.rect.x-layout.board.x,y:cell.rect.y-layout.board.y})}
               onclick={() => dispatch({type:'select',cell:cell.id})} onfocus={() => { dispatch({type:'select',cell:cell.id}); focusedCell = cell.id; }} onblur={() => focusedCell = null}>
               <span class="anchor" style={rectStyle({ ...cell.anchor, x: cell.anchor.x - cell.rect.x, y: cell.anchor.y - cell.rect.y })}>
-                <Leaf facePath={appliedTheme.definition.cellPath} id={cell.id} selected={selected === cell.id} focused={keyboard && focusedCell === cell.id} value={values[cell.id] || undefined} {notes} {time} diameter={cell.anchor.width} />
+                <Leaf faceDetail={appliedTheme.definition.cellDetail} facePath={appliedTheme.definition.cellPath} id={cell.id} selected={selected === cell.id} focused={keyboard && focusedCell === cell.id} value={values[cell.id] || undefined} {notes} {time} diameter={cell.anchor.width} />
                 {#if conflicts.has(cell.id)}<span class="conflict-mark" aria-hidden="true" style:font-size={`${cell.anchor.width * .22}px`}>!</span>{/if}
               </span>
             </button>
@@ -423,7 +438,7 @@
           {#if gameState.attempt}<button class="cream" disabled={blocked} onclick={() => gameState.conflictedChanges ? nav?.openPanel('recover') : resume(gameState.attempt!.role)}>{a.resumeHere}</button>{:else}<button class="cream" onclick={() => nav?.quit()}>{c.mainMenu}</button>{/if}
         </section>
       {/if}
-      <nav class={['dock', { landscape: layout.landscape }]} aria-label={a.board} bind:this={dockElement} style={`${rectStyle(layout.dock)};--key:${layout.keySize}px`}>
+      <nav class={['dock', { landscape: layout.landscape, 'single-row': layout.dockSingleRow }]} aria-label={a.board} bind:this={dockElement} style={`${rectStyle(layout.dock)};--key:${layout.dockSingleRow ? layout.dock.height : layout.keySize}px`}>
         {#each [1,2,3,4,5,6,7,8,9] as number (number)}
           <button class="cream numeric" disabled={blocked || !gameState.canStudy || gameState.attempt?.status !== 'playing'} aria-label={String(number)} onclick={() => dispatch({type:'enter',digit:number},true)}>{number}</button>
         {/each}
@@ -434,7 +449,7 @@
         <h1 style={`${rectStyle(layout.menuTitle)};font-size:${layout.titleFontSize}px;transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>Toadoku</h1>
         <div class="art-slot" style={`${rectStyle(layout.menuArt)};transform:translate(${artFloat.x}px,${artFloat.y}px)`}><img class="menu-art" src={menuSketch} alt={copy.art} width="1254" height="1254" draggable="false" decoding="async" /></div>
       </section>
-      <nav class="menu-panel" aria-label={route === 'quick' ? copy.quick : route === 'progression' ? copy.progression : 'Toadoku'} bind:this={menuElement} style={`${rectStyle(layout.menuPanel)};--action:${layout.menuActionHeight}px`}>
+      <nav class={['menu-panel', { 'base-row': baseMenuRow }]} aria-label={route === 'quick' ? copy.quick : route === 'progression' ? copy.progression : 'Toadoku'} bind:this={menuElement} style={`${rectStyle(menuPanelRect)};--action:${layout.menuActionHeight}px`}>
         {#if route === 'menu' || route === 'more'}
           <button class="cream" disabled={blocked} onclick={() => nav?.go('quick')}>{copy.quick}</button>
           <button class="cream" disabled={blocked || gameState.durability === 'ephemeral'} onclick={() => nav?.go('progression')}>{copy.progression}</button>
@@ -450,7 +465,7 @@
           <button class="cream" onclick={() => {controller?.cancelStart();nav?.go('menu');}}>{copy.back}</button>
         {/if}
       </nav>
-      <button class="cream menu-more" aria-label={copy.more} disabled={blocked || !controller} onclick={() => nav?.openPanel('settings')} style={`right:0;bottom:0;width:${layout.keySize}px;height:${layout.keySize}px`}><Ellipsis size={28} /></button>
+      <button class="cream menu-more" aria-label={copy.more} disabled={blocked || !controller} onclick={() => nav?.openPanel('settings')} style={`right:0;bottom:0;width:${menuMoreSize}px;height:${menuMoreSize}px`}><Ellipsis size={28} /></button>
       {#if booting || gameState.busy}
         <p class="scene-status" role="status">{a.loading}</p>
       {:else if bootError}
@@ -470,7 +485,7 @@
     {#if DialogComponent}
     <DialogComponent view={overlay.panel} {locale} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
       receipt={gameState.receipt} {continueBand} hint={gameState.canStudy ? gameState.hint : undefined} {hintProblem} busy={blocked || gameState.hintComputing} {closingBlocked} {saveState} {anchor} restorePreview={restorePreview?.summary} {restoreError} {exportError} {recoveryBusy} {recoveryProblem}
-      {themeError} onThemeRetry={refreshTheme} onThemeReload={reloadApplication}
+      {themeError} {automaticThemeInfo} activeThemeId={appliedTheme.id} onThemeRetry={refreshTheme} onThemeReload={reloadApplication}
       onCommand={command => dispatch(command)} onNavigate={navigatePanel} onClose={closeDialog} onPreference={changePreferences}
       onHint={async choice => { if (!blocked) await controller?.requestHint(choice); }} onContinue={continuePuzzle} onReplay={replay}
       onRestart={async () => { if (blocked || !controller) return; if (await controller.restart()) {focusReason='tool';historyClosing=true;nav?.closeAll();} }}

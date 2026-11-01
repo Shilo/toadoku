@@ -1,6 +1,6 @@
 <script lang="ts">
   import { floatOffset } from '../motion/float';
-  import { digitGeometry, focusGeometry, leafShape, noteGeometry } from './shape';
+  import { digitGeometry, focusGeometry, noteGeometry } from './shape';
 
   interface Props {
     id: number;
@@ -10,10 +10,12 @@
     value?: number;
     notes?: readonly number[];
     time: number;
-    facePath?: (id: number) => string;
+    facePath: (id: number) => string;
+    faceDetail?: (id: number) => string;
   }
-  let { id, diameter, selected, focused = false, value, notes = [], time, facePath }: Props = $props();
-  const path = $derived(facePath?.(id) ?? leafShape(id).path);
+  let { id, diameter, selected, focused = false, value, notes = [], time, facePath, faceDetail }: Props = $props();
+  const path = $derived(facePath(id));
+  const detail = $derived(faceDetail?.(id));
   const offset = $derived(floatOffset(id, time, 'leaf'));
   const candidates = $derived(noteGeometry(diameter));
   const digitBox = $derived(digitGeometry(diameter));
@@ -26,6 +28,7 @@
     <span class="front">
       <svg class="face" viewBox="0 0 100 100" focusable="false">
         <path d={path} />
+        {#if detail}<path class="rind" d={detail} />{/if}
         {#if selected}<circle class="selection-dew" cx="15" cy="51" r="2.7" />{/if}
       </svg>
       {#if focused}
@@ -58,6 +61,7 @@
   .selected .front { transform: translateY(calc(-1 * var(--leaf-selected-lift))); }
   .selected .lip { fill: var(--leaf-selected-lip); transform: translateY(var(--leaf-lip-depth)); }
   .selected .face { fill: var(--leaf-selected-face); }
+  .rind { fill: var(--leaf-rind); }
   .selection-dew { fill: var(--leaf-selected-dew); }
   .focus-dew { position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: var(--focus-bead-size); height: var(--focus-bead-size); box-sizing: border-box; border: calc(var(--focus-width) / 4) solid var(--focus-edge); border-radius: 50%; background: var(--leaf-focus); }
   .notes { position: absolute; inset: 0; display: grid; place-items: center; }

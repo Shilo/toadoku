@@ -3,6 +3,7 @@ import { definition as pondDefinition } from '../src/lib/theme/pond';
 import { definition as cauldronDefinition } from '../src/lib/theme/cauldron';
 import { themeStyle, type ThemeTokens } from '../src/lib/theme/tokens';
 import { presentation } from '../src/lib/theme/presentation';
+import { cauldronLiquidProfile } from '../src/lib/scene/cauldron';
 
 const presets = [
   ['pond/light', pondDefinition.light], ['pond/dark', pondDefinition.dark],
@@ -30,7 +31,11 @@ describe.each(presets)('%s semantic preset', (_, theme) => {
       expect(name).toMatch(/^--[a-z-]+$/);
       expect(value).toBeTruthy(); expect(value).not.toMatch(/undefined|NaN|Infinity/);
     }
-    for (const group of ['spacing', 'geometry', 'motion'] as const) expect(theme[group]).toEqual(presentation[group]);
+    for (const group of ['spacing', 'geometry'] as const) expect(theme[group]).toEqual(presentation[group]);
+    const { waterPeriod, ...motionBudget } = theme.motion;
+    const { waterPeriod: sharedPeriod, ...sharedMotionBudget } = presentation.motion;
+    expect(motionBudget).toEqual(sharedMotionBudget);
+    expect(waterPeriod).toBe(theme.id === 'cauldron' ? cauldronLiquidProfile.period * 1000 : sharedPeriod);
     for (const [role, value] of Object.entries(presentation.surface)) expect(theme.surface[role as keyof typeof presentation.surface]).toBe(value);
     for (const [role, value] of Object.entries(presentation.typography)) expect(theme.typography[role as keyof typeof presentation.typography]).toBe(value);
     expect(theme.typography.titleWeight).toBe(400);
@@ -64,6 +69,7 @@ it('switches appearances without changing theme identity, scene colors, cells or
     expect(light.id).toBe(dark.id);
     for (const group of ['water', 'ground', 'leaf', 'geometry', 'motion', 'spacing', 'typography'] as const) expect(light[group]).toEqual(dark[group]);
   }
-  expect(pondDefinition.cellPath).toBeUndefined(); expect(pondDefinition.vessel).toBeUndefined();
+  expect(pondDefinition.cellPath).toBeTypeOf('function');
+  expect(pondDefinition.vessel).toBeTypeOf('function'); expect(pondDefinition.liquid).toBeTypeOf('function');
   expect(cauldronDefinition.cellPath).toBeTypeOf('function'); expect(cauldronDefinition.vessel).toBeTypeOf('function');
 });

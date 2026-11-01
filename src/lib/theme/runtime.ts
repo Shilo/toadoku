@@ -1,14 +1,18 @@
 import { resolveAppearance, resolveTheme, type AppearanceId, type ThemeId } from './policy';
 import type { ThemeTokens } from './tokens';
 import type { Layout } from '../layout';
+import type { LiquidFrame, SceneBubble, VesselRenderer } from '../scene/types';
 
 export interface ThemeFont { readonly family: string; readonly url: string; readonly weight?: string }
 export interface ThemeDefinition {
   readonly light: ThemeTokens;
   readonly dark: ThemeTokens;
   readonly font?: ThemeFont;
-  readonly cellPath?: (id: number) => string;
-  readonly vessel?: (layout: Layout, screen: 'menu' | 'game') => { wet: string; dry: string; transpose: boolean };
+  readonly cellPath: (id: number) => string;
+  readonly cellDetail?: (id: number) => string;
+  readonly liquid: (layout: Layout, screen: 'menu' | 'game', time: number) => LiquidFrame;
+  readonly bubbles?: (layout: Layout, screen: 'menu' | 'game', time: number) => readonly SceneBubble[];
+  readonly vessel: VesselRenderer;
 }
 export interface AppliedTheme {
   readonly id: ThemeId;

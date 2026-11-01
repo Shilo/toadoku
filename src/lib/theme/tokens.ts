@@ -2,17 +2,19 @@
 export interface ThemeTokens {
   readonly id: string;
   readonly water: { readonly deep: string; readonly middle: string; readonly shallow: string };
-  readonly ground: { readonly wet: string; readonly dry: string };
+  readonly ground: { readonly wet: string; readonly dry: string; readonly rim: string };
+  readonly decoration: { readonly bubble: string; readonly bubbleEdge: string };
   readonly leaf: {
     readonly face: string; readonly lip: string; readonly highlight: string; readonly ink: string;
     readonly selectedFace: string; readonly selectedLip: string; readonly selectedDew: string;
     readonly focus: string; readonly dew: string;
-    readonly entryInk: string; readonly noteInk: string; readonly conflictInk: string;
+    readonly entryInk: string; readonly noteInk: string; readonly conflictInk: string; readonly rind: string;
   };
   readonly control: {
     readonly face: string; readonly lip: string; readonly highlight: string; readonly ink: string;
     readonly disabledFace: string; readonly disabledInk: string; readonly disabledLip: string;
     readonly focus: string;
+    readonly edge: string; readonly selectedEdge: string; readonly disabledEdge: string;
     readonly hoverFace: string; readonly pressedFace: string; readonly selectedFace: string; readonly selectedInk: string;
   };
   readonly typography: {
@@ -25,7 +27,7 @@ export interface ThemeTokens {
   };
   readonly spacing: { readonly small: number; readonly large: number };
   readonly surface: {
-    readonly controlRadius: number; readonly controlDepth: number; readonly controlHighlight: number;
+    readonly controlRadius: number; readonly controlDepth: number; readonly controlHighlight: number; readonly controlEdgeWidth: number;
     readonly leafSelectedLift: number; readonly leafDefaultLipDepth: number; readonly leafLipDepth: number;
     readonly focusBeadSize: number; readonly focusEdge: string; readonly focusWidth: number;
     readonly dialogRadius: number; readonly artFallbackInk: string;
@@ -55,18 +57,21 @@ export interface ThemeTokens {
 export function themeStyle(theme: ThemeTokens): string {
   const roles: Record<string, string | number> = {
     'water-deep': theme.water.deep, 'water-middle': theme.water.middle, 'water-shallow': theme.water.shallow,
-    'ground-wet': theme.ground.wet, 'ground-dry': theme.ground.dry,
+    'ground-wet': theme.ground.wet, 'ground-dry': theme.ground.dry, 'ground-rim': theme.ground.rim,
+    'bubble-color': theme.decoration.bubble, 'bubble-edge': theme.decoration.bubbleEdge,
     'leaf-face': theme.leaf.face, 'leaf-lip': theme.leaf.lip, 'leaf-highlight': theme.leaf.highlight,
     'leaf-ink': theme.leaf.ink, 'entry-ink': theme.leaf.entryInk,
     'note-ink': theme.leaf.noteInk, 'conflict-ink': theme.leaf.conflictInk, 'leaf-selected-face': theme.leaf.selectedFace,
     'leaf-selected-lip': theme.leaf.selectedLip, 'leaf-selected-dew': theme.leaf.selectedDew,
-    'leaf-focus': theme.leaf.focus, 'leaf-dew': theme.leaf.dew,
+    'leaf-focus': theme.leaf.focus, 'leaf-dew': theme.leaf.dew, 'leaf-rind': theme.leaf.rind,
     'control-face': theme.control.face, 'control-lip': theme.control.lip,
     'control-hover-face': theme.control.hoverFace, 'control-pressed-face': theme.control.pressedFace,
     'control-selected-face': theme.control.selectedFace, 'control-selected-ink': theme.control.selectedInk,
     'control-highlight': theme.control.highlight, 'control-ink': theme.control.ink,
     'control-disabled-face': theme.control.disabledFace, 'control-disabled-ink': theme.control.disabledInk,
     'control-disabled-lip': theme.control.disabledLip, 'control-focus': theme.control.focus,
+    'control-edge': theme.control.edge, 'control-selected-edge': theme.control.selectedEdge, 'control-disabled-edge': theme.control.disabledEdge,
+    'control-edge-width': `${theme.surface.controlEdgeWidth}px`,
     'font-ui': theme.typography.ui, 'font-title': theme.typography.title, 'title-ink': theme.typography.titleInk,
     'type-control-min': `${theme.typography.controlMin}px`, 'type-control-max': `${theme.typography.controlMax}px`,
     'type-digit-min': `${theme.typography.digitMin}px`, 'type-digit-max': `${theme.typography.digitMax}px`,

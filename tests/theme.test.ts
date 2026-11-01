@@ -17,9 +17,9 @@ function contrast(a: string, b: string): number {
 }
 
 describe('Pond presentation contract', () => {
-  it('keeps exactly the selected three water and two ground roles', () => {
+  it('keeps selected water and shore colors with a separate authored rim role', () => {
     expect(Object.values(pond.water)).toEqual(['#0D6267', '#329D9A', '#7ED1B8']);
-    expect(Object.values(pond.ground)).toEqual(['#6D9F81', '#B6BA86']);
+    expect(pond.ground).toEqual({ wet: '#6D9F81', dry: '#B6BA86', rim: '#4D7E68' });
     expect(pond.spacing.large).toBe(pond.spacing.small * 2);
     expect(pond.spacing.small).toBe(4);
   });

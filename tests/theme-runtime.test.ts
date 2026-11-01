@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { pond } from '../src/lib/theme/pond';
+import { pond, definition as pondDefinition } from '../src/lib/theme/pond';
 import { createThemeRuntime, type AppliedTheme, type ThemeDefinition } from '../src/lib/theme/runtime';
 import { nextLocalMidnight, resolveAppearance, resolveTheme } from '../src/lib/theme/policy';
 import { themeStyle } from '../src/lib/theme/tokens';
@@ -12,7 +12,7 @@ function deferred<T>() {
 }
 const light = { ...pond, id: 'pond', water: { ...pond.water, deep: '#123456' } };
 const dark = { ...pond, id: 'pond', water: { ...pond.water, deep: '#654321' } };
-const definition: ThemeDefinition = { light, dark, font: { family: 'TestTitle', url: '/title.ttf' } };
+const definition: ThemeDefinition = { ...pondDefinition, light, dark, font: { family: 'TestTitle', url: '/title.ttf' } };
 const date = new Date(2026, 9, 31, 12);
 afterEach(() => { vi.useRealTimers(); });
 

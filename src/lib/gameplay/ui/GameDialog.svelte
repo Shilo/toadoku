@@ -23,7 +23,7 @@
   import { bandForPool, poolForLeap } from '../../modes';
   import type { CloseReason, DialogView, GameDialogProps } from './types';
   import type { SessionCommand } from '../../session';
-  let { view, locale, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, themeError = false, onThemeRetry, onThemeReload, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
+  let { view, locale, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, themeError = false, activeThemeId, automaticThemeInfo, onThemeRetry, onThemeReload, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
     onCommand, onNavigate, onClose, onPreference, onHint, onContinue, onReplay, onRestart, onReplace, onExport, onRecovery, onResumeSaved, onRestore, onRestoreInput, onRetry }: GameDialogProps = $props();
   const c = $derived(uiCopy[locale]);
   const themeText = $derived(themeCopy[locale]);
@@ -153,10 +153,16 @@
         {#if attempt && saveState !== 'saved'}<p>{appCopy[locale].reloadWarning}</p><button class="secondary" disabled={recoveryBusy || !onRecovery} onclick={event => exportWithFocus(event,() => onRecovery?.())}>{c.emergencyExport}</button>{/if}
         <button class="secondary" onclick={onThemeReload}>{appCopy[locale].reload}</button>
       {/if}
-      <label>{themeText.theme}<select value={preferences.theme} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, theme: event.currentTarget.value })}>
+      <label>{themeText.theme}<select aria-describedby={preferences.theme === 'auto' && automaticThemeInfo && (automaticThemeInfo.transition || automaticThemeInfo.remaining) ? 'automatic-theme-description' : undefined} value={preferences.theme} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, theme: event.currentTarget.value })}>
         {#if !themeChoices.includes(preferences.theme as typeof themeChoices[number])}<option value={preferences.theme} disabled>{themeText.unknown}</option>{/if}
-        {#each themeChoices as choice (choice)}<option value={choice}>{themeText[choice]}</option>{/each}
+        {#each themeChoices as choice (choice)}<option value={choice}>{themeText[choice]}{#if choice === 'auto' && activeThemeId}&nbsp;·&nbsp;{themeText[activeThemeId]}{/if}</option>{/each}
       </select></label>
+      {#if preferences.theme === 'auto' && automaticThemeInfo && (automaticThemeInfo.transition || automaticThemeInfo.remaining)}
+        <p id="automatic-theme-description" class="theme-summary">
+          {#if automaticThemeInfo.transition && !themeError}<span>{automaticThemeInfo.transition}</span>{/if}
+          {#if automaticThemeInfo.remaining}<span>{automaticThemeInfo.remaining}</span>{/if}
+        </p>
+      {/if}
       <label>{themeText.appearance}<select value={preferences.appearance} disabled={busy || !preferencesAvailable} onchange={event => onPreference({ ...preferences, appearance: event.currentTarget.value })}>
         {#if !appearanceChoices.includes(preferences.appearance as typeof appearanceChoices[number])}<option value={preferences.appearance} disabled>{themeText.unknown}</option>{/if}
         {#each appearanceChoices as choice (choice)}<option value={choice}>{themeText[choice]}</option>{/each}
@@ -246,7 +252,8 @@
   .pane { display: flex; flex-direction: column; gap: 8px; }
   .pane p { margin: 0; }
   .pane > :first-child { margin-top: 8px; }
-  .primary { background: var(--control-selected-face); color: var(--control-selected-ink); width: 100%; }
+  .primary, .secondary, .large-keys button, select, input:not(.file-input), .file-label { box-shadow: inset 0 0 0 var(--control-edge-width) var(--control-edge); }
+  .primary { background: var(--control-selected-face); color: var(--control-selected-ink); width: 100%; box-shadow: inset 0 0 0 var(--control-edge-width) var(--control-selected-edge); }
   .secondary { background: var(--control-lip); width: 100%; }
   label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .file-label { position: relative; min-height: 44px; box-sizing: border-box; justify-content: center; padding: 8px; border-radius: 12px; background: var(--control-lip); cursor: pointer; overflow-wrap: anywhere; }
@@ -254,7 +261,9 @@
   .file-label[data-disabled="true"] { opacity: .48; cursor: default; }
   .file-input { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; clip-path: inset(50%); overflow: hidden; }
   .file-name { overflow-wrap: anywhere; }
-  select, input { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: 8px; background: var(--control-face); }
+  select, input { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: 8px; background: var(--control-face); color: var(--control-ink); }
+  .theme-summary { font-size: .9rem; line-height: 1.4; }
+  .theme-summary span { display: block; }
   .session-info { border-top: 1px solid var(--control-lip); }
   summary { min-height: 44px; box-sizing: border-box; padding: 8px; cursor: pointer; }
   summary:focus-visible { outline: 2px solid var(--control-focus); outline-offset: -2px; border-radius: 8px; }
@@ -270,7 +279,7 @@
   .note-specimen span { display: grid; place-items: center; }
   .large-keys { display: grid; grid-template-columns: repeat(3, minmax(44px, 1fr)); gap: 4px; }
   .large-keys button { background: var(--control-lip); font-size: 1.5rem; min-height: 48px; }
-  .large-keys button[aria-pressed="true"] { background: var(--control-selected-face); color: var(--control-selected-ink); }
+  .large-keys button[aria-pressed="true"] { background: var(--control-selected-face); color: var(--control-selected-ink); box-shadow: inset 0 0 0 var(--control-edge-width) var(--control-selected-edge); }
   .inline-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
   .reward-total { display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .reward-amount { display: inline-flex; align-items: center; gap: 8px; }
