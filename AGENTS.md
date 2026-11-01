@@ -6,7 +6,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Tech stack
 
-- Svelte framework, TypeScript, Vite. Do not use SvelteKit.
+- Svelte framework, TypeScript, Vite.
 - GitHub Pages; installable PWA with offline play.
 - JavaScript delivery; no required backend or WebAssembly.
 
