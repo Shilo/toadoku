@@ -1,6 +1,6 @@
 # PWA system walkthrough
 
-For players: installing is optional, and online play works without offline setup. Prepare puzzles before a trip. When an update is ready, finish saving or export recovery, close every Toadoku window, then reopen.
+For players: installing is optional, and online play works without offline setup. Open More, then Install and offline (during a game, choose Settings first). Prepare puzzles before a trip. When an update is ready, finish saving or export recovery, close every Toadoku window, then reopen.
 
 This is the maintainers' map of the implemented installation, offline and update system. [Acceptance](pwa-acceptance.md) contains measured costs and actual evidence; the [validation matrix](pwa-validation-matrix.md) defines the release gates. The historical [handoff](pwa-implementation-handoff.md) and [decision ledger](pwa-progress.md) explain why these choices were challenged.
 
@@ -69,6 +69,24 @@ Post-deploy checks verify all current shell/worker/release bytes and MIME types,
 
 For offline failure, reconnect and inspect/prepare again. Manual preparation can repair missing/corrupt files only for the matching active build, preserving valid entries and enforcing integrity/budgets. Old mutable bytes may no longer exist on the host; then finish saving/export recovery and close/reopen into the available build. Clear extras may recover malformed disposable rows without touching essential data. Do not recommend clearing site data or unregistering workers as routine recovery. Use the existing emergency export when ordinary storage is unavailable.
 
+## First publication and a failed first attempt
+
+This is maintainer setup, not a player setting. A missing release file does not prove that a website is empty. Before the first publication, independently confirm that this exact Pages website has never served an app, including older workflows and deleted run history. If it already has a site, preserve and verify its existing files through a separately reviewed migration. Do not delete it or invent an empty history to get past the check.
+
+For a confirmed never-published website, use the Pages workflow's manual Run workflow action on main. Its one-time initial_release field is exactly:
+
+`OWNER/REPO|https://configured-pages-base/|FULL_MAIN_SHA`
+
+Replace all three parts with the actual repository, the exact configured Pages base URL including its trailing slash, and the full forty-character main commit. This is a confirmation about that specific target and source, not a force/reset switch. The workflow passes the value as environment data, not executable shell text. No publication has been performed as part of this implementation.
+
+The read-only proof checks complete currently returned workflow history, across branches and earlier rerun attempts, within bounded run/attempt/API limits. Known workflow source and an explicitly skipped deployment step are required for each prior attempt. An uploaded archive does not prove deployment. A failed or cancelled deployment might already have published, so it is not considered safe initial setup. Missing, unknown, changed or truncated history refuses recovery. The normal hosted release must remain recoverable. An existing index page without a release inventory also refuses initial publication.
+
+If the first attempt failed before deployment and history proves deployment stayed skipped, a new manual run can use the confirmation for the corrected main commit. If deployment was attempted, do not repeat the never-published confirmation: inspect the actual host and recover its valid inventory/assets. After a successful first publication, ordinary later releases use the hosted inventory and need no initial_release input. The API check cannot prove that nobody deleted history or published through another system; the independent first-publication review supplies that missing evidence.
+
+## Removing extra puzzles safely
+
+Remove extra puzzles removes the current extras and asks other windows to cancel existing optional preparation. A shared clear revision is checked inside the same database transaction that would write a record or reserve list, so work started before removal cannot restore old extras afterward. Foreground online requests capture the revision without waiting for it before returning the requested puzzle. A slow or failed optional storage read skips extra retention; it does not fail that game. A genuinely new request after removal may save its puzzle normally. The essential saved game and rewards are separate and are preserved.
+
 ## File map and change checks
 
 | Responsibility | Main entry points |
@@ -78,7 +96,7 @@ For offline failure, reconnect and inspect/prepare again. Manual preparation can
 | Exact delivery and trust | `src/lib/catalog/load.ts`, `manifest.v1.ts`, existing decode/attestation modules. |
 | Disposable planning/storage/readiness | `src/lib/offline/plan.ts`, `store.ts`, `verify.ts`, `reserve.ts`. |
 | Inventory, identities and manifest | `vite.config.ts`, `tools/pwa/build.ts`, `validate.mjs`, `catalog-artifact.mjs`. |
-| Retention/publication checks | `tools/pwa/{previous,retain,snapshot,capacity,verify-host,host-mime}.mjs`, `.github/workflows/pages.yml`. |
+| Retention/publication checks | `tools/pwa/{bootstrap,previous,retain,snapshot,capacity,verify-host,host-mime}.mjs`, `.github/workflows/pages.yml`. |
 | Icon maintenance | [Icon recipe](pwa-icons.md), `public/pwa/`, `tools/pwa/icons.mjs`. |
 
 Before release, run type/unit gates, a production build and artifact validation, then the affected production-browser journeys from the validation matrix. Use root and repository subpaths. Changes to update/storage/trust behavior require their failure and multi-window cases; lazy feature/theme/font changes require cold offline first use. Keep heavy jobs serial and bind evidence to the exact combined source/build. The acceptance record, not this map, identifies which hardware/hosting gates have actually passed.

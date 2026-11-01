@@ -3,6 +3,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      initial_release:
+        description: 'Only for a never-published target: OWNER/REPO|https://configured-pages-base/|FULL_MAIN_SHA (see docs/pwa-system.md)'
+        required: false
+        default: ''
+        type: string
 permissions:
   contents: read
   actions: read
@@ -13,6 +19,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -36,6 +43,8 @@ jobs:
       - name: Read monotonic retained publication archive
         env:
           GH_TOKEN: ${{ github.token }}
+          TOADOKU_INITIAL_RELEASE: ${{ inputs.initial_release }}
+          TOADOKU_PAGES_BASE: ${{ steps.pages.outputs.base_url }}/
         run: node tools/pwa/previous.mjs
       - name: Expand validated archive path
         shell: bash
@@ -65,7 +74,8 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-      - id: deployment
+      - name: Deploy verified Pages artifact
+        id: deployment
         uses: actions/deploy-pages@v4
       - uses: actions/upload-artifact@v4
         with:
