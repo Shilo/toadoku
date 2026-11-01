@@ -5,6 +5,11 @@ import type { Plugin } from 'vite';
 
 export const MAX_SHELL_BYTES = 8 * 1024 * 1024;
 export const MAX_RESOURCE_BYTES = 4 * 1024 * 1024;
+export function assertCachedShellBudget(resourceBytes: number, metadataBytes: number): number {
+  const total = resourceBytes + metadataBytes;
+  if (!Number.isSafeInteger(resourceBytes) || resourceBytes < 0 || !Number.isSafeInteger(metadataBytes) || metadataBytes < 0 || metadataBytes > MAX_RESOURCE_BYTES || total > MAX_SHELL_BYTES) throw new Error('Offline cached closure exceeds its byte budget');
+  return total;
+}
 export const digest = (bytes: Uint8Array | string) => createHash('sha256').update(bytes).digest('hex');
 export const integrity = (bytes: Uint8Array) => `sha256-${createHash('sha256').update(bytes).digest('base64')}`;
 export async function files(root: string, prefix = ''): Promise<string[]> {
@@ -43,8 +48,9 @@ export function pwaRelease(): Plugin {
       await writeFile(join(output, 'index.html'), index);
       const inventory = await Promise.all(shell.map(async path => { const bytes = await readFile(join(output, path)); if (bytes.length > MAX_RESOURCE_BYTES) throw new Error(`Oversized shell resource: ${path}`); return { path, bytes: bytes.length, sha256: digest(bytes), integrity: integrity(bytes), mime: mime(path) }; }));
       const bytes = inventory.reduce((sum, file) => sum + file.bytes, 0);
-      if (bytes > MAX_SHELL_BYTES) throw new Error('Offline application shell exceeds 8 MiB');
-      await writeFile(join(output, 'release.json'), JSON.stringify({ protocol: 1, buildId, bytes, files: inventory }));
+      const metadata = JSON.stringify({ protocol: 1, buildId, bytes, files: inventory });
+      assertCachedShellBudget(bytes, Buffer.byteLength(metadata));
+      await writeFile(join(output, 'release.json'), metadata);
     } },
   };
 }
