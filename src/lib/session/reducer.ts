@@ -23,24 +23,37 @@ export function getValues(attempt: Attempt): number[] {
 }
 
 function validCell(cell: number): boolean { return Number.isInteger(cell) && cell >= 0 && cell < 81; }
-function validNotes(notes: number[]): boolean {
-  if (!Array.isArray(notes) || notes.length !== 81 || Reflect.ownKeys(notes).length !== 82) return false;
-  for (let cell = 0; cell < 81; cell++) if (!Object.prototype.propertyIsEnumerable.call(notes, cell) || !Number.isInteger(notes[cell]) || notes[cell] < 0 || notes[cell] > 511) return false;
-  return true;
+function copyNotes(notes: number[]): number[] | undefined {
+  if (!Array.isArray(notes) || notes.length !== 81 || Reflect.ownKeys(notes).length !== 82) return;
+  const copy: number[] = [];
+  for (let cell = 0; cell < 81; cell++) {
+    if (!Object.prototype.propertyIsEnumerable.call(notes, cell)) return;
+    const value = notes[cell];
+    if (!Number.isInteger(value) || value < 0 || value > 511) return;
+    copy.push(value);
+  }
+  return copy;
 }
 
 /** Storage revisions/writer epochs belong to the repository, not the input reducer. */
 export function reduceAttempt(attempt: Attempt, command: SessionCommand): SessionResult {
   const givens = decodeGrid(attempt.definition.givens);
-  if (!givens.ok || !decodeBoard(attempt.entries).ok || !validNotes(attempt.notes) ||
-      !validCell(attempt.selection) || !Array.isArray(attempt.undo) || attempt.undo.length > 512 ||
+  if (!givens.ok) return { kind: 'integrity', reason: 'state' };
+  const decodedEntries = decodeBoard(attempt.entries);
+  if (!decodedEntries.ok) return { kind: 'integrity', reason: 'state' };
+  const previousEntries = decodedEntries.board, previousNotes = copyNotes(attempt.notes), originalUndo = attempt.undo;
+  if (!previousNotes || !validCell(attempt.selection) || !Array.isArray(originalUndo) || originalUndo.length > 512 ||
       !Number.isSafeInteger(attempt.commandSeq) || attempt.commandSeq < 0 ||
       !Number.isSafeInteger(attempt.logicalRevision) || attempt.logicalRevision < 0 ||
       !Number.isSafeInteger(attempt.elapsedMs) || attempt.elapsedMs < 0 ||
-      givens.board.some((value, cell) => (value !== 0 && (attempt.entries[cell] !== 0 || attempt.notes[cell] !== 0)) ||
-        (attempt.entries[cell] !== 0 && attempt.notes[cell] !== 0))) return { kind: 'integrity', reason: 'state' };
-  if (Reflect.ownKeys(attempt.undo).length !== attempt.undo.length + 1) return { kind: 'integrity', reason: 'history' };
-  for (let index = 0; index < attempt.undo.length; index++) if (!Object.prototype.propertyIsEnumerable.call(attempt.undo, index)) return { kind: 'integrity', reason: 'history' };
+      givens.board.some((value, cell) => (value !== 0 && (previousEntries[cell] !== 0 || previousNotes[cell] !== 0)) ||
+        (previousEntries[cell] !== 0 && previousNotes[cell] !== 0))) return { kind: 'integrity', reason: 'state' };
+  if (Reflect.ownKeys(originalUndo).length !== originalUndo.length + 1) return { kind: 'integrity', reason: 'history' };
+  const history: EditPatch[] = [];
+  for (let index = 0; index < originalUndo.length; index++) {
+    if (!Object.prototype.propertyIsEnumerable.call(originalUndo, index)) return { kind: 'integrity', reason: 'history' };
+    history.push(originalUndo[index]);
+  }
 
   function changed(fields: Partial<Attempt>, valuesChanged = false): SessionResult {
     if (attempt.commandSeq === Number.MAX_SAFE_INTEGER || valuesChanged && attempt.logicalRevision === Number.MAX_SAFE_INTEGER) {
@@ -60,37 +73,43 @@ export function reduceAttempt(attempt: Attempt, command: SessionCommand): Sessio
   }
   if (command.type === 'toggle-notes') return changed({ notesMode: !attempt.notesMode });
   if (command.type === 'restart') {
-    const valuesChanged = attempt.entries.some(Boolean);
-    if (!valuesChanged && !attempt.notes.some(Boolean) && !attempt.undo.length) return { kind: 'noop' };
+    const valuesChanged = previousEntries.some(Boolean);
+    if (!valuesChanged && !previousNotes.some(Boolean) && !history.length) return { kind: 'noop' };
     return changed({ entries: Array(81).fill(0), notes: Array(81).fill(0), undo: [] }, valuesChanged);
   }
   if (command.type === 'undo') {
-    const patch = attempt.undo.at(-1);
-    if (!patch) return attempt.undo.length ? { kind: 'integrity', reason: 'history' } : { kind: 'noop' };
-    if (!validCell(patch.cell) || !Array.isArray(patch.changes) || !patch.changes.length || patch.changes.length > 21 || Reflect.ownKeys(patch.changes).length !== patch.changes.length + 1) return { kind: 'integrity', reason: 'history' };
-    const seen = new Set<number>();
-    for (let index = 0; index < patch.changes.length; index++) {
-      const change = patch.changes[index];
-      if (!Object.prototype.propertyIsEnumerable.call(patch.changes, index) || !change || typeof change !== 'object' ||
-          !validCell(change.cell) || seen.has(change.cell) || givens.board[change.cell] !== 0 ||
+    const patch = history[history.length - 1];
+    if (!patch) return history.length ? { kind: 'integrity', reason: 'history' } : { kind: 'noop' };
+    const primaryCell = patch.cell, originalChanges = patch.changes;
+    if (!validCell(primaryCell) || !Array.isArray(originalChanges) || !originalChanges.length || originalChanges.length > 21 || Reflect.ownKeys(originalChanges).length !== originalChanges.length + 1) return { kind: 'integrity', reason: 'history' };
+    const seen = new Set<number>(), validatedChanges: CellChange[] = [];
+    for (let index = 0; index < originalChanges.length; index++) {
+      if (!Object.prototype.propertyIsEnumerable.call(originalChanges, index)) return { kind: 'integrity', reason: 'history' };
+      const originalChange = originalChanges[index];
+      if (!originalChange || typeof originalChange !== 'object') return { kind: 'integrity', reason: 'history' };
+      // Capture the checked data once; caller iterators/methods must not retarget an undo.
+      const change: CellChange = { cell: originalChange.cell, beforeValue: originalChange.beforeValue, afterValue: originalChange.afterValue,
+        beforeNotes: originalChange.beforeNotes, afterNotes: originalChange.afterNotes };
+      if (!validCell(change.cell) || seen.has(change.cell) || givens.board[change.cell] !== 0 ||
           ![change.beforeValue, change.afterValue].every(n => Number.isInteger(n) && n >= 0 && n <= 9) ||
           ![change.beforeNotes, change.afterNotes].every(n => Number.isInteger(n) && n >= 0 && n <= 511) ||
           change.beforeValue !== 0 && change.beforeNotes !== 0 || change.afterValue !== 0 && change.afterNotes !== 0 ||
-          attempt.entries[change.cell] !== change.afterValue || attempt.notes[change.cell] !== change.afterNotes) return { kind: 'integrity', reason: 'history' };
+          previousEntries[change.cell] !== change.afterValue || previousNotes[change.cell] !== change.afterNotes) return { kind: 'integrity', reason: 'history' };
       seen.add(change.cell);
+      validatedChanges.push(change);
     }
-    if (!seen.has(patch.cell)) return { kind: 'integrity', reason: 'history' };
-    const entries = attempt.entries.slice(), notes = attempt.notes.slice();
+    if (!seen.has(primaryCell)) return { kind: 'integrity', reason: 'history' };
+    const entries = previousEntries.slice(), notes = previousNotes.slice();
     let valuesChanged = false;
-    for (const change of patch.changes) {
+    for (const change of validatedChanges) {
       valuesChanged ||= change.beforeValue !== change.afterValue;
       entries[change.cell] = change.beforeValue; notes[change.cell] = change.beforeNotes;
     }
-    return changed({ entries, notes, undo: attempt.undo.slice(0, -1), selection: patch.cell }, valuesChanged);
+    return changed({ entries, notes, undo: history.slice(0, -1), selection: primaryCell }, valuesChanged);
   }
   const cell = attempt.selection;
   if (givens.board[cell]) return { kind: 'rejected', reason: 'clue' };
-  const entries = attempt.entries.slice(), notes = attempt.notes.slice();
+  const entries = previousEntries.slice(), notes = previousNotes.slice();
   if (command.type === 'enter') {
     if (!Number.isInteger(command.digit) || command.digit < 1 || command.digit > 9) return { kind: 'rejected', reason: 'digit' };
     const bit = 1 << (command.digit - 1);
@@ -108,11 +127,11 @@ export function reduceAttempt(attempt: Attempt, command: SessionCommand): Sessio
   }
   const changes: CellChange[] = [];
   let valuesChanged = false;
-  for (let index = 0; index < 81; index++) if (entries[index] !== attempt.entries[index] || notes[index] !== attempt.notes[index]) {
-    changes.push({ cell: index, beforeValue: attempt.entries[index], afterValue: entries[index],
-      beforeNotes: attempt.notes[index], afterNotes: notes[index] });
-    valuesChanged ||= entries[index] !== attempt.entries[index];
+  for (let index = 0; index < 81; index++) if (entries[index] !== previousEntries[index] || notes[index] !== previousNotes[index]) {
+    changes.push({ cell: index, beforeValue: previousEntries[index], afterValue: entries[index],
+      beforeNotes: previousNotes[index], afterNotes: notes[index] });
+    valuesChanged ||= entries[index] !== previousEntries[index];
   }
   const patch: EditPatch = { cell, changes };
-  return changed({ entries, notes, undo: [...attempt.undo.slice(-511), patch] }, valuesChanged);
+  return changed({ entries, notes, undo: [...history.slice(-511), patch] }, valuesChanged);
 }

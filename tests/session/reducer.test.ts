@@ -123,8 +123,19 @@ describe('session editing and monotone history', () => {
     expect(state.logicalRevision).toBe(0);
     expect(reduceAttempt(state, { type: 'checkpoint', elapsedMs: 2000 })).toEqual({ kind: 'noop' });
   });
-  it('rejects hidden, symbolic and compensating extras in notes, history and compound changes', () => {
-    const edited = command(attemptFixture(), { type: 'enter', digit: 2 });
+  it('rejects malformed, hidden, symbolic and compensating history data without mutation', () => {
+    const original = attemptFixture(), edited = command(original, { type: 'enter', digit: 2 });
+    const editedBefore = structuredClone(edited), restored = command(edited, { type: 'undo' });
+    expect(restored.entries).toEqual(original.entries); expect(restored.notes).toEqual(original.notes);
+    expect(edited).toEqual(editedBefore);
+    const callable = Object.freeze(Object.assign(() => undefined, { ...edited.undo[0].changes[0] }));
+    for (const changes of [null, [callable]]) {
+      const state = structuredClone(edited); state.undo[0].changes = changes as never;
+      if (changes) Object.freeze(changes);
+      Object.freeze(state.entries); Object.freeze(state.notes); Object.freeze(state.undo[0]); Object.freeze(state.undo); Object.freeze(state);
+      expect(reduceAttempt(state, { type: 'undo' })).toEqual({ kind: 'integrity', reason: 'history' });
+      expect(state).toEqual({ ...edited, undo: [{ ...edited.undo[0], changes }] });
+    }
     for (const field of ['notes', 'undo', 'changes'] as const) for (const attack of ['hidden-index', 'hidden-extra', 'symbol', 'compensating'] as const) {
       const state = structuredClone(edited);
       const array = field === 'notes' ? state.notes : field === 'undo' ? state.undo : state.undo[0].changes;
@@ -132,7 +143,7 @@ describe('session editing and monotone history', () => {
       if (attack === 'hidden-extra') Object.defineProperty(array, 'extra', { value: true });
       if (attack === 'symbol') Object.defineProperty(array, Symbol('extra'), { value: true });
       if (attack === 'compensating') Object.assign(array, { extra: true });
-      expect(reduceAttempt(state, { type: 'undo' }).kind).toBe('integrity');
+      expect(reduceAttempt(state, { type: 'undo' })).toEqual({ kind: 'integrity', reason: field === 'notes' ? 'state' : 'history' });
     }
   });
 });
