@@ -98,6 +98,8 @@
   const values = $derived(gameState.attempt ? getValues(gameState.attempt) : []);
   const conflicts = $derived(new Set(values.length ? findConflicts(values).flatMap(conflict => [...conflict.cells]) : []));
   const titleFloat = $derived(floatOffset(701, time, 'identity')), artFloat = $derived(floatOffset(702, time, 'identity'));
+  const titleNameSize = $derived((layout.menuTitle.height - 19 * (appliedTheme?.tokens.typography.uiLineHeight ?? 1.15) - 4)
+    / (appliedTheme?.tokens.typography.titleLineHeight ?? 1.05));
   const sceneBlocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || gameState.busy);
   const blocked = $derived(sceneBlocked || historyClosing || checkingAuthority || dialogLoading && route === 'more');
   const closingBlocked = $derived(booting || actionBusy || checkingAuthority || gameState.busy && gameState.restorePhase !== 'staging' || historyClosing);
@@ -229,6 +231,13 @@
   function loadingDialog(node: HTMLDialogElement) {
     node.showModal(); node.querySelector<HTMLButtonElement>('button')?.focus();
     return () => node.close();
+  }
+  function outsideLoadingDialog(event: MouseEvent) {
+    if (event.target !== event.currentTarget || closingBlocked) return;
+    const rect = (event.currentTarget as HTMLDialogElement).getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) {
+      event.preventDefault(); event.stopPropagation(); void closeDialog('dismiss');
+    }
   }
   function navigatePanel(view: DialogView) {
     const backupBack = overlay?.panel === 'backup' && view === 'settings';
@@ -409,8 +418,18 @@
       platform: /Mac|iPhone|iPad/.test(navigator.platform) ? 'mac' : 'other', selection: selected });
     if (command) { event.preventDefault(); dispatch(command, true); }
   }
-  function singleActivation(element: HTMLElement) {
-    const guard = (event: MouseEvent) => { if (event.detail > 1) { event.preventDefault(); event.stopImmediatePropagation(); } };
+  function preventDialogClickThrough(element: HTMLElement) {
+    let previousClickWasDialog = false;
+    const guard = (event: MouseEvent) => {
+      const target = event.target instanceof Element ? event.target : undefined;
+      const inDialog = !!target?.closest('dialog');
+      const fallsThrough = previousClickWasDialog && !inDialog && event.detail > 1
+        && !!target?.closest('.cell, .dock .numeric');
+      // Consume only the first cross-dialog gameplay click, including its focus
+      // default. Successive intentional clicks and all menu controls stay native.
+      if (event.type === 'click') previousClickWasDialog = inDialog;
+      if (fallsThrough) { event.preventDefault(); event.stopImmediatePropagation(); }
+    };
     element.addEventListener('mousedown', guard, true); element.addEventListener('click', guard, true);
     return () => { element.removeEventListener('mousedown', guard, true); element.removeEventListener('click', guard, true); };
   }
@@ -422,7 +441,7 @@
 <svelte:document onvisibilitychange={visibility} />
 <svelte:head><title>Toadoku</title><meta name="theme-color" content={appliedTheme?.tokens.water.deep ?? '#0D6267'} /></svelte:head>
 
-<main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens) : undefined} {@attach singleActivation}>
+<main class="world" lang={locale} data-theme={appliedTheme?.id} data-appearance={appliedTheme?.appearance} style={appliedTheme ? themeStyle(appliedTheme.tokens) : undefined} {@attach preventDialogClickThrough}>
   {#if appliedTheme}
   <div class={['scene', { 'study-paused': inGame && (studyPaused || !documentVisible) }]} bind:clientWidth={width} bind:clientHeight={height}>
     <Scene {layout} screen={inGame ? 'game' : 'menu'} {time} vessel={appliedTheme.definition.vessel} liquid={appliedTheme.definition.liquid} bubbles={appliedTheme.definition.bubbles} />
@@ -457,7 +476,10 @@
       </nav>
     {:else}
       <section class="identity" aria-label="Toadoku">
-        <h1 style={`${rectStyle(layout.menuTitle)};font-size:${layout.titleFontSize}px;transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>Toadoku</h1>
+        <div class="title-lockup" style={`${rectStyle(layout.menuTitle)};transform:translate(${titleFloat.x}px,${titleFloat.y}px)`}>
+          <h1 style:font-size={`${titleNameSize}px`}>Toadoku</h1>
+          <p class="subtitle">SUDOKU</p>
+        </div>
         <div class="art-slot" style={`${rectStyle(layout.menuArt)};transform:translate(${artFloat.x}px,${artFloat.y}px)`}><img class="menu-art" src={menuSketch} alt={copy.art} width="1254" height="1254" draggable="false" decoding="async" /></div>
       </section>
       <nav class={['menu-panel', { 'base-row': baseMenuRow }]} aria-label={screen === 'quick' ? copy.quick : screen === 'progression' ? copy.progression : 'Toadoku'} bind:this={menuElement} style={`${rectStyle(menuPanelRect)};--action:${layout.menuActionHeight}px`}>
@@ -503,7 +525,7 @@
       onReplace={async confirm => { if (confirm && pendingStart) await start(pendingStart); else {pendingStart=undefined;await closeDialog('dismiss');} }}
       onExport={exportBackup} onRecovery={exportRecovery} onRestore={restore} onRestoreInput={cancelBackupOperation} onResumeSaved={async confirm => { if (confirm && gameState.attempt) await resume(gameState.attempt.role, true); }} onRetry={gameState.durability === 'ephemeral' || gameState.conflictedChanges ? undefined : async () => { await controller?.retry(); }} />
     {:else}
-      <dialog aria-label={c.game} {@attach loadingDialog} oncancel={event => {event.preventDefault();void closeDialog('dismiss');}}>
+      <dialog aria-label={c.game} {@attach loadingDialog} onclick={outsideLoadingDialog} oncancel={event => {event.preventDefault();void closeDialog('dismiss');}}>
         <p role="status">{dialogError ? a.featureLoadError : a.loading}</p>
         {#if dialogError}
           <button class="cream" onclick={loadDialog}>{a.retry}</button>

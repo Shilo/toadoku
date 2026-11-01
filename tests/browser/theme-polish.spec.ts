@@ -445,14 +445,67 @@ test('lazy dialog loading and failure preserve Quick Play and its button styles'
     await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Loading…');
     expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
     await page.keyboard.press('1'); expect(await page.locator('.cell').count()).toBe(0);
-    release();
+    // The pointer stays over More, outside this centered fallback window.
+    for (const clickCount of [2, 3, 4]) {
+      await page.mouse.down({ clickCount }); await page.mouse.up({ clickCount });
+      await expect(page.getByRole('dialog')).toHaveCount(clickCount % 2);
+      expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
+    }
+    const failed = page.waitForEvent('requestfailed', request => request.url().includes('/GameDialog.svelte'));
+    release(); await failed;
+    await expect(page.getByRole('dialog')).toHaveCount(0); // Late failure cannot reopen it.
+    await page.mouse.down({ clickCount: 5 }); await page.mouse.up({ clickCount: 5 });
     await expect(page.getByRole('dialog').getByRole('status')).toHaveText(appCopy.en.featureLoadError);
     expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
-    await page.keyboard.press('Escape');
+    await page.mouse.down({ clickCount: 6 }); await page.mouse.up({ clickCount: 6 });
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.locator('.menu-more')).toBeFocused();
     expect(await page.locator('.menu-panel').evaluate(panel => panel.outerHTML)).toBe(menu);
   } finally { release(); }
+});
+
+test('stationary repeated clicks keep More responsive and accept intentional note-key presses', async ({ page }) => {
+  await page.goto('/'); await ready(page); await quick(page);
+  const blank = page.locator('.cell[data-clue="false"]').first();
+  await blank.click();
+  const before = (await snapshot(page)).attempt!;
+  const more = (await page.locator('.dock .more').boundingBox())!;
+  const x = more.x + more.width / 2, y = more.y + more.height / 2;
+  await page.evaluate(() => {
+    (window as any).pressTrace = [];
+    for (const type of ['mousedown', 'mouseup', 'click']) document.addEventListener(type, event => {
+      const e = event as MouseEvent, target = event.target as Element;
+      (window as any).pressTrace.push({ type, detail: e.detail, target: target.tagName, class: target.getAttribute('class'), x: e.clientX, y: e.clientY });
+    }, true);
+  });
+  const press = async (clickCount: number) => {
+    await page.mouse.down({ clickCount }); await page.mouse.up({ clickCount });
+  };
+  await page.mouse.move(x, y);
+  for (let clickCount = 1; clickCount <= 8; clickCount++) {
+    await press(clickCount);
+    await expect(page.getByRole('dialog'), JSON.stringify(await page.evaluate(() => (window as any).pressTrace))).toHaveCount(clickCount % 2, { timeout: 1500 });
+  }
+  expect(logical((await snapshot(page)).attempt!)).toEqual(logical(before));
+  await page.locator('.dock .more').click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Notes', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const digit = (await page.locator('.dock .numeric').first().boundingBox())!;
+  const dx = digit.x + digit.width / 2, dy = digit.y + digit.height / 2;
+  const cell = Number(await blank.getAttribute('data-cell'));
+  await page.mouse.move(dx, dy);
+  for (let clickCount = 1; clickCount <= 4; clickCount++) {
+    await press(clickCount);
+    await expect.poll(async () => (await snapshot(page)).attempt!.notes[cell]).toBe(clickCount % 2);
+  }
+  // Closing a dialog must not let its second click enter an underlying digit.
+  await page.locator('.dock .more').click();
+  await page.mouse.move(dx, dy); await press(1);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await press(2);
+  expect((await snapshot(page)).attempt!.notes[cell]).toBe(0);
+  await press(3);
+  await expect.poll(async () => (await snapshot(page)).attempt!.notes[cell]).toBe(1);
 });
 
 test('submenu headings use the ground foreground in both themes and appearances', async ({ page }) => {
@@ -470,6 +523,78 @@ test('submenu headings use the ground foreground in both themes and appearances'
     await expect(page.locator('.menu-panel h2')).toHaveCSS('color', ink);
     await page.getByRole('button', { name: 'Back', exact: true }).click();
   }
+});
+
+test('the regular-font Sudoku descriptor fits the protected title area in portrait and landscape', async ({ page, browser }) => {
+  await page.goto('/'); await ready(page);
+  for (const theme of ['pond', 'cauldron']) {
+    await settings(page); await choose(page, 'Theme', theme);
+    await expect(page.locator('.world')).toHaveAttribute('data-theme', theme);
+    await closeDialogs(page);
+    for (const [width, height] of [[240, 320], [320, 568], [360, 800], [568, 320], [800, 360], [1280, 720], [720, 1280], [2560, 1440]]) {
+      await page.setViewportSize({ width, height });
+      await expect.poll(() => page.locator('div.scene').evaluate(scene => Math.round(scene.getBoundingClientRect().width))).toBe(width - 16);
+      await expect(page.locator('svg.scene[data-scene="menu"]')).toHaveAttribute('viewBox', `0 0 ${width - 16} ${height - 16}`);
+      const title = page.locator('.title-lockup');
+      const fits = await title.evaluate(block => {
+        const b = block.getBoundingClientRect(), heading = block.querySelector('h1')!, subtitle = block.querySelector('.subtitle')!;
+        const h = heading.getBoundingClientRect(), s = subtitle.getBoundingClientRect();
+        const headingRange = document.createRange(), subtitleRange = document.createRange();
+        headingRange.selectNodeContents(heading); subtitleRange.selectNodeContents(subtitle);
+        const inside = (r: DOMRect) => r.left >= b.left - .5 && r.right <= b.right + .5 && r.top >= b.top - 1 && r.bottom <= b.bottom + 1;
+        // Font ranges include ascender/descender whitespace outside the CSS
+        // line box. Check allocation with line boxes and clipping with ranges.
+        const textFits = (r: DOMRect) => r.left >= b.left - .5 && r.right <= b.right + .5
+          && r.top >= 0 && r.bottom <= innerHeight;
+        const ui = getComputedStyle(document.querySelector('.menu-panel button')!).fontFamily;
+        return { contained: [h, s].every(inside) && [headingRange.getBoundingClientRect(), subtitleRange.getBoundingClientRect()].every(textFits),
+          gap: s.top - h.bottom, size: parseFloat(getComputedStyle(subtitle).fontSize),
+          normalFont: getComputedStyle(subtitle).fontFamily === ui,
+          weight: getComputedStyle(subtitle).fontWeight, text: subtitle.textContent,
+          viewport: b.left >= 0 && b.top >= 0 && b.right <= innerWidth && b.bottom <= innerHeight,
+          artGap: document.querySelector('.art-slot')!.getBoundingClientRect().top - b.bottom,
+          bounds: [b, h, s, headingRange.getBoundingClientRect(), subtitleRange.getBoundingClientRect()].map(r => r.toJSON()) };
+      });
+      expect(fits, `${theme} ${width}x${height} ${JSON.stringify(fits.bounds)}`).toMatchObject({ contained: true, normalFont: true, weight: '700', text: 'SUDOKU', viewport: true });
+      expect(fits.size).toBe(19); expect(fits.gap).toBeGreaterThanOrEqual(3.5);
+      if (height > width) expect(fits.artGap).toBeGreaterThanOrEqual(7.5);
+      await expect(page.getByRole('heading', { name: 'Toadoku', exact: true })).toHaveCount(1);
+      if (width === 360 || width === 800 || width === 1280) await page.screenshot({ path: `${evidence}/${theme}-subtitle-${width}x${height}.png` });
+      const before = await title.evaluate(block => block.getBoundingClientRect().toJSON());
+      await page.getByRole('button', { name: 'Quick Play', exact: true }).click();
+      expect(await title.evaluate(block => block.getBoundingClientRect().toJSON())).toEqual(before);
+      await page.getByRole('button', { name: 'Back', exact: true }).click();
+    }
+  }
+  const fallbackContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: 'en-US', reducedMotion: 'reduce' });
+  try {
+    const fallback = await fallbackContext.newPage(); let blockedFonts = 0;
+    await fallback.route(/\/(?:Chewy|Creepster)-Regular.*\.ttf/, route => {
+      // Vite also serves a JavaScript ?url import at this path. Fault only the
+      // actual font payload so this exercises font fallback, not chunk failure.
+      if (route.request().resourceType() !== 'font') return route.continue();
+      blockedFonts++; return route.abort('failed');
+    });
+    await fallback.goto('/'); await ready(fallback);
+    for (const theme of ['pond', 'cauldron']) {
+      await settings(fallback); await choose(fallback, 'Theme', theme);
+      await expect(fallback.locator('.world')).toHaveAttribute('data-theme', theme); await closeDialogs(fallback);
+      for (const [width, height] of [[320, 568], [800, 360]]) {
+        await fallback.setViewportSize({ width, height });
+        await expect(fallback.locator('svg.scene[data-scene="menu"]')).toHaveAttribute('viewBox', `0 0 ${width - 16} ${height - 16}`);
+        expect(await fallback.locator('.title-lockup').evaluate(block => {
+          const b = block.getBoundingClientRect();
+          return [...block.children].every(line => {
+            const range = document.createRange(); range.selectNodeContents(line);
+            const r = range.getBoundingClientRect();
+            return r.left >= b.left && r.right <= b.right && r.top >= 0 && r.bottom <= innerHeight;
+          }) && ![...document.fonts].some(font => ['Chewy', 'Creepster'].includes(font.family));
+        })).toBe(true);
+        if (width === 320) await fallback.screenshot({ path: `${evidence}/${theme}-subtitle-font-fallback.png` });
+      }
+    }
+    expect(blockedFonts).toBeGreaterThanOrEqual(2);
+  } finally { await fallbackContext.close(); }
 });
 
 test('HUD rows keep localized labels and identity anchors while condensing only roomy bottom docks', async ({ page, browser }) => {

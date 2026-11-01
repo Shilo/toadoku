@@ -18,6 +18,8 @@ Do not add a scenic frame, enclosing oval pot, permanent gameplay HUD, side-view
 
 Only Pond must retain frog-associated scenery and lily-pad cells. Other themes can use appropriate materials and floating objects. The shared app identity and terminology remain; new frog transitions/animations are deferred. Seasonal artwork cannot replace or recolor the shared logo.
 
+The menu identity includes a subordinate uppercase `SUDOKU` descriptor in the normal UI font. Both lines share the original protected title rectangle and float transform, preserving artwork, shore and bubble exclusions. The themed wordmark fits the remaining height; the descriptor uses 19px bold normal type and existing title ink, retaining the established 3:1 contrast against deep/middle liquid. Do not mute it with opacity or make it tiny over moving liquid. Preserve the exact Toadoku heading name for accessibility.
+
 ## Token and material rules
 
 Use the actual typed contract in [tokens.ts](../src/lib/theme/tokens.ts), not the historical research interface. Define both appearances with the same complete role set.
@@ -57,6 +59,8 @@ Rendering functions consume `Layout`, screen and the existing active-time clock.
 All main-menu actions, including difficulties, Resume, Back and More, share `layout.menuActionHeight` across base, Quick Play and Progression states. It is capped at 64px and shrinks with the viewport's existing key budget. Maximum submenu reservation and identity/shore anchors stay fixed across menu states. Narrow portrait gameplay uses 2x5; landscape retains right 5x2, with ten equal-height keys within that allocation. Existing bottom-dock allocations may use one 56px-high row only with at least 596px usable width and 32px board faces. This includes ten 56px-wide keys plus nine 4px gaps. The minimum was raised after the real German save badge overflowed 48px keys. Preserve full localized labels, Notes/save cues and equal key heights.
 
 Opening an overlay preserves its underlying screen, mounted cells, labels, control geometry and normal enabled/disabled appearance. Render the underlying menu from the overlay's base screen, not the overlay route itself. Native modal dialogs make the background inert and retain the existing theme-token backdrop; ordinary windows do not need a glass visual redesign or additional blur. Readable Settings/tools remain timed. Explicit Pause and restore staging blur the entire scene while stopping study time, retaining its silhouette and mounted cells. Authority loss still conceals stale puzzle values. Do not couple visual presence to the clock's `canStudy` flag or disable all background controls merely because a lazy dialog is loading. Focus returns to the appropriate trigger after dismissal.
+
+Never reject all mouse events with `detail > 1`: it is a native multi-click count, not proof of a duplicate command, and can break stationary repeated clicks throughout the app. Existing busy/history/command guards prevent duplicate work. A narrow one-click dialog-to-gameplay guard protects against a dismissal's second click entering an underlying cell/number or moving selection through focus; menu controls and repeated intentional note-key presses remain native. Loading/error dialogs share the loaded dialog's outside-dismiss behavior. Test stationary presses with real increasing native click counts and late-import dismissal, rather than assuming repeated locator clicks reproduce the browser's multi-click sequence.
 
 ## Auto and future events
 
