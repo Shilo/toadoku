@@ -72,7 +72,7 @@ Language detection uses ordered `navigator.languages`, falling back to `navigato
 
 Persist the selected preference separately from the applied theme. Auto is the fresh default; existing saved Pond choices remain intentional. Unknown IDs resolve safely without rewriting saves. Appearance remains an independent system/light/dark choice. Use the existing preference transaction pipeline and keep storage schemas unchanged.
 
-Halloween currently includes October 24 through November 7, ending at local November 8. Calendar boundaries choose the event; countdown days are 24-hour durations with rounded-up remaining hours and a final less-than-one-hour label. Name the seasonal theme directly and associate its event, for example "Cauldron ends in 7 days and 4 hours (Halloween)." This describes the theme window, not the literal holiday date. Settings shows the actually applied theme, including when a desired theme is loading or failed; remaining-time copy names the expected seasonal theme. Fixed choices have no expiry. Refresh countdown text quietly each visible minute; that refresh must not retry imports. Re-resolve on midnight/resume.
+Halloween's actual date is October 31. The shared two-week rule activates it from October 24 through November 6, ending at local November 7. Calendar boundaries choose the event; countdown days are 24-hour durations with rounded-up remaining hours and a final less-than-one-hour label. Name the seasonal theme directly and associate its event, for example "Cauldron ends in 6 days and 4 hours (Halloween)." This describes the theme window, not the literal holiday date. Settings shows the actually applied theme, including when a desired theme is loading or failed; remaining-time copy names the expected seasonal theme. Fixed choices have no expiry. Refresh countdown text quietly each visible minute; that refresh must not retry imports. Re-resolve on midnight/resume.
 
 ### Add a yearly event
 
@@ -83,16 +83,15 @@ Annual events are data in `THEME_EVENTS` in [calendar.ts](../src/lib/theme/calen
   id: 'halloween',
   theme: 'cauldron',
   label: { en: 'Halloween', de: 'Halloween', es: 'Halloween' },
-  start: { month: 10, day: 24 },
-  end: { month: 11, day: 8 },
+  date: { month: 10, day: 31 },
 }
 ```
 
-Months are 1-based and boundaries use the device's local time. Start is inclusive; end is exclusive, so this includes all of November 7. Year is omitted because the window repeats every year. Optional `hour` and `minute` fields support shorter annual windows, such as 09:30 through 11:00 on one date. Omitted time means midnight. If the end's nominal calendar position precedes the start, it belongs to the following year, supporting December-to-January windows.
+Months are 1-based. Supply only the actual event date, not a pre-expanded window. Year is omitted because it repeats annually. Every event uses the same `EVENT_DAYS_EACH_SIDE = 7` rule: start at local midnight seven calendar days before, end at local midnight seven calendar days after. The start is inclusive and end exclusive, giving exactly 14 active calendar dates. Including both the event day and all seven following dates would instead give 15; that earlier convention is superseded. There are no per-event durations or hour/minute fields. Adjacent event years are checked so January events can start in December and December events can remain active in January.
 
 Auto uses the first active entry in list order. Overlaps require no priority numbers, sorting, randomness or extra saved state. The same resolved occurrence supplies the theme, localized event label and countdown deadline. When no window matches, `DEFAULT_THEME` supplies Pond. Explicit theme choices bypass the schedule and have no expiry.
 
-The application wakes at the next scheduled intraday boundary or local midnight, whichever comes first, and rechecks on resume/focus. Countdown minute updates remain independent and do not retry imports. This is a small annual-window resolver, not a general recurrence service: dates are fixed month/day values. Invalid dates and empty occurrences are skipped; February 29 occurrences run only in valid leap years. Native local `Date` behavior shifts nonexistent DST times forward and chooses the earlier repeated time; normalized empty windows are skipped. Use calendar boundaries rather than fixed millisecond weeks across DST.
+The application rechecks at local midnight and on resume/focus. Countdown minute updates remain independent and do not retry imports. This is a small annual-date resolver, not a general recurrence service. Invalid actual dates are skipped before deriving windows; February 29 events run only in valid leap years. Offsets use local calendar arithmetic, preserving a 14-calendar-day window across DST even when elapsed duration is 335 or 337 hours rather than 336.
 
 New event data needs localized labels and boundary/overlap/year-wrap tests. A new theme additionally needs the ID, lazy module and name registration described below; scheduling does not import its visual code eagerly. Moving-date holidays need an explicitly reviewed extension rather than incorrect fixed dates.
 

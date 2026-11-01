@@ -187,7 +187,7 @@ test('fresh defaults follow system preferences and saved choices survive reload'
 });
 
 test('Auto names its actual theme and updates remaining time on minutes and local midnight', async ({ page }) => {
-  const start = new Date('2026-11-07T22:59:30-08:00');
+  const start = new Date('2026-11-06T22:59:30-08:00');
   await page.clock.install({ time: start }); await page.clock.pauseAt(start);
   await page.goto('/'); await ready(page); await settings(page);
   const auto = page.getByRole('dialog').getByRole('combobox', { name: 'Theme', exact: true }).locator('option[value="auto"]');

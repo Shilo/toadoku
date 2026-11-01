@@ -16,10 +16,10 @@ describe('automatic theme event metadata', () => {
     const start = new Date(year, 9, 24), stamp = start.getTime();
     const active = automaticThemeStatus(start, 'cauldron');
     expect(active).toMatchObject({ activeId: 'cauldron', expectedId: 'cauldron', phase: 'ready', event: { id: 'halloween' } });
-    expect(active.event!.endsAt).toEqual(new Date(year, 10, 8));
+    expect(active.event!.endsAt).toEqual(new Date(year, 10, 7));
     expect(start.getTime()).toBe(stamp);
-    expect(automaticThemeStatus(new Date(year, 10, 7, 23, 59, 59, 999), 'cauldron').event!.remaining.lessThanHour).toBe(true);
-    expect(automaticThemeStatus(new Date(year, 10, 8), 'cauldron')).toEqual({ activeId: 'cauldron', expectedId: 'pond', phase: 'loading' });
+    expect(automaticThemeStatus(new Date(year, 10, 6, 23, 59, 59, 999), 'cauldron').event!.remaining.lessThanHour).toBe(true);
+    expect(automaticThemeStatus(new Date(year, 10, 7), 'cauldron')).toEqual({ activeId: 'cauldron', expectedId: 'pond', phase: 'loading' });
   });
 
   it('separates the rendered theme from the desired theme during loading and failure', () => {
@@ -38,15 +38,15 @@ describe('automatic theme event metadata', () => {
     const start = automaticThemeStatus(new Date(2026, 9, 24), 'cauldron');
     expect(start.event!.endsAt.getHours()).toBe(0);
     expect(start.event!.endsAt.getMonth()).toBe(10);
-    expect(start.event!.endsAt.getDate()).toBe(8);
-    expect(start.event!.remaining).toEqual({ days: 15, hours: 1, lessThanHour: false });
+    expect(start.event!.endsAt.getDate()).toBe(7);
+    expect(start.event!.remaining).toEqual({ days: 14, hours: 1, lessThanHour: false });
     const beforeFallback = automaticThemeStatus(new Date(2026, 10, 1), 'cauldron').event!.remaining;
     const afterFallback = automaticThemeStatus(new Date(2026, 10, 2), 'cauldron').event!.remaining;
     expect(beforeFallback.days * 24 + beforeFallback.hours - afterFallback.days * 24 - afterFallback.hours).toBe(25);
   });
 
   it('rounds hours rather than whole days and never reports zero hours while active', () => {
-    const end = new Date(2026, 10, 8).getTime();
+    const end = new Date(2026, 10, 7).getTime();
     for (const [hours, days, remainder] of [[48 + 1 / 60, 2, 1], [48, 2, 0], [25, 1, 1], [24, 1, 0], [1, 0, 1]] as const) {
       expect(automaticThemeStatus(new Date(end - hours * HOUR_MS), 'cauldron').event!.remaining)
         .toEqual({ days, hours: remainder, lessThanHour: false });
@@ -65,7 +65,7 @@ describe('localized automatic theme status', () => {
     ['de', 'Aktives Thema: Kessel', 'Kessel: noch 2 Tage und 1 Stunde (Halloween).'],
     ['es', 'Tema activo: Caldero', 'Caldero termina en 2 d\u00edas y 1 hora (Halloween).'],
   ] as const)('names the active theme and duration in %s', (locale, active, remaining) => {
-    const end = new Date(2026, 10, 8).getTime();
+    const end = new Date(2026, 10, 7).getTime();
     const text = formatAutomaticThemeStatus(automaticThemeStatus(new Date(end - 49 * HOUR_MS), 'cauldron'), locale);
     expect(text).toEqual({ active, transition: undefined, remaining });
     expect(Object.values(text).filter(value => value !== undefined).join(' ')).not.toMatch(/[{}\uFFFD]/);
@@ -82,7 +82,7 @@ describe('localized automatic theme status', () => {
   });
 
   it.each(['en', 'de', 'es'] as const)('formats the final hour honestly and removes expired event text in %s', locale => {
-    const end = new Date(2026, 10, 8).getTime();
+    const end = new Date(2026, 10, 7).getTime();
     const before = formatAutomaticThemeStatus(automaticThemeStatus(new Date(end - 1), 'cauldron'), locale);
     expect(before.remaining).toContain(themeCopy[locale].lessThanHour);
     const after = formatAutomaticThemeStatus(automaticThemeStatus(new Date(end), 'cauldron'), locale);

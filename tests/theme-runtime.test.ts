@@ -20,7 +20,7 @@ describe('local calendar theme policy', () => {
   it.each([2024, 2026, 2027, 2032])('uses all inclusive annual edges in %i', year => {
     for (const [month, day, hour, minute, expected] of [
       [9, 23, 23, 59, 'pond'], [9, 24, 0, 0, 'cauldron'], [9, 31, 12, 0, 'cauldron'],
-      [10, 1, 0, 0, 'cauldron'], [10, 7, 23, 59, 'cauldron'], [10, 8, 0, 0, 'pond'],
+      [10, 1, 0, 0, 'cauldron'], [10, 6, 23, 59, 'cauldron'], [10, 7, 0, 0, 'pond'],
       [0, 1, 0, 0, 'pond'], [1, 29, 12, 0, 'pond'], [11, 31, 23, 59, 'pond'],
     ] as const) expect(resolveTheme('auto', new Date(year, month, day, hour, minute))).toBe(expected);
   });
@@ -36,7 +36,7 @@ describe('local calendar theme policy', () => {
     const before = new Date(2026, 9, 23, 23, 59, 59);
     expect(resolveTheme(choice, before)).toBe('pond');
     expect(resolveTheme(choice, nextLocalMidnight(before))).toBe('cauldron');
-    const end = new Date(2026, 10, 7, 23, 59, 59);
+    const end = new Date(2026, 10, 6, 23, 59, 59);
     expect(resolveTheme(choice, end)).toBe('cauldron');
     expect(resolveTheme(choice, nextLocalMidnight(end))).toBe('pond');
   });

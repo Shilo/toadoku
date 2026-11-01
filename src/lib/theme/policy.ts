@@ -1,5 +1,5 @@
 import { DEFAULT_THEME, resolveAutomaticTheme } from './calendar';
-export { nextLocalMidnight, nextThemeRefresh } from './calendar';
+export { nextLocalMidnight } from './calendar';
 
 /** Preference strings remain opaque in storage; resolution never rewrites them. */
 export type ThemeId = 'pond' | 'cauldron';

@@ -153,10 +153,10 @@ test('Auto refreshes on local boundary and resume while explicit Pond remains pe
   await page.clock.setFixedTime(new Date('2026-10-24T00:00:00-07:00'));
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
-  await page.clock.setFixedTime(new Date('2026-11-07T23:59:59-08:00'));
+  await page.clock.setFixedTime(new Date('2026-11-06T23:59:59-08:00'));
   await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
-  await page.clock.setFixedTime(new Date('2026-11-08T00:00:00-08:00'));
+  await page.clock.setFixedTime(new Date('2026-11-07T00:00:00-08:00'));
   await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
   await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
   expect((await snapshot(page)).preferences.theme).toBe('auto');
