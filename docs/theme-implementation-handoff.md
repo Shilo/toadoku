@@ -2,6 +2,8 @@
 
 Implementation status: [theme progress](theme-progress.md) records the explicitly activated isolated `codex/themes` branch, validation and remaining integration/hardware limits. The brief below remains its scope contract.
 
+Future theme implementations should also follow the [theme authoring guide](theme-authoring.md), which consolidates the accepted design boundaries and actual extension points after Pond/Cauldron polish.
+
 This brief activates the theme task only when the user sends it to a new agent. Work autonomously in a separate Git worktree and branch. Gameplay continues independently in the original checkout and must finish before theme integration.
 
 ## Isolation and ownership

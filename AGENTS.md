@@ -85,7 +85,7 @@ For gameplay, start with the [autonomous gameplay handoff](docs/gameplay-impleme
 | --- | --- |
 | Layout, pads, controls, menus | [UI/UX](docs/ui-ux.md), [menu flow](docs/menu.md) |
 | Visual constraints and artwork | [Design](docs/design.md) |
-| Tokens, backgrounds, appearance | [Themes](docs/themes.md) |
+| Tokens, backgrounds, appearance, future themes | [Theme authoring](docs/theme-authoring.md), [themes](docs/themes.md) |
 | Pad cutouts or animated water | [Future visual research](docs/future-visual-research.md) |
 | Stack, modules, validation | [Architecture](docs/architecture.md) |
 | Rules, catalogs, deduction patterns | [Data/correctness](docs/gameplay-data-and-correctness.md), [source audit](docs/research/gameplay-readiness-audit.md) |

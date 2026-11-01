@@ -2,6 +2,8 @@
 
 ## Reopened whole-theme polish
 
+The [theme authoring guide](theme-authoring.md) extracts the reusable design and implementation rules for future themes. This progress record retains the decisions, corrections and evidence behind them.
+
 The reopened polish is implemented and validated on `codex/themes`, implementation commit `8e85f30`. Earlier slices below are historical baselines. The final flat design retains the established board, fixed logical targets, shared artwork and landscape composition; changes add theme-owned material/motion, safe local curve reach and bounded HUD refinements. Gameplay checkout and gameplay authorities remain untouched. Hardware, zoom and sustained performance limits remain open.
 
 The whole-theme critique found four connected failures: Cauldron depended on a purple Pond repaint rather than cookware/stew identity; its cell material was generic; dark controls merged into the vessel; and nominal-circle geometry guards flattened Pond curves at square proportions. Polish must improve recognition, hierarchy, material coherence, controllable motion and responsive character together, without moving gameplay targets or copying a scenic mockup.

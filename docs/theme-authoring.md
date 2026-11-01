@@ -1,0 +1,76 @@
+# Theme authoring guide
+
+This is the current reusable design and implementation contract for themes on the isolated `codex/themes` branch. It consolidates the accepted Pond/Cauldron direction. [Theme progress](theme-progress.md) records decisions and validation; the [isolated handoff](theme-implementation-handoff.md) governs ownership. Historical Pond-only restrictions and candidate interfaces do not override this guide. It does not authorize a new theme, gameplay changes or integration into the gameplay checkout.
+
+## Preserve the game, theme the world
+
+Every theme should feel like a coherent top-down liquid environment. The liquid is the play space; the ground or vessel supports controls. Theme identity should come from material, shapes, motion and typography together, while the familiar flat Sudoku composition remains intact. Flat does not mean a plain recolor.
+
+| Preserve across themes | A theme may author |
+| --- | --- |
+| Classic 9x9 rules, upright digits, readable 3x3 groups and existing group-color assignment | Three distinct solid liquid fills and a dedicated liquid motion/profile for menu and gameplay |
+| All 81 full rectangular targets, inward 1:1 face anchors, digit/note geometry and fixed logical IDs | Cell silhouette and peripheral material detail inside the shared envelope, with an opaque readable center |
+| Shared layout, 4px/8px spacing, ten dock keys, Fill/Square setting and navigation | Ground/vessel contour inside the existing clearance corridor; optional narrow lip following that contour |
+| Selection, keyboard focus, conflicts, notes, progress, rewards and persistence authority | Semantic colors for all states, complete control boundaries, finish and radii |
+| Toadoku name, shared main-menu logo/sketch and product terminology | Licensed title/body font roles, fallbacks, weights and measured metric adjustments |
+
+Do not add a scenic frame, enclosing oval pot, permanent gameplay HUD, side-view horizon, gradients or decorative margins that shrink the board. Keep soft controls and equal corner radii on each dialog/popover. Theme-specific ornament never moves or resizes hitboxes. Layout changes are shared product decisions, not per-theme options.
+
+Only Pond must retain frog-associated scenery and lily-pad cells. Other themes can use appropriate materials and floating objects. The shared app identity and terminology remain; new frog transitions/animations are deferred. Seasonal artwork cannot replace or recolor the shared logo.
+
+## Token and material rules
+
+Use the actual typed contract in [tokens.ts](../src/lib/theme/tokens.ts), not the historical research interface. Define both appearances with the same complete role set.
+
+| Token group | Meaning and constraints |
+| --- | --- |
+| `water.deep/middle/shallow` | Exactly three solid liquid colors. All three must remain visibly present after foreground occlusion, not merely exist in the preset. Preserve clear group lightness relationships. |
+| `ground.wet/dry/rim` | Liquid-facing bank/inner vessel, control-bearing ground/body, and a separate narrow seam or lip. The third band is ground, not a fourth liquid fill. |
+| `decoration.bubble/bubbleEdge` | Separate decorative paint. Rings may use a fourth color distinct from the liquid; it is not a group cue. A theme can omit bubbles. |
+| `leaf` | Existing semantic name for any cell material, including lily pads or squash. Cover normal/selected faces, lip, ink, notes, entries, conflicts, focus and optional peripheral rind. |
+| `control`, `surface`, `dialog` | Complete normal/hover/pressed/selected/disabled/focus materials, edges, shadows and control/window radii. An edge must survive every applicable state. |
+| `typography` | Title and normal font stacks, colors, weights, line heights and established size limits. Keep font sizes stable unless measured font metrics justify a change. |
+| Shared budgets | Spacing, geometry, floating travel and update-rate limits are shared presentation contracts. A new palette does not justify changing them. Theme liquid periods may differ. |
+
+Pond retains its three water colors and wet/dry ground, organic shore and notched lily pads. Cauldron uses orange pumpkin broth, pale squash faces, dark iron/enamel ground and a thin metal lip. Its boundary has one regular concave curve, not a wavy shore or convex mound. These material choices are examples for future themes, not a requirement that every theme resemble cookware.
+
+The existing rim bands are at most 1.5px for Pond and 2px for Cauldron, interpolated within the bank. Do not enlarge the bank to make a lip fit. At constrained short-landscape menu sizes, the unchanged temporary sketch intentionally straddles the Cauldron rim; title/control clearance and full bubble exclusion still apply.
+
+Active text must satisfy the maintained contrast checks. Cauldron's three group fills pass 3:1 pairwise; preserve that baseline when extending its palette. Meaningful boundaries and focus need clear non-text contrast. Inspect actual rendered edges and small notes as well as numeric ratios. Scrollbar tracks/corners remain transparent; thumb and arrow-glyph colors match, subject to native-browser limits.
+
+## Implementation boundaries
+
+| Source | Ownership |
+| --- | --- |
+| [runtime.ts](../src/lib/theme/runtime.ts) | `ThemeDefinition`, explicit dynamic imports, bounded font loading and atomic publication of the winning theme/appearance |
+| [presentation.ts](../src/lib/theme/presentation.ts), [layout.ts](../src/lib/layout.ts) | Shared budgets and viewport allocation; theme definitions consume layout rather than allocating it |
+| [scene/types.ts](../src/lib/scene/types.ts), [scene contract](../src/lib/scene/README.md) | Required `liquid` and `vessel`, optional `bubbles`, frame/path types and complete containment rules |
+| Theme definition module | Complete light/dark tokens, optional local title font, required `cellPath`, optional `cellDetail` and scene functions |
+| [policy.ts](../src/lib/theme/policy.ts), [event.ts](../src/lib/theme/event.ts), [copy.ts](../src/lib/theme/copy.ts) | Small eager selection/calendar metadata and localized status; no eager theme renderer or font imports |
+
+Keep shared Scene/Leaf/board components free of theme-ID checks. Shared components receive functions and semantic CSS properties. Lazy-load theme modules and their fonts/assets; do not turn the system into a plugin framework or add a separate board implementation.
+
+Outfit currently supplies the shared, eagerly loaded normal UI/digit font. `ThemeDefinition.font` loads one theme-specific face, currently the title font. Changing `typography.ui` alone does not load a new body font. A future body-font change needs explicit lazy loading/readiness for every required face, licensed local files, coherent fallback/publication and measured digit/note/control metrics. Extend that small contract only as required; keep font loading inside the guarded runtime.
+
+Rendering functions consume `Layout`, screen and the existing active-time clock. They own no timers, observers or gameplay state. Reduced motion has a deterministic static pose; hidden work pauses. Reserve full independent face/lip/lift/float/focus sweeps, not just the current position. Decorations must stay outside readable centers and meaningful region boundaries. Cache expensive layout-only site/proof work against immutable layout objects. SVG path/circle animation still paints; do not claim compositor-only or phone performance without measurement.
+
+Current shared controls use a 64px equal-height base-menu row. Maximum submenu reservation and identity/shore anchors stay fixed across menu states. Narrow portrait gameplay uses 2x5; landscape retains right 5x2. Existing bottom-dock allocations may use one 56px-high row only with at least 596px usable width and 32px board faces. This includes ten 56px-wide keys plus nine 4px gaps. The minimum was raised after the real German save badge overflowed 48px keys. Preserve full localized labels, Notes/save cues and equal key heights.
+
+## Auto and future events
+
+Persist the selected preference separately from the applied theme. Auto is the fresh default; existing saved Pond choices remain intentional. Unknown IDs resolve safely without rewriting saves. Appearance remains an independent system/light/dark choice. Use the existing preference transaction pipeline and keep storage schemas unchanged.
+
+Halloween currently includes October 24 through November 7, ending at local November 8. Calendar boundaries choose the event; countdown days are 24-hour durations with rounded-up remaining hours and a final less-than-one-hour label. Settings shows the actually applied theme, including when a desired theme is loading or failed. Refresh countdown text quietly each visible minute; that refresh must not retry imports. Re-resolve on midnight/resume.
+
+For a future event, explicitly define its annual window, local start/end boundaries, fallback and overlap priority before extending the small policy. Do not hardcode the current date, add fixed millisecond weeks across DST, or copy Halloween's deadline/labels into a new theme. New event rules need boundary/DST tests and all three locales.
+
+## Authoring and acceptance
+
+1. Read maintained screens, this guide and current progress. Identify the material/UX goal and challenge weaker alternatives before implementation. Use bounded named specialists for concepts and independent review when following the activated handoff.
+2. Research primary sources and compare reference-based ImageGen concepts before a new UI experiment. Keep mockups/prompts ignored in `prototypes/`; document useful directions and rejected generated mistakes. Final production illustration still requires human authorship, provenance and licensing. The existing rough sketch is a temporary exception only.
+3. Add the authored lazy module and semantic roles. Register its ID/choice/import and localized name; extend event policy/status only when needed. Reuse the stable layout and presentation components. Verify complete appearance presets and coherent failure/font fallback.
+4. Prove full swept containment, readable opaque centers, unchanged targets, useful curvature at square proportions and separation of ornament from game state. Narrow lips/bubbles must disappear safely when no valid decorative space exists. Do not weaken these bounds to match a mockup.
+5. Review actual menu/game screenshots in both appearances, Full/Reduced motion, Fill/Square and EN/DE/ES. Cover 320x568, 360x800, 800x360, 1280x720, near-square and large desktop; test the bottom-row threshold and safe-area allocation. Check pressed/hover/disabled/focus edges, conflicts, notes, native scrollbars and long save labels.
+6. Run relevant token/calendar/runtime/geometry tests and browser invariants. Theme switches must retain puzzle, edits, undo, rewards and identical target rectangles at the same viewport/board shape; time/checkpoint counters may advance. Verify deployment subpaths, lazy chunks/fonts, licenses and unchanged logo. Record hardware/zoom/performance limits honestly. Prefer sequential single-worker checks when resource use matters.
+
+Use [theme progress](theme-progress.md) for the current test commands, evidence paths and integration limits. Green tests support visual judgment; they do not approve a future theme's appearance automatically.
