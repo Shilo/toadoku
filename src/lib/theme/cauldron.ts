@@ -24,7 +24,7 @@ export const cauldron: ThemeTokens = {
     ...presentation.typography,
     ui: '"Outfit", system-ui, sans-serif', title: '"Creepster", "Outfit", system-ui, sans-serif',
     titleInk: '#FFF1DB', digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11,
-    uiWeight: 600, digitWeight: 600, noteWeight: 500, numberLineHeight: 1,
+    titleWeight: 400, uiWeight: 600, digitWeight: 600, noteWeight: 500, numberLineHeight: 1,
   },
   spacing: presentation.spacing,
   surface: {

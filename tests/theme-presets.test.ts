@@ -33,6 +33,8 @@ describe.each(presets)('%s semantic preset', (_, theme) => {
     for (const group of ['spacing', 'geometry', 'motion'] as const) expect(theme[group]).toEqual(presentation[group]);
     for (const [role, value] of Object.entries(presentation.surface)) expect(theme.surface[role as keyof typeof presentation.surface]).toBe(value);
     for (const [role, value] of Object.entries(presentation.typography)) expect(theme.typography[role as keyof typeof presentation.typography]).toBe(value);
+    expect(theme.typography.titleWeight).toBe(400);
+    expect(css['--weight-title']).toBe('400');
     expect(theme.surface.dialogRadius).toBeGreaterThan(0);
     expect(theme.surface.buttonRadius).toBeGreaterThan(0);
   });

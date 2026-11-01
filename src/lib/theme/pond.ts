@@ -23,7 +23,7 @@ export const pond = {
     ui: '"Outfit", system-ui, sans-serif', title: '"Chewy", "Outfit", system-ui, sans-serif',
     titleInk: '#FFF5D9', controlMin: 16, controlMax: 22,
     digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11, titleMin: 44, titleMax: 80,
-    uiWeight: 600, digitWeight: 600, noteWeight: 500,
+    titleWeight: 400, uiWeight: 600, digitWeight: 600, noteWeight: 500,
     uiLineHeight: 1.15, titleLineHeight: 1.05, numberLineHeight: 1,
   },
   spacing: { small: 4, large: 8 },

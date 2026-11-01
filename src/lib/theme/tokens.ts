@@ -20,7 +20,7 @@ export interface ThemeTokens {
     readonly controlMin: number; readonly controlMax: number;
     readonly digitMin: number; readonly digitMax: number; readonly noteMin: number; readonly noteMax: number;
     readonly titleMin: number; readonly titleMax: number;
-    readonly uiWeight: number; readonly digitWeight: number; readonly noteWeight: number;
+    readonly titleWeight: number; readonly uiWeight: number; readonly digitWeight: number; readonly noteWeight: number;
     readonly uiLineHeight: number; readonly titleLineHeight: number; readonly numberLineHeight: number;
   };
   readonly spacing: { readonly small: number; readonly large: number };
@@ -72,7 +72,7 @@ export function themeStyle(theme: ThemeTokens): string {
     'type-digit-min': `${theme.typography.digitMin}px`, 'type-digit-max': `${theme.typography.digitMax}px`,
     'type-note-min': `${theme.typography.noteMin}px`, 'type-note-max': `${theme.typography.noteMax}px`,
     'type-title-min': `${theme.typography.titleMin}px`, 'type-title-max': `${theme.typography.titleMax}px`,
-    'weight-ui': theme.typography.uiWeight, 'weight-digit': theme.typography.digitWeight,
+    'weight-title': theme.typography.titleWeight, 'weight-ui': theme.typography.uiWeight, 'weight-digit': theme.typography.digitWeight,
     'weight-note': theme.typography.noteWeight, 'line-ui': theme.typography.uiLineHeight,
     'line-title': theme.typography.titleLineHeight, 'line-number': theme.typography.numberLineHeight,
     'space-small': `${theme.spacing.small}px`, 'space-large': `${theme.spacing.large}px`,
