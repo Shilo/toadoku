@@ -12,5 +12,9 @@ export default defineConfig({
     }
   }],
   base: './',
+  // DEV001: ignored certification builds and mutation reports are not application entries.
+  optimizeDeps: { entries: ['index.html'] },
+  // Fixtures can still be served on demand; generated evidence never triggers application HMR.
+  server: { watch: { ignored: ['**/prototypes/**'] } },
   build: { license: { fileName: 'licenses/dependencies.json' } }
 });

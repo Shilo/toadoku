@@ -1,4 +1,24 @@
-# Proposed architecture
+# Application architecture
+
+Current gameplay implementation supersedes the historical preparation notes below. The full phase is still undergoing the [required validation](gameplay-validation-matrix.md); [actual progress](gameplay-progress.md) distinguishes accepted source slices from unfinished acceptance.
+
+| Maintained module | Responsibility |
+| --- | --- |
+| `src/lib/sudoku/` | Strict classic rules, topology, candidates, conflicts, capped exact solver |
+| `tools/catalog/`, `src/lib/catalog/`, `public/catalog/v1/` | Reproducible licensed import, independent Algorithm X, certification/membership, bounded progressive loading/cache |
+| `src/lib/session/` | Immutable clues, entries/manual notes, compound bounded undo, monotone assistance and independent active-play clock |
+| `src/lib/hints/` | Typed technique detector and separately implemented witness verification |
+| `src/lib/modes/`, `src/lib/rewards/` | Five shared difficulty pools, frontier/replay policy, direct Dewdrops arithmetic under pinned policy 2 |
+| `src/lib/storage/` | Validated IndexedDB generations, writer/revision authority, exactly-once receipts, physical history buckets, worker backup/restore and explicit unscored recovery play |
+| `src/lib/gameplay/` | Save coalescing and asynchronous gameplay/disclosure/completion/navigation integration; lazy bootstrap, hint worker and dialog |
+| `src/lib/gameplay/ui/` | Concise English/German/Spanish tools, Settings, enlarged notes, results and recovery presentation |
+| `src/lib/layout.ts`, `src/lib/scene/`, `src/lib/leaves/`, `src/lib/theme/` | Shared geometry, noninteractive decoration and maintained Pond styling; no gameplay authority |
+
+The application uses Svelte, TypeScript and Vite without SvelteKit, a required backend or WebAssembly. There is no runtime puzzle generation. Current active and retained-result roles preserve verified puzzle/policy snapshots for local resume; after Continue or replacement, compact receipts retain pinned definition/policy while obsolete full attempts are removed. Missing next shards fail recoverably. Service-worker application-shell caching, installability and deployment are separate work, so cold offline launch is not claimed.
+
+The current Pond system is preserved while gameplay acceptance finishes. The separately authorized Auto/Pond/Cauldron theme task is queued afterwards. Themes never own Sudoku rules, hitboxes, state or rewards.
+
+## Historical preparation context
 
 Gameplay handoff update, 2026-10-31: the [complete autonomous implementation brief](gameplay-implementation-handoff.md) now defines the next activated phase, with separate pure rules, certified progressive catalog, hints, sessions, modes/rewards and transactional persistence. Read its [data contracts](gameplay-data-and-correctness.md), [state/storage contracts](gameplay-state-and-persistence.md) and [validation gates](gameplay-validation-matrix.md). This preparation adds no application code. Runtime generation is unnecessary; old generators and two-localStorage-record saves are not production foundations. IndexedDB transactions, active-generation/revision/owner checks and immutable receipts govern persistence. Historical UI/prototype-only statements below do not restrict that later activated gameplay scope.
 

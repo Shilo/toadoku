@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "note": "AGG001 pinned effective policy. Only canonical output-path leaves and force:true strengthening may vary; mutation scope is independently verified as exact full files.",
+  "node": "v25.0.0",
+  "packages": {
+    "@stryker-mutator/core": "10.1.1",
+    "@stryker-mutator/instrumenter": "10.1.1",
+    "@stryker-mutator/vitest-runner": "10.1.1",
+    "vitest": "4.1.12",
+    "typescript": "6.0.3"
+  },
+  "configs": {
+    "tests/adversarial/stryker.config.mjs": "aa878c3599281e54b40e6297a1325aba7e4e8a2ff7a697e4a506e9c38efa46ec",
+    "tests/adversarial/vitest.mutation.config.ts": "bd759b272fab9df2cf99a64f906de5a49a6fbf8274ce75c1c1c0b9b0f63df78e",
+    "package.json": "a1d827b26a1e754f90e7e8e43e74bfe8ce01f735906a8a3880fc483604cac419",
+    "package-lock.json": "05a030a8b586cb8b83806ffaf2cabb1fd76746adc0f6af275e2f144af557fb5d"
+  },
+  "config": {
+    "testRunner": "vitest",
+    "plugins": [
+      "@stryker-mutator/vitest-runner"
+    ],
+    "vitest": {
+      "configFile": "tests/adversarial/vitest.mutation.config.ts",
+      "related": true,
+      "pool": "forks"
+    },
+    "mutate": [
+      "<owned-full-files>"
+    ],
+    "concurrency": 2,
+    "ignorePatterns": [
+      "/prototypes/**",
+      "/.agents/**",
+      "/.codex/**",
+      "/dist/**"
+    ],
+    "symlinkNodeModules": false,
+    "tempDirName": "<artifact-path>",
+    "reporters": [
+      "progress",
+      "clear-text",
+      "json",
+      "html",
+      "event-recorder"
+    ],
+    "eventReporter": {
+      "baseDir": "<artifact-path>"
+    },
+    "jsonReporter": {
+      "fileName": "<artifact-path>"
+    },
+    "htmlReporter": {
+      "fileName": "<artifact-path>"
+    },
+    "thresholds": {
+      "high": 100,
+      "low": 100,
+      "break": 100
+    },
+    "timeoutMS": 10000,
+    "timeoutFactor": 2,
+    "dryRunTimeoutMinutes": 10,
+    "disableBail": false,
+    "cleanTempDir": false,
+    "incremental": true,
+    "incrementalFile": "<artifact-path>",
+    "fileLogLevel": "off",
+    "logLevel": "debug",
+    "configFile": "tests/adversarial/stryker.config.mjs",
+    "allowConsoleColors": true,
+    "checkers": [],
+    "checkerNodeArgs": [],
+    "commandRunner": {
+      "command": "npm test"
+    },
+    "coverageAnalysis": "perTest",
+    "clearTextReporter": {
+      "allowColor": true,
+      "allowEmojis": false,
+      "logTests": true,
+      "maxTestsToLog": 3,
+      "reportTests": true,
+      "reportMutants": true,
+      "reportScoreTable": true,
+      "skipFull": false
+    },
+    "dashboard": {
+      "baseUrl": "https://dashboard.stryker-mutator.io/api/reports",
+      "reportType": "full"
+    },
+    "dryRunOnly": false,
+    "ignoreStatic": false,
+    "force": false,
+    "inPlace": false,
+    "maxConcurrentTestRunners": 9007199254740991,
+    "maxTestRunnerReuse": 0,
+    "mutator": {
+      "plugins": null,
+      "excludedMutations": []
+    },
+    "appendPlugins": [],
+    "disableTypeChecks": true,
+    "testRunnerNodeArgs": [],
+    "tsconfigFile": "tsconfig.json",
+    "warnings": true,
+    "allowEmpty": false,
+    "ignorers": [],
+    "testFiles": []
+  }
+}

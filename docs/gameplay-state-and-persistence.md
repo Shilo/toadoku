@@ -107,37 +107,36 @@ Progression's New game label must not imply resetting all progress. With existin
 
 ## 5. Exact score and Dewdrops policy
 
-Pin `scorePolicyVersion`, display band, rating snapshot, base/target/configuration and schedule binding into each new attempt. Changing configuration cannot retroactively reprice an active attempt or receipt.
+The later user simplification and accepted reward policy 2 supersede the historical separate-score proposal. Dewdrops are the completion score and currency. Pin `rewardVersion: 2`, display band, rating snapshot, base/target/configuration and schedule binding into each new attempt. Changing configuration cannot retroactively reprice an active attempt or receipt. The section anchor is retained for existing links.
 
-Let `N > 0` be originally empty cells, `R` distinct originally empty cells whose answer was exposed by the game, `A = N - R`, `B` band base, `T` target active milliseconds, and `E` nonnegative accumulated active milliseconds. Validate all inputs and intermediate arithmetic as safe integers.
+Let `N > 0` be originally empty cells, `R` distinct originally empty cells whose answer was exposed by the game, `A = N - R`, `B` band base, `T` target active milliseconds, and `E` nonnegative accumulated active milliseconds. Validate inputs and integer products/denominators within safe-integer bounds. Division may produce a bounded fractional quotient, which is rounded down at the explicit floor operations below.
 
 | Band | Base B | Provisional T |
 | --- | ---: | ---: |
-| Easy | 1000 | 600,000 ms |
-| Medium | 2000 | 1,200,000 ms |
-| Hard | 4000 | 2,400,000 ms |
+| Easy | 100 | 600,000 ms |
+| Medium | 200 | 1,200,000 ms |
+| Hard | 400 | 2,400,000 ms |
 
 ```text
 bonusBasisPoints = informationAssistanceUsed
   ? 0
   : floor(1000 * max(0, T - E) / T)
 
-score = floor(B * A * (10000 + bonusBasisPoints) / (N * 10000))
-earnedDewdrops = floor(score / 10)
+dewdrops = floor(B * A * (10000 + bonusBasisPoints) / (N * 10000))
 ```
 
-The maximum bonus is 10%; slower unassisted completion retains the full base. Treat these times/bases as published provisional v1 policy, not measured human fairness. No per-tap points, invented optimal-move count, note penalty, hidden mistake penalty, Metamorphosis multiplier, farming cap, daily limit, purchases or spending.
+The maximum bonus is 10%; slower unassisted completion retains the full base. Treat these times/bases as published policy 2 defaults, not measured human fairness. No per-tap points, invented optimal-move count, note penalty, hidden mistake penalty, Metamorphosis multiplier, farming cap, daily limit, purchases or spending. Permanently unscored attempts earn zero.
 
-| Example | Expected score | Expected Dewdrops |
-| --- | ---: | ---: |
-| Easy, 51 blanks, no help, 5 active minutes | 1050 | 105 |
-| Easy, no help, at least 10 active minutes | 1000 | 100 |
-| Medium, 50 blanks, 5 exposed answers | 1800 | 180 |
-| Hard, 51 blanks, 5 exposed answers | 3607 | 360 |
-| All original blanks exposed | 0 | 0 |
-| Logical elimination hint, no exposed answer | Full band base, no bonus | Base / 10 |
+| Example | Expected Dewdrops |
+| --- | ---: |
+| Easy, 51 blanks, no help, 5 active minutes | 105 |
+| Easy, no help, at least 10 active minutes | 100 |
+| Medium, 50 blanks, 5 exposed answers, any time | 180 |
+| Hard, 51 blanks, 5 exposed answers, any time | 360 |
+| All original blanks exposed | 0 |
+| Logical elimination hint, no exposed answer, any time | Full band base |
 
-The rejected conversion of 100 score per Dewdrop would round every positive-time Easy bonus away. Keep the agreed conversion by 10 and test boundaries `E=0`, `T-1`, `T`, `T+1`, one/no/all exposed cells and repeated exposure of one cell. Clamp the time-bonus numerator before multiplication when elapsed time exceeds the target.
+There is no separate score or conversion. Calculate the integer bonus first, then one final reward floor. Test boundaries `E=0`, `T-1`, `T`, `T+1`, one/no/all exposed cells and repeated exposure of one cell. Clamp the time-bonus numerator before multiplication when elapsed time exceeds the target. Validated bases bound the intermediate numerator to 356,400,000 and denominator to 810,000. Older score-policy records require explicit recovery; never silently reinterpret them.
 
 Wallet and lifetime earned are records of one currency. With no spending in v1, both increase by the same committed delta and remain equal from a zero start. Use safe-integer checks and explicit overflow failure; never wrap or silently reset counters. Local data is not a trusted leaderboard or anti-cheat ledger.
 

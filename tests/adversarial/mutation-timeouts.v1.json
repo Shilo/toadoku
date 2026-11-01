@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "note": "Individually approved exact timeout audits only. The complete critical mutation inventory and all remaining timeout audits are still pending.",
+  "audits": [
+    {
+      "file": "src/lib/storage/decode.ts",
+      "sourceSha256": "fff163bd46b1eb0d08a00406597ec3267cd1faee8643eafc15e4b8e6649d4cf7",
+      "mutatorName": "UpdateOperator",
+      "location": {
+        "end": {
+          "column": 39,
+          "line": 202
+        },
+        "start": {
+          "column": 33,
+          "line": 202
+        }
+      },
+      "original": "cell++",
+      "replacement": "cell--",
+      "originalRunId": "658",
+      "observedStatus": "Timeout",
+      "reviewStatus": "approved",
+      "decision": "nontermination",
+      "author": "Sage",
+      "proof": "The validated cell 0 passes the clue/entry/notes predicate. cell-- then yields only negative indices, always below 81. Strict plain copied arrays and the givens string have no negative properties, so both truthy conjunctions remain false. Floating-point precision eventually stalls at a negative counter rather than restoring progress. No callback or node/abort budget exists in this synchronous loop.",
+      "projectContract": "Persistent snapshot decoding must terminate after validating exactly 81 cells.",
+      "testPremise": "Any otherwise valid attempt whose cell 0 satisfies the original clue/entry/notes contract.",
+      "progressInvariant": "Original cell starts 0, increases by 1 and reaches 81; mutant decreases by 1 and can never reach 81.",
+      "challengers": [
+        {
+          "name": "Rowan",
+          "agreement": "Independently read the literal source and challenged the transformed progress invariant and test premise. Confirmed no remaining budget, abort or failing condition terminates the synchronous mutant; the actual instrumenter hit limit supports nontermination rather than host contention."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read both literal proposal records and the decode/json sources. Independently recomputed current source SHA, raw report SHA and exact fingerprints, matching one raw Timeout each. Approved only these two causal nontermination audits as Timeout, never Killed."
+        }
+      ],
+      "rawEvidence": "prototypes/gameplay-validation/mutation/storage-decode-initial-raw.json",
+      "rawEvidenceSha256": "a70456b70c1253723597230ebd5cb91d244c5cbacb4d8d1f396e67fe431c8671",
+      "statusReason": "Hit limit reached (2300508/2300500)"
+    },
+    {
+      "file": "src/lib/storage/json.ts",
+      "sourceSha256": "39ecf5b1836076cda4ad5491ff637065cba056c8a947aa2d503ab57e59e0a021",
+      "mutatorName": "BlockStatement",
+      "location": {
+        "end": {
+          "column": 4,
+          "line": 47
+        },
+        "start": {
+          "column": 26,
+          "line": 27
+        }
+      },
+      "original": "{\n    const next = pending.pop()!;\n    if (++nodes > limits.nodes || next.depth > limits.depth) fail('complexity');\n    const item = next.value;\n    if (typeof item === 'string') {\n      if (item.length > limits.string) fail('string');\n    } else if (typeof item === 'number') {\n      if (!Number.isFinite(item)) fail('number');\n    } else if (Array.isArray(item)) {\n      if (item.length > limits.array) fail('array');\n      for (const child of item) pending.push({ value: child, depth: next.depth + 1 });\n    } else if (item !== null && typeof item === 'object') {\n      const keys = Object.keys(item);\n      if (keys.length > limits.keys) fail('keys');\n      for (const key of keys) {\n        if (['__proto__', 'constructor', 'prototype'].includes(key)) fail('prototype-key');\n        if (key.length > limits.string) fail('string');\n        pending.push({ value: (item as Record<string, unknown>)[key], depth: next.depth + 1 });\n      }\n    }\n  }",
+      "replacement": "{}",
+      "originalRunId": "27",
+      "observedStatus": "Timeout",
+      "reviewStatus": "approved",
+      "decision": "nontermination",
+      "author": "Sage",
+      "proof": "After JSON.parse accepts any ordinary JSON scalar, pending contains its root node. Replacing the entire while body with {} removes pending.pop and every complexity guard. pending.length stays 1 forever, with no callback or asynchronous abort path. The recorded instrumenter hit limit corroborates this direct nontermination.",
+      "projectContract": "Bounded JSON structural validation must terminate and preserve explicit resource limits.",
+      "testPremise": "Any syntactically valid JSON input that passes the byte check, including 0 under default limits.",
+      "progressInvariant": "Original loop consumes one pending node and enqueues finitely many children; mutant never changes pending.",
+      "challengers": [
+        {
+          "name": "Rowan",
+          "agreement": "Independently read the literal source and challenged the transformed progress invariant and test premise. Confirmed no remaining budget, abort or failing condition terminates the synchronous mutant; the actual instrumenter hit limit supports nontermination rather than host contention."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read both literal proposal records and the decode/json sources. Independently recomputed current source SHA, raw report SHA and exact fingerprints, matching one raw Timeout each. Approved only these two causal nontermination audits as Timeout, never Killed."
+        }
+      ],
+      "rawEvidence": "prototypes/gameplay-validation/mutation/storage-json-initial-raw.json",
+      "rawEvidenceSha256": "9f533913b9efb5f6ed4bf1bebca1d0d09e308c30dcc1aabed118668824538aee",
+      "statusReason": "Hit limit reached (125140901/125140900)"
+    }
+  ]
+}

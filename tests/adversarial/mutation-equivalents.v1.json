@@ -1,0 +1,2165 @@
+{
+  "version": 1,
+  "rawEvidence": "prototypes/gameplay-validation/mutation/rules-v2-initial.json",
+  "accepted": false,
+  "note": "Individually approved exact reviews for the recorded source SHA only. Complete critical-scope adjudication is still pending.",
+  "reviews": [
+    {
+      "originalRunId": "177",
+      "file": "src/lib/sudoku/solver.ts",
+      "sourceSha256": "8f73feb2fc4221aa926ce5cf6cec660c9e00c6a710b2d6e44b38f8711172a959",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 31,
+          "line": 18
+        },
+        "start": {
+          "column": 22,
+          "line": 18
+        }
+      },
+      "original": "cell < 81",
+      "replacement": "cell <= 81",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "The strict solver copies exactly81 dense cells before clue initialization.",
+      "proof": "The additional cell81 iteration reads undefined. The enclosing truthiness guard skips it, so no masks, search state, node counts or callbacks change.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "180",
+      "file": "src/lib/sudoku/solver.ts",
+      "sourceSha256": "8f73feb2fc4221aa926ce5cf6cec660c9e00c6a710b2d6e44b38f8711172a959",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 18
+        },
+        "start": {
+          "column": 45,
+          "line": 18
+        }
+      },
+      "original": "board[cell]",
+      "replacement": "true",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "Clue masks are Uint16 values containing only the low9 nonzero-digit bits.",
+      "proof": "Zero shifts set bit31, which cannot overlap the low9 masks in the duplicate check and truncates to0 when written to Uint16Array. Each blank therefore leaves the same row/column/box masks.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "216",
+      "file": "src/lib/sudoku/solver.ts",
+      "sourceSha256": "8f73feb2fc4221aa926ce5cf6cec660c9e00c6a710b2d6e44b38f8711172a959",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 33,
+          "line": 36
+        },
+        "start": {
+          "column": 24,
+          "line": 36
+        }
+      },
+      "original": "cell < 81",
+      "replacement": "cell <= 81",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "The strict solver copies exactly81 dense cells before scanning blank candidates.",
+      "proof": "The additional cell81 iteration reads undefined, which is not strictly0. Its blank-cell body is skipped, preserving all search state and bounded results.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "231",
+      "file": "src/lib/sudoku/solver.ts",
+      "sourceSha256": "8f73feb2fc4221aa926ce5cf6cec660c9e00c6a710b2d6e44b38f8711172a959",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 40
+        },
+        "start": {
+          "column": 11,
+          "line": 40
+        }
+      },
+      "original": "mask === 0",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "An unsatisfiable search node contributes no solutions and consumes one search-node budget unit.",
+      "proof": "Without the explicit zero-mask return, size0 selects that blank as strict minimum. No later candidate count can replace minimum0. A later singleton may end scanning, but target candidates remain0; the empty branch loop returns without a solution. Node and callback counts are unchanged.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "239",
+      "file": "src/lib/sudoku/solver.ts",
+      "sourceSha256": "8f73feb2fc4221aa926ce5cf6cec660c9e00c6a710b2d6e44b38f8711172a959",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 25,
+          "line": 43
+        },
+        "start": {
+          "column": 11,
+          "line": 43
+        }
+      },
+      "original": "size < minimum",
+      "replacement": "size <= minimum",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "MRV selects any cell with minimum candidate cardinality. No tie order or exact witness is promised; nodeBudget is a ceiling and unknown is permitted.",
+      "proof": "Using<= instead of< selects a later cell with the same minimum cardinality. All branches remain exhaustive up to the second solution or explicit budget/abort. Completed counts and witnesses stay sound, input remains unchanged, and the same budget ceiling is enforced. Different finite-budget known/unknown outcomes are permitted tie-policy choices.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "243",
+      "file": "src/lib/sudoku/solver.ts",
+      "sourceSha256": "8f73feb2fc4221aa926ce5cf6cec660c9e00c6a710b2d6e44b38f8711172a959",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 21,
+          "line": 44
+        },
+        "start": {
+          "column": 11,
+          "line": 44
+        }
+      },
+      "original": "size === 1",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "Exact MRV correctness, sound completed counts/any witness and a node-budget ceiling are contracted. Exact scan order and callback count are not.",
+      "proof": "With no later zero candidate, a full scan preserves the first singleton because no positive cardinality is less than1. A later zero proves this node unsatisfiable and prunes earlier. Thus full scanning adds no recursive search nodes and can refine unknown to a sound known result within the same ceiling. It changes no input or deduction premise.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "254",
+      "file": "src/lib/sudoku/solver.ts",
+      "sourceSha256": "8f73feb2fc4221aa926ce5cf6cec660c9e00c6a710b2d6e44b38f8711172a959",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 48
+        },
+        "start": {
+          "column": 11,
+          "line": 48
+        }
+      },
+      "original": "!solution",
+      "replacement": "true",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "A complete count1 or count2 may contain any valid solution witness. Unknown/aborted responses expose no count or witness.",
+      "proof": "Always storing the current completion keeps the unique witness for count1. For count2 it stores the second valid witness instead of the first, then search saturates. Both satisfy every original clue and unit. Incomplete searches still return only unknown/aborted without a leaked witness.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "364",
+      "file": "src/lib/sudoku/topology.ts",
+      "sourceSha256": "8a1e4b2e9a47c14df27cc562039ec3614a2eccc3ef85c168f125fb46fbfe2728",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 95,
+          "line": 23
+        },
+        "start": {
+          "column": 80,
+          "line": 23
+        }
+      },
+      "original": "'Invalid digit'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "digitBit rejects values outside integer1..9 with RangeError; message prose is not contracted.",
+      "proof": "Only RangeError message text becomes empty. The same type/range guard throws the same error class; no invalid digit is admitted and valid masks are unchanged.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "380",
+      "file": "src/lib/sudoku/topology.ts",
+      "sourceSha256": "8a1e4b2e9a47c14df27cc562039ec3614a2eccc3ef85c168f125fb46fbfe2728",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 101,
+          "line": 28
+        },
+        "start": {
+          "column": 87,
+          "line": 28
+        }
+      },
+      "original": "'Invalid cell'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "Cell indices outside integer0..80 are rejected with RangeError; message prose is not contracted.",
+      "proof": "Only RangeError message text becomes empty. The same cell-index guard and RangeError class remain; invalid indices never reach board topology.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise."
+    },
+    {
+      "originalRunId": "328",
+      "file": "src/lib/sudoku/topology.ts",
+      "sourceSha256": "8a1e4b2e9a47c14df27cc562039ec3614a2eccc3ef85c168f125fb46fbfe2728",
+      "mutatorName": "ArrowFunction",
+      "location": {
+        "end": {
+          "column": 5,
+          "line": 16
+        },
+        "start": {
+          "column": 38,
+          "line": 13
+        }
+      },
+      "original": "(_, cell) => Object.freeze([\n    Math.floor(cell / 9), 9 + cell % 9,\n    18 + Math.floor(cell / 27) * 3 + Math.floor(cell % 9 / 3),\n  ])",
+      "replacement": "() => undefined",
+      "observedStatus": "RuntimeError",
+      "decision": "invalid-unloadable",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently inspected every literal proof and exact source. Accepted these fourteen equivalents under the stated contract projection and the separately replayed unloadable static mutant; no broad static or diagnostic mutator exclusion."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually reviewed the accountant, all fifteen literal proofs and the rules/solver/topology sources. Independently ran seven accounting tests and the native replay. Approved fourteen exact equivalents under the stated projection plus the separately unloadable static classification, never as a killed mutant."
+        }
+      ],
+      "projectContract": "CELL_UNITS must provide a three-house array per cell, and module initialization must construct every peer set before rule APIs are callable.",
+      "proof": "The mutated Array.from callback returns undefined for every CELL_UNITS entry. Mandatory top-level PEERS construction then evaluates unitIds.flatMap on undefined and throws before module initialization completes. This is an unloadable, non-executable static mutant, separately excluded from executable correctness accounting and never counted as killed.",
+      "contractProjection": "Invalid non-executable static code, not a successful gameplay run and not a killed mutant.",
+      "evidence": "prototypes/gameplay-validation/mutation/topology328-native-replay.json",
+      "evidenceSha256": "a538740abe10b618e188637ffcdc1014f756145faf12f8598cf39adad3d74571"
+    },
+    {
+      "originalRunId": "66",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/session-clock-after-boundaries-cumulative.json",
+      "file": "src/lib/session/clock.ts",
+      "sourceSha256": "534d6621b419ee727262affc9ab3484e6dbd1da87545cae57d51970524fee095",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 39
+        },
+        "start": {
+          "column": 11,
+          "line": 39
+        }
+      },
+      "original": "!disposed",
+      "replacement": "true",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted.",
+      "proof": "First disposal already accumulates the active segment and clears start. Repeated body execution samples only inactive total without reading now, preserves total/start/disposed, and returns the identical floor. Reactivation still rejects.",
+      "contractProjection": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted."
+    },
+    {
+      "originalRunId": "9",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/session-clock-after-boundaries-cumulative.json",
+      "file": "src/lib/session/clock.ts",
+      "sourceSha256": "534d6621b419ee727262affc9ab3484e6dbd1da87545cae57d51970524fee095",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 115,
+          "line": 14
+        },
+        "start": {
+          "column": 93,
+          "line": 14
+        }
+      },
+      "original": "'Invalid elapsed time'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted.",
+      "proof": "Only the uncontracted invalid-initial-elapsed RangeError message becomes empty. The same value validation and error class remain.",
+      "contractProjection": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted."
+    },
+    {
+      "originalRunId": "23",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/session-clock-after-boundaries-cumulative.json",
+      "file": "src/lib/session/clock.ts",
+      "sourceSha256": "534d6621b419ee727262affc9ab3484e6dbd1da87545cae57d51970524fee095",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 71,
+          "line": 21
+        },
+        "start": {
+          "column": 49,
+          "line": 21
+        }
+      },
+      "original": "previous !== undefined",
+      "replacement": "true",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted.",
+      "proof": "On the first read, comparing a finite number with undefined converts undefined to NaN and yields false. On later reads the original condition already compares with the previous number. No clock read or update changes.",
+      "contractProjection": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted."
+    },
+    {
+      "originalRunId": "29",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/session-clock-after-boundaries-cumulative.json",
+      "file": "src/lib/session/clock.ts",
+      "sourceSha256": "534d6621b419ee727262affc9ab3484e6dbd1da87545cae57d51970524fee095",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 139,
+          "line": 21
+        },
+        "start": {
+          "column": 114,
+          "line": 21
+        }
+      },
+      "original": "'Invalid monotonic clock'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted.",
+      "proof": "Only the uncontracted monotonic-clock RangeError message becomes empty. Invalid/backward reads still reject with the same error class.",
+      "contractProjection": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted."
+    },
+    {
+      "originalRunId": "44",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/session-clock-after-boundaries-cumulative.json",
+      "file": "src/lib/session/clock.ts",
+      "sourceSha256": "534d6621b419ee727262affc9ab3484e6dbd1da87545cae57d51970524fee095",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 110,
+          "line": 27
+        },
+        "start": {
+          "column": 87,
+          "line": 27
+        }
+      },
+      "original": "'Elapsed time overflow'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted.",
+      "proof": "Only the uncontracted elapsed-overflow RangeError message becomes empty. The safe-integer/negative guard and rejection remain.",
+      "contractProjection": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted."
+    },
+    {
+      "originalRunId": "40",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/session-clock-after-boundaries-cumulative.json",
+      "file": "src/lib/session/clock.ts",
+      "sourceSha256": "534d6621b419ee727262affc9ab3484e6dbd1da87545cae57d51970524fee095",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 64,
+          "line": 27
+        },
+        "start": {
+          "column": 54,
+          "line": 27
+        }
+      },
+      "original": "result < 0",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted.",
+      "proof": "Validated initial total is nonnegative. Every elapsed segment is the difference of monotonic readings, hence nonnegative, and paused totals retain those sums. result<0 is impossible; the independent safe-integer floor guard still rejects overflow.",
+      "contractProjection": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted."
+    },
+    {
+      "originalRunId": "61",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/session-clock-after-boundaries-cumulative.json",
+      "file": "src/lib/session/clock.ts",
+      "sourceSha256": "534d6621b419ee727262affc9ab3484e6dbd1da87545cae57d51970524fee095",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 46,
+          "line": 35
+        },
+        "start": {
+          "column": 27,
+          "line": 35
+        }
+      },
+      "original": "start !== undefined",
+      "replacement": "true",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted.",
+      "proof": "The added body execution is only an already-inactive pause. rawSample with start undefined returns total without reading now; assigning that total and clearing an already-undefined start changes no value. Active/disposed behavior and returned floor remain.",
+      "contractProjection": "Active-play monotonic segment totals, explicit invalid-read rejection, idempotent activity/disposal and no invented elapsed time. Exact diagnostic prose and redundant internal condition evaluation are uncontracted."
+    },
+    {
+      "originalRunId": "42",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/save-queue-after-boundaries-cumulative.json",
+      "file": "src/lib/gameplay/controller.ts",
+      "sourceSha256": "d6b0ec1660d7a708fa85518c6449f38f618c7a1d5cfe8d7b05169a49e74dd26f",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 20,
+          "line": 47
+        },
+        "start": {
+          "column": 5,
+          "line": 47
+        }
+      },
+      "original": "this.publish();",
+      "replacement": ";",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "One in-flight save and one newest pending snapshot, validated acknowledgements, permanent-failure protection, reported state transitions and eventual flush acknowledgement. Exact duplicate notification count and microtask stack side effects are uncontracted.",
+      "proof": "For an idle healthy queue, the immediately following start publishes the same pending/committedSeq/failure fields. For a running queue, pending is already true via running; for a failed queue the retained pending snapshot already makes it true. Replacing the newest payload changes none of the reported fields. Exact callback count/stack side effects are not contracted.",
+      "contractProjection": "One in-flight save and one newest pending snapshot, validated acknowledgements, permanent-failure protection, reported state transitions and eventual flush acknowledgement. Exact duplicate notification count and microtask stack side effects are uncontracted."
+    },
+    {
+      "originalRunId": "85",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/save-queue-after-boundaries-cumulative.json",
+      "file": "src/lib/gameplay/controller.ts",
+      "sourceSha256": "d6b0ec1660d7a708fa85518c6449f38f618c7a1d5cfe8d7b05169a49e74dd26f",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 74
+        },
+        "start": {
+          "column": 9,
+          "line": 74
+        }
+      },
+      "original": "this.publish();",
+      "replacement": ";",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "One in-flight save and one newest pending snapshot, validated acknowledgements, permanent-failure protection, reported state transitions and eventual flush acknowledgement. Exact duplicate notification count and microtask stack side effects are uncontracted.",
+      "proof": "The failure and retained newest pending snapshot are set before this notification. The pump returns and its installed finally clears running then publishes the same pending/committedSeq/failure fields. Reentrant retry before finally or in finally remains serial under the running/pending safeguards. Eventual state/acknowledgement is unchanged; exact callback count/microtask stack side effects are uncontracted.",
+      "contractProjection": "One in-flight save and one newest pending snapshot, validated acknowledgements, permanent-failure protection, reported state transitions and eventual flush acknowledgement. Exact duplicate notification count and microtask stack side effects are uncontracted."
+    },
+    {
+      "originalRunId": "115",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/save-queue-after-boundaries-cumulative.json",
+      "file": "src/lib/gameplay/controller.ts",
+      "sourceSha256": "d6b0ec1660d7a708fa85518c6449f38f618c7a1d5cfe8d7b05169a49e74dd26f",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 24,
+          "line": 83
+        },
+        "start": {
+          "column": 9,
+          "line": 83
+        }
+      },
+      "original": "this.publish();",
+      "replacement": ";",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Independently read the literal source and challenged this exact mutation. Agreed with its stated contract projection, not a broad publisher, clock or diagnostic exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read current clock.ts/controller.ts and all ten exact records. Approved these seven clock and three queue equivalences under their stated observable projections; start retry-progress notification remains meaningful and tested."
+        }
+      ],
+      "projectContract": "One in-flight save and one newest pending snapshot, validated acknowledgements, permanent-failure protection, reported state transitions and eventual flush acknowledgement. Exact duplicate notification count and microtask stack side effects are uncontracted.",
+      "proof": "An invalid acknowledgement sets the permanent corrupt failure and retains pending before notifying. Finally publishes the same failure/pending/committedSeq fields after clearing running. No invalid acknowledgement reaches acknowledge, and retry remains forbidden. Reentrant recovery still drains before replacing the queue; exact duplicate callback count/stack timing is not contracted.",
+      "contractProjection": "One in-flight save and one newest pending snapshot, validated acknowledgements, permanent-failure protection, reported state transitions and eventual flush acknowledgement. Exact duplicate notification count and microtask stack side effects are uncontracted."
+    },
+    {
+      "originalRunId": "49",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 120,
+          "line": 10
+        },
+        "start": {
+          "column": 96,
+          "line": 10
+        }
+      },
+      "original": "'modified reward policy'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "23",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 153,
+          "line": 4
+        },
+        "start": {
+          "column": 135,
+          "line": 4
+        }
+      },
+      "original": "'counter overflow'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "102",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 395,
+          "line": 14
+        },
+        "start": {
+          "column": 372,
+          "line": 14
+        }
+      },
+      "original": "'invalid reward inputs'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "130",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 140,
+          "line": 23
+        },
+        "start": {
+          "column": 96,
+          "line": 23
+        }
+      },
+      "original": "typeof attempt.assistance.used !== 'boolean'",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "The same assistance.used primitive passes unchanged as calculateReward inputs.information, whose strict boolean guard independently rejects every nonboolean. Removing this outer duplicate check accepts no invalid reward.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "135",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 231,
+          "line": 23
+        },
+        "start": {
+          "column": 209,
+          "line": 23
+        }
+      },
+      "original": "'attempt reward state'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "147",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 44,
+          "line": 26
+        },
+        "start": {
+          "column": 36,
+          "line": 26
+        }
+      },
+      "original": "cell < 0",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Independently inspected repository decodeAttempt-before-completion and verified ephemeral allocation callsites. Approved this exact bounded proof only under primitive-string data-only Attempt precondition; explicitly retained forged-object counterexample as a limitation. No broader helper contract or production behavior change."
+        }
+      ],
+      "projectContract": "rewardForAttempt accepts a typed data-only Attempt with primitive string Definition.givens, no accessors or custom iteration. Unknown transport objects are decoded by storage before either production completion callsite.",
+      "proof": "Under that primitive-string precondition, Number.isInteger remains and an integer below zero indexes no character in the validated 81-character ASCII givens. givens[cell] is undefined and the independent original-blank check rejects. Lead counterexample: a forged object givens with toString returning 81 zeros and custom iterator/index properties can distinguish this deletion; it is outside this typed-helper precondition and must be rejected at storage unknown-input boundaries. No runtime primitive-type guard is claimed here.",
+      "contractProjection": "Same typed primitive Attempt results and invalid primitive-field rejection; no assertion of strict unknown-object decoding at this internal helper."
+    },
+    {
+      "originalRunId": "150",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 57,
+          "line": 26
+        },
+        "start": {
+          "column": 48,
+          "line": 26
+        }
+      },
+      "original": "cell > 80",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Independently inspected repository decodeAttempt-before-completion and verified ephemeral allocation callsites. Approved this exact bounded proof only under primitive-string data-only Attempt precondition; explicitly retained forged-object counterexample as a limitation. No broader helper contract or production behavior change."
+        }
+      ],
+      "projectContract": "rewardForAttempt accepts a typed data-only Attempt with primitive string Definition.givens, no accessors or custom iteration. Unknown transport objects are decoded by storage before either production completion callsite.",
+      "proof": "Under that primitive-string precondition, Number.isInteger remains and an integer above 80 indexes no character in the validated 81-character ASCII givens. givens[cell] is undefined and the independent original-blank check rejects. Lead counterexample: a forged object givens with toString returning 81 zeros and custom iterator/index properties can distinguish this deletion; it is outside this typed-helper precondition and must be rejected at storage unknown-input boundaries. No runtime primitive-type guard is claimed here.",
+      "contractProjection": "Same typed primitive Attempt results and invalid primitive-field rejection; no assertion of strict unknown-object decoding at this internal helper."
+    },
+    {
+      "originalRunId": "157",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rewards-final1-cumulative.json",
+      "file": "src/lib/rewards/index.ts",
+      "sourceSha256": "87f97d80e3d7a9f24443b76bea78ad1022f11748a0e810c0d05d9135be6c9473",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 159,
+          "line": 26
+        },
+        "start": {
+          "column": 144,
+          "line": 26
+        }
+      },
+      "original": "'exposed cells'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "42",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 30,
+          "line": 13
+        },
+        "start": {
+          "column": 24,
+          "line": 13
+        }
+      },
+      "original": "'pool'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "48",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 74,
+          "line": 16
+        },
+        "start": {
+          "column": 68,
+          "line": 16
+        }
+      },
+      "original": "'band'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "97",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 261,
+          "line": 23
+        },
+        "start": {
+          "column": 243,
+          "line": 23
+        }
+      },
+      "original": "'frontier binding'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "116",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 124,
+          "line": 28
+        },
+        "start": {
+          "column": 112,
+          "line": 28
+        }
+      },
+      "original": "'generation'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "140",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 172,
+          "line": 35
+        },
+        "start": {
+          "column": 164,
+          "line": 35
+        }
+      },
+      "original": "'unlock'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "10",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 69,
+          "line": 6
+        },
+        "start": {
+          "column": 46,
+          "line": 6
+        }
+      },
+      "original": "leap > policyData.leaps",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "The integer and lower bounds remain. A leap above60 has no matching pinned schedule row; accessing pool on the absent find result rejects before returning. Invalid calls promise rejection, not a specific error class.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "14",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 98,
+          "line": 6
+        },
+        "start": {
+          "column": 92,
+          "line": 6
+        }
+      },
+      "original": "'leap'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "7",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 42,
+          "line": 6
+        },
+        "start": {
+          "column": 34,
+          "line": 6
+        }
+      },
+      "original": "leap < 1",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "The integer and upper bounds remain. A leap below1 has no matching pinned schedule row; accessing pool on the absent find result rejects before returning. Invalid calls promise rejection, not a specific error class.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "120",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 28,
+          "line": 33
+        },
+        "start": {
+          "column": 3,
+          "line": 33
+        }
+      },
+      "original": "validateBinding(binding);",
+      "replacement": ";",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "profile.frontier is still validated and sameFrontier compares runId, metamorphosis, leap and scheduleVersion exactly. A matching binding therefore has all validated fields; a mismatching binding rejects before effects. Null/malformed access also rejects.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "121",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "CallExpression",
+      "location": {
+        "end": {
+          "column": 63,
+          "line": 33
+        },
+        "start": {
+          "column": 29,
+          "line": 33
+        }
+      },
+      "original": "validateBinding(profile.frontier);",
+      "replacement": ";",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "binding is still validated and sameFrontier compares runId, metamorphosis, leap and scheduleVersion exactly. A matching profile.frontier therefore has all validated fields; a mismatching frontier rejects before effects. Null/malformed access also rejects.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "164",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/modes-final1-cumulative.json",
+      "file": "src/lib/modes/index.ts",
+      "sourceSha256": "c3c2dd27bd3fdc632ea25a1b0233784e1e2fe37ff2aae6d4cc998def45547b40",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 160,
+          "line": 38
+        },
+        "start": {
+          "column": 142,
+          "line": 38
+        }
+      },
+      "original": "'new run identity'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually audited the final1 literal records and current reward/modes sources. Agrees with this exact redundant guard or uncontracted diagnostic proof under the reject-only invalid-input contract; no broad author or operator exemption."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these exact proposed records and current rewards/modes implementation. Approved under typed data-only, no-accessors and reject-only invalid-API contracts. Reward index-bound147/150 are held separately pending correction of their primitive-string precondition."
+        }
+      ],
+      "projectContract": "Pinned v2 Dewdrop arithmetic and exact frontier identity/advancement on valid inputs, immutable inputs, and rejection of invalid inputs before effects. Diagnostic prose and invalid-input error class are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation rejects the same inputs before effects; no source consumer branches on this literal.",
+      "contractProjection": "Same valid return values and input immutability; invalid API inputs still reject without effects. No diagnostic prose or invalid-input error-class promise."
+    },
+    {
+      "originalRunId": "67",
+      "file": "src/lib/sudoku/rules.ts",
+      "sourceSha256": "6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 67,
+          "line": 26
+        },
+        "start": {
+          "column": 52,
+          "line": 26
+        }
+      },
+      "original": "'Invalid board'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Lead",
+          "agreement": "Actually read current rules.ts and all six literal rebase records. Approved the indexed full output assignment proof for allocation mutant16 and the five unchanged logical proofs after strict decoder strengthening, subject to exact current hash and span audit."
+        },
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed current rules.ts and all six exact fingerprints against SHA 6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4. Agreed with allocation-only mutation16, three diagnostic strings, zero-peer bit31 masking and unused byDigit[0]. No production change or broad exemption."
+        }
+      ],
+      "projectContract": "Malformed public rule input throws RangeError. Its message text is uncontracted.",
+      "proof": "The same RangeError is thrown at the same invalid-board boundary; replacing only its message does not accept input or change the error class.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise.",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rules-strict-final-cumulative.json",
+      "previousSourceSha256": "a3f0048edcc443656ceea1aed6628a19ea5f9978cc5b74f5afd698057e7409d2"
+    },
+    {
+      "originalRunId": "16",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rules-strict-final-cumulative.json",
+      "file": "src/lib/sudoku/rules.ts",
+      "sourceSha256": "6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4",
+      "mutatorName": "ArrayDeclaration",
+      "location": {
+        "end": {
+          "column": 36,
+          "line": 7
+        },
+        "start": {
+          "column": 27,
+          "line": 7
+        }
+      },
+      "original": "Array(81)",
+      "replacement": "Array()",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Lead",
+          "agreement": "Actually read current rules.ts and all six literal rebase records. Approved the indexed full output assignment proof for allocation mutant16 and the five unchanged logical proofs after strict decoder strengthening, subject to exact current hash and span audit."
+        },
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed current rules.ts and all six exact fingerprints against SHA 6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4. Agreed with allocation-only mutation16, three diagnostic strings, zero-peer bit31 masking and unused byDigit[0]. No production change or broad exemption."
+        }
+      ],
+      "projectContract": "decodeBoard returns a fresh plain frozen 81-element array containing each validated primitive index. Internal preallocation and capacity growth are unobservable.",
+      "proof": "The indexed loop validates and assigns every index 0 through 80 before the only successful return. Starting with an empty Array instead of a sparse preallocated Array(81) therefore produces an identical plain dense 81-element output, keys, values, frozen state and input immutability. On invalid input the local array is never returned.",
+      "contractProjection": "Same strict input rejection and fresh frozen plain 81-integer output; no allocation-capacity or intermediate-local-length promise."
+    },
+    {
+      "originalRunId": "40",
+      "file": "src/lib/sudoku/rules.ts",
+      "sourceSha256": "6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 11
+        },
+        "start": {
+          "column": 35,
+          "line": 11
+        }
+      },
+      "original": "'board-cell'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Lead",
+          "agreement": "Actually read current rules.ts and all six literal rebase records. Approved the indexed full output assignment proof for allocation mutant16 and the five unchanged logical proofs after strict decoder strengthening, subject to exact current hash and span audit."
+        },
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed current rules.ts and all six exact fingerprints against SHA 6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4. Agreed with allocation-only mutation16, three diagnostic strings, zero-peer bit31 masking and unused byDigit[0]. No production change or broad exemption."
+        }
+      ],
+      "projectContract": "Strict decoding returns ok:false for invalid cells. Invalid-reason prose is an uncontracted string.",
+      "proof": "Replacing board-cell with an empty string preserves rejected input, ok:false and the string reason type. No consumer branches on this diagnostic literal.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise.",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rules-strict-final-cumulative.json",
+      "previousSourceSha256": "a3f0048edcc443656ceea1aed6628a19ea5f9978cc5b74f5afd698057e7409d2"
+    },
+    {
+      "originalRunId": "57",
+      "file": "src/lib/sudoku/rules.ts",
+      "sourceSha256": "6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 105,
+          "line": 21
+        },
+        "start": {
+          "column": 92,
+          "line": 21
+        }
+      },
+      "original": "'grid-format'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Lead",
+          "agreement": "Actually read current rules.ts and all six literal rebase records. Approved the indexed full output assignment proof for allocation mutant16 and the five unchanged logical proofs after strict decoder strengthening, subject to exact current hash and span audit."
+        },
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed current rules.ts and all six exact fingerprints against SHA 6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4. Agreed with allocation-only mutation16, three diagnostic strings, zero-peer bit31 masking and unused byDigit[0]. No production change or broad exemption."
+        }
+      ],
+      "projectContract": "Strict grid decoding accepts only a primitive string containing exactly81 ASCII digits. Failure-reason prose is not a literal contract.",
+      "proof": "Replacing grid-format with an empty string changes only uncontracted diagnostic prose. The strict primitive-string and regular-expression rejection remain.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise.",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rules-strict-final-cumulative.json",
+      "previousSourceSha256": "a3f0048edcc443656ceea1aed6628a19ea5f9978cc5b74f5afd698057e7409d2"
+    },
+    {
+      "originalRunId": "74",
+      "file": "src/lib/sudoku/rules.ts",
+      "sourceSha256": "6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 56,
+          "line": 35
+        },
+        "start": {
+          "column": 39,
+          "line": 35
+        }
+      },
+      "original": "board[peer] !== 0",
+      "replacement": "true",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Lead",
+          "agreement": "Actually read current rules.ts and all six literal rebase records. Approved the indexed full output assignment proof for allocation mutant16 and the five unchanged logical proofs after strict decoder strengthening, subject to exact current hash and span audit."
+        },
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed current rules.ts and all six exact fingerprints against SHA 6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4. Agreed with allocation-only mutation16, three diagnostic strings, zero-peer bit31 masking and unused byDigit[0]. No production change or broad exemption."
+        }
+      ],
+      "projectContract": "Candidates contain only the low9 digit bits after strict integer0..9 decoding.",
+      "proof": "For a zero-valued peer, JavaScript shift-count modulo32 makes1<<(0-1) set only bit31. The final AND511 removes that bit. Nonzero peers set exactly their original low9 bits.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise.",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rules-strict-final-cumulative.json",
+      "previousSourceSha256": "a3f0048edcc443656ceea1aed6628a19ea5f9978cc5b74f5afd698057e7409d2"
+    },
+    {
+      "originalRunId": "90",
+      "file": "src/lib/sudoku/rules.ts",
+      "sourceSha256": "6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 52,
+          "line": 44
+        },
+        "start": {
+          "column": 41,
+          "line": 44
+        }
+      },
+      "original": "board[cell]",
+      "replacement": "true",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Lead",
+          "agreement": "Actually read current rules.ts and all six literal rebase records. Approved the indexed full output assignment proof for allocation mutant16 and the five unchanged logical proofs after strict decoder strengthening, subject to exact current hash and span audit."
+        },
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed current rules.ts and all six exact fingerprints against SHA 6f4d1d1d5510fd6676f8aa66706aef76007ebcfd9806ca0b8106206ca315b1f4. Agreed with allocation-only mutation16, three diagnostic strings, zero-peer bit31 masking and unused byDigit[0]. No production change or broad exemption."
+        }
+      ],
+      "projectContract": "Conflict results contain duplicate nonzero digits1..9 in each unit.",
+      "proof": "Including zero cells fills only byDigit[0]. The subsequent emission loop visits digits1 through9, so all emitted conflicts and participating nonzero cells are unchanged.",
+      "contractProjection": "Strict validation and error class, sound exact saturated count/any witness, MRV minimum cardinality, immutable input, explicit abort/unknown and node-budget ceiling; no uncontracted prose or tie-order promise.",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/rules-strict-final-cumulative.json",
+      "previousSourceSha256": "a3f0048edcc443656ceea1aed6628a19ea5f9978cc5b74f5afd698057e7409d2"
+    },
+    {
+      "originalRunId": "57",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 92,
+          "line": 18
+        },
+        "start": {
+          "column": 86,
+          "line": 18
+        }
+      },
+      "original": "'seed'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "154",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 47,
+          "line": 42
+        },
+        "start": {
+          "column": 19,
+          "line": 42
+        }
+      },
+      "original": "'invalid weighted selection'",
+      "replacement": "\"\"",
+      "observedStatus": "NoCoverage",
+      "decision": "unreachable",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "For validated selected states, weights have positive integer total and uniformBelow returns 0<=position<total. The prefix loop must return on or before the last positive weight. This exact diagnostic expression is in the separately reviewed unreachable defensive tail; no loop or guard is excluded.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "217",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 115,
+          "line": 54
+        },
+        "start": {
+          "column": 99,
+          "line": 54
+        }
+      },
+      "original": "'epoch overflow'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "14",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 108,
+          "line": 6
+        },
+        "start": {
+          "column": 94,
+          "line": 6
+        }
+      },
+      "original": "'random bound'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "35",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 106,
+          "line": 11
+        },
+        "start": {
+          "column": 91,
+          "line": 11
+        }
+      },
+      "original": "'random uint32'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "42",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 54,
+          "line": 14
+        },
+        "start": {
+          "column": 19,
+          "line": 14
+        }
+      },
+      "original": "'random source rejected repeatedly'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "101",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 108,
+          "line": 30
+        },
+        "start": {
+          "column": 92,
+          "line": 30
+        }
+      },
+      "original": "'eligible pools'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "82",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 157,
+          "line": 23
+        },
+        "start": {
+          "column": 137,
+          "line": 23
+        }
+      },
+      "original": "'permutation domain'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "131",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 220,
+          "line": 33
+        },
+        "start": {
+          "column": 208,
+          "line": 33
+        }
+      },
+      "original": "'pool state'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "144",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 37,
+          "line": 39
+        },
+        "start": {
+          "column": 19,
+          "line": 39
+        }
+      },
+      "original": "i < weights.length",
+      "replacement": "i <= weights.length",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Every selected count is a positive integer, and weights are nonnegative with a positive total. Initial position is less than that total. Subtracting each skipped weight must reach a final positive prefix that returns before i equals weights.length. The added iteration is unreachable.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "183",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "StringLiteral",
+      "location": {
+        "end": {
+          "column": 210,
+          "line": 47
+        },
+        "start": {
+          "column": 194,
+          "line": 47
+        }
+      },
+      "original": "'pool traversal'",
+      "replacement": "\"\"",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "Only uncontracted diagnostic message text becomes empty. The same validation or bounded failure rejects the same invalid input before effects; no runtime consumer branches on the literal.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "215",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "ConditionalExpression",
+      "location": {
+        "end": {
+          "column": 76,
+          "line": 54
+        },
+        "start": {
+          "column": 48,
+          "line": 54
+        }
+      },
+      "original": "!Number.isSafeInteger(epoch)",
+      "replacement": "false",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "After incrementing the local epoch, the immediately following permutation independently rejects an unsafe integer before RNG creation or any input mutation. Removing the duplicate earlier check preserves valid results and invalid rejection; diagnostic text is uncontracted.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "18",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 35,
+          "line": 9
+        },
+        "start": {
+          "column": 23,
+          "line": 9
+        }
+      },
+      "original": "tries < 1024",
+      "replacement": "tries <= 1024",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "The mutation permits one extra bounded entropy sample. Every returned integer remains validated and obtained through the same rejection threshold and modulo mapping. It can refine a formerly unavailable result to a sound result when a source first succeeds on sample 1025. No public exact retry or callback-count budget is promised; unbounded looping remains impossible.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "87",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "EqualityOperator",
+      "location": {
+        "end": {
+          "column": 32,
+          "line": 26
+        },
+        "start": {
+          "column": 27,
+          "line": 26
+        }
+      },
+      "original": "i > 0",
+      "replacement": "i >= 0",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "The added i=0 iteration calls uniformBelow(1) on the private seeded generator. Every generated uint32 is below its limit, so it returns j=0 and swaps values[0] with itself. The extra private generator state is discarded when permutation returns, and no external RNG is observed.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    },
+    {
+      "originalRunId": "155",
+      "rawEvidence": "prototypes/gameplay-validation/mutation/catalog-select-final-cumulative.json",
+      "file": "src/lib/catalog/select.ts",
+      "sourceSha256": "9bc4baff86e0ea65143cace85c9b89b12c2c9831b811508fe1ffbbd0e97eedf2",
+      "mutatorName": "ArrayDeclaration",
+      "location": {
+        "end": {
+          "column": 87,
+          "line": 46
+        },
+        "start": {
+          "column": 85,
+          "line": 46
+        }
+      },
+      "original": "[]",
+      "replacement": "[\"Stryker was here\"]",
+      "observedStatus": "Survived",
+      "decision": "equivalent",
+      "reviewStatus": "approved",
+      "author": "Rowan",
+      "challengers": [
+        {
+          "name": "Cora",
+          "agreement": "Actually reviewed the six exact selector residuals and the weighted-tail proof. Confirmed no consumer branches on the nine diagnostic literals. Agreed with the stated bounded-refinement and private-generator projections; genuine entropy, seed and versioned-recurrence mutants are excluded."
+        },
+        {
+          "name": "Lead",
+          "agreement": "Actually read these fifteen exact records and current select.ts. Approved the nine diagnostic messages, exact unreachable weighted tail and five remaining redundancy/refinement proofs. Rejected epoch179 after finding the intervening fully-blocked early return; that proof is removed and a real regression added."
+        }
+      ],
+      "projectContract": "Uniform valid integer extraction with explicit bounded source failure, stable version1 private permutation and exact bounded exclusion traversal on typed data-only states. Invalid input rejects; diagnostic prose and exact internal retry count are uncontracted.",
+      "proof": "The added default string is not an integer and is removed by the unchanged exclusion filter. The resulting blocked set is identical to the original empty default; explicitly supplied exclusions are unchanged.",
+      "contractProjection": "Same valid selected ordinals and state transitions, with only sound bounded entropy refinement allowed. No uncontracted diagnostic, callback-count or discarded private RNG-state promise."
+    }
+  ]
+}

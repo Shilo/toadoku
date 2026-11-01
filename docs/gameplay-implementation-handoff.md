@@ -74,9 +74,9 @@ These are starting decisions after the preparation team's research/challenge. Co
 | Repeat | Complete frontier Leap 60 once, increment Metamorphosis, create next run at Leap 1; repeat the same difficulty arc; no reward multiplier |
 | Replay | Fresh puzzle for any completed unlocked Leap; highest unlock survives cycles within schedule version; replay never changes frontier |
 | Active roles | One Quick Play, one frontier, one replay; no arbitrary three-slot UI and no silent replacement |
-| Score bases | Easy 1000, Medium 2000, Hard 4000; completion credit weighted by answers not exposed by the game |
+| Dewdrops bases | Later accepted policy 2: Easy 100, Medium 200, Hard 400; completion credit weighted by answers not exposed by the game |
 | Speed | At most 10%, provisional targets 10/20/40 active minutes; any disclosed information assistance disables that attempt's speed bonus |
-| Conversion | `floor(score / 10)` Dewdrops, one final conversion; no points for individual taps/checks/edits |
+| Calculation | Later user simplification: Dewdrops are the score, with no separate points/conversion; one final reward floor after the basis-point bonus calculation |
 | Undo | Last 512 reversible edits initially; no claim of unlimited history; assistance/time/rewards never undo |
 | Catalog delivery | About 256 records per shard, at most 96 KiB decoded/32 KiB gzip, top manifest at most 128 KiB, one foreground fetch plus at most one prefetch |
 | Logical hint set | Naked/hidden singles, pointing/claiming, naked/hidden pairs and triples, basic X-Wing; sound typed proof and explicit reveal fallback when unsupported |

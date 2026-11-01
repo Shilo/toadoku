@@ -14,4 +14,6 @@
 /src/lib/storage/** text eol=lf
 /src/lib/gameplay/** text eol=lf
 /tests/adversarial/** text eol=lf
+/package.json text eol=lf
+/package-lock.json text eol=lf
 /public/licenses/** -text

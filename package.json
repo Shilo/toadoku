@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": ">=24.11.0"
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
@@ -13,7 +13,18 @@
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "test": "node tools/test.mjs unit",
     "test:browser": "node tools/test.mjs browser",
-    "test:browser:install": "node tools/test.mjs install"
+    "test:browser:install": "node tools/test.mjs install",
+    "test:browsers:install": "node tools/test.mjs install firefox webkit",
+    "test:storage": "node tools/test.mjs browser --config tests/storage/playwright.config.ts",
+    "test:models": "node tools/test.mjs unit tests/session/model.test.ts",
+    "test:coverage": "node tools/test.mjs unit --config tests/adversarial/vitest.coverage.config.ts",
+    "test:mutation": "stryker run tests/adversarial/stryker.config.mjs",
+    "test:mutation:review": "node tests/adversarial/mutation-jobs.mjs review",
+    "test:mutation:capture": "node tests/adversarial/mutation-jobs.mjs capture",
+    "catalog:capture": "node tools/catalog/source.ts",
+    "catalog:build": "node tools/catalog/import.ts",
+    "catalog:verify": "node tools/catalog/verify.ts public/catalog/v1",
+    "catalog:checkouts": "node tools/catalog/checkouts.ts"
   },
   "dependencies": {
     "@lucide/svelte": "1.66.0",

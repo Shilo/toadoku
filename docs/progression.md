@@ -1,5 +1,9 @@
 # Randomized progression and repeat runs
 
+Current implementation pins schedule version 1, starting Metamorphosis 1 and Leap 1. Leaps 1-6 use Easy; 7-15 and 16-24 use the lower and upper Medium intervals; 25-42 and 43-60 use the lower and upper Hard intervals. At valid frontier completion, the receipt/reward and next frontier commit once. Completing Leap 60 commits the next run at Metamorphosis +1, Leap 1; the old completed board remains until explicit Continue allocates its successor. Quick Play and replay never claim frontier grants. Fresh completed-Leap replay preserves the unfinished frontier and has no repeat-counter multiplier. [Policy 2](../data/gameplay-policy.v2.json), the [exact state contract](gameplay-state-and-persistence.md) and [actual progress](gameplay-progress.md) supersede historical open numerical proposals below. Final validation is still pending.
+
+## Historical preparation context
+
 Implementation handoff, 2026-10-31: use the [gameplay brief](gameplay-implementation-handoff.md) and [mode/state specification](gameplay-state-and-persistence.md) for the next activated phase. They provide provisional v1 defaults for autonomous researched/challenged ratification: 60 Leaps, starting Metamorphosis 1/Leap 1, five rated intervals, lifetime completed-Leap access per schedule, separate frontier/replay roles and once-only grants. These are explicit implementation direction, not historically approved numerical balance or completed playtesting. Earlier open-policy language below records how requirements developed; it must not cause routine user polling or conflicting save logic.
 
 ## Agreed behavior

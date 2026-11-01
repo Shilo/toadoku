@@ -1,11 +1,11 @@
-# Deferred work
+# Work and acceptance backlog
 
 ## Gameplay handoff and next activated phase
 
 - [x] Review gameplay/mode/scoring/storage documentation and primary sources; prepare the [complete autonomous handoff](docs/gameplay-implementation-handoff.md), [data/rules](docs/gameplay-data-and-correctness.md), [state/storage](docs/gameplay-state-and-persistence.md), [validation matrix](docs/gameplay-validation-matrix.md) and [readiness audit](docs/research/gameplay-readiness-audit.md).
 - [x] Include a copy-ready receiving-agent prompt explicitly requiring research and challenge of every plan, including the orchestrator's own plans, all task/test/integration plans and every fix/material revision.
-- [ ] Activate the complete gameplay implementation in a subsequent task. Use researched/challenged specialist ownership, reciprocal actual-code/fix review, lead-owned Codex browser acceptance and periodic green Conventional Commits. Handoff preparation does not activate implementation.
-- [ ] Build/certify at least 100,000 licensed, deduplicated puzzles with stored solutions and progressive loading. Source metadata counts are not completed certification.
+- [x] Activate the complete gameplay implementation with specialist ownership, reciprocal actual-code/fix review, lead-owned Codex browser acceptance and periodic green Conventional Commits. See [actual progress](docs/gameplay-progress.md); final acceptance remains pending.
+- [x] Build/certify 100,000 licensed puzzles with stored solutions in 488 progressively loaded shards, with independent complete verification and explicitly scoped duplicate filtering. Final clean-checkout repetition remains part of release acceptance.
 - [ ] Implement and independently validate rules, input/notes/undo/hints, active-play timer, Quick Play, Progression/replays, score/Dewdrops, atomic persistent state and recovery/backup.
 - [ ] Implement complete tools/Settings including persistent Fill space/Square, usable enlarged notes, accessible results and all required navigation/locale/shape/failure cases. Preserve the Pond UI.
 - [ ] Ratify the handoff's explicit provisional v1 schedule/balance/role defaults through evidence; complete the entire validation matrix and document actual external/hardware limits. Historical open questions below are superseded for this phase by the handoff's autonomous decision process, not by claims of prior user approval.
@@ -46,7 +46,7 @@ This section records completed prototype scope; it does not authorize further pr
 
 ## Themes and art
 
-- [ ] Defer Halloween artwork, palette, seasonal dates and automatic event switching until basic Pond gameplay is settled. Preserve earlier research, do not implement it now.
+- [ ] Finish gameplay, pause and report to the user. Do not begin theme research, concepts or implementation without fresh user instructions. Preserve the earlier modular lazy Auto/Pond/Cauldron brief as reference only; it does not authorize automatic continuation after gameplay. Its requested event window, logo/terms boundaries and production provenance rules remain available for the later task.
 - [ ] Replace the deliberately provisional black-and-white question-mark frog-plus-pad image with one human-made composite asset. Final provenance and rights still apply.
 - [ ] Asset-pack sourcing and purchases are deferred; a placeholder is the current direction.
 
