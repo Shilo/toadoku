@@ -57,6 +57,7 @@ it('rejects mismatched or malformed worker preparation before stage registration
     (value: any) => { value.preparedRestoreVersion = 2; }, (value: any) => { value.generation = 'other'; },
     (value: any) => { value.packingMs = NaN; }, (value: any) => { value.packingMs = -1; }, (value: any) => { value.packingMs = 'slow'; },
     (value: any) => { value.extra = 1; }, (value: any) => { value.rows = null; },
+    (value: any) => { value.rows.extra = true; },
     (value: any) => { value.rows = []; },
     (value: any) => { value.rows.push(value.rows[0]); },
     (value: any) => { value.rows = value.rows.filter((row: any) => row.store !== 'issuedBuckets'); },

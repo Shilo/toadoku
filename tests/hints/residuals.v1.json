@@ -1,0 +1,814 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "author": "Rowan",
+    "ownership": "Original numeric value-state and proof fixtures. No copied artwork, prose or third-party puzzle source.",
+    "reference": "https://hodoku.sourceforge.net/en/techniques.php",
+    "algebraicSolution": "solution[row,column] = (3*row + floor(row/3) + column) % 9 + 1",
+    "purpose": "Strict named-premise and protocol regression cases. Hall negatives explicitly have zero solutions and are never soundness certificates."
+  },
+  "cases": [
+    {
+      "name": "witness-cell--1",
+      "category": "protocol-negative",
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [],
+          "cells": [
+            -1
+          ],
+          "digits": [
+            6
+          ]
+        },
+        "placements": [
+          {
+            "cell": 5,
+            "digit": 6
+          }
+        ],
+        "eliminations": []
+      },
+      "origin": "Derived from unchanged original fixtures in tests/fixtures/techniques/original.v1.json; only the declared proof is altered."
+    },
+    {
+      "name": "witness-cell-81",
+      "category": "protocol-negative",
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [],
+          "cells": [
+            81
+          ],
+          "digits": [
+            6
+          ]
+        },
+        "placements": [
+          {
+            "cell": 5,
+            "digit": 6
+          }
+        ],
+        "eliminations": []
+      },
+      "origin": "Derived from unchanged original fixtures in tests/fixtures/techniques/original.v1.json; only the declared proof is altered."
+    },
+    {
+      "name": "same-length-wrong-conclusion",
+      "category": "false-deduction",
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [],
+          "cells": [
+            5
+          ],
+          "digits": [
+            6
+          ]
+        },
+        "placements": [
+          {
+            "cell": 5,
+            "digit": 7
+          }
+        ],
+        "eliminations": []
+      },
+      "origin": "Derived from unchanged original fixtures in tests/fixtures/techniques/original.v1.json; only the declared proof is altered."
+    },
+    {
+      "name": "partial-claimed-source",
+      "category": "false-deduction",
+      "values": "000000000000000100000100000000000001000001000001000000000000010000010000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "pointing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            18,
+            9
+          ],
+          "cells": [
+            0,
+            9
+          ],
+          "digits": [
+            1
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 72,
+            "digit": 1
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "partial-target-house",
+      "category": "false-deduction",
+      "values": "000000000000000100000100000000000001000001000001000000000000010000010000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "pointing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            18,
+            9
+          ],
+          "cells": [
+            0,
+            1
+          ],
+          "digits": [
+            1
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 72,
+            "digit": 1
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "empty-source-sites",
+      "category": "false-deduction",
+      "values": "123456789456789123789123456234567891567891234891234567345678912678912345912345670",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            0
+          ],
+          "cells": [
+            80
+          ],
+          "digits": [
+            1
+          ]
+        },
+        "eliminations": [],
+        "placements": [
+          {
+            "cell": 80,
+            "digit": 1
+          }
+        ]
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "two-source-sites",
+      "category": "false-deduction",
+      "values": "003456789456789013789003456034567890567890034890034567345678900678900345900345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            0
+          ],
+          "cells": [
+            0,
+            1
+          ],
+          "digits": [
+            1
+          ]
+        },
+        "eliminations": [],
+        "placements": [
+          {
+            "cell": 0,
+            "digit": 1
+          }
+        ]
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "three-site-pointing",
+      "category": "valid",
+      "values": "000000000456000000789000000000000000000000000000000000000000000000000000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "pointing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            18,
+            0
+          ],
+          "cells": [
+            0,
+            1,
+            2
+          ],
+          "digits": [
+            1
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 3,
+            "digit": 1
+          },
+          {
+            "cell": 4,
+            "digit": 1
+          },
+          {
+            "cell": 5,
+            "digit": 1
+          },
+          {
+            "cell": 6,
+            "digit": 1
+          },
+          {
+            "cell": 7,
+            "digit": 1
+          },
+          {
+            "cell": 8,
+            "digit": 1
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "swapped-claiming",
+      "category": "wrong-name",
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "pointing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            6,
+            25
+          ],
+          "cells": [
+            57,
+            58
+          ],
+          "digits": [
+            7
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 66,
+            "digit": 7
+          }
+        ]
+      },
+      "origin": "Derived from unchanged original fixtures in tests/fixtures/techniques/original.v1.json; only the declared proof is altered."
+    },
+    {
+      "name": "swapped-pointing",
+      "category": "wrong-name",
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "claiming",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            21,
+            10
+          ],
+          "cells": [
+            37,
+            46
+          ],
+          "digits": [
+            9
+          ]
+        },
+        "placements": [],
+        "eliminations": [
+          {
+            "cell": 64,
+            "digit": 9
+          }
+        ]
+      },
+      "origin": "Derived from unchanged original fixtures in tests/fixtures/techniques/original.v1.json; only the declared proof is altered."
+    },
+    {
+      "name": "partial-subset-house",
+      "category": "false-deduction",
+      "values": "003456789456789003789003456034567890567890034890034567345678900678900345900345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-pair",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            0
+          ],
+          "cells": [
+            0,
+            15
+          ],
+          "digits": [
+            1,
+            2
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 1,
+            "digit": 1
+          },
+          {
+            "cell": 1,
+            "digit": 2
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "unused-naked-digit-Hall",
+      "category": "hall-negative",
+      "values": "000045678930000000000000000000000000000000000000000000000000000000000000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            0
+          ],
+          "cells": [
+            0,
+            1,
+            2
+          ],
+          "digits": [
+            1,
+            2,
+            3
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 3,
+            "digit": 1
+          },
+          {
+            "cell": 3,
+            "digit": 2
+          },
+          {
+            "cell": 3,
+            "digit": 3
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original consistent Hall-deficient value-state. No solution or catalog certification is claimed."
+    },
+    {
+      "name": "outside-hidden-house",
+      "category": "hall-negative",
+      "values": "000056789000000000000000000001000000000100000000000000002300000003200000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            0
+          ],
+          "cells": [
+            0,
+            1,
+            9
+          ],
+          "digits": [
+            1,
+            2,
+            3
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 0,
+            "digit": 4
+          },
+          {
+            "cell": 1,
+            "digit": 4
+          },
+          {
+            "cell": 9,
+            "digit": 4
+          },
+          {
+            "cell": 9,
+            "digit": 5
+          },
+          {
+            "cell": 9,
+            "digit": 6
+          },
+          {
+            "cell": 9,
+            "digit": 7
+          },
+          {
+            "cell": 9,
+            "digit": 8
+          },
+          {
+            "cell": 9,
+            "digit": 9
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original consistent Hall-deficient value-state. No solution or catalog certification is claimed."
+    },
+    {
+      "name": "empty-hidden-member",
+      "category": "hall-negative",
+      "values": "000056789000000000000000000001000000000100000000000000002300000003200000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "hidden-triple",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            0
+          ],
+          "cells": [
+            0,
+            1,
+            2
+          ],
+          "digits": [
+            1,
+            2,
+            3
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 0,
+            "digit": 4
+          },
+          {
+            "cell": 1,
+            "digit": 4
+          },
+          {
+            "cell": 2,
+            "digit": 4
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original consistent Hall-deficient value-state. No solution or catalog certification is claimed."
+    },
+    {
+      "name": "column-zero-XWing",
+      "category": "valid",
+      "values": "000000000450000000780000000230000000560000000890000000340000000670000000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "x-wing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            9,
+            10,
+            0,
+            8
+          ],
+          "cells": [
+            0,
+            72,
+            1,
+            73
+          ],
+          "digits": [
+            1
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 2,
+            "digit": 1
+          },
+          {
+            "cell": 3,
+            "digit": 1
+          },
+          {
+            "cell": 4,
+            "digit": 1
+          },
+          {
+            "cell": 5,
+            "digit": 1
+          },
+          {
+            "cell": 6,
+            "digit": 1
+          },
+          {
+            "cell": 7,
+            "digit": 1
+          },
+          {
+            "cell": 8,
+            "digit": 1
+          },
+          {
+            "cell": 74,
+            "digit": 1
+          },
+          {
+            "cell": 75,
+            "digit": 1
+          },
+          {
+            "cell": 76,
+            "digit": 1
+          },
+          {
+            "cell": 77,
+            "digit": 1
+          },
+          {
+            "cell": 78,
+            "digit": 1
+          },
+          {
+            "cell": 79,
+            "digit": 1
+          },
+          {
+            "cell": 80,
+            "digit": 1
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "wrong-XWing-cells",
+      "category": "false-deduction",
+      "values": "000000000450000000780000000230000000560000000890000000340000000670000000000000000",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "x-wing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            9,
+            10,
+            0,
+            8
+          ],
+          "cells": [
+            2,
+            72,
+            1,
+            73
+          ],
+          "digits": [
+            1
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 0,
+            "digit": 1
+          },
+          {
+            "cell": 3,
+            "digit": 1
+          },
+          {
+            "cell": 4,
+            "digit": 1
+          },
+          {
+            "cell": 5,
+            "digit": 1
+          },
+          {
+            "cell": 6,
+            "digit": 1
+          },
+          {
+            "cell": 7,
+            "digit": 1
+          },
+          {
+            "cell": 8,
+            "digit": 1
+          },
+          {
+            "cell": 74,
+            "digit": 1
+          },
+          {
+            "cell": 75,
+            "digit": 1
+          },
+          {
+            "cell": 76,
+            "digit": 1
+          },
+          {
+            "cell": 77,
+            "digit": 1
+          },
+          {
+            "cell": 78,
+            "digit": 1
+          },
+          {
+            "cell": 79,
+            "digit": 1
+          },
+          {
+            "cell": 80,
+            "digit": 1
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    },
+    {
+      "name": "partial-XWing-covers",
+      "category": "false-deduction",
+      "values": "123450009406080123009100406234067891507801204800200507340008902608010345012345678",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "x-wing",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [
+            2,
+            4,
+            13,
+            14
+          ],
+          "cells": [
+            22,
+            23,
+            40,
+            43
+          ],
+          "digits": [
+            3
+          ]
+        },
+        "eliminations": [
+          {
+            "cell": 49,
+            "digit": 3
+          },
+          {
+            "cell": 50,
+            "digit": 3
+          }
+        ],
+        "placements": []
+      },
+      "origin": "Derived from unchanged original fixtures in tests/fixtures/techniques/original.v1.json; only the declared proof is altered."
+    },
+    {
+      "name": "conclusion-string-cell",
+      "category": "protocol-negative",
+      "values": "123456789456789123789123456234567891567891234891234567345678912678912345912345670",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [],
+          "cells": [
+            80
+          ],
+          "digits": [
+            8
+          ]
+        },
+        "eliminations": [],
+        "placements": [
+          {
+            "cell": "80",
+            "digit": 8
+          }
+        ]
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed.",
+      "control": {
+        "kind": "deduction",
+        "technique": "naked-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [],
+          "cells": [
+            80
+          ],
+          "digits": [
+            8
+          ]
+        },
+        "eliminations": [],
+        "placements": [
+          {
+            "cell": 80,
+            "digit": 8
+          }
+        ]
+      }
+    },
+    {
+      "name": "valid-conclusion-cell80",
+      "category": "valid",
+      "values": "123456789456789123789123456234567891567891234891234567345678912678912345912345670",
+      "deduction": {
+        "kind": "deduction",
+        "technique": "naked-single",
+        "techniqueVersion": 1,
+        "logicalRevision": 0,
+        "witness": {
+          "units": [],
+          "cells": [
+            80
+          ],
+          "digits": [
+            8
+          ]
+        },
+        "eliminations": [],
+        "placements": [
+          {
+            "cell": 80,
+            "digit": 8
+          }
+        ]
+      },
+      "origin": "Original deterministic algebraic-grid construction or subset. No catalog novelty or rating is claimed."
+    }
+  ]
+}

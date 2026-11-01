@@ -113,7 +113,9 @@ it('rejects oversized BigInt before decimal formatting while observing a valid f
   } finally { BigInt.prototype.toString = original; }
 });
 
-it('records DOMException code explicitly rather than deriving it in the independent reader', async () => {
+it('records undefined scalar tags and DOMException metadata explicitly', async () => {
+  const undefinedArtifact = JSON.parse(new TextDecoder().decode((await encodeRawRecovery(undefined)).bytes));
+  expect(undefinedArtifact.root).toEqual({ special: 'undefined' });
   const input = new DOMException('denied', 'SecurityError');
   const artifact = JSON.parse(new TextDecoder().decode((await encodeRawRecovery(input)).bytes));
   expect(artifact.nodes[0]).toMatchObject({ type: 'dom-exception', name: input.name, message: input.message, code: input.code });
