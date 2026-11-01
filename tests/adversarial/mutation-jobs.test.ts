@@ -10,7 +10,7 @@ import { sourceHash } from './mutation-review.mjs';
 function fixture() {
   const file = 'src/lib/example.ts' as const, source = 'export const value = 1;\n', test = 'tests/example.test.ts' as const, testSource = 'original test source';
   const packages = { '@stryker-mutator/core': '10.1.1', typescript: '6.0.3' }, configs: Record<string, string> = { 'configuration fixture': 'same bytes' }, node = 'v25.0.0';
-  const config = { mutate: [file], force: false, concurrency: 2, ignoreStatic: false, mutator: { plugins: null, excludedMutations: [] },
+  const config = { mutate: [file], force: true, concurrency: 2, ignoreStatic: false, mutator: { plugins: null, excludedMutations: [] },
     tempDirName: 'prototypes/gameplay-validation/tmp', incrementalFile: 'prototypes/gameplay-validation/incremental.json',
     eventReporter: { baseDir: 'prototypes/gameplay-validation/events' }, jsonReporter: { fileName: 'prototypes/gameplay-validation/raw.json' },
     htmlReporter: { fileName: 'prototypes/gameplay-validation/raw.html' }, thresholds: { high: 100, low: 100, break: 100 } };
@@ -21,10 +21,12 @@ function fixture() {
     testFiles: { [test]: { source: testSource, tests: [{ id: '0' }] } } };
   const log = `timestamp DEBUG ConfigReader Loaded config: ${JSON.stringify(config, null, 2)}\nrest of log`;
   const ownedFiles: string[] = [file], expectedFiles: string[] = [file];
+  const executionInputs = { [file]: source, [test]: testSource, 'tests/helper.ts': 'independent helper source' } as Record<string, string>;
   const job = { name: 'example', files: ownedFiles, report, plan: { mutantPlans: [{ plan: 'Run', mutant: { ...mutant, relativeFileName: file } }] }, log,
-    inventory: { version: 1, node, packages: structuredClone(packages), configs: structuredClone(configs), files: [file], sources: { [file]: sourceHash(source) }, tests: { [test]: sourceHash(testSource) } }, hashes: {} };
+    inventory: { version: 2, node, packages: structuredClone(packages), configs: structuredClone(configs), files: [file], sources: { [file]: sourceHash(source) }, tests: { [test]: sourceHash(testSource) },
+      inputs: Object.fromEntries(Object.entries(executionInputs).map(([path, value]) => [path, sourceHash(value)])) }, hashes: {} };
   const options = { jobs: [job], expectedFiles, currentSources: { [file]: source }, currentTests: { [test]: testSource } as Record<string, string>, currentConfigs: configs,
-    currentPackages: packages, node, policy: { version: 1, packages: structuredClone(packages), configs: structuredClone(configs), node, config: normalizedConfig(config, [file]) } };
+    currentInputs: executionInputs, currentPackages: packages, node, policy: { version: 1, packages: structuredClone(packages), configs: structuredClone(configs), node, config: normalizedConfig(config, [file]) } };
   return { file, source, test, testSource, config, mutant, job, options };
 }
 
@@ -41,8 +43,9 @@ describe('complete mutation-job evidence union', () => {
     expect(Object.keys(combined.report.files)).toEqual([h.file]);
     expect(adjudicateJobs({ combined, expectedFiles: h.options.expectedFiles, currentSources: h.options.currentSources, reviews: [], timeoutAudits: [] }))
       .toMatchObject({ accepted: true, finalAcceptance: true, rawTotals: { Killed: 1 }, rawScore: 100 });
-    h.job.report.config.force = true; h.job.log = `DEBUG ConfigReader Loaded config: ${JSON.stringify(h.job.report.config)}`;
-    expect(combineJobs(h.options).provenance[0].forced).toBe(true);
+    expect(combined.provenance[0].forced).toBe(true);
+    h.job.report.config.force = false; h.job.log = `DEBUG ConfigReader Loaded config: ${JSON.stringify(h.job.report.config)}`;
+    expect(() => combineJobs(h.options)).toThrow('force every mutant');
   });
 
   it('rejects missing, duplicate, unexpected and noncanonical authoritative scopes', () => {
@@ -129,11 +132,28 @@ describe('complete mutation-job evidence union', () => {
       expect(adjudicateJobs({ ...args, timeoutAudits: [{ ...audit, ...invalid }] }).finalAcceptance).toBe(false);
   });
 
+  it('rejects helper and execution-data changes even when every test entry is unchanged', () => {
+    for (const mutation of ['changed', 'added', 'removed', 'data', 'missing-capture', 'old-version']) {
+      const h = fixture();
+      if (mutation === 'changed') h.options.currentInputs['tests/helper.ts'] += 'changed';
+      else if (mutation === 'added') h.options.currentInputs['tests/new-helper.ts'] = 'new helper';
+      else if (mutation === 'removed') delete h.options.currentInputs['tests/helper.ts'];
+      else if (mutation === 'data') h.options.currentInputs['public/catalog/v1/fixture.json'] = 'new data';
+      else if (mutation === 'old-version') h.job.inventory.version = 1;
+      else delete (h.job.inventory as Partial<typeof h.job.inventory>).inputs;
+      expect(h.options.currentTests[h.test]).toBe(h.testSource);
+      expect(() => combineJobs(h.options)).toThrow();
+    }
+  });
+
   it('creates a fresh ignored nested directory before capturing actual source provenance', async () => {
     const output = `prototypes/gameplay-validation/capture-smoke-${randomUUID()}/nested/inventory.json`;
     await captureInventory(['src/lib/sudoku/rules.ts'], output);
     const inventory = JSON.parse(readFileSync(output, 'utf8'));
-    expect(inventory).toMatchObject({ version: 1, files: ['src/lib/sudoku/rules.ts'] });
+    expect(inventory).toMatchObject({ version: 2, files: ['src/lib/sudoku/rules.ts'] });
     expect(inventory.sources['src/lib/sudoku/rules.ts']).toBe(sourceHash(readFileSync('src/lib/sudoku/rules.ts')));
+    for (const path of ['tests/session/fixtures.ts', 'tests/fixtures/techniques/original.v1.json', 'tools/catalog/oracle-exact-cover.ts', 'public/catalog/v1/manifest.json'])
+      expect(inventory.inputs[path]).toBe(sourceHash(readFileSync(path)));
+    for (const path of ['tests/adversarial/mutation-equivalents.v1.json', 'tests/adversarial/mutation-timeouts.v1.json']) expect(inventory.inputs[path]).toBeUndefined();
   });
 });

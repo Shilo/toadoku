@@ -6,6 +6,10 @@ import { adjudicate, fingerprint, inventoryFromPlan, reviewName, reviewText, sou
 
 export const CONFIG_SOURCES = ['tests/adversarial/stryker.config.mjs', 'tests/adversarial/vitest.mutation.config.ts', 'package.json', 'package-lock.json'];
 export const PACKAGES = ['@stryker-mutator/core', '@stryker-mutator/instrumenter', '@stryker-mutator/vitest-runner', 'vitest', 'typescript'];
+const INPUT_PATTERNS = ['src/**/*.{ts,svelte,css,json}', 'tests/**/*.{ts,mjs,json}', 'tools/**/*.{ts,mjs,json}',
+  'data/**/*.json', 'public/catalog/**/*.json', 'vitest.config.ts', 'tsconfig*.json', 'svelte.config.js', 'vite.config.ts'];
+// These are post-run adjudication, never inputs to the unit/mutation execution.
+const REVIEW_DOCUMENTS = new Set(['tests/adversarial/mutation-equivalents.v1.json', 'tests/adversarial/mutation-timeouts.v1.json']);
 const PATH_LEAVES = [['tempDirName'], ['incrementalFile'], ['eventReporter', 'baseDir'], ['jsonReporter', 'fileName'], ['htmlReporter', 'fileName']];
 const requireThat = (condition, reason) => { if (!condition) throw Error(reason); };
 const normalized = path => path.replaceAll('\\', '/');
@@ -59,7 +63,7 @@ export function normalizedConfig(config, files) {
 }
 
 /** Select explicit authoritative file owners, never silently take the last cached report. */
-export function combineJobs({ jobs, expectedFiles, currentSources, currentTests, currentConfigs, currentPackages, node, policy }) {
+export function combineJobs({ jobs, expectedFiles, currentSources, currentTests, currentInputs, currentConfigs, currentPackages, node, policy }) {
   requireThat(policy?.version === 1 && isDeepStrictEqual(policy.packages, currentPackages) && policy.node === node && isDeepStrictEqual(policy.configs, currentConfigs), 'Stale package, runtime or configuration policy');
   requireThat(Array.isArray(jobs) && jobs.length && sameSet(expectedFiles, [...new Set(expectedFiles)]) && expectedFiles.every(sourcePath), 'Invalid expected source inventory');
   const files = {}, inventories = {}, provenance = [], owners = new Set(), names = new Set();
@@ -68,13 +72,17 @@ export function combineJobs({ jobs, expectedFiles, currentSources, currentTests,
     requireThat(Array.isArray(job.files) && job.files.length && sameSet(job.files, [...new Set(job.files)]) && job.files.every(file => sourcePath(file) && expectedFiles.includes(file)), 'Invalid job source scope');
     const config = loadedConfig(job.log);
     requireThat(isDeepStrictEqual(config, job.report?.config), 'Raw report and loaded configuration disagree');
+    requireThat(config.force === true, 'Final authoritative jobs must force every mutant to rerun');
     requireThat(isDeepStrictEqual(normalizedConfig(config, job.files), policy.config), 'Run policy differs from reviewed full configuration');
     requireThat(job.report.framework?.name === 'StrykerJS' && job.report.framework.version === policy.packages['@stryker-mutator/core'] && job.report.framework.dependencies?.typescript === policy.packages.typescript, 'Mutation framework version differs');
     const capture = job.inventory;
-    requireThat(capture?.version === 1 && sameSet(capture.files, job.files) && isDeepStrictEqual(capture.packages, policy.packages) && capture.node === node && isDeepStrictEqual(capture.configs, currentConfigs), 'Missing or stale job-start inventory');
+    requireThat(capture?.version === 2 && sameSet(capture.files, job.files) && isDeepStrictEqual(capture.packages, policy.packages) && capture.node === node && isDeepStrictEqual(capture.configs, currentConfigs), 'Missing or stale job-start inventory');
     requireThat(sameSet(Object.keys(capture.sources ?? {}), job.files), 'Job-start source scope differs');
     const currentTestHashes = Object.fromEntries(Object.entries(currentTests).map(([path, source]) => [path, sourceHash(source)]));
     requireThat(isDeepStrictEqual(capture.tests, currentTestHashes), 'Current test inventory differs from job-start capture');
+    requireThat(currentInputs && Object.keys(currentInputs).length > 0, 'Missing execution-input inventory');
+    const currentInputHashes = Object.fromEntries(Object.entries(currentInputs).map(([path, source]) => [path, sourceHash(source)]));
+    requireThat(isDeepStrictEqual(capture.inputs, currentInputHashes), 'Current execution inputs differ from job-start capture');
     const reportedSources = Object.fromEntries(Object.entries(job.report.files ?? {}).map(([file, data]) => [normalized(file), data.source]));
     const planned = inventoryFromPlan(job.plan, reportedSources);
     requireThat(job.report.testFiles && Object.keys(job.report.testFiles).length > 0, 'Missing reported test source provenance');
@@ -135,15 +143,18 @@ export function adjudicateJobs({ combined, expectedFiles, currentSources, review
 function versions() { return Object.fromEntries(PACKAGES.map(name => [name, JSON.parse(readFileSync(`node_modules/${name}/package.json`, 'utf8')).version])); }
 function configHashes() { return Object.fromEntries(CONFIG_SOURCES.map(path => [path, sourceHash(readFileSync(path))])); }
 function tests() { return Object.fromEntries([...globSync('tests/**/*.test.ts')].map(normalized).sort().map(path => [path, readFileSync(path, 'utf8')])); }
+function inputs() { return Object.fromEntries([...new Set([...globSync(INPUT_PATTERNS)].map(normalized))].sort()
+  .filter(path => !REVIEW_DOCUMENTS.has(path)).map(path => [path, readFileSync(path)])); }
 export async function captureInventory(files, output) {
   const { default: config } = await import('./stryker.config.mjs');
   const expected = [...globSync(config.mutate)].map(normalized);
   requireThat(files.length && sameSet(files, [...new Set(files)]) && files.every(file => expected.includes(file) && sourcePath(file)), 'Capture requires exact critical source paths');
-  const result = { version: 1, capturedAt: new Date().toISOString(), node: process.version, files,
+  const result = { version: 2, capturedAt: new Date().toISOString(), node: process.version, files,
     sources: Object.fromEntries(files.map(path => [path, sourceHash(readFileSync(path))])),
-    tests: Object.fromEntries(Object.entries(tests()).map(([path, source]) => [path, sourceHash(source)])), configs: configHashes(), packages: versions() };
+    tests: Object.fromEntries(Object.entries(tests()).map(([path, source]) => [path, sourceHash(source)])),
+    inputs: Object.fromEntries(Object.entries(inputs()).map(([path, source]) => [path, sourceHash(source)])), configs: configHashes(), packages: versions() };
   writeArtifact(output, result);
-  return { captured: output, sources: files.length, tests: Object.keys(result.tests).length };
+  return { captured: output, sources: files.length, tests: Object.keys(result.tests).length, inputs: Object.keys(result.inputs).length };
 }
 
 async function review(reviewPath, jobsPath, timeoutPath) {
@@ -157,7 +168,7 @@ async function review(reviewPath, jobsPath, timeoutPath) {
       inventory: JSON.parse(texts.inventory), hashes: Object.fromEntries(Object.entries(texts).map(([key, value]) => [key, sourceHash(value)])) };
   });
   const combined = combineJobs({ jobs, expectedFiles, currentSources: Object.fromEntries(expectedFiles.map(file => [file, readFileSync(file, 'utf8')])),
-    currentTests: tests(), currentConfigs: configHashes(), currentPackages: versions(), node: process.version,
+    currentTests: tests(), currentInputs: inputs(), currentConfigs: configHashes(), currentPackages: versions(), node: process.version,
     policy: JSON.parse(readFileSync('tests/adversarial/mutation-policy.v1.json', 'utf8')) });
   const reviews = JSON.parse(readFileSync(reviewPath, 'utf8')).reviews;
   const replayEvidence = Object.fromEntries(reviews.filter(item => item.evidence).map(item => {
