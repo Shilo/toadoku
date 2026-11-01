@@ -161,6 +161,10 @@ Current application build is c74346bc6751295a6a9201d13721f2fbe041c1e81008c0a2409
 
 Historical feature evidence has been byte-verified into main under prototypes/pwa-integration/feature-evidence/prototypes, preserving 43,203 files /2,863,659,330 bytes; inventory.json records every file hash. Historical paths in this record refer to their original capture location; use that preserved prefix after worktree retirement. Reproducible node_modules, browser binaries and temporary caches were excluded. Final post-merge evidence is directly under main prototypes/pwa-validation. [The system guide](pwa-system.md) explains operation, maintenance and first-publication recovery; [the icon recipe](pwa-icons.md) explains source rights, sizes, safe shapes and regeneration.
 
+## Delivery and cleanup
+
+The merged feature branch was deleted with Git's safe ancestry check, and its managed worktree was archived after verified evidence preservation and Local handoff. Only the original main Git worktree/branch remains. Windows still holds the retired empty folder; it contains no checkout files and has no Git registration. No user/editor process was terminated to force that cosmetic cleanup. See the [handoff/archive receipts](pwa-integration.md#managed-handoff-and-feature-retirement). No source changed after the accepted green gates.
+
 ## Plain-language answers for the completed main build
 
 - **Before playing:** about 106 kB arrived before the menu worked and 381-386 kB before the first puzzle, including part of the existing picture. On our simulated slower connection, the menu took 1.21 seconds and the board 2.77 seconds, compared with 1.23/2.79 before PWA. This is desktop testing, not a phone or live-site measurement.
