@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { automaticCheckAllowed } from './policy';
+import { automaticCheckAllowed, restoredBackoff } from './policy';
 export type PwaPhase = 'unavailable' | 'idle' | 'checking' | 'downloading' | 'waiting' | 'ready' | 'failed';
 export interface PwaStatus {
   phase: PwaPhase; runningBuild: string; availableBuild?: string; lastCheck?: number;
@@ -25,7 +25,7 @@ export function createPwaClient(base: URL): PwaClient {
   let disposed = false, failures = 0, nextCheck = 0, lastAttempt = 0;
   const listeners = new Set<(status: PwaStatus) => void>(), cleanups: Array<() => void> = [];
   const backoffKey = `toadoku:pwa:checks:1:${base.pathname}`;
-  try { const saved = JSON.parse(localStorage.getItem(backoffKey) ?? 'null'); if (Number.isInteger(saved?.failures) && saved.failures >= 0 && saved.failures <= 3 && Number.isFinite(saved.nextCheck)) { failures = saved.failures; nextCheck = saved.nextCheck; } } catch { /* Optional check throttling is best effort. */ }
+  try { const text = localStorage.getItem(backoffKey) ?? 'null'; const saved = text.length <= 256 ? restoredBackoff(JSON.parse(text), Date.now()) : undefined; if (saved) { failures = saved.failures; nextCheck = saved.nextCheck; } } catch { /* Optional check throttling is best effort. */ }
   function publish(patch: Partial<PwaStatus>) {
     if (disposed) return;
     status = { ...status, ...patch };
@@ -33,7 +33,7 @@ export function createPwaClient(base: URL): PwaClient {
   }
   function resetFailures() { failures = 0; nextCheck = 0; try { localStorage.removeItem(backoffKey); } catch { /* Optional. */ } }
   function failure(problem: unknown) {
-    failures = Math.min(3, failures + 1); nextCheck = Date.now() + (failures === 1 ? 300_000 : 1_800_000);
+    failures = Math.min(3, failures + 1); nextCheck = Date.now() + (failures === 1 ? 300_000 : failures === 2 ? 1_800_000 : 86_400_000);
     try { localStorage.setItem(backoffKey, JSON.stringify({ failures, nextCheck })); } catch { /* No gameplay dependency. */ }
     publish({ phase: 'failed', problem: String(problem) });
   }
@@ -61,11 +61,12 @@ export function createPwaClient(base: URL): PwaClient {
     catch (error) { verificationProblem = String(error); }
     if (disposed || active !== registration.active || waiting !== registration.waiting) return;
     const shellReady = activeReply?.ready === true && activeReply.buildId === build;
+    const newerActive = activeReply?.ready === true && activeReply.buildId !== build;
     if (waiting && waitingReply?.ready !== true) verificationProblem ??= 'Downloaded application is incomplete. Check again while online.';
     if (active && activeReply?.ready !== true) verificationProblem ??= 'Offline application is incomplete. Prepare it again while online.';
-    publish({ shellReady, shellBytes: shellReady ? activeReply?.bytes : undefined, availableBuild: waitingReply?.ready ? waitingReply.buildId : undefined,
+    publish({ shellReady, shellBytes: shellReady ? activeReply?.bytes : undefined, availableBuild: waitingReply?.ready ? waitingReply.buildId : newerActive ? activeReply?.buildId : undefined,
       problem: verificationProblem ?? status.problem,
-      phase: verificationProblem ? 'failed' : installing ? 'downloading' : waiting ? 'waiting' : shellReady ? 'ready' : status.phase === 'failed' ? 'failed' : 'idle' });
+      phase: verificationProblem ? 'failed' : installing ? 'downloading' : waiting || newerActive ? 'waiting' : shellReady ? 'ready' : status.phase === 'failed' ? 'failed' : 'idle' });
   }
   function attach(reg: ServiceWorkerRegistration) {
     if (!ours(reg)) throw new Error('Another application owns the requested worker scope');
@@ -85,6 +86,7 @@ export function createPwaClient(base: URL): PwaClient {
   }
   async function requestCheck(manual: boolean) {
     if (!supported || !registration || disposed || checking) return checking;
+    if (lastAttempt > Date.now()) lastAttempt = 0;
     if (!manual && !automaticCheckAllowed({ failures, nextCheck, lastAttempt, now: Date.now(), hidden: document.hidden, online: navigator.onLine })) return;
     if (manual) resetFailures();
     lastAttempt = Date.now(); publish({ phase: registration.waiting ? 'waiting' : 'checking', lastCheck: lastAttempt, problem: undefined });
@@ -100,7 +102,7 @@ export function createPwaClient(base: URL): PwaClient {
   async function start(manual = false) {
     if (!supported || disposed) return;
     if (starting) return starting;
-    if (!manual && (failures >= 3 || Date.now() < nextCheck)) { publish({ phase: 'failed', problem: 'Download paused after a failure. Prepare offline or check again to retry.' }); return; }
+    if (!manual && Date.now() < nextCheck) { publish({ phase: 'failed', problem: 'Download paused after a failure. Prepare offline or check again to retry.' }); return; }
     if (manual) resetFailures();
     starting = (async () => { try {
       const existing = registration ?? await navigator.serviceWorker.getRegistration(base.href);
@@ -111,20 +113,20 @@ export function createPwaClient(base: URL): PwaClient {
   async function ensureShell(): Promise<boolean> {
     await start(true);
     if (!registration) return false;
-    if (registration.installing) {
-      const worker = registration.installing;
+    const firstInstall = !registration.active || registration.active.state === 'activating';
+    const candidate = registration.installing ?? (firstInstall ? registration.waiting ?? registration.active : undefined);
+    if (candidate) {
       await new Promise<void>(resolve => {
         const timer = setTimeout(done, 180_000);
-        function done() { clearTimeout(timer); worker.removeEventListener('statechange', changed); resolve(); }
-        function changed() { if (['installed', 'activated', 'redundant'].includes(worker.state)) done(); }
-        worker.addEventListener('statechange', changed); changed();
+        function done() { clearTimeout(timer); candidate!.removeEventListener('statechange', changed); resolve(); }
+        function changed() {
+          if (candidate!.state === 'redundant' || candidate!.state === 'activated' || !firstInstall && candidate!.state === 'installed') done();
+        }
+        candidate.addEventListener('statechange', changed); changed();
       });
     }
-    // First install may pass through activating after the installed event.
-    if (registration.active?.state === 'activating') {
-      const worker = registration.active;
-      await new Promise<void>(resolve => { const timer = setTimeout(done, 15_000); function done() { clearTimeout(timer); worker.removeEventListener('statechange', changed); resolve(); } function changed() { if (worker.state !== 'activating') done(); } worker.addEventListener('statechange', changed); changed(); });
-    }
+    // Discard any coalesced readback captured before first activation became observable.
+    await refreshing;
     await refresh();
     if (!status.shellReady && registration.active) {
       try {
@@ -137,7 +139,7 @@ export function createPwaClient(base: URL): PwaClient {
   if (supported) {
     const checkVisible = () => { void requestCheck(false); };
     window.addEventListener('focus', checkVisible); window.addEventListener('online', checkVisible); document.addEventListener('visibilitychange', checkVisible);
-    const timer = setInterval(checkVisible, 60_000);
+    const timer = setInterval(checkVisible, 5000);
     cleanups.push(() => { clearInterval(timer); window.removeEventListener('focus', checkVisible); window.removeEventListener('online', checkVisible); document.removeEventListener('visibilitychange', checkVisible); });
   }
   return {

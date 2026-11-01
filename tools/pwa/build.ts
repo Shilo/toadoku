@@ -21,12 +21,13 @@ export function mime(path: string): string {
 /** Runs after emitted files exist and before the PWA plugin inventories them. */
 export function pwaRelease(): Plugin {
   let output = 'dist', failed = false;
+  let originalError: unknown;
   return {
     name: 'toadoku-release-inventory', apply: 'build',
     configResolved(config) { output = config.build.outDir; },
-    async buildEnd(error) { if (error) { failed = true; await mkdir(output, { recursive: true }); await writeFile(join(output, '.pwa-failed'), 'Application build failed'); } },
+    async buildEnd(error) { if (error) { failed = true; originalError = error; await mkdir(output, { recursive: true }); await writeFile(join(output, '.pwa-failed'), 'Application build failed'); } },
     closeBundle: { order: 'pre', sequential: true, async handler(error) {
-      if (error || failed) throw new Error('Refusing offline inventory after failed application build');
+      if (error || failed) throw originalError ?? error ?? new Error('Refusing offline inventory after failed application build');
       await rm(join(output, '.pwa-failed'), { force: true });
       await mkdir(join(output, 'licenses'), { recursive: true });
       await copyFile('node_modules/workbox-core/LICENSE', join(output, 'licenses', 'Workbox-MIT.txt'));

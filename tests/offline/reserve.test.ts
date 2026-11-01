@@ -5,7 +5,7 @@ import { POOLS } from '../../src/lib/catalog/types';
 import type { AttestedRecord, PoolId } from '../../src/lib/catalog/types';
 import { OfflineSupport } from '../../src/lib/offline/reserve';
 import type { OfflineStore } from '../../src/lib/offline/types';
-import { OFFLINE_LIMITS, recordKey } from '../../src/lib/offline/plan';
+import { OFFLINE_LIMITS, recordKey, coveragePlans } from '../../src/lib/offline/plan';
 import type { CurrentSave } from '../../src/lib/storage/repository';
 
 const manifestBytes = new Uint8Array(await readFile('public/catalog/v1/manifest.json'));
@@ -204,6 +204,27 @@ describe('verified offline reserve', () => {
     expect(fixture.support.state.phase).toBe('ready');
     expect(Object.values(fixture.support.state.counts).every(count => count >= 3)).toBe(true);
     unsubscribe(); fixture.support.dispose(); fixture.loader.dispose();
+  }, 20_000);
+
+  it('stops before the twenty-first new shard attempt when a wrap closure exceeds the explicit default allowance', async () => {
+    const fixture = setup();
+    for (const state of fixture.save.pools) state.cursor = state.count - 1;
+    const paths = new Set(fixture.save.pools.flatMap(state => coveragePlans(state, [], 3)[2].map(ordinal =>
+      manifest.pools[state.pool].shards.find((shard: { start: number; count: number }) => ordinal >= shard.start && ordinal < shard.start + shard.count).path)));
+    expect(paths.size).toBeGreaterThan(20);
+    const before = JSON.stringify(fixture.save);
+    await fixture.support.prepare('default');
+    expect(fixture.support.state.phase).toBe('failed');
+    expect(fixture.support.state.problem).toContain('offline-download-limit');
+    expect(fixture.requests.filter(path => path !== 'manifest.json')).toHaveLength(20);
+    expect(fixture.support.state.downloadedBytes).toBeLessThanOrEqual(OFFLINE_LIMITS.defaultDownloadBytes);
+    expect(fixture.store.records.size).toBeGreaterThan(0);
+    expect(fixture.store.records.size).toBeLessThan(fixture.support.state.total);
+    expect(JSON.stringify(fixture.save)).toBe(before);
+    const requests = fixture.requests.length;
+    await fixture.support.inspect();
+    expect(fixture.requests).toHaveLength(requests);
+    fixture.support.dispose(); fixture.loader.dispose();
   }, 20_000);
 
 });

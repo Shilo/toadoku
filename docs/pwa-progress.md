@@ -34,3 +34,17 @@ Primary sources: [lifecycle](https://web.dev/articles/service-worker-lifecycle),
 ## Evidence status
 
 Implementation in progress. No Android, hosting, performance, offline or update acceptance is claimed by this planning record.
+
+## Implementation reviews and first executable slice
+
+Commit `eb055c9` records the first implementation slice. The full then-current unit gate passed 412 tests in 62 files with two workers, and type checks reported zero errors/warnings. The subsequently added prepare/readback race regression passed its nine-test affected suite. Production build and artifact validation passed, but this did not establish a functioning installed worker.
+
+Reciprocal implementation review added exact manifest tuple and strict record/proof shape checks, explicit manifest-write acknowledgement, independent foreground/background fetch lanes, cancelled-write and inspection barriers, clear-generation readback, scoped cross-window clear notifications, failure backoff and manual shell repair. Cora reviewed the actual offline modules and lead UI; Rowan reviewed worker/client contracts; Sage independently checked installation states, planner models and integrated UI races. Opening offline controls now verifies actual shell bytes instead of retaining a stale ready flag after eviction. Existing recipes never mutate essential save generations during preparation or cleanup.
+
+Lead's personal Codex browser walkthrough used the isolated production fixture at port 5196. Menu Settings and the new panel were reachable; native prompt absence showed browser guidance, not a false installed state. Actual Prepare failed safely with zero claimed reserve. Sage independently reproduced `Offline shell readback failed` with all raw cache entries present.
+
+The root cause was an unchallenged library append step: Vite PWA adds a second `manifest.webmanifest` entry without integrity after the transform. The first entry had SHA-256 integrity, but the last-entry map discarded it. Build validation only searched for hash strings and missed this semantic duplicate. Lead identified the emitted-byte counterexample, Cora inspected the actual plugin source, and Sage independently challenged the fix before execution. Agreement: normalize equal URL/revision entries with compatible integrity, reject conflicting or missing integrity, and independently validate the actual injected array rather than substring presence. Fresh native installation is required after the fix. Failed fixtures and interrupted diagnostic attempts are retained as failures, not passing evidence.
+
+Lead and Cora also challenged release identity across Windows/Linux checkouts. Narrow LF attributes bind worker/build identity inputs consistently; the upstream ISC notice remains byte-preserved. No vendored skills, catalog bytes, oracle, rule implementation or theme work changed.
+
+Deployment review challenged two additional hazards: a successful publication followed by a failed verification job must still retain that publication's old assets, and a build that stayed current for sixty days must not expire its files at its first replacement. The revised pipeline uses conservative monotonic archived assets and verified currently hosted release metadata before age pruning. It refuses publication when required history or its 256 MiB support budget cannot be established. Local fault tests and source review remain required before acceptance.

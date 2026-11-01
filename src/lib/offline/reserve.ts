@@ -2,7 +2,7 @@ import { decodeManifest } from '../catalog/decode';
 import { manifestMembership } from '../catalog/attestation';
 import { POOLS } from '../catalog/types';
 import type { CatalogManifest, PoolId } from '../catalog/types';
-import type { CatalogLoader } from '../catalog/load';
+import type { CatalogLoader, BackgroundAllowance } from '../catalog/load';
 import type { GameRepositoryPort } from '../gameplay/repository-port';
 import type { CurrentSave } from '../storage/repository';
 import { coveragePlans, exclusions, packBudget, packTarget, recordKey, saveFingerprint } from './plan';
@@ -149,26 +149,31 @@ export class OfflineSupport {
     if (this.value.phase === 'preparing' || this.disposed) return;
     const operation = ++this.operation, abort = this.abort = new AbortController();
     this.publish({ phase: 'preparing', completed: 0, total: 0, downloadedBytes: 0, problem: undefined });
-    const startBytes = this.catalog.backgroundTransferredBytes;
+    let received = 0;
     try {
       const plan = await this.plan(kind, abort.signal);
       if (operation !== this.operation || abort.signal.aborted) return;
       this.publish({ plannedBytes: plan.bytes, total: plan.jobs.length });
       let charged = plan.metadataMissing ? 128 * 1024 : 0;
-      const requested = new Set<string>();
+      const allowance: BackgroundAllowance = {
+        claim: maximumBytes => {
+          if (operation !== this.operation || abort.signal.aborted || charged + maximumBytes > plan.cap) return false;
+          charged += maximumBytes; return true;
+        },
+        received: bytes => {
+          received += bytes;
+          if (operation === this.operation) this.publish({ downloadedBytes: received });
+        },
+      };
       let completed = 0;
       for (const job of plan.jobs) {
         if (operation !== this.operation || abort.signal.aborted) return;
-        if (!requested.has(job.path)) {
-          if (charged + 96 * 1024 > plan.cap) throw new Error('offline-download-limit');
-          charged += 96 * 1024; requested.add(job.path);
-        }
-        const record = await this.catalog.getRecord(job.pool, job.ordinal, abort.signal, 'background');
+        const record = await this.catalog.getRecord(job.pool, job.ordinal, abort.signal, 'background', allowance);
         if (operation !== this.operation || abort.signal.aborted) return;
-        if (record.kind !== 'ready') throw new Error('offline-download-' + record.kind);
+        if (record.kind !== 'ready') throw new Error(record.reason.includes('offline-download-limit') ? 'offline-download-limit' : 'offline-download-' + record.kind);
         // Write success and independent readback, not cache presence, acknowledge readiness.
         if (!await this.store.putRecord(record.value) || !await this.retained(job.pool, job.ordinal, plan.manifest)) throw new Error('offline-record-write');
-        this.publish({ completed: ++completed, downloadedBytes: this.catalog.backgroundTransferredBytes - startBytes });
+        this.publish({ completed: ++completed, downloadedBytes: received });
         await yieldInput();
       }
       if (plan.fingerprint !== saveFingerprint(await this.current())) throw new Error('offline-state-changed');
@@ -178,7 +183,7 @@ export class OfflineSupport {
       await this.inspect();
     } catch (error) {
       if (operation === this.operation) {
-        this.publish({ phase: 'failed', problem: String(error), downloadedBytes: this.catalog.backgroundTransferredBytes - startBytes });
+        this.publish({ phase: 'failed', problem: String(error), downloadedBytes: received });
         await this.inspect();
       }
     } finally { if (this.abort === abort) this.abort = undefined; }

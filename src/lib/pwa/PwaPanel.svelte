@@ -79,8 +79,7 @@
     <p role="status">{installation ? c[installation.phase] : c.loading}</p>
     {#if installation?.phase === 'available'}<button class="primary" onclick={() => install?.prompt()}>{c.installButton}</button>{/if}
     {#if installation && !['standalone', 'installed', 'prompting'].includes(installation.phase)}
-      <p>{installation.context !== 'browser' ? c[installation.context] : c[installation.platform]}</p>
-      <p>{c.fallback}</p>
+      <details><summary>{c.installHelp}</summary><p>{installation.context !== 'browser' ? c[installation.context] : c[installation.platform]}</p><p>{c.fallback}</p></details>
     {/if}
   </section>
   <section aria-labelledby="pwa-offline-title">
@@ -90,9 +89,6 @@
     {#if reserve}
       <h4>{c.coverage}</h4>
       <dl><div><dt>{c.easy}</dt><dd>{count('easy')}</dd></div><div><dt>{c.medium}</dt><dd>{Math.min(count('medium-low'), count('medium-high'))}</dd></div><div><dt>{c.hard}</dt><dd>{Math.min(count('hard-low'), count('hard-high'))}</dd></div></dl>
-      <p>{c.horizon}</p>
-      <p>{c.noAuto}</p><p>{c.background}</p>
-      <details><summary>{c.travel}</summary><p>{c.guarantee}</p><p>{c.travelHelp}</p><p>{c.files}</p></details>
       <p>{c.defaultHelp}</p>
       {#if small}<p>{c.estimate}: {formatBytes(small.bytes, locale)}</p>{/if}
       <button class="primary" disabled={working || checking || !client || delivery?.phase === 'unavailable'} onclick={() => prepare('default')}>{c.prepare}</button>
@@ -109,18 +105,15 @@
       <p>{c.stored}: {formatBytes(reserve.storedBytes,locale)}</p>
       <button class="secondary" disabled={working || checking} onclick={() => refresh()}>{c.inspect}</button>
       <button class="secondary" disabled={working || checking || !reserve.storedBytes} onclick={clear}>{c.remove}</button>
-      <p>{c.storeHelp}</p>
+      <details><summary>{c.downloadHelp}</summary><p>{c.horizon}</p><p>{c.noAuto}</p><p>{c.background}</p><p>{c.guarantee}</p><p>{c.files}</p><p>{c.storeHelp}</p><p>{c.eviction}</p>
+      {#if retained}<p>{c.persisted}</p>{:else if supportsPersistence}<button class="secondary" onclick={persist}>{c.persist}</button>{#if retentionAsked}<p role="status">{c.denied}</p>{/if}{/if}</details>
     {:else}<p role="status">{unavailable ? c.error : c.loading}</p>{/if}
     {#if failed || reserve?.phase === 'failed'}<p role="alert">{c.error}</p>{/if}
-    <p>{c.eviction}</p>
-    {#if retained}<p>{c.persisted}</p>
-    {:else if supportsPersistence}<button class="secondary" onclick={persist}>{c.persist}</button>{#if retentionAsked}<p role="status">{c.denied}</p>{/if}{/if}
   </section>
   <section aria-labelledby="pwa-update-title">
     <h3 id="pwa-update-title">{c.update}</h3>
     <p role="status">{updateText}</p>
-    <p>{c.updateHelp}</p>
-    <dl><div><dt>{c.build}</dt><dd>{delivery?.runningBuild ?? '…'}</dd></div><div><dt>{c.lastCheck}</dt><dd>{delivery?.lastCheck ? new Date(delivery.lastCheck).toLocaleTimeString(locale) : c.never}</dd></div></dl>
+    <details><summary>{c.versionHelp}</summary><p>{c.updateHelp}</p><dl><div><dt>{c.build}</dt><dd>{delivery?.runningBuild ?? '…'}</dd></div><div><dt>{c.lastCheck}</dt><dd>{delivery?.lastCheck ? new Date(delivery.lastCheck).toLocaleTimeString(locale) : c.never}</dd></div></dl></details>
     <button class="secondary" disabled={!client || delivery?.phase === 'checking' || delivery?.phase === 'unavailable'} onclick={() => client?.check()}>{c.check}</button>
   </section>
 </div>

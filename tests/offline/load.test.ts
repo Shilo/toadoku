@@ -111,5 +111,57 @@ describe('offline loader priority and rejected bytes', () => {
     expect(await loader.ensureOfflineManifest()).toBe(false);
     loader.dispose();
   });
+  it('debits every background refetch after foreground LRU eviction, and refusal cannot reject a same-path foreground consumer', async () => {
+    const requests: string[] = [];
+    const loader = new CatalogLoader('https://test.invalid/catalog/v1/', { fetcher: async input => { requests.push(new URL(String(input)).pathname); return fixture(input); } });
+    let claims = 0;
+    const allowance = { claim: () => ++claims <= 1 };
+    expect((await loader.getRecord('easy', 0, undefined, 'background', allowance)).kind).toBe('ready');
+    expect(claims).toBe(1);
+    expect((await loader.getRecord('easy', 1, undefined, 'background', allowance)).kind).toBe('ready');
+    expect(claims).toBe(1);
+    for (const shard of manifest.pools.easy.shards.slice(1, 5)) expect((await loader.getRecord('easy', shard.start)).kind).toBe('ready');
+    const [background, foreground] = await Promise.all([
+      loader.getRecord('easy', 2, undefined, 'background', allowance), loader.getRecord('easy', 2),
+    ]);
+    expect(background).toMatchObject({ kind: 'unavailable', reason: expect.stringContaining('offline-download-limit') });
+    expect(foreground.kind).toBe('ready');
+    expect(claims).toBe(2);
+    expect(requests.filter(path => path.endsWith(manifest.pools.easy.shards[0].path))).toHaveLength(2);
+    loader.dispose();
+  });
+  it('an existing foreground read spends no optional allowance, and a shared admitted background read keeps its original action byte ownership', async () => {
+    for (const owner of ['foreground', 'background'] as const) {
+      let started!: () => void, release!: () => void;
+      const ready = new Promise<void>(resolve => { started = resolve; });
+      const held = new Promise<void>(resolve => { release = resolve; });
+      const loader = new CatalogLoader('https://test.invalid/catalog/v1/', { fetcher: async (input, init) => {
+        if (String(input).endsWith('manifest.json')) return response(manifestBytes);
+        started();
+        await new Promise<void>((resolve, reject) => { held.then(resolve); init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted','AbortError')), { once: true }); });
+        return fixture(input);
+      } });
+      await loader.initialize();
+      let oldClaims = 0, oldBytes = 0, newClaims = 0, newBytes = 0;
+      const oldAllowance = { claim: () => { oldClaims++; return true; }, received: (bytes: number) => oldBytes += bytes };
+      const newAllowance = { claim: () => { newClaims++; return false; }, received: (bytes: number) => newBytes += bytes };
+      const cancel = new AbortController();
+      const first = loader.getRecord('easy', 0, cancel.signal, owner, oldAllowance);
+      await ready;
+      const foreground = loader.getRecord('easy', 1);
+      const joined = loader.getRecord('easy', 2, undefined, 'background', newAllowance);
+      // Cancellation releases only this consumer; the foreground still needs the same bytes.
+      await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+      cancel.abort(); expect((await first).kind).toBe('aborted');
+      release();
+      expect((await foreground).kind).toBe('ready');
+      expect((await joined).kind).toBe('ready');
+      expect(newClaims).toBe(0); expect(newBytes).toBe(0);
+      expect(oldClaims).toBe(owner === 'background' ? 1 : 0);
+      expect(oldBytes).toBe(owner === 'background' ? manifest.pools.easy.shards[0].bytes : 0);
+      loader.dispose();
+    }
+  });
+
 });
 

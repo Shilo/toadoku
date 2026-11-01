@@ -6,5 +6,32 @@ export function orphanShellCaches(names: readonly string[], protectedNames: Read
   return names.filter(name => ownedShellCache(name, prefix) && !protectedNames.has(name));
 }
 export function automaticCheckAllowed(input: { failures: number; nextCheck: number; lastAttempt: number; now: number; hidden: boolean; online: boolean }): boolean {
-  return !input.hidden && input.online && input.failures < 3 && input.now >= input.nextCheck && input.now - input.lastAttempt >= 10_000;
+  return !input.hidden && input.online && input.now >= input.nextCheck && input.now - (input.lastAttempt > input.now ? 0 : input.lastAttempt) >= 60_000;
+}
+
+export interface IntegrityEntry { url: string; revision?: string | null; integrity?: string }
+/** Plugin-added public entries bypass Workbox's glob transforms. Merge only identical identities. */
+export function normalizePrecache(entries: readonly IntegrityEntry[], scope = 'https://toadoku.invalid/'): IntegrityEntry[] {
+  const unique = new Map<string, IntegrityEntry>();
+  const base = new URL(scope);
+  if (!base.pathname.endsWith('/')) throw new Error('Invalid precache scope');
+  for (const entry of entries) {
+    if (typeof entry.url !== 'string' || !entry.url || entry.url.includes('..') || entry.url.startsWith('/') || /[:?#]/.test(entry.url)) throw new Error('Invalid precache path');
+    const url = new URL(entry.url, base);
+    if (url.origin !== base.origin || !url.pathname.startsWith(base.pathname)) throw new Error('Invalid precache scope');
+    const canonical = url.href.slice(base.href.length);
+    const previous = unique.get(canonical);
+    if (previous && (previous.revision !== entry.revision || previous.integrity && entry.integrity && previous.integrity !== entry.integrity)) throw new Error('Conflicting precache identity');
+    unique.set(canonical, { ...entry, url: canonical, integrity: entry.integrity || previous?.integrity });
+  }
+  for (const entry of unique.values()) if (!/^sha256-[A-Za-z0-9+/]{43}=$/.test(entry.integrity ?? '')) throw new Error('Missing or invalid precache integrity');
+  return [...unique.values()];
+}
+
+export function restoredBackoff(value: unknown, now: number): { failures: number; nextCheck: number } | undefined {
+  if (!value || typeof value !== 'object') return;
+  const saved = value as { failures?: unknown; nextCheck?: unknown };
+  if (typeof saved.failures !== 'number' || !Number.isInteger(saved.failures) || saved.failures < 0 || saved.failures > 3 ||
+      typeof saved.nextCheck !== 'number' || !Number.isFinite(saved.nextCheck) || saved.nextCheck < 0 || saved.nextCheck > now + 86_400_000) return;
+  return { failures: saved.failures, nextCheck: saved.nextCheck };
 }

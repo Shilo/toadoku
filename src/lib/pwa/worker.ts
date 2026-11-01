@@ -1,11 +1,11 @@
 /// <reference lib="webworker" />
-import { orphanShellCaches, ownedShellCache } from './policy';
+import { normalizePrecache, orphanShellCaches, ownedShellCache } from './policy';
 import { PrecacheController } from 'workbox-precaching';
 import type { PrecacheEntry } from 'workbox-precaching';
 
 declare const self: ServiceWorkerGlobalScope;
-const manifest = self.__WB_MANIFEST as PrecacheEntry[];
 const scope = self.registration.scope;
+const manifest = normalizePrecache(self.__WB_MANIFEST as PrecacheEntry[], scope);
 const prefix = `toadoku:pwa:1:${encodeURIComponent(new URL(scope).pathname)}:`;
 const releaseRevision = manifest.find(entry => entry.url === 'release.json')?.revision;
 if (!releaseRevision) throw new Error('Missing release inventory');

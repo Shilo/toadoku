@@ -50,3 +50,20 @@ The first exploratory baseline omitted repeat visits and mislabeled server-sent 
 
 Production PWA lifecycle, cold offline features/completion/recovery, download costs/responsiveness, failure tests and final report challenge remain pending implementation. Android hardware and an authorized HTTPS Pages deployment have not been supplied or tested.
 
+
+## Initial native install failure and correction boundary
+
+The first frozen PWA A build `df323a090de60fa71e9aaa5ee23f1e676ccc7110242f98063bb075b2d3852576`, worker SHA `1eb5f580927246ade106c47e70715ba3b230e960a99618a18f3c4040647ee0b7`, failed actual service-worker installation. Lead observed this independently in Codex browser at port 5196; Sage reproduced it at 5198. The initial long readiness wait was terminated only after verifying owned Node process 30492 and its browser descendants. That terminated attempt has no completed result JSON and is not a pass.
+
+The separate diagnostic uses the native CDP ServiceWorker error channel and actual Cache Storage. It reports `Offline shell readback failed` with all downloaded entries present. Lead and Cora identified duplicate `manifest.webmanifest` entries in the actual injected worker: the plugin appended a same-revision entry without integrity after manifest transforms, overwriting the valid entry in the readback lookup. Sage challenged the proposed fix before implementation: merge only compatible same-URL/revision entries, preserve a valid integrity value, reject conflicts or entirely missing integrity, and verify a fresh native install. A build passing its former string-presence validator was insufficient evidence.
+
+The first copied B fixture also failed because the test builder omitted `data/gameplay-policy.v2.json`. This was a fixture omission, not a gameplay defect. The build guard initially hid the original import error; Cora's reviewed diagnostic fix preserves the original error while leaving the failed-build marker. The fixture builder now includes policy data and a local copy of the required Workbox license.
+
+## Independent model result
+
+The installation state-machine and independent reserve-horizon suites pass 13 tests in two files with one worker (478ms total). The traversal model does not import production selection helpers. It exhausts more than 400,000 dynamic role-retention/release branches for horizons one through three, simulates 1,000 travel paths at horizon 25 across wraps, rejects unsupported tiny domains and epoch overflow, and detects the meaningful fault of omitting currently blocked raw positions.
+
+## Final measurement method correction
+
+Page-target CDP network throttling may not shape service-worker fetches. Lead challenged that assumption before final acceptance measurements. The shared static host now optionally imposes an aggregate 200,000-byte/s response-body budget, 150ms header latency and fair chunks capped at 8KiB across real page and worker HTTP responses. It respects response backpressure and closed sockets. CDP network throttling is disabled for those paired runs; CPU factor four applies only to the page. Socket-written response bytes, completed CDP requests, timestamped partial CDP body bytes and logical file sizes remain separate. Earlier baseline timings retain their original page-target shaping label and do not stand in for final paired results.
+

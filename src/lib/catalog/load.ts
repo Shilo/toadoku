@@ -5,6 +5,7 @@ import type { OfflineCatalogCache } from '../offline/types';
 import { verifyRetained } from '../offline/verify';
 class Corrupt extends Error {}
 type ReadPriority = 'foreground' | 'background';
+export interface BackgroundAllowance { claim(maximumBytes: number): boolean; received?(bytes: number): void }
 interface SharedRead { controller: AbortController; consumers: number; promise: Promise<Uint8Array> }
 export class CatalogLoader {
   readonly base: URL;
@@ -45,7 +46,7 @@ export class CatalogLoader {
     if (url.origin !== this.base.origin || !url.pathname.startsWith(this.base.pathname) || url.search || url.hash) throw new Corrupt('catalog path');
     return url;
   }
-  private async fetchBounded(path: string, limit: number, signal: AbortSignal, priority: ReadPriority): Promise<Uint8Array> {
+  private async fetchBounded(path: string, limit: number, signal: AbortSignal, priority: ReadPriority, allowance?: BackgroundAllowance): Promise<Uint8Array> {
     const response = await this.fetcher(this.url(path), { signal, redirect: 'error' });
     const rejectResponse = async (error: Error): Promise<never> => {
       try { await response.body?.cancel(); } catch { /* Preserve the response rejection. */ }
@@ -60,7 +61,7 @@ export class CatalogLoader {
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
         const part = await reader.read(); if (part.done) break;
         size += part.value.length;
-        if (priority === 'background') this.backgroundTransferredBytes += part.value.length;
+        if (priority === 'background') { this.backgroundTransferredBytes += part.value.length; allowance?.received?.(part.value.length); }
         if (size > limit) { await reader.cancel(); throw new Corrupt('byte limit'); }
         parts.push(part.value);
       }
@@ -69,17 +70,20 @@ export class CatalogLoader {
     for (const part of parts) { bytes.set(part, offset); offset += part.length; }
     return bytes;
   }
-  private read(path: string, limit: number, signal?: AbortSignal, priority: ReadPriority = 'foreground'): Promise<Uint8Array> {
+  private read(path: string, limit: number, signal?: AbortSignal, priority: ReadPriority = 'foreground', allowance?: BackgroundAllowance): Promise<Uint8Array> {
     if (signal?.aborted) return Promise.reject(new DOMException('Aborted', 'AbortError'));
     let shared = this.reads.get(path);
     if (shared?.controller.signal.aborted) shared = undefined;
     if (!shared) {
+      // Admit before publishing the shared read. Refused optional work must not
+      // become a shared promise that can reject a joining foreground consumer.
+      if (priority === 'background' && allowance && !allowance.claim(limit)) return Promise.reject(new Error('offline-download-limit'));
       const controller = new AbortController();
       const execute = async () => {
         if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
         let timedOut = false;
         const timer = setTimeout(() => { timedOut = true; controller.abort(); }, 20_000);
-        try { return await this.fetchBounded(path, limit, controller.signal, priority); }
+        try { return await this.fetchBounded(path, limit, controller.signal, priority, allowance); }
         catch (error) { if (timedOut) throw new Error('catalog-timeout'); throw error; }
         finally { clearTimeout(timer); }
       };
@@ -135,13 +139,13 @@ export class CatalogLoader {
     })();
     return this.initializing;
   }
-  private async shard(descriptor: ShardDescriptor, signal?: AbortSignal, priority: ReadPriority = 'foreground'): Promise<readonly CatalogRecord[]> {
+  private async shard(descriptor: ShardDescriptor, signal?: AbortSignal, priority: ReadPriority = 'foreground', allowance?: BackgroundAllowance): Promise<readonly CatalogRecord[]> {
     const known = this.decoded.get(descriptor.sha256);
     if (known) { this.decoded.delete(descriptor.sha256); this.decoded.set(descriptor.sha256, known); return known; }
     let bytes: Uint8Array | undefined;
     try { bytes = await this.cache?.get(descriptor.sha256); } catch { /* Disposable cache failure does not fail essential play. */ }
     if (bytes && (bytes.length !== descriptor.bytes || await sha256(bytes) !== descriptor.sha256)) bytes = undefined;
-    if (!bytes) bytes = await this.read(descriptor.path, 96 * 1024, signal, priority);
+    if (!bytes) bytes = await this.read(descriptor.path, 96 * 1024, signal, priority, allowance);
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     if (bytes.length !== descriptor.bytes || await sha256(bytes) !== descriptor.sha256) throw new Corrupt('shard hash/size');
     let records: readonly CatalogRecord[];
@@ -151,7 +155,7 @@ export class CatalogLoader {
     try { await this.cache?.put(descriptor.sha256, bytes); } catch { /* Separate disposable cache quota is nonfatal. */ }
     return records;
   }
-  async getRecord(pool: PoolId, ordinal: number, signal?: AbortSignal, priority: ReadPriority = 'foreground'): Promise<CatalogResult<AttestedRecord>> {
+  async getRecord(pool: PoolId, ordinal: number, signal?: AbortSignal, priority: ReadPriority = 'foreground', allowance?: BackgroundAllowance): Promise<CatalogResult<AttestedRecord>> {
     if (signal?.aborted) return { kind: 'aborted', reason: 'canceled' };
     const initialized = await this.initialize(); if (initialized.kind !== 'ready') return initialized;
     if (signal?.aborted) return { kind: 'aborted', reason: 'canceled' };
@@ -165,7 +169,7 @@ export class CatalogLoader {
         if (signal?.aborted) return { kind: 'aborted', reason: 'canceled' };
         return { kind: 'ready', value: retained };
       }
-      const records = await this.shard(descriptor, signal, priority), record = records[ordinal - descriptor.start];
+      const records = await this.shard(descriptor, signal, priority, allowance), record = records[ordinal - descriptor.start];
       if (!await verifyRecordIdentity(record)) throw new Corrupt('record identity');
       let tree = this.recordTrees.get(descriptor.sha256);
       if (!tree) {

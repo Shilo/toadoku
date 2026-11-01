@@ -17,3 +17,11 @@
 /package.json text eol=lf
 /package-lock.json text eol=lf
 /public/licenses/** -text
+
+# Canonical PWA identity inputs and byte-preserved upstream icon notice.
+/src/lib/pwa/** text eol=lf
+/src/lib/offline/** text eol=lf
+/tools/pwa/** text eol=lf
+/vite.config.ts text eol=lf
+/public/pwa/icon.svg text eol=lf
+/public/pwa/Lucide-ISC.txt -text

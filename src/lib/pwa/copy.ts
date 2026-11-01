@@ -2,6 +2,7 @@ import type { Locale } from '../i18n';
 
 const en = {
 
+  installHelp: 'Install from browser menu', downloadHelp: 'How downloads work', versionHelp: 'Version details',
   title: 'Install and offline', install: 'Installation', installButton: 'Install app',
 
   browser: 'Play here, or install from your browser menu.', available: 'Your browser can install Toadoku.',
@@ -36,13 +37,13 @@ const en = {
 
   horizon: 'Quick Play, Progression and replays share these puzzles. Another window or a restored backup can change the counts.',
 
-  guarantee: 'Medium and Hard counts cover either internal difficulty pool. A complete travel pack has 25 per pool, enough for one Progression run without extra Quick Play or replays.',
+  guarantee: 'Medium and Hard counts cover either internal difficulty pool. A complete travel pack covers 60 scheduled Progression puzzles from any Leap, without extra Quick Play or replays.',
 
   prepare: 'Prepare offline play', travel: 'Prepare a longer trip', inspect: 'Check saved puzzles',
 
-  defaultHelp: 'Small pack: targets 3 upcoming puzzles per pool, at most 2 MiB of puzzle files per action.',
+  defaultHelp: 'Small pack: targets 3 next puzzles per difficulty. Download limit: about 2.1 MB per action.',
 
-  travelHelp: 'Travel pack: targets 25 per pool, at most 12 MiB of puzzle files per action.',
+  travelHelp: 'Travel pack: targets 25 per difficulty. Download limit: about 12.6 MB per action.',
 
   estimate: 'Estimated additional puzzle files', files: 'App files download separately. Each small puzzle file is fully checked before use.',
 
@@ -80,6 +81,7 @@ type Copy = { [K in keyof typeof en]: string };
 
 const de: Copy = {
 
+  installHelp:'Über das Browsermenü installieren', downloadHelp:'So funktionieren Downloads', versionHelp:'Versionsdetails',
   title:'Installation und offline', install:'Installation', installButton:'App installieren',
 
   browser:'Hier spielen oder über das Browsermenü installieren.', available:'Dein Browser kann Toadoku installieren.',
@@ -110,13 +112,13 @@ const de: Copy = {
 
   horizon:'Schnellspiel, Fortschritt und Wiederholungen teilen diese Rätsel. Andere Fenster oder Backups können die Zahlen ändern.',
 
-  guarantee:'Mittel und Schwer decken beide internen Bereiche ab. Ein vollständiges Reisepaket hat 25 je Bereich: genug für einen Fortschrittslauf ohne zusätzliche Schnellspiele oder Wiederholungen.',
+  guarantee:'Mittel und Schwer decken beide internen Bereiche ab. Ein vollständiges Reisepaket deckt ab jedem Sprung 60 Fortschrittsrätsel ab, ohne zusätzliche Schnellspiele oder Wiederholungen.',
 
   prepare:'Offline-Spiel vorbereiten', travel:'Längere Reise vorbereiten', inspect:'Gespeicherte Rätsel prüfen',
 
-  defaultHelp:'Kleines Paket: 3 nächste Rätsel je Bereich, höchstens 2 MiB Rätseldateien pro Vorgang.',
+  defaultHelp:'Kleines Paket: 3 nächste Rätsel je Schwierigkeit. Download-Grenze: etwa 2,1 MB je Vorgang.',
 
-  travelHelp:'Reisepaket: 25 je Bereich, höchstens 12 MiB Rätseldateien pro Vorgang.',
+  travelHelp:'Reisepaket: 25 je Schwierigkeit. Download-Grenze: etwa 12,6 MB je Vorgang.',
 
   estimate:'Geschätzte zusätzliche Rätseldateien', files:'App-Dateien laden getrennt. Jede kleine Rätseldatei wird vor der Nutzung vollständig geprüft.',
 
@@ -152,6 +154,7 @@ const de: Copy = {
 
 const es: Copy = {
 
+  installHelp:'Instalar desde el menú del navegador', downloadHelp:'Cómo funcionan las descargas', versionHelp:'Detalles de la versión',
   title:'Instalación y sin conexión', install:'Instalación', installButton:'Instalar aplicación',
 
   browser:'Juega aquí o instala desde el menú del navegador.', available:'Tu navegador puede instalar Toadoku.',
@@ -181,13 +184,13 @@ const es: Copy = {
 
   horizon:'Juego rápido, Progresión y repeticiones comparten estos sudokus. Otra ventana o una copia restaurada puede cambiar las cifras.',
 
-  guarantee:'Medio y Difícil cubren ambos grupos internos. Un paquete de viaje completo tiene 25 por grupo: suficiente para un recorrido de Progresión sin partidas rápidas ni repeticiones adicionales.',
+  guarantee:'Medio y Difícil cubren ambos grupos internos. Un paquete de viaje completo cubre 60 sudokus de Progresión desde cualquier salto, sin partidas rápidas ni repeticiones adicionales.',
 
   prepare:'Preparar juego sin conexión', travel:'Preparar un viaje largo', inspect:'Comprobar sudokus guardados',
 
-  defaultHelp:'Paquete pequeño: 3 próximos sudokus por grupo, máximo 2 MiB de archivos por acción.',
+  defaultHelp:'Paquete pequeño: 3 próximos sudokus por dificultad. Límite de descarga: unos 2,1 MB por acción.',
 
-  travelHelp:'Paquete de viaje: 25 por grupo, máximo 12 MiB de archivos por acción.',
+  travelHelp:'Paquete de viaje: 25 por dificultad. Límite de descarga: unos 12,6 MB por acción.',
 
   estimate:'Archivos adicionales estimados', files:'Los archivos de la aplicación se descargan aparte. Cada archivo pequeño de sudokus se verifica por completo antes de usarlo.',
 
@@ -224,8 +227,6 @@ const es: Copy = {
 export const pwaCopy: Record<Locale, Copy> = { en, de, es };
 
 export function formatBytes(bytes: number, locale: Locale): string {
-
-  return bytes < 1024 ? `${Math.ceil(bytes)} B` : bytes < 1024 * 1024 ? `${new Intl.NumberFormat(locale, {maximumFractionDigits:1}).format(bytes / 1024)} KiB` : `${new Intl.NumberFormat(locale, {maximumFractionDigits:2}).format(bytes / 1024 / 1024)} MiB`;
-
+  const format = new Intl.NumberFormat(locale, {maximumFractionDigits: 1});
+  return bytes < 1000 ? String(Math.ceil(bytes)) + ' B' : bytes < 1_000_000 ? format.format(bytes / 1000) + ' kB' : format.format(bytes / 1_000_000) + ' MB';
 }
-
