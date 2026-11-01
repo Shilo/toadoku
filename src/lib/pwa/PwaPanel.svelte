@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, untrack } from 'svelte';
+  import { onMount, tick, untrack } from 'svelte';
   import type { Locale } from '../i18n';
   import type { PwaClient, PwaStatus } from './client';
   import type { InstallSupport, InstallState } from './install';
@@ -21,9 +21,18 @@
   $effect(() => install?.subscribe(value => installation = value));
   $effect(() => {
     if (!offline) return;
-    const stop = offline.subscribe(value => reserve = value);
-    untrack(() => { void refresh(offline); });
-    return () => { refreshSequence++; refreshing = false; stop(); };
+    const support = offline;
+    let attached = true, wasPreparing = false;
+    const stop = support.subscribe(value => {
+      const settled = wasPreparing && value.phase !== 'preparing';
+      wasPreparing = value.phase === 'preparing';
+      reserve = value;
+      if (settled) void tick().then(() => {
+        if (attached && live && support === offline && !working) void refresh(support);
+      });
+    });
+    untrack(() => { void refresh(support); });
+    return () => { attached = false; refreshSequence++; refreshing = false; stop(); };
   });
   onMount(() => {
     void navigator.storage?.persisted?.().then(value => { if (live) retained = value; }).catch(() => undefined);
@@ -31,7 +40,7 @@
     return () => { live = false; operation++; refreshSequence++; clearInterval(timer); };
   });
   async function refresh(support = offline) {
-    if (!support || working) return;
+    if (!support || working || refreshing) return;
     const request = ++refreshSequence; refreshing = true; failed = false;
     const current = () => live && request === refreshSequence && support === offline;
     try {
