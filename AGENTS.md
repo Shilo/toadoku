@@ -66,8 +66,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 ## Working rules
 
 - KISS, YAGNI, DRY. Add only what the task needs.
-- Follow **strong defaults and progressive disclosure**: useful defaults, no setup for ordinary play, and no unnecessary features/settings. Keep frequent actions easy to reach; reveal necessary infrequent options through clear secondary access. Preserve accessibility, timely feedback/recovery and consequential disclosures. Use concise, familiar labels. Read the short [usability guide](docs/usability-principles.md) when changing features, settings, navigation or copy. Its linked usability research is optional.
-- Use **progressive disclosure for agent context**: keep mandatory rules and explicit loading conditions in concise guides; place research/history in linked references loaded when relevant. Keep related rules together, avoid duplicate authority, and never defer constraints needed to act correctly.
+- Follow **simplicity-first design**: strong defaults, no setup for ordinary play, and minimal necessary features/settings. Keep frequent actions easy to reach; use progressive disclosure for necessary infrequent options through clear secondary access. Preserve accessibility, timely feedback/recovery and consequential disclosures. Use concise, familiar labels. Read the short [usability guide](docs/usability-principles.md) when changing features, settings, navigation or copy. Its linked usability research is optional.
 - Use Conventional Commits.
 - Use unit tests for logic/state; reserve browser tests for critical flows and visual validation. Batch actions; avoid redundant screenshots and reruns.
 - No em dashes or personal context in project files.

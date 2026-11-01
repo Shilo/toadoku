@@ -14,11 +14,11 @@ The challenged conclusion: fewer visible controls alone do not make an app intui
 
 These sources provide design guidance, not usability evidence from this app's players. W3C's cited cognitive guidance is supplemental, not a WCAG conformance checklist. Feature frequency and discoverability remain hypotheses until observed.
 
-## Naming and applying the documentation pattern
+## Naming the product philosophy
 
-**Progressive disclosure** is the established pattern: essential information first, further detail when needed. Strong defaults are a separate supporting practice, not part of a single formally named principle. Anthropic also uses progressive disclosure for agents discovering context incrementally; the broader discipline is context engineering. [Anthropic: Effective Context Engineering for AI Agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+**Simplicity-first design** is this project's descriptive label for strong defaults, minimal necessary features and progressive disclosure. It names the app's usability philosophy, not a formal industry standard. Apple's settings guidance is a useful reference; "Apple philosophy" alone is too broad to specify the intended behavior.
 
-The documentation split applies that pattern: AGENTS.md gives the rule and loading condition, the short guide contains operational requirements, and this reference contains optional evidence. The challenge is that more files can increase searching and cause agents to miss requirements. Keep related instructions together, maintain one authoritative version and retain required constraints in the relevant guide. Shorter context is useful only when it still supplies enough information to act correctly; the split alone does not guarantee better agent performance.
+The label needs its operational definition: a minimal-looking interface can still hide frequent tools, necessary accessibility options or important feedback. The short guide defines the defaults, placement and safeguards that agents must follow.
 
 ## Independent challenge and resulting corrections
 
