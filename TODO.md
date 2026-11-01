@@ -4,11 +4,11 @@
 
 - [x] Review gameplay/mode/scoring/storage documentation and primary sources; prepare the [complete autonomous handoff](docs/gameplay-implementation-handoff.md), [data/rules](docs/gameplay-data-and-correctness.md), [state/storage](docs/gameplay-state-and-persistence.md), [validation matrix](docs/gameplay-validation-matrix.md) and [readiness audit](docs/research/gameplay-readiness-audit.md).
 - [x] Include a copy-ready receiving-agent prompt explicitly requiring research and challenge of every plan, including the orchestrator's own plans, all task/test/integration plans and every fix/material revision.
-- [x] Activate the complete gameplay implementation with specialist ownership, reciprocal actual-code/fix review, lead-owned Codex browser acceptance and periodic green Conventional Commits. See [actual progress](docs/gameplay-progress.md); final acceptance remains pending.
-- [x] Build/certify 100,000 licensed puzzles with stored solutions in 488 progressively loaded shards, with independent complete verification and explicitly scoped duplicate filtering. Final clean-checkout repetition remains part of release acceptance.
-- [ ] Implement and independently validate rules, input/notes/undo/hints, active-play timer, Quick Play, Progression/replays, score/Dewdrops, atomic persistent state and recovery/backup.
-- [ ] Implement complete tools/Settings including persistent Fill space/Square, usable enlarged notes, accessible results and all required navigation/locale/shape/failure cases. Preserve the Pond UI.
-- [ ] Ratify the handoff's explicit provisional v1 schedule/balance/role defaults through evidence; complete the entire validation matrix and document actual external/hardware limits. Historical open questions below are superseded for this phase by the handoff's autonomous decision process, not by claims of prior user approval.
+- [x] Complete gameplay with specialist ownership, reciprocal actual-code/fix review, lead-owned Codex browser acceptance and periodic green Conventional Commits. See [acceptance and external limits](docs/gameplay-acceptance.md).
+- [x] Build/certify 100,000 licensed puzzles with stored solutions in 488 progressively loaded shards, with independent complete verification, deterministic rebuild, both autocrlf imports/checkouts and explicitly scoped duplicate filtering.
+- [x] Implement and independently validate rules, input/notes/undo/hints, active-play timer, Quick Play, Progression/replays, score/Dewdrops, atomic persistent state and recovery/backup.
+- [x] Implement complete tools/Settings including persistent Fill space/Square, usable enlarged notes, accessible results and required navigation/locale/shape/failure cases. Preserve the Pond UI.
+- [x] Ratify v1 schedule/balance/role policies; pass the available executable validation matrix and record physical-device/zoom/assistive-technology and later PWA release limits honestly. Historical open questions are superseded by the recorded challenged decisions.
 
 ## Production UI handoff and next phase
 
@@ -37,16 +37,17 @@ This section records completed prototype scope; it does not authorize further pr
 
 ## More and settings
 
-- [x] Keep More disabled in the completed prototype reference. The next production UI phase enables the existing tenth gameplay key for real navigation, as specified in the new handoff.
-- [ ] Review one shared menu: regular options in the main menu; regular options plus tools to their right in gameplay. Test narrow-screen stacking before choosing two columns.
-- [ ] Compare that idea against the previous direct-tools-plus-Settings proposal without adding a nested Tools step.
-- [ ] Restore Notes, Undo, Erase and Hint access, sticky Notes state, accessible dismissal/focus and session information.
-- [ ] Expose the planned Fill space / Square preference when Settings is available. Do not claim it is user-accessible while its only entry point is disabled.
+- [x] Preserve disabled More in the historical prototype; the maintained gameplay uses its tenth key for functional navigation.
+- [x] Supersede the historical tools-on-right proposal with accepted Tools-left/Menu-right gameplay choices, responsive popovers and accessible larger sheets/dialogs.
+- [x] Review menu alternatives and retain direct solving-tool access without a nested Tools step.
+- [x] Restore Notes, Undo, Erase and Hint access, sticky Notes state, accessible dismissal/focus and session information.
+- [x] Expose persistent Fill space / Square through Settings.
 - [ ] Revisit optional PWA installation placement; browser installation does not require an in-game More menu.
 
 ## Themes and art
 
-- [ ] Finish gameplay, pause and report to the user. Do not begin theme research, concepts or implementation without fresh user instructions. Preserve the earlier modular lazy Auto/Pond/Cauldron brief as reference only; it does not authorize automatic continuation after gameplay. Its requested event window, logo/terms boundaries and production provenance rules remain available for the later task.
+- [x] Finish gameplay and pause/report with the accepted evidence and external limits.
+- [ ] Await fresh user direction before theme implementation or integration in this checkout. Separate-worktree theme activity does not authorize merging it automatically. Preserve the Auto/Pond/Cauldron brief and provenance boundaries for the later task.
 - [ ] Replace the deliberately provisional black-and-white question-mark frog-plus-pad image with one human-made composite asset. Final provenance and rights still apply.
 - [ ] Asset-pack sourcing and purchases are deferred; a placeholder is the current direction.
 
@@ -61,9 +62,9 @@ This section records completed prototype scope; it does not authorize further pr
 
 ## Design and gameplay decisions
 
-- [ ] Validate the new top-down pad board: recognizable 3 by 3 groups without grid lines, nine-note readability, immutable clues, focus/selection/conflicts and rectangular hitboxes.
+- [x] Validate top-down groups, nine-position enlarged notes, immutable clues, focus/selection/conflicts and fixed hitboxes through recorded desktop/emulated-phone checks. Physical-phone readability remains unverified.
 - [ ] Test full-allocation Fill space with 4px/8px spacing at actual portrait/landscape sizes, including safe areas and the Square alternative. Existing representative emulation passes do not certify physical hardware.
-- [ ] Settle score/currency formula, progression schedule, catalog and repeated-level policies.
-- [ ] Ratify the gameplay handoff's separate Quick Play/frontier/replay roles and explicit replacement policy. Arbitrary three-slot management and automatic overwriting are not selected.
+- [x] Settle direct Dewdrops rewards, versioned progression schedule, certified catalog and completed-Leap replay policies.
+- [x] Ratify separate Quick Play/frontier/replay roles and explicit replacement. Arbitrary save slots and automatic overwriting are not selected.
 
 This is a backlog, not implementation approval. Keep temporary mockups/code under ignored `prototypes/`.

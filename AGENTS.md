@@ -18,8 +18,8 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 ## Current task and next phase
 
-- Gameplay is explicitly activated. The maintained source now includes certified catalog data, Sudoku/session/hint modules, Quick Play/Progression/replays, direct Dewdrops rewards and transactional IndexedDB storage. [Gameplay progress](docs/gameplay-progress.md) records accepted slices and unfinished gates. Do not treat the historical presentation-only statements below as the current implementation or mark the full phase accepted before its required validation finishes.
-- Following interruption recovery, finish all prior gameplay tasks and acceptance, then pause and report back. Do not start any theme work, including after gameplay completion, until the user supplies fresh instructions. Preserve the maintained Pond appearance. The earlier Auto/Pond/Cauldron theme brief is reference for that later user-directed task, not permission to start automatically.
+- Gameplay implementation and available-environment acceptance are complete. The maintained source includes 100,000 independently certified puzzles, Sudoku/session/hint modules, Quick Play/Progression/replays, direct Dewdrops rewards and transactional IndexedDB storage. [Gameplay acceptance](docs/gameplay-acceptance.md) records actual gates and external hardware/release limits; [progress](docs/gameplay-progress.md) retains the challenged decisions and historical failures. Presentation-only statements below describe completed history.
+- Pause and report gameplay completion. Do not start or integrate theme work in this checkout until the user supplies fresh instructions. Preserve the maintained Pond appearance. The separate theme worktree and earlier Auto/Pond/Cauldron brief do not authorize automatic integration.
 
 - Historical preparation produced the [autonomous gameplay handoff](docs/gameplay-implementation-handoff.md), its data/state/validation specifications and receiving-agent prompt. That brief now governs the explicitly activated gameplay phase and supersedes historical UI-only restrictions.
 - Every plan in the activated gameplay phase must be researched online and challenged before execution, including the lead's own overall/architecture/integration plans, each specialist plan, test plans and every proposed fix or material revision. Assign a named specialist to challenge lead-authored plans. Record evidence-supported agreement, review actual implementations reciprocally, test integrated journeys personally with Codex browser, and commit accepted green slices periodically. See the [mandatory research/challenge loop](docs/gameplay-implementation-handoff.md#6-mandatory-research-and-reciprocal-challenge-loop).
@@ -42,7 +42,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
-- More stays disabled in the completed prototype reference. The tracked gameplay implementation has functional tools/Settings, modes, storage and rewards with three active roles rather than arbitrary save slots. Final gameplay validation remains pending. Theme work awaits fresh user instructions after gameplay completion.
+- More stays disabled in the completed prototype reference. The accepted tracked gameplay has functional tools/Settings, modes, storage and rewards with three active roles rather than arbitrary save slots. External hardware/release limits remain explicit. Theme integration awaits fresh user instructions.
 - The tracked UI integrates fresh water, pads, shore and floating modules. Physical hardware validation remains deferred. See [production progress](docs/production-ui-progress.md) and the separate [prototype record](docs/prototype-progress.md).
 - No store, purchases or upgrades.
 
