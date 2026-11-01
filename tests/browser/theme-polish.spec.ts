@@ -815,6 +815,14 @@ test('HUD rows keep localized labels and identity anchors while condensing only 
       await page.getByRole('dialog').getByRole('button', { name: uiCopy[locale].notes, exact: true }).click();
     }
     await expect(page.locator('.dock .notes-mode')).toHaveCount(1);
+    const symbols = await page.locator('.dock .more').evaluate(button => ({
+      padded: button.classList.contains('has-state'),
+      labelIcons: button.querySelectorAll('.notes-mode svg').length,
+      sizes: [...button.querySelectorAll('.more-symbols > svg')].map(icon => {
+        const r = icon.getBoundingClientRect(); return [r.width, r.height];
+      }),
+    }));
+    expect(symbols).toEqual({ padded: true, labelIcons: 0, sizes: [[28, 28], [12, 12]] });
     const inside = await page.locator('.dock .notes-mode').evaluate(label => {
       const b = label.closest('button')!.getBoundingClientRect(), range = document.createRange();
       range.selectNodeContents(label);
@@ -840,6 +848,9 @@ test('HUD rows keep localized labels and identity anchors while condensing only 
       await recovery.getByRole('button', { name: appCopy[locale].unscored, exact: true }).click();
       await recovery.getByRole('button', { name: dictionaries[locale].easy, exact: true }).click();
       await expect(recovery.locator('.cell')).toHaveCount(81);
+      expect(await recovery.locator('.dock .more-symbols > svg').evaluateAll(icons => icons.map(icon => {
+        const r = icon.getBoundingClientRect(); return [r.width, r.height];
+      }))).toEqual([[20, 20]]); // Recovery alone does not invent a Notes indicator.
       await recovery.locator('.dock .more').click();
       await recovery.getByRole('dialog').getByRole('button', { name: uiCopy[locale].notes, exact: true }).click();
       await expect(recovery.locator('.dock .save-label')).toHaveText(appCopy[locale].unscoredShort);

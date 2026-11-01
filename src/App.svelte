@@ -472,7 +472,7 @@
         {#each [1,2,3,4,5,6,7,8,9] as number (number)}
           <button class="cream numeric" disabled={sceneBlocked || !boardVisible || gameState.attempt?.status !== 'playing'} aria-label={String(number)} onclick={() => dispatch({type:'enter',digit:number},true)}>{number}</button>
         {/each}
-        <button class={['cream', 'more', {'has-state': !!saveBadge}]} bind:this={moreButton} aria-label={`${copy.more}${gameState.attempt?.notesMode ? `, ${c.notes}` : ''}${saveBadge ? `, ${saveBadge}` : ''}`} aria-haspopup="dialog" onclick={() => nav?.openMore()}><span class="more-symbols"><Ellipsis aria-hidden="true" size={saveBadge ? 20 : 28} />{#if saveBadge && gameState.attempt?.notesMode}<Pencil aria-hidden="true" size={12} />{/if}</span>{#if saveBadge}<span class="save-label"><span>{saveBadge}</span></span>{:else if gameState.attempt?.notesMode}<span class="notes-mode"><Pencil aria-hidden="true" size={12} />{c.notes}</span>{/if}</button>
+        <button class={['cream', 'more', {'has-state': !!saveBadge || gameState.attempt?.notesMode}]} bind:this={moreButton} aria-label={`${copy.more}${gameState.attempt?.notesMode ? `, ${c.notes}` : ''}${saveBadge ? `, ${saveBadge}` : ''}`} aria-haspopup="dialog" onclick={() => nav?.openMore()}><span class="more-symbols"><Ellipsis aria-hidden="true" size={saveBadge ? 20 : 28} />{#if gameState.attempt?.notesMode}<Pencil aria-hidden="true" size={12} />{/if}</span>{#if saveBadge}<span class="save-label"><span>{saveBadge}</span></span>{:else if gameState.attempt?.notesMode}<span class="notes-mode">{c.notes}</span>{/if}</button>
       </nav>
     {:else}
       <section class="identity" aria-label="Toadoku">
