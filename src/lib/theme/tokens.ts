@@ -24,9 +24,7 @@ export interface ThemeTokens {
     readonly controlMin: number; readonly controlMax: number;
     readonly bodySize: number; readonly summarySize: number; readonly smallLabelSize: number;
     readonly summaryLineHeight: number;
-    /** Upward ink adjustment in em, without moving or enlarging the fixed paint box. */
-    readonly digitBaselineShift: number;
-    readonly digitUnderlineStyle: 'solid' | 'wavy'; readonly digitUnderlineOffset: number;
+    readonly gridDigitScale: number; readonly gridDigitMax: number;
     readonly digitMin: number; readonly digitMax: number; readonly noteMin: number; readonly noteMax: number;
     readonly titleMin: number; readonly titleMax: number;
     readonly uiWeight: number; readonly digitWeight: number; readonly noteWeight: number;
@@ -61,7 +59,7 @@ export interface ThemeTokens {
 }
 
 /** Explicit unit mapping keeps ratios, lengths, timing and stacking unambiguous. */
-export function themeStyle(theme: ThemeTokens, uiFontFamily = SYSTEM_UI_FONT, themeFontLoaded = false): string {
+export function themeStyle(theme: ThemeTokens, uiFontFamily = SYSTEM_UI_FONT): string {
   const roles: Record<string, string | number> = {
     'water-deep': theme.water.deep, 'water-middle': theme.water.middle, 'water-shallow': theme.water.shallow,
     'ground-wet': theme.ground.wet, 'ground-dry': theme.ground.dry, 'ground-rim': theme.ground.rim, 'ground-ink': theme.ground.ink,
@@ -79,12 +77,10 @@ export function themeStyle(theme: ThemeTokens, uiFontFamily = SYSTEM_UI_FONT, th
     'control-disabled-lip': theme.control.disabledLip, 'control-focus': theme.control.focus,
     'control-edge': theme.control.edge, 'control-selected-edge': theme.control.selectedEdge, 'control-disabled-edge': theme.control.disabledEdge,
     'control-edge-width': `${theme.surface.controlEdgeWidth}px`,
-    'font-ui': uiFontFamily, 'font-solving': uiFontFamily, 'title-ink': theme.typography.titleInk,
+    'font-ui': uiFontFamily, 'title-ink': theme.typography.titleInk,
     'type-body': `${theme.typography.bodySize}px`, 'type-summary': `${theme.typography.summarySize}px`,
     'type-small-label': `${theme.typography.smallLabelSize}px`, 'line-summary': theme.typography.summaryLineHeight,
-    'digit-baseline-shift': `${themeFontLoaded ? theme.typography.digitBaselineShift : 0}em`,
-    'digit-underline-style': themeFontLoaded ? theme.typography.digitUnderlineStyle : 'wavy',
-    'digit-underline-offset': `${themeFontLoaded ? theme.typography.digitUnderlineOffset : .1}em`,
+    'grid-digit-scale': theme.typography.gridDigitScale, 'type-grid-digit-max': `${theme.typography.gridDigitMax}px`,
     'type-control-min': `${theme.typography.controlMin}px`, 'type-control-max': `${theme.typography.controlMax}px`,
     'type-digit-min': `${theme.typography.digitMin}px`, 'type-digit-max': `${theme.typography.digitMax}px`,
     'type-note-min': `${theme.typography.noteMin}px`, 'type-note-max': `${theme.typography.noteMax}px`,

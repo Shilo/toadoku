@@ -26,7 +26,6 @@ export const cauldron: ThemeTokens = {
   typography: {
     ...presentation.typography,
     bodySize: 17.6, summarySize: 17.6, smallLabelSize: 13, summaryLineHeight: 1.3,
-    digitBaselineShift: .04, digitUnderlineStyle: 'solid', digitUnderlineOffset: .03,
     titleInk: '#FFF0CA', digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11,
     uiWeight: 600, digitWeight: 600, noteWeight: 500, numberLineHeight: 1,
   },

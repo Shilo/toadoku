@@ -54,7 +54,7 @@
 
 <style>
   .leaf, .floating, .front, svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .leaf { display: block; pointer-events: none; color: var(--leaf-ink); font-family: var(--font-solving); }
+  .leaf { display: block; pointer-events: none; color: var(--leaf-ink); font-family: var(--font-grid); }
   svg { overflow: visible; }
   .lip { fill: var(--leaf-lip); transform: translateY(var(--leaf-default-lip-depth)); }
   .face { fill: var(--leaf-face); }
@@ -65,7 +65,7 @@
   .selection-dew { fill: var(--leaf-selected-dew); }
   .focus-dew { position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: var(--focus-bead-size); height: var(--focus-bead-size); box-sizing: border-box; border: calc(var(--focus-width) / 4) solid var(--focus-edge); border-radius: 50%; background: var(--leaf-focus); }
   .notes { position: absolute; inset: 0; display: grid; place-items: center; }
-  .digit { position: absolute; top: 50%; left: 50%; translate: -50% -50%; overflow: clip; display: flex; align-items: center; justify-content: center; padding-bottom: calc(var(--digit-baseline-shift, 0em) * 2); font-size: clamp(var(--type-digit-min), calc(var(--diameter) * .64), var(--type-digit-max)); font-weight: var(--weight-digit); line-height: var(--line-number); }
+  .digit { position: absolute; top: 50%; left: 50%; translate: -50% -50%; clip-path: circle(50%); display: flex; align-items: center; justify-content: center; font-size: min(var(--type-grid-digit-max), calc(var(--diameter) * var(--grid-digit-scale))); font-weight: var(--weight-digit); line-height: var(--line-number); }
   .note { position: absolute; top: 50%; left: 50%; display: grid; place-items: center; font-family: var(--font-note); font-weight: var(--weight-note); line-height: var(--line-number); translate: -50% -50%; }
 </style>
 

@@ -9,7 +9,7 @@ export interface ThemeFont { readonly family: string; readonly faces: readonly [
 export interface ThemeDefinition {
   readonly light: ThemeTokens;
   readonly dark: ThemeTokens;
-  /** One optional family for UI and primary numerals; branding is baked vector data. */
+  /** One optional UI/dock family. Grid numerals are shared; branding is baked vector data. */
   readonly font?: ThemeFont;
   readonly wordmark: Wordmark;
   readonly cellPath: (id: number) => string;

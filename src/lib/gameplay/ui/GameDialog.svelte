@@ -273,12 +273,12 @@
   .metric-label { display: inline-flex; align-items: center; gap: 4px; }
   .metric-label :global(svg), .reward-amount :global(svg) { flex-shrink: 0; }
   dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-  .large-cell { color: var(--leaf-ink); background: var(--leaf-face); border-radius: 32px; width: 160px; height: 160px; align-self: center; display: grid; place-items: center; font-family: var(--font-solving); }
+  .large-cell { color: var(--leaf-ink); background: var(--leaf-face); border-radius: 32px; width: 160px; height: 160px; align-self: center; display: grid; place-items: center; font-family: var(--font-grid); }
   .large-cell strong { font-size: 64px; }
   .note-specimen { width: 120px; height: 120px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); font-size: 24px; text-align: center; }
   .note-specimen span { display: grid; place-items: center; }
   .large-keys { display: grid; grid-template-columns: repeat(3, minmax(44px, 1fr)); gap: 4px; }
-  .large-keys button { background: var(--control-lip); font-family: var(--font-solving); font-size: 1.5rem; min-height: 48px; }
+  .large-keys button { background: var(--control-lip); font-family: var(--font-grid); font-size: 1.5rem; min-height: 48px; }
   .large-keys button[aria-pressed="true"] { background: var(--control-selected-face); color: var(--control-selected-ink); box-shadow: inset 0 0 0 var(--control-edge-width) var(--control-selected-edge); }
   .inline-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
   .reward-total { display: flex; flex-direction: column; align-items: center; gap: 4px; }

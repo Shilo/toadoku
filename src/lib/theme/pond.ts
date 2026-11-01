@@ -28,7 +28,7 @@ export const pond = {
   typography: {
     titleInk: '#FFF5D9', controlMin: 16, controlMax: 22,
     bodySize: 16, summarySize: 14.4, smallLabelSize: 12.1, summaryLineHeight: 1.4,
-    digitBaselineShift: .09, digitUnderlineStyle: 'solid', digitUnderlineOffset: .03,
+    gridDigitScale: .68, gridDigitMax: 36,
     digitMin: 17, digitMax: 32, noteMin: 4.5, noteMax: 11, titleMin: 44, titleMax: 80,
     uiWeight: 600, digitWeight: 600, noteWeight: 500,
     uiLineHeight: 1.15, titleLineHeight: 1.05, numberLineHeight: 1,

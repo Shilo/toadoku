@@ -140,7 +140,13 @@ describe('opaque potion medallions', () => {
       for (let n = 0; n < 72; n++) expect(inside(outline, { x: 50 + 36 * Math.cos(n * Math.PI / 36), y: 50 + 36 * Math.sin(n * Math.PI / 36) })).toBe(true);
       for (const diameter of [28, 33.77, 48, 80, 160]) {
         const digit = digitGeometry(diameter);
-        const boxes = [{ x: 0, y: 0, width: digit.width, height: digit.height }, ...noteGeometry(diameter).map(n => ({ x: n.x, y: n.y, width: n.size, height: n.size }))];
+        expect(digit.width).toBe(digit.height);
+        for (let n = 0; n < 72; n++) {
+          const angle = n * Math.PI / 36;
+          expect(inside(outline, { x: 50 + Math.cos(angle) * digit.width / diameter * 50,
+            y: 50 + Math.sin(angle) * digit.height / diameter * 50 })).toBe(true);
+        }
+        const boxes = noteGeometry(diameter).map(n => ({ x: n.x, y: n.y, width: n.size, height: n.size }));
         for (const box of boxes) for (const x of [-.5, .5]) for (const y of [-.5, .5]) expect(inside(outline, { x: 50 + (box.x + x * box.width) / diameter * 100, y: 50 + (box.y + y * box.height) / diameter * 100 })).toBe(true);
       }
       for (let i = 1; i < curves.length; i++) expect(curves[i - 1][3]).toEqual(curves[i][0]);

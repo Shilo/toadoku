@@ -59,6 +59,7 @@ test('built bundle runs under repository subpath with local assets and notices',
   expect((await readAttempt()).id).toBe(originalId); expect(await page.locator('.cell').evaluateAll(es=>es.map(e=>e.getAttribute('aria-label')))).toEqual(originalEntries);
   await page.evaluate(()=>document.fonts.ready);
   expect(await page.evaluate(()=>[...document.fonts].filter(face => face.family === 'ToadokuPondUI' && face.status === 'loaded').map(face => face.weight).sort())).toEqual(['400','700']);
+  expect(await page.evaluate(()=>[...document.fonts].some(face => face.family.replaceAll('"','') === 'ToadokuSolving' && face.status === 'loaded'))).toBe(true);
   expect(requests.some(url => /(?:Chewy|Creepster).*\.(?:ttf|woff2)/.test(url))).toBe(false);
   await page.getByRole('button',{name:'Mehr',exact:true}).click();
   await page.getByRole('button',{name:'Einstellungen',exact:true}).click();

@@ -33,7 +33,7 @@ it('keeps baked wordmarks inside their natural em frames without font downloads'
   }
 });
 
-it('gives each theme one optional UI and numeral family with honest native faces', () => {
+it('gives each theme one optional UI and dock family with honest native faces and shared grid sizing', () => {
   expect(pond.font).toMatchObject({ family: 'ToadokuPondUI', faces: [{ weight: '400' }, { weight: '700' }] });
   expect(cauldron.font).toMatchObject({ family: 'ToadokuCauldronUI', faces: [{ weight: '400' }] });
   for (const definition of [pond, cauldron]) {
@@ -42,7 +42,9 @@ it('gives each theme one optional UI and numeral family with honest native faces
     expect(definition.light.typography).not.toHaveProperty('ui');
   }
   expect(pond.wordmark.path).not.toBe(cauldron.wordmark.path);
-  expect(themeStyle(pond.light)).toContain('--digit-baseline-shift:0em');
-  expect(themeStyle(pond.light, '"ToadokuPondUI", system-ui', true)).toContain('--digit-baseline-shift:0.09em');
-  expect(themeStyle(cauldron.light, '"ToadokuCauldronUI", system-ui', true)).toContain('--digit-baseline-shift:0.04em');
+  for (const theme of [pond.light, cauldron.light]) {
+    expect(themeStyle(theme)).not.toMatch(/--font-grid:|--digit-baseline-shift:/);
+    expect(themeStyle(theme)).toContain('--grid-digit-scale:0.68');
+    expect(themeStyle(theme)).toContain('--type-grid-digit-max:36px');
+  }
 });

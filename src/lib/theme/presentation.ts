@@ -14,6 +14,7 @@ export const presentation = {
   typography: {
     controlMin: 16, controlMax: 22, uiLineHeight: 1.15, titleMax: 80, titleMin: 44, titleLineHeight: 1.05,
     noteMax: 11,
+    gridDigitScale: .68, gridDigitMax: 36,
   },
   surface: { leafDefaultLipDepth: 0.8, leafSelectedLift: 0.9, leafLipDepth: 0.95, focusBeadSize: 3 },
 } as const;
