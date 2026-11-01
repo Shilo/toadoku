@@ -64,6 +64,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 - KISS, YAGNI, DRY. Add only what the task needs.
 - Use Conventional Commits.
+- Use unit tests for logic/state; reserve browser tests for critical flows and visual validation. Batch actions; avoid redundant screenshots and reruns.
 - No em dashes or personal context in project files.
 - Discuss one decision at a time; keep replies extremely concise.
 - Use ImageGen before new UI experiments.
