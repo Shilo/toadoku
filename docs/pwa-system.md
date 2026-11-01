@@ -2,6 +2,31 @@
 
 For players: installing is optional, and online play works without offline setup. Open More, then Install and offline (during a game, choose Settings first). Prepare puzzles before a trip. When an update is ready, finish saving or export recovery, close every Toadoku window, then reopen.
 
+## Player workflow
+
+1. **While online:** open **More → Install and offline** from the menu, or **More → Settings → Install and offline** during a game.
+2. Choose **Prepare offline play** for **3 upcoming puzzles per difficulty**. For a longer trip, open **More offline options → Prepare a longer trip** for **25 per difficulty**. A completed travel pack covers a 60-game Progression run if Quick Play, replays and replacements do not consume the same reserve.
+3. Wait for preparation to finish. Check that app files are verified and the displayed Easy/Medium/Hard counts cover the play you need. Installing the app or seeing a saved game alone does not prove those extra puzzles are ready.
+4. After first setup, finish saving or export recovery, **close every Toadoku tab and app window, then reopen once** before relying on offline play. Keep a backup of important progress.
+5. Offline, resume your saved game or start a prepared next puzzle normally. When the exact next puzzle is missing, reconnect and prepare again; the app keeps the current game/result rather than substituting another puzzle.
+
+### What downloads, and when
+
+- **Ordinary online play:** fetches the exact requested puzzle when needed. It can retain that puzzle and recent files for reuse, but does not automatically fill an offline pack or download the entire 100,000-puzzle collection. The active saved game contains its own puzzle.
+- **App files:** save automatically about two seconds after the first usable board, or earlier when preparation is explicitly requested. They are separate from extra puzzle downloads and include both current themes and first-use features.
+- **Extra puzzles:** download only after a preparation action. The targets are upcoming playable counts, not fixed totals of downloaded files. Easy has one internal pool; Medium and Hard have two each, so a fresh small/travel pack typically stores 15/125 records, sometimes more for boundary lookahead. Displayed counts use the minimum coverage needed for each difficulty.
+- **After playing or returning online:** packs do not automatically refill. Choose Prepare again when you need more; it reuses verified records and available recent files, and downloads only missing work. Removed or browser-evicted files may download again.
+
+### Progress, cancellation and partial preparation
+
+Puzzle work handles one optional file at a time while foreground play has its own lane. A file is read in chunks, then fully checked; progress counts records only after they are saved and checked again. Partial file bytes are not playable puzzles.
+
+An already-started puzzle pack can continue after closing the panel so you can play. Reopen the panel to use **Cancel preparation**. Hiding the app stops optional puzzle preparation. Cancel keeps completed verified puzzles; choose Prepare again online to finish missing work. App installation/update files can finish separately. If you close the panel while it is still preparing app files, its pending start of the puzzle pack is cancelled.
+
+Preparation can stop short after a connection error, storage refusal or its per-action work limit. Trust the checked counts, not the requested target or the number of files present. Reconnect or free space and prepare again. Small/travel actions allow about 2.1/12.6 MB of work before compression; these are not exact mobile-data caps. Normal online puzzle selection and essential saved progress do not depend on spare offline-pack capacity. **Remove extra puzzles** keeps saved games and rewards; a newly requested online puzzle may be retained afterward.
+
+## Maintainer overview
+
 This is the maintainers' map of the implemented installation, offline and update system. [Acceptance](pwa-acceptance.md) contains measured costs and actual evidence; the [validation matrix](pwa-validation-matrix.md) defines the release gates. The historical [handoff](pwa-implementation-handoff.md) and [decision ledger](pwa-progress.md) explain why these choices were challenged.
 
 ## Startup and setup
@@ -51,7 +76,7 @@ Admission is conservative: cancelled queued requests can use allowance without t
 
 ## Updates and cache ownership
 
-`vite-plugin-pwa` uses `injectManifest`: the build inserts the actual emitted inventory into the authored worker. SHA-256 integrity binds required response bytes, including mutable HTML/public files. The release identity also binds worker/build/config/lockfile inputs. Compatible duplicate plugin entries are normalized; conflicting identities or missing integrity fail closed. Current lazy features, module workers, fonts, icons and notices belong to the closure. Puzzle shards and their manifest are not precached with application files. Both current themes and their four small WOFF2 fonts are included for offline choices and Auto rollover. The fonts total 37,428 bytes; the typed two-theme policy in tools/pwa/theme-packs.ts enforces a separate64 KiB font budget and source-hash/notice completeness. This is separate from module/wordmark/whole-shell bytes. Future themes/fonts require explicit policy review rather than automatic unlimited expansion.
+`vite-plugin-pwa` uses `injectManifest`: the build inserts the actual emitted inventory into the authored worker. SHA-256 integrity binds required response bytes, including mutable HTML/public files. The release identity also binds worker/build/config/lockfile inputs. Compatible duplicate plugin entries are normalized; conflicting identities or missing integrity fail closed. Current lazy features, module workers, fonts, icons and notices belong to the closure. Puzzle shards and their manifest are not precached with application files. Both current themes and their four small WOFF2 fonts are included for offline choices and Auto rollover. The fonts total 37,428 bytes; the typed two-theme policy in tools/pwa/theme-packs.ts enforces a separate 64 KiB font budget and source-hash/notice completeness. This is separate from module/wordmark/whole-shell bytes. Future themes/fonts require explicit policy review rather than automatic unlimited expansion.
 
 The pinned Workbox installer awaits app entries individually. Its scheduling is separate from the two puzzle lanes and does not govern all browser traffic. Unchanged bytes are reused only after verification. Cache names include the app, encoded deployment base and full release ID. Staging protects active/waiting/installing identities, removes only strict owned orphan caches, and refuses uncertain ownership or excess storage. It never clears adjacent apps or essential databases. Activation cleans the current release's own obsolete entries; later staging removes abandoned releases.
 

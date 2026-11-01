@@ -1,6 +1,6 @@
 # Application architecture
 
-Current gameplay implementation supersedes the historical preparation notes below. The full phase is still undergoing the [required validation](gameplay-validation-matrix.md); [actual progress](gameplay-progress.md) distinguishes accepted source slices from unfinished acceptance.
+Merged gameplay, themes and PWA supersede the historical preparation notes below. Available-environment acceptance is complete; [gameplay acceptance](gameplay-acceptance.md), [theme integration](theme-integration.md) and [PWA acceptance](pwa-acceptance.md) record the actual checks and remaining hardware/hosting gates. The [PWA walkthrough](pwa-system.md) covers player workflow and maintenance.
 
 | Maintained module | Responsibility |
 | --- | --- |
@@ -12,11 +12,13 @@ Current gameplay implementation supersedes the historical preparation notes belo
 | `src/lib/storage/` | Validated IndexedDB generations, writer/revision authority, exactly-once receipts, physical history buckets, worker backup/restore and explicit unscored recovery play |
 | `src/lib/gameplay/` | Save coalescing and asynchronous gameplay/disclosure/completion/navigation integration; lazy bootstrap, hint worker and dialog |
 | `src/lib/gameplay/ui/` | Concise English/German/Spanish tools, Settings, enlarged notes, results and recovery presentation |
+| `src/lib/pwa/`, `src/lib/offline/` | Optional installation, verified app files, safe waiting updates and bounded upcoming-puzzle preparation, separate from essential saves |
+| `tools/pwa/`, `.github/workflows/pages.yml` | Artifact/catalog validation, first-publication proof, retained assets, rollback snapshots and capacity checks |
 | `src/lib/layout.ts`, `src/lib/scene/`, `src/lib/leaves/`, `src/lib/theme/` | Shared layout and safety budgets, noninteractive decoration and lazy theme/token/font definitions; no gameplay authority |
 
-The application uses Svelte, TypeScript and Vite without SvelteKit, a required backend or WebAssembly. There is no runtime puzzle generation. Current active and retained-result roles preserve verified puzzle/policy snapshots for local resume; after Continue or replacement, compact receipts retain pinned definition/policy while obsolete full attempts are removed. Missing next shards fail recoverably. Service-worker application-shell caching, installability and deployment are separate work, so cold offline launch is not claimed.
+The application uses Svelte, TypeScript and Vite without SvelteKit, a required backend or WebAssembly. There is no runtime puzzle generation. Current active and retained-result roles preserve verified puzzle/policy snapshots for local resume; after Continue or replacement, compact receipts retain pinned definition/policy while obsolete full attempts are removed. Missing next shards fail recoverably. Verified app caching and installability are implemented separately from essential saves. Production-browser cold offline journeys are recorded in PWA acceptance; real Android and authorized live Pages validation remain external release gates.
 
-Gameplay/main preserves its own Pond implementation while acceptance finishes. Auto/Pond/Cauldron is implemented on the separately authorized `codex/themes` worktree; it is not merged into gameplay. The [theme authoring guide](theme-authoring.md) maps the actual lazy token/renderer/font contracts and future extension process. Themes never own Sudoku rules, hitboxes, state or rewards.
+Main includes the reviewed Auto/Pond/Cauldron implementation. The [theme authoring guide](theme-authoring.md) maps the actual lazy token/renderer/font contracts and future extension process. Themes never own Sudoku rules, hitboxes, state or rewards.
 
 ## Historical preparation context
 
@@ -70,6 +72,6 @@ Implementation begins after the relevant decisions and ImageGen mockups have bee
 
 ## Implemented PWA boundary
 
-The isolated PWA phase adds `src/lib/pwa` for installation, verified complete app caching and waiting updates; `src/lib/offline` for bounded disposable attested records; and `tools/pwa` for complete artifact validation and guarded Pages retention/rollback. The certified exact catalog allocator remains authoritative. Foreground online misses bypass optional download limits. Essential sessions, wallet, receipts and recovery retain their existing database and transaction authority.
+The merged PWA implementation uses `src/lib/pwa` for installation, verified complete app caching and waiting updates; `src/lib/offline` for bounded disposable attested records; and `tools/pwa` for complete artifact validation and guarded Pages retention/rollback. The certified exact catalog allocator remains authoritative. Foreground online misses bypass optional download limits. Essential sessions, wallet, receipts and recovery retain their existing database and transaction authority.
 
-`injectManifest` emits an application-owned worker and raw browser lifecycle bridge. App files and puzzle records have separate readiness checks and budgets. No forced activation or application reload is available. Finish saving or export recovery, close every window, and reopen to use a waiting release. See [actual acceptance, measurements and external release gates](pwa-acceptance.md); this implementation does not integrate the separate theme branch or publish Pages.
+`injectManifest` emits an application-owned worker and raw browser lifecycle bridge. App files and puzzle records have separate readiness checks and budgets. No forced activation or application reload is available. Finish saving or export recovery, close every window, and reopen to use a waiting release. Both reviewed themes are included. See [actual acceptance, measurements and external release gates](pwa-acceptance.md); no Pages publication has been performed.

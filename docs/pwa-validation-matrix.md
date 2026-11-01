@@ -1,6 +1,6 @@
 # PWA validation and acceptance matrix
 
-Required by the [implementation handoff](pwa-implementation-handoff.md). These are future gates, not test results. Research and independently challenge the test plan, then map each implemented invariant to actual evidence in `docs/pwa-acceptance.md`.
+Required by the [implementation handoff](pwa-implementation-handoff.md). These are acceptance criteria, not test results. [PWA acceptance](pwa-acceptance.md) records completed checks and external hardware/hosting gates. Research and independently challenge affected test plans, then map each implemented invariant to its actual evidence there.
 
 ## Evidence and resource rules
 
