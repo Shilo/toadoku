@@ -1,0 +1,16 @@
+/* Use native scrolling, dimensions and hit areas, with Pond ink on a clear track. */
+@media (forced-colors: none) {
+  :where(.world, .world *) { scrollbar-color: var(--control-ink) transparent; }
+  @supports selector(::-webkit-scrollbar) {
+    :where(.world, .world *) { scrollbar-color: auto; }
+    ::-webkit-scrollbar, ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--control-ink); border: 3px solid transparent; background-clip: padding-box; border-radius: 12px; }
+    ::-webkit-scrollbar-button { background-color: transparent; background-repeat: no-repeat; background-position: center; }
+    ::-webkit-scrollbar-button:vertical { background-size: 12px 8px; }
+    ::-webkit-scrollbar-button:horizontal { background-size: 8px 12px; }
+    ::-webkit-scrollbar-button:vertical:decrement { background-image: conic-gradient(from 135deg at 50% 25%, var(--control-ink) 90deg, transparent 0); }
+    ::-webkit-scrollbar-button:vertical:increment { background-image: conic-gradient(from 315deg at 50% 75%, var(--control-ink) 90deg, transparent 0); }
+    ::-webkit-scrollbar-button:horizontal:decrement { background-image: conic-gradient(from 45deg at 25% 50%, var(--control-ink) 90deg, transparent 0); }
+    ::-webkit-scrollbar-button:horizontal:increment { background-image: conic-gradient(from 225deg at 75% 50%, var(--control-ink) 90deg, transparent 0); }
+  }
+}

@@ -9,7 +9,7 @@ export interface OverlayState {
   readonly parentId?: string;
 }
 const screens: readonly string[] = ['menu', 'quick', 'progression', 'board'];
-const panels: readonly string[] = ['more', 'settings', 'notes', 'hint', 'result', 'pause', 'replay', 'backup', 'restart', 'replace'];
+const panels: readonly string[] = ['more', 'settings', 'notes', 'hint', 'result', 'pause', 'replay', 'backup', 'restart', 'replace', 'recover'];
 const routes: readonly string[] = [...screens, 'more'];
 const isScreen = (value: unknown): value is Screen => typeof value === 'string' && screens.includes(value);
 export const parseRoute = (hash: string): Route => routes.includes(hash.slice(1)) ? hash.slice(1) as Route : 'menu';

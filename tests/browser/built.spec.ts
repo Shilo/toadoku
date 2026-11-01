@@ -5,6 +5,8 @@ import { extname, resolve, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { dictionaries } from '../../src/lib/i18n';
+import { appCopy } from '../../src/lib/gameplay/app-copy';
+import type { Attempt } from '../../src/lib/gameplay/contracts';
 
 let server:Server,origin:string;
 test.beforeAll(async()=>{
@@ -34,8 +36,22 @@ test('built bundle runs under repository subpath with local assets and notices',
   await page.getByRole('button',{name:'Schnellspiel',exact:true}).click();
   await page.getByRole('button',{name:'Leicht',exact:true}).click();
   await expect(page.locator('.cell')).toHaveCount(81);
+  const readAttempt = () => page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve,reject) => {const request=indexedDB.open('toadodu:%2Ftoadoku%2F');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+    try { return await new Promise<Attempt>((resolve,reject)=>{const tx=db.transaction('attempts','readonly');const req=tx.objectStore('attempts').getAll();tx.oncomplete=()=>resolve(req.result[0]);tx.onabort=()=>reject(tx.error);}); }
+    finally { db.close(); }
+  });
+  const originalId=(await readAttempt()).id;
+  const blank=page.locator('[data-clue="false"]').first(); await blank.press('1');
+  const blankIndex=Number(await blank.getAttribute('data-cell'));
+  await expect.poll(async()=>(await readAttempt()).entries[blankIndex]).toBe(1);
+  const originalEntries=await page.locator('.cell').evaluateAll(es=>es.map(e=>e.getAttribute('aria-label')));
   await page.getByRole('button',{name:'Mehr',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();
-  await page.reload();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.locator('.cell')).toHaveCount(81);
+  await page.reload();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.locator('.cell')).toHaveCount(0);
+  await page.getByRole('button',{name:'Schnellspiel',exact:true}).click();
+  await page.getByRole('button',{name:appCopy.de.resume,exact:true}).click();
+  await expect(page.locator('.cell')).toHaveCount(81);
+  expect((await readAttempt()).id).toBe(originalId); expect(await page.locator('.cell').evaluateAll(es=>es.map(e=>e.getAttribute('aria-label')))).toEqual(originalEntries);
   await page.evaluate(()=>document.fonts.ready);
   expect(await page.evaluate(()=>document.fonts.check('16px Outfit')&&document.fonts.check('80px Chewy'))).toBe(true);
   expect(errors).toEqual([]);expect(requests.every(url=>url.startsWith(`${origin}/toadoku/`))).toBe(true);
@@ -47,6 +63,8 @@ test('built bundle runs under repository subpath with local assets and notices',
   for(const file of assets.filter(f=>/\.(js|css)$/.test(f)))expect(await readFile(`dist/assets/${file}`,'utf8')).not.toMatch(/prototypes\/|menu-placeholder|serviceWorker\.register/);
   for(const file of ['Chewy-LICENSE.txt','Outfit-OFL.txt'])expect(await readFile(`dist/licenses/${file}`)).toEqual(await readFile(`src/assets/fonts/${file}`));
   const dependencies=JSON.parse(await readFile('dist/licenses/dependencies.json','utf8')) as {name:string;identifier:string;text:string}[];
-  expect(dependencies.map(d=>d.name).sort()).toEqual(['clsx','svelte']);
-  expect(dependencies.every(d=>d.identifier==='MIT'&&d.text.includes('Permission is hereby granted'))).toBe(true);
+  expect(dependencies.map(d=>d.name).sort()).toEqual(['@lucide/svelte','clsx','svelte']);
+  expect(dependencies.filter(d=>d.name!=='@lucide/svelte').every(d=>d.identifier==='MIT'&&d.text.includes('Permission is hereby granted'))).toBe(true);
+  expect(dependencies.find(d=>d.name==='@lucide/svelte')?.identifier).toBe('ISC');
+  expect(await readFile('dist/licenses/lucide-LICENSE.txt')).toEqual(await readFile('public/licenses/lucide-LICENSE.txt'));
 });
