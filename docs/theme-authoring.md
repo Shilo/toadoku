@@ -91,9 +91,17 @@ Months are 1-based. Supply only the actual event date, not a pre-expanded window
 
 Auto uses the first active entry in list order. Overlaps require no priority numbers, sorting, randomness or extra saved state. The same resolved occurrence supplies the theme, localized event label and countdown deadline. When no window matches, `DEFAULT_THEME` supplies Pond. Explicit theme choices bypass the schedule and have no expiry.
 
-The application rechecks at local midnight and on resume/focus. Countdown minute updates remain independent and do not retry imports. This is a small annual-date resolver, not a general recurrence service. Invalid actual dates are skipped before deriving windows; February 29 events run only in valid leap years. Offsets use local calendar arithmetic, preserving a 14-calendar-day window across DST even when elapsed duration is 335 or 337 hours rather than 336.
+The application rechecks at local midnight and on resume/focus. Countdown minute updates remain independent and do not retry imports. This is a small annual-date resolver, not a general recurrence service. Invalid actual dates are skipped before deriving windows; February 29 events run only in valid leap years. Each boundary is constructed directly from nominal calendar fields, so an event date's skipped midnight cannot carry a normalized 01:00 into other dates. If a boundary's own midnight does not exist, native `Date` uses its first valid local instant. The shared rule measures calendar days; elapsed duration can differ across DST, for example 335 or 337 hours rather than 336.
 
 New event data needs localized labels and boundary/overlap/year-wrap tests. A new theme additionally needs the ID, lazy module and name registration described below; scheduling does not import its visual code eagerly. Moving-date holidays need an explicitly reviewed extension rather than incorrect fixed dates.
+
+## Choosing events worth a full theme
+
+Use a small set of major, broadly recognized occasions with distinct visual identities. Cultural interest alone does not justify another complete palette, scene, cell material and validation burden. Smaller customs can inform optional accents within a larger seasonal theme.
+
+Current research recommendation, not authorization to create themes: prioritize Christmas, Easter and the existing Halloween theme; Fasching is a strong Austrian candidate. A September 2026 IMAS survey of Austrian residents aged 16 and above reported 63% celebrating Fasching and 49% Halloween, supporting Fasching's local relevance rather than copying only an American calendar. [Primary survey and methods](https://www.imas.at/news/fasching-ist-das-groessere-fest-klar-und-eindeutig)
+
+New Year is optional after those priorities. Combine Advent with the Christmas/winter direction; defer separate Martinstag and Epiphany themes. Nikolaus/Krampus can inform a later winter variation instead of requiring another full theme now. These are product-effort judgments, not statements that the traditions lack cultural importance. Easter and Fasching require calculated annual dates before scheduling; the current fixed-date registry must not approximate them with a permanent month/day. No new theme or event is registered by these recommendations.
 
 ## Authoring and acceptance
 

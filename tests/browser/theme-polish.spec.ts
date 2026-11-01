@@ -186,6 +186,49 @@ test('fresh defaults follow system preferences and saved choices survive reload'
   }
 });
 
+test('Auto repeats yearly at actual local midnight across time zones without changing saved choices', async ({ browser }) => {
+  for (const timezoneId of ['UTC', 'Europe/Vienna', 'America/Los_Angeles', 'America/Santiago']) {
+    const context = await browser.newContext({ baseURL: 'http://127.0.0.1:5195', locale: 'en-US', timezoneId,
+      viewport: { width: 360, height: 800 }, reducedMotion: 'reduce' });
+    try {
+      const page = await context.newPage();
+      const localStamp = (year: number, month: number, day: number) =>
+        page.evaluate(({ year, month, day }) => new Date(year, month, day, 23, 59, 30).getTime(), { year, month, day });
+      const initial = await localStamp(2026, 9, 23);
+      await page.clock.install({ time: initial }); await page.clock.pauseAt(initial);
+      await page.goto('/'); await ready(page);
+      await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
+      const before = await snapshot(page);
+      expect(before.preferences.theme).toBe('auto');
+      await settings(page);
+      const auto = page.getByRole('dialog').getByRole('combobox', { name: 'Theme', exact: true }).locator('option[value="auto"]');
+      for (const year of [2026, 2027, 2032, 2100]) {
+        // Jump years without running a year's worth of timers. The synthetic
+        // focus event exercises the existing resume handler and re-arms midnight.
+        await page.clock.setSystemTime(await localStamp(year, 9, 23));
+        await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+        await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
+        await expect(auto).toHaveText('Auto \u00b7 Pond');
+        await page.clock.fastForward(30_000);
+        await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
+        await expect(auto).toHaveText('Auto \u00b7 Cauldron');
+        await expect(page.locator('#automatic-theme-description')).toContainText('Cauldron ends in');
+        await page.clock.setSystemTime(await localStamp(year, 10, 6));
+        await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+        await expect(page.locator('#automatic-theme-description')).toHaveText('Cauldron ends in less than 1 hour (Halloween).');
+        await page.clock.fastForward(30_000);
+        await expect(page.locator('.world')).toHaveAttribute('data-theme', 'pond');
+        await expect(auto).toHaveText('Auto \u00b7 Pond');
+        await expect(page.locator('#automatic-theme-description')).toHaveCount(0);
+        const after = await snapshot(page);
+        expect(after.preferences).toEqual(before.preferences);
+        expect(after.profile).toEqual(before.profile);
+        expect(after.attempt).toBeUndefined();
+      }
+    } finally { await context.close(); }
+  }
+});
+
 test('Auto names its actual theme and updates remaining time on minutes and local midnight', async ({ page }) => {
   const start = new Date('2026-11-06T22:59:30-08:00');
   await page.clock.install({ time: start }); await page.clock.pauseAt(start);

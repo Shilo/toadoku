@@ -33,10 +33,11 @@ function occurrence(event: AnnualThemeEvent, year: number): ThemeEventOccurrence
   const { month, day } = event.date;
   if (![month, day].every(Number.isInteger) || month < 1 || month > 12
     || day < 1 || day > new Date(year, month, 0).getDate()) return;
-  const anchor = new Date(year, month - 1, day);
-  const startsAt = new Date(anchor.getTime()), endsAt = new Date(anchor.getTime());
-  startsAt.setDate(startsAt.getDate() - EVENT_DAYS_EACH_SIDE);
-  endsAt.setDate(endsAt.getDate() + EVENT_DAYS_EACH_SIDE);
+  // Derive each boundary from nominal calendar fields. Cloning an anchor whose
+  // midnight was skipped by DST would incorrectly carry its normalized 01:00
+  // into boundary dates where midnight exists.
+  const startsAt = new Date(year, month - 1, day - EVENT_DAYS_EACH_SIDE);
+  const endsAt = new Date(year, month - 1, day + EVENT_DAYS_EACH_SIDE);
   return { id: event.id, label: event.label, startsAt, endsAt };
 }
 
