@@ -10,6 +10,12 @@
 - [x] Implement complete tools/Settings including persistent Fill space/Square, usable enlarged notes, accessible results and required navigation/locale/shape/failure cases. Preserve the Pond UI.
 - [x] Ratify v1 schedule/balance/role policies; pass the available executable validation matrix and record physical-device/zoom/assistive-technology and later PWA release limits honestly. Historical open questions are superseded by the recorded challenged decisions.
 
+## PWA installation, offline play and frequent updates
+
+- [x] Prepare the [isolated-worktree implementation handoff](docs/pwa-implementation-handoff.md), [primary-source/reference-app research](docs/research/pwa-readiness-audit.md) and [validation matrix](docs/pwa-validation-matrix.md), including a copy-ready receiving-agent prompt.
+- [ ] When invoked by the user, implement in a new worktree/branch with independently challenged plans, measured bounded offline reserves, in-app installation and safe frequent-release discovery/activation. Do not preload the full corpus or alter theme work automatically.
+- [ ] Prove cold offline dependency coverage, allocation authority, durable readiness and rapid multi-build/multi-tab updates. Record actual Android/hosting evidence or explicit remaining external release gates; deliver the committed branch for review before integration/publication.
+
 ## Production UI handoff and next phase
 
 - [x] Close the prototype phase and write the [full production UI handoff](docs/production-ui-handoff.md), including selected design/prototype links, scope, tokens, navigation, assets and validation.
@@ -42,7 +48,7 @@ This section records completed prototype scope; it does not authorize further pr
 - [x] Review menu alternatives and retain direct solving-tool access without a nested Tools step.
 - [x] Restore Notes, Undo, Erase and Hint access, sticky Notes state, accessible dismissal/focus and session information.
 - [x] Expose persistent Fill space / Square through Settings.
-- [ ] Revisit optional PWA installation placement; browser installation does not require an in-game More menu.
+- [ ] Implement concise in-app installation/readiness/update controls through the [PWA handoff](docs/pwa-implementation-handoff.md); keep them outside solving Tools and the permanent gameplay dock.
 
 ## Themes and art
 
