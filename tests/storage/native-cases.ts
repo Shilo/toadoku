@@ -13,6 +13,7 @@ import { bucketId, bucketKey } from '../../src/lib/storage/history-codec';
 
 let certified: { definitions: Definition[]; pools: PoolState[] } | undefined;
 export { fresh as recoveryTestDatabase };
+export { allocation as metadataAllocationRequest, solved as metadataSolved };
 async function certifiedFixtures(): Promise<NonNullable<typeof certified>> {
   if (certified) return certified;
   const loader = new CatalogLoader(new URL('/catalog/v1/', location.origin));

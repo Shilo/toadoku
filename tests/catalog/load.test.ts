@@ -53,6 +53,8 @@ describe('progressive local catalog', () => {
     const descriptor = manifest.pools.easy.shards[0], value = JSON.parse(await readFile(`public/catalog/v1/${descriptor.path}`, 'utf8'));
     const record = decodeTuple(value.records[0], 'easy'); expect(await verifyRecordIdentity(record)).toBe(true);
     expect(await verifyRecordIdentity({ ...record, id: 'a'.repeat(64) })).toBe(false);
+    const otherGroup=record.groupId==='a'.repeat(64)?'b'.repeat(64):'a'.repeat(64);
+    expect(await verifyRecordIdentity({...record,groupId:otherGroup})).toBe(false);
     expect(() => decodeTuple([...value.records[0].slice(0, 5), 49, 0], 'easy')).toThrow();
     expect(() => decodeTuple(new Array(1_000_000_000), 'easy')).toThrow();
     expect(() => decodeShard({ schemaVersion: 1, catalogVersion: '1', pool: 'easy', start: 0, records: new Array(1_000_000_000) }, { ...descriptor, count: 1 })).toThrow();

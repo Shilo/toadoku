@@ -25,7 +25,8 @@ export function findDeduction(input: readonly number[], logicalRevision: number,
   function eliminations(cells: readonly number[], ds: number[]): Conclusion[] {
     return cells.flatMap(cell => ds.filter(digit => masks[cell] & (1 << (digit - 1))).map(digit => ({ cell, digit })));
   }
-  for (const technique of only ? [only] : ORDER) {
+  // Explicit and normal requests share one supported-technique registry.
+  for (const technique of only ? ORDER.filter(technique => technique === only) : ORDER) {
     if (technique === 'naked-single') {
       for (let cell = 0; cell < 81; cell++) {
         const ds = digits(masks[cell]);
@@ -69,7 +70,9 @@ export function findDeduction(input: readonly number[], logicalRevision: number,
           if (removed.length) return deduction(technique, [unit], cells, ds, [], removed);
         }
       }
-    } else if (technique === 'x-wing') {
+    } else {
+      // The closed registry leaves only X-Wing; new kinds must extend this dispatch.
+      const kind: 'x-wing' = technique;
       for (const offset of [0, 9]) for (let digit = 1; digit <= 9; digit++) {
         const bases = Array.from({ length: 9 }, (_, n) => n + offset).filter(unit => sites(unit, digit).length === 2);
         for (const pair of combinations(bases, 2)) {
@@ -79,7 +82,7 @@ export function findDeduction(input: readonly number[], logicalRevision: number,
           if (!second.every(cell => cover.some(unit => UNITS[unit].includes(cell)))) continue;
           const cells = [...first, ...second];
           const removed = eliminations(cover.flatMap(unit => UNITS[unit].filter(cell => !cells.includes(cell))), [digit]);
-          if (removed.length) return deduction(technique, [...pair, ...cover], cells, [digit], [], removed);
+          if (removed.length) return deduction(kind, [...pair, ...cover], cells, [digit], [], removed);
         }
       }
     }

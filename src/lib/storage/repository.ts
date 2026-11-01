@@ -35,6 +35,28 @@ const issue = (reason: 'generation' | 'revision' | 'owner' | 'role' | 'pool' | '
 };
 const corrupt = (reason: string): never => { throw new StorageFailure({ kind: 'corrupt', reason }); };
 const key = (generation: string, id: string): [string, string] => [generation, id];
+// IndexedDB compares strings by UTF16 code units and arrays lexicographically.
+const generationRange = (generation: string): IDBKeyRange => IDBKeyRange.bound([generation], [`${generation}\u0000`], false, true);
+
+function physicalGeneration(value: unknown, generation: string): void {
+  const record = object(value);
+  if (Object.hasOwn(record, 'generation') && record.generation !== generation) corrupt('physical-generation-key');
+}
+function roleAt(value: unknown, generation: string, expectedRole: Role): RoleRecord {
+  const record = decodeRole(value);
+  if (record.generation !== generation || record.role !== expectedRole) corrupt('role-key-binding');
+  return record;
+}
+function poolAt(value: unknown, generation: string, expectedPool: PoolId): PoolState {
+  const record = decodePool(value); physicalGeneration(value, generation);
+  if (record.pool !== expectedPool) corrupt('pool-key-binding');
+  return record;
+}
+function attemptAt(value: unknown, generation: string, expectedId: string, expectedRole?: Role): Attempt {
+  const record = decodeAttempt(value);
+  if (record.generation !== generation || record.id !== expectedId || (expectedRole !== undefined && record.role !== expectedRole)) corrupt('attempt-key-binding');
+  return record;
+}
 
 export interface RepositoryOptions {
   baseUrl: URL | string;
@@ -251,15 +273,13 @@ export class Repository {
           ...ROLES.map(role => context.store('roles').get(key(generation, role))),
           ...POOLS.map(pool => context.store('pools').get(key(generation, pool))), context.store('meta').get(key(generation, 'layout'))], values => {
           const preferences = decodePreferences(values[0]); const profile = decodeProfile(values[1]);
-          const roles = values.slice(2, 5).map(decodeRole); const pools = values.slice(5, 10).map(decodePool);
+          physicalGeneration(values[0], generation); physicalGeneration(values[1], generation);
+          const roles = ROLES.map((role, index) => roleAt(values[index + 2], generation, role));
+          const pools = POOLS.map((pool, index) => poolAt(values[index + 5], generation, pool));
           decodeLayout(values[10], generation);
           const bound = roles.filter(role => role.attemptId);
           readMany(context, bound.map(role => context.store('attempts').get(key(generation, role.attemptId!))), entries => {
-            const attempts = entries.map(decodeAttempt);
-            for (const role of bound) {
-              const attempt = attempts.find(attempt => attempt.id === role.attemptId);
-              if (!attempt || attempt.role !== role.role || attempt.generation !== generation) corrupt('role-binding');
-            }
+            const attempts = bound.map((role, index) => attemptAt(entries[index], generation, role.attemptId!, role.role));
             context.result({ meta: active, preferences, profile, roles, pools, attempts });
           });
         });
@@ -279,7 +299,9 @@ export class Repository {
     return transact(this.database, ['meta', 'settings'], 'readonly', context => {
       context.request(context.store('meta').get('current'), value => {
         const active = meta(value);
-        context.request(context.store('settings').get(active.generation), value => context.result(decodePreferences(value)));
+        context.request(context.store('settings').get(active.generation), value => {
+          const preferences = decodePreferences(value); physicalGeneration(value, active.generation); context.result(preferences);
+        });
       });
     });
   }
@@ -289,8 +311,13 @@ export class Repository {
       context.request(context.store('meta').get('current'), rawMeta => {
         const generation = rawMeta && typeof rawMeta === 'object' && typeof rawMeta.generation === 'string' ? rawMeta.generation : 'unresolved';
         const stores = ['settings', 'profile', 'attempts', 'roles', 'pools'];
-        readMany(context, [...stores.map(store => context.store(store).index('generation').getAll(generation)), context.store('meta').get(key(generation, 'layout'))], values => {
-          context.result({ generation, raw: { meta: rawMeta, layout: values[stores.length], ...Object.fromEntries(stores.map((store, index) => [store, values[index]])) } });
+        readMany(context, [...stores.flatMap(store => {
+          const range = store === 'settings' || store === 'profile' ? IDBKeyRange.only(generation) : generationRange(generation);
+          return [context.store(store).getAll(range), context.store(store).getAllKeys(range)];
+        }), context.store('meta').get(key(generation, 'layout'))], values => {
+          context.result({ generation, raw: { meta: rawMeta, layout: values[stores.length * 2],
+            keys: Object.fromEntries(stores.map((store, index) => [store, values[index * 2 + 1]])),
+            ...Object.fromEntries(stores.map((store, index) => [store, values[index * 2]])) } });
         });
       });
     });
@@ -343,9 +370,9 @@ export class Repository {
     return transact(this.database, ['meta', 'attempts', 'roles'], 'readwrite', context => current(context, generation, active => {
       identifier(token);
       context.request(context.store('attempts').get(key(generation, attemptId)), value => {
-        const attempt = decodeAttempt(value);
+        const attempt = attemptAt(value, generation, attemptId);
         context.request(context.store('roles').get(key(generation, attempt.role)), value => {
-          const role = decodeRole(value);
+          const role = roleAt(value, generation, attempt.role);
           if (role.attemptId !== attemptId) issue('role');
           const next: Attempt = { ...attempt, revision: increment(attempt.revision), writer: { token, epoch: increment(attempt.writer.epoch) } };
           context.store('attempts').put(next, key(generation, attemptId)); touch(context, active); context.result(next);
@@ -359,9 +386,9 @@ export class Repository {
     try { guard = captureGuard(inputGuard); snapshot = decodeAttempt(inputSnapshot); integer(expectedRevision); } catch (error) { return Promise.resolve(storageFailure(error).issue); }
     return transact(this.database, ['meta', 'attempts', 'roles'], 'readwrite', context => current(context, guard.generation, active => {
       context.request(context.store('attempts').get(key(guard.generation, guard.attemptId)), value => {
-        const attempt = decodeAttempt(value); guardAttempt(attempt, guard, expectedRevision);
+        const attempt = attemptAt(value, guard.generation, guard.attemptId); guardAttempt(attempt, guard, expectedRevision);
         context.request(context.store('roles').get(key(guard.generation, attempt.role)), value => {
-          if (decodeRole(value).attemptId !== attempt.id) issue('role');
+          if (roleAt(value, guard.generation, attempt.role).attemptId !== attempt.id) issue('role');
           const next = mergeSnapshot(attempt, snapshot); next.revision = increment(attempt.revision);
           context.store('attempts').put(next, key(guard.generation, attempt.id)); touch(context, active); context.result(next);
         });
@@ -382,7 +409,7 @@ export class Repository {
     try { guard = captureGuard(inputGuard); disclosure = decodeDisclosure(input); } catch (error) { return storageFailure(error).issue; }
     const preflight = await transact<Attempt>(this.database, ['meta', 'attempts'], 'readonly', context => current(context, guard.generation, () => {
       context.request(context.store('attempts').get(key(guard.generation, guard.attemptId)), value => {
-        const attempt = decodeAttempt(value); guardAttempt(attempt, guard);
+        const attempt = attemptAt(value, guard.generation, guard.attemptId); guardAttempt(attempt, guard);
         if (attempt.status !== 'playing' || disclosure.logicalRevision !== attempt.logicalRevision || disclosure.attemptId !== attempt.id) issue('revision');
         validateDisclosureAnswers(attempt.definition, disclosure); context.result(attempt);
       });
@@ -393,11 +420,11 @@ export class Repository {
     if (proof.kind !== 'committed') return proof;
     return transact(this.database, ['meta', 'attempts', 'roles'], 'readwrite', context => current(context, guard.generation, active => {
       context.request(context.store('attempts').get(key(guard.generation, guard.attemptId)), value => {
-        const attempt = decodeAttempt(value); guardAttempt(attempt, guard);
+        const attempt = attemptAt(value, guard.generation, guard.attemptId); guardAttempt(attempt, guard);
         if (attempt.status !== 'playing' || disclosure.attemptId !== attempt.id || disclosure.logicalRevision !== attempt.logicalRevision
           || !same(attempt.definition, frozen.definition)) issue('revision');
         context.request(context.store('roles').get(key(guard.generation, attempt.role)), value => {
-          if (decodeRole(value).attemptId !== attempt.id) issue('role');
+          if (roleAt(value, guard.generation, attempt.role).attemptId !== attempt.id) issue('role');
           if (attempt.pendingDisclosure?.id === disclosure.id) {
             if (!same(attempt.pendingDisclosure, disclosure)) corrupt('disclosure-id-collision');
             context.result(attempt); return;
@@ -434,13 +461,16 @@ export class Repository {
         context.store('profile').get(generation), context.store('pools').get(key(generation, attempt.definition.pool)),
         ...ROLES.map(role => context.store('roles').get(key(generation, role)))], values => {
         const priorIntent = values[0] === undefined ? undefined : decodeIntent(values[0]);
-        const role = decodeRole(values[1]); const profile = decodeProfile(values[2]); const pool = decodePool(values[3]);
+        if (priorIntent && (priorIntent.id !== intent.id || priorIntent.generation !== generation || priorIntent.role !== intent.role)) corrupt('intent-key-binding');
+        const role = roleAt(values[1], generation, intent.role); const profile = decodeProfile(values[2]); physicalGeneration(values[2], generation);
+        const pool = poolAt(values[3], generation, attempt.definition.pool);
+        const currentRoles = ROLES.map((expected, index) => roleAt(values[index + 4], generation, expected));
         if (priorIntent) {
           const comparable = { ...priorIntent }; delete comparable.outcomeAttemptId;
           if (!same(comparable, intent) || !priorIntent.outcomeAttemptId) issue('intent');
           context.request(context.store('attempts').get(key(generation, priorIntent.outcomeAttemptId!)), outcome => {
             if (!outcome || role.attemptId !== priorIntent.outcomeAttemptId) issue('intent');
-            context.result(decodeAttempt(outcome));
+            context.result(attemptAt(outcome, generation, priorIntent.outcomeAttemptId!, intent.role));
           });
           return;
         }
@@ -454,10 +484,10 @@ export class Repository {
         const firstIssue = !previousIssued && !groupIssued;
         if (!firstIssue && pool.lifetimeIssued < pool.count) issue('pool');
         if (request.nextPool.lifetimeIssued !== pool.lifetimeIssued + (firstIssue ? 1 : 0) || request.nextPool.lifetimeIssued > pool.count) issue('pool');
-        const currentRoles = values.slice(4).map(decodeRole);
         const bound = currentRoles.filter(record => record.attemptId);
         readMany(context, bound.map(record => context.store('attempts').get(key(generation, record.attemptId!))), snapshots => {
-          const attempts = snapshots.map(decodeAttempt); const old = attempts.find(item => item.id === role.attemptId);
+          const attempts = bound.map((record, index) => attemptAt(snapshots[index], generation, record.attemptId!, record.role));
+          const old = attempts.find(item => item.id === role.attemptId);
           if (old) {
             if (old.status === 'pending-completion') issue('role');
             if (old.status === 'completed') {
@@ -505,8 +535,8 @@ export class Repository {
       const generation = guard.generation;
       readMany(context, [context.store('attempts').get(key(generation, guard.attemptId)),
         context.store('profile').get(generation)], values => {
-        const attempt = decodeAttempt(values[0]); guardAttempt(attempt, guard);
-        const profile = decodeProfile(values[1]);
+        const attempt = attemptAt(values[0], generation, guard.attemptId); guardAttempt(attempt, guard);
+        const profile = decodeProfile(values[1]); physicalGeneration(values[1], generation);
         historySlot(context, generation, 'receipt', guard.attemptId, receiptSlot => {
         if (receiptSlot.value !== undefined) {
           const receipt = receiptSlot.value as CompletionReceipt;
@@ -517,7 +547,7 @@ export class Repository {
         if (attempt.status !== 'pending-completion' && attempt.status !== 'playing') issue('role');
         assertCompleted(attempt);
         context.request(context.store('roles').get(key(generation, attempt.role)), value => {
-          if (decodeRole(value).attemptId !== attempt.id) issue('role');
+          if (roleAt(value, generation, attempt.role).attemptId !== attempt.id) issue('role');
           const result = rewardForAttempt(attempt);
           const wallet = safeAdd(profile.wallet, result.dewdrops); const lifetimeEarned = safeAdd(profile.lifetimeEarned, result.dewdrops);
           const grantId = attempt.role === 'frontier' ? frontierGrantId(generation, attempt.binding!) : undefined;
@@ -553,14 +583,16 @@ export class Repository {
         const active = meta(value); const generation = active.generation;
         historyLayout(context, generation, layout => {
         const indexed = ['roles', 'attempts', 'pools', 'intents'];
+        const range = generationRange(generation);
         readMany(context, [context.store('settings').get(generation), context.store('profile').get(generation),
-          ...indexed.map(store => context.store(store).index('generation').getAll(generation)),
+          ...indexed.flatMap(store => [context.store(store).getAll(range), context.store(store).getAllKeys(range)]),
           ...['receipts', 'issued', 'receiptBuckets', 'issuedBuckets'].flatMap(store => [
-            context.store(store).index('generation').getAll(generation), context.store(store).index('generation').getAllKeys(generation)])], values => {
-          const backup = { physicalExportVersion: 1, base: { schemaVersion: 1, application: 'toadodu', preferences: values[0], profile: values[1],
-            roles: values[2], attempts: values[3], pools: values[4], intents: values[5] },
-            history: { generation, layout, receiptRows: values[6], receiptKeys: values[7], issuedRows: values[8], issuedKeys: values[9],
-              receiptBuckets: values[10], receiptBucketKeys: values[11], issuedBuckets: values[12], issuedBucketKeys: values[13] } } as PhysicalBackup;
+            context.store(store).getAll(range), context.store(store).getAllKeys(range)])], values => {
+          const backup = { physicalExportVersion: 2, base: { schemaVersion: 1, application: 'toadodu', preferences: values[0], profile: values[1],
+            roles: values[2], attempts: values[4], pools: values[6], intents: values[8] },
+            metadataKeys: { roles: values[3], attempts: values[5], pools: values[7], intents: values[9] },
+            history: { generation, layout, receiptRows: values[10], receiptKeys: values[11], issuedRows: values[12], issuedKeys: values[13],
+              receiptBuckets: values[14], receiptBucketKeys: values[15], issuedBuckets: values[16], issuedBucketKeys: values[17] } } as PhysicalBackup;
           context.result({ backup, meta: active });
         });
         });
@@ -579,7 +611,7 @@ export class Repository {
       context.request(context.store('meta').get('current'), value => {
         const expected = meta(value);
         context.request(context.store('profile').get(expected.generation), value => {
-          const profile = decodeProfile(value);
+          const profile = decodeProfile(value); physicalGeneration(value, expected.generation);
           context.result({ expected, backup, summary: { replaceWallet: profile.wallet, importedWallet: backup.profile.wallet,
             activeAttempts: backup.attempts.length, receipts: backup.receipts.length, issued: backup.issued.length } });
         });

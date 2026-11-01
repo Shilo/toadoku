@@ -16,5 +16,11 @@ export default defineConfig({
   optimizeDeps: { entries: ['index.html'] },
   // Fixtures can still be served on demand; generated evidence never triggers application HMR.
   server: { watch: { ignored: ['**/prototypes/**'] } },
-  build: { license: { fileName: 'licenses/dependencies.json' } }
+  build: {
+    modulePreload: {
+      // Native import owns its target; a failed self-preload can prevent WebKit recovery.
+      resolveDependencies: (filename, deps, { hostType }) => hostType === 'js' ? deps.filter(dep => dep !== filename) : deps,
+    },
+    license: { fileName: 'licenses/dependencies.json' },
+  }
 });

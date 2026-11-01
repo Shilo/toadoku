@@ -262,7 +262,7 @@ export function decodeReceipt(value: unknown): CompletionReceipt {
   if (input.binding !== undefined && poolForLeap(decodeFrontier(input.binding).leap) !== definition.pool) return fail('receipt-pool');
   if ((input.role === 'quick') !== (input.binding === undefined)) return fail('receipt-binding');
   if (input.grantId !== undefined) {
-    if (typeof input.grantId !== 'string' || input.grantId.length > 512) return fail('grant-id');
+    if (typeof input.grantId !== 'string' || input.grantId.length > 1024) return fail('grant-id');
     const binding = decodeFrontier(input.binding);
     const expected = ['frontier', input.generation, binding.runId, binding.metamorphosis, binding.leap, binding.scheduleVersion];
     let tuple: unknown;

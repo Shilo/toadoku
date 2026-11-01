@@ -10,7 +10,7 @@ export type SessionCommand =
   | { type: 'restart' }
   | { type: 'checkpoint'; elapsedMs: number };
 export type SessionResult =
-  | { kind: 'changed'; attempt: Attempt; primaryCell?: number }
+  | { kind: 'changed'; attempt: Attempt }
   | { kind: 'noop' }
   | { kind: 'rejected'; reason: 'cell' | 'digit' | 'clue' | 'filled-notes' | 'frozen' | 'time' }
   | { kind: 'integrity'; reason: 'state' | 'history' | 'overflow' };
@@ -42,12 +42,12 @@ export function reduceAttempt(attempt: Attempt, command: SessionCommand): Sessio
   if (Reflect.ownKeys(attempt.undo).length !== attempt.undo.length + 1) return { kind: 'integrity', reason: 'history' };
   for (let index = 0; index < attempt.undo.length; index++) if (!Object.prototype.propertyIsEnumerable.call(attempt.undo, index)) return { kind: 'integrity', reason: 'history' };
 
-  function changed(fields: Partial<Attempt>, valuesChanged = false, primaryCell?: number): SessionResult {
+  function changed(fields: Partial<Attempt>, valuesChanged = false): SessionResult {
     if (attempt.commandSeq === Number.MAX_SAFE_INTEGER || valuesChanged && attempt.logicalRevision === Number.MAX_SAFE_INTEGER) {
       return { kind: 'integrity', reason: 'overflow' };
     }
     return { kind: 'changed', attempt: { ...attempt, ...fields, commandSeq: attempt.commandSeq + 1,
-      logicalRevision: attempt.logicalRevision + (valuesChanged ? 1 : 0) }, ...(primaryCell === undefined ? {} : { primaryCell }) };
+      logicalRevision: attempt.logicalRevision + (valuesChanged ? 1 : 0) } };
   }
   if (command.type === 'select') {
     if (!validCell(command.cell)) return { kind: 'rejected', reason: 'cell' };
@@ -86,7 +86,7 @@ export function reduceAttempt(attempt: Attempt, command: SessionCommand): Sessio
       valuesChanged ||= change.beforeValue !== change.afterValue;
       entries[change.cell] = change.beforeValue; notes[change.cell] = change.beforeNotes;
     }
-    return changed({ entries, notes, undo: attempt.undo.slice(0, -1), selection: patch.cell }, valuesChanged, patch.cell);
+    return changed({ entries, notes, undo: attempt.undo.slice(0, -1), selection: patch.cell }, valuesChanged);
   }
   const cell = attempt.selection;
   if (givens.board[cell]) return { kind: 'rejected', reason: 'clue' };
@@ -114,5 +114,5 @@ export function reduceAttempt(attempt: Attempt, command: SessionCommand): Sessio
     valuesChanged ||= entries[index] !== attempt.entries[index];
   }
   const patch: EditPatch = { cell, changes };
-  return changed({ entries, notes, undo: [...attempt.undo.slice(-511), patch] }, valuesChanged, cell);
+  return changed({ entries, notes, undo: [...attempt.undo.slice(-511), patch] }, valuesChanged);
 }

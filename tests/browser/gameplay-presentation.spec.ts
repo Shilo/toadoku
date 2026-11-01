@@ -9,6 +9,7 @@ test.beforeAll(async () => {
   await writeFile(`${evidence}/${fixtureId}.ts`, `import { mount } from 'svelte';import Harness from './${fixtureId}.svelte';mount(Harness,{target:document.getElementById('app')!});`);
   // Isolated UI fixture only. It is neither catalog provenance nor durable reward evidence.
   await writeFile(`${evidence}/${fixtureId}.svelte`, String.raw`<script lang="ts">
+    import { tick } from 'svelte';
     import GameDialog from '/src/lib/gameplay/ui/GameDialog.svelte';
     import { themeStyle } from '/src/lib/theme/pond';
     import '/src/lib/theme/fonts.css';
@@ -27,7 +28,7 @@ test.beforeAll(async () => {
     (window as any).uiEvents=[];
     async function getHint(kind:any){(window as any).uiEvents.push({hint:kind});if(!params.has('hintcase'))return;hintBusy=true;if(params.has('hintdelay'))await new Promise(resolve=>setTimeout(resolve,500));hintBusy=false;if(params.get('hintcase')==='ready')hint={kind:'reveal',logicalRevision:attempt.logicalRevision,cell:attempt.selection,digit:Number(attempt.definition.solution[attempt.selection])};else hintProblem=params.get('hintcase');}
     async function doExport(kind:any){(window as any).uiEvents.push({export:kind});if(!params.has('exportdelay'))return;if(kind==='recovery')recoveryPending=true;else exportBusy=true;await new Promise(resolve=>setTimeout(resolve,500));exportBusy=false;recoveryPending=false;}
-    function command(value:any){(window as any).uiEvents.push(value);const result=reduceAttempt(attempt,value);if(result.kind==='changed')attempt=result.attempt;}
+    async function command(value:any){(window as any).uiEvents.push(value);const result=reduceAttempt(attempt,value);if(result.kind==='changed')attempt=result.attempt;if(params.has('commanddelay')){await new Promise(resolve=>setTimeout(resolve,500));if(params.has('commandreplace')){attempt={...attempt,id:'new-fixture-attempt'};open=false;await tick();document.getElementById('underlying')?.focus();}(window as any).uiEvents.push('command-settled');}}
     function close(reason:any){(window as any).uiEvents.push({close:reason});if(view==='more')open=false;else view='more';}
   </script>
   <main style={themeStyle()}><button id="underlying" onclick={()=>(window as any).uiEvents.push('underlying')}>Underlying</button>{#if open}<GameDialog {view} locale={preferences.language} {attempt} {replayAttempt} {profile} {preferences} preferencesAvailable={!params.has('noprefs')} {receipt} continueBand={params.get('continueband')??undefined} {hint} {hintProblem} {anchor} {restorePreview} busy={params.has('busy')||hintBusy||exportBusy||recoveryPending} closingBlocked={params.has('blocked')} saveState={params.get('save')??'saved'} exportError={params.has('exporterror')} recoveryBusy={params.has('recoverybusy')||recoveryPending} recoveryProblem={params.get('recoveryproblem')??undefined} onRestoreInput={()=>{(window as any).uiEvents.push('restore-input');}} onRecovery={async()=>{(window as any).uiEvents.push('recovery');await doExport('recovery');}} onResumeSaved={(confirm)=>{(window as any).uiEvents.push({resumeSaved:confirm});}} onCommand={command} onNavigate={(next)=>view=next} onClose={close} onPreference={(next)=>preferences=next} onHint={getHint} onContinue={()=>close('continue')} onReplay={()=>{}} onRestart={()=>{}} onExport={()=>doExport('backup')} onRestore={(_,confirm)=>{if(!confirm)restorePreview={replaceWallet:105,importedWallet:105,activeAttempts:1,receipts:1,issued:2};}} />{/if}</main>
@@ -187,4 +188,15 @@ test('export completion restores its trigger and preserves deliberate Close focu
 test('retained Quick result names the explicit next difficulty in every locale',async({page})=>{
   await page.setViewportSize({width:320,height:568});
   for(const locale of ['en','de','es'] as const){await page.goto(`${route('result',locale)}&continueband=hard`);await expect(page.getByRole('button',{name:`${uiCopy[locale].continue} · ${uiCopy[locale].hard}`,exact:true})).toBeEnabled();await expect(page.getByRole('dialog').locator('.reward-total')).toContainText('105');}
+});
+
+for(const action of ['erase','undo'] as const)test(`editor ${action} keeps useful focus when its trigger becomes unavailable`,async({page})=>{
+  await page.goto(route('notes'));await expect(page.locator('.note-specimen span')).toHaveCount(9);
+  if(action==='undo')await page.getByRole('button',{name:uiCopy.en.erase,exact:true}).click();
+  const trigger=page.getByRole('button',{name:uiCopy.en[action],exact:true});await trigger.focus();await trigger.press('Enter');await expect(trigger).toBeDisabled();await expect(page.locator('#game-dialog-title')).toBeFocused();await page.keyboard.press('Tab');await expect(page.getByRole('button',{name:uiCopy.en.back,exact:true})).toBeFocused();
+});
+
+test('delayed editor command preserves chosen Close focus and a replacement context',async({page})=>{
+  for(const target of ['close','back'] as const){await page.goto(`${route('notes')}&commanddelay=1`);const erase=page.getByRole('button',{name:uiCopy.en.erase,exact:true});await erase.focus();await erase.press('Enter');await expect(erase).toBeDisabled();const chosen=page.getByRole('button',{name:uiCopy.en[target],exact:true});await chosen.focus();await expect.poll(()=>page.evaluate(()=>(window as any).uiEvents.includes('command-settled'))).toBe(true);await expect(chosen).toBeFocused();}
+  await page.goto(`${route('notes')}&commanddelay=1&commandreplace=1`);const erase=page.getByRole('button',{name:uiCopy.en.erase,exact:true});await erase.focus();await erase.press('Enter');await expect.poll(()=>page.evaluate(()=>(window as any).uiEvents.includes('command-settled'))).toBe(true);await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.locator('#underlying')).toBeFocused();
 });

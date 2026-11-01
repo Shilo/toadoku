@@ -41,4 +41,23 @@ describe('60 Leap frontier', () => {
     const revision = initial(); revision.revision = Number.MAX_SAFE_INTEGER;
     expect(() => advanceFrontier(revision, revision.frontier)).toThrow();
   });
+  it('accepts opaque identity boundaries and rejects invalid grant positions independently', () => {
+    for (const length of [1,128,129,256]) {
+      const binding={...initial().frontier,runId:'r'.repeat(length)},generation='g'.repeat(length);
+      expect(JSON.parse(frontierGrantId(generation,binding))).toEqual(['frontier',generation,binding.runId,1,1,1]);
+      const ordinary=initial();ordinary.frontier=binding;
+      expect(advanceFrontier(ordinary,binding).frontier).toEqual({...binding,leap:2});
+      const profile=initial();profile.frontier={...binding,leap:60};profile.highestCompletedLeap=59;
+      const nextRunId='n'.repeat(length),before=structuredClone(profile),next=advanceFrontier(profile,{...profile.frontier},nextRunId);
+      expect(next.frontier).toEqual({...profile.frontier,runId:nextRunId,leap:1,metamorphosis:2});expect(profile).toEqual(before);
+    }
+    for(const leap of [0,61,.5,NaN])expect(()=>frontierGrantId('g',{...initial().frontier,leap})).toThrow();
+    const profile=initial();profile.frontier.leap=60;profile.highestCompletedLeap=59;
+    for(const nextRunId of [7,'',undefined,'n'.repeat(257)]){const before=structuredClone(profile);expect(()=>advanceFrontier(profile,{...profile.frontier},nextRunId as never)).toThrow();expect(profile).toEqual(before);}
+    expect(()=>frontierGrantId('g'.repeat(257),initial().frontier)).toThrow();
+    const oversized={...initial().frontier,runId:'r'.repeat(257)};
+    expect(()=>frontierGrantId('g',oversized)).toThrow();
+    const oversizedProfile=initial();oversizedProfile.frontier=oversized;
+    expect(()=>advanceFrontier(oversizedProfile,oversized)).toThrow();
+  });
 });

@@ -57,7 +57,7 @@
   const values = $derived(gameState.attempt ? getValues(gameState.attempt) : []);
   const conflicts = $derived(new Set(values.length ? findConflicts(values).flatMap(conflict => [...conflict.cells]) : []));
   const titleFloat = $derived(floatOffset(701, time, 'identity')), artFloat = $derived(floatOffset(702, time, 'identity'));
-  const blocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || gameState.busy || historyClosing || dialogLoading);
+  const blocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || gameState.busy || historyClosing || dialogLoading && route === 'more');
   const closingBlocked = $derived(booting || actionBusy || gameState.busy && gameState.restorePhase !== 'staging' || historyClosing);
   const concealed = $derived(!!gameState.restorePhase || !!overlay && ['settings','pause','backup','restart','replace','replay','recover'].includes(overlay.panel));
   const saveState = $derived(bootError ? 'unavailable' : gameState.problem?.startsWith('conflict') ? 'conflict' : gameState.saveState === 'pending' ? 'saving' : gameState.saveState);

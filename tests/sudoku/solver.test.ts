@@ -5,6 +5,13 @@ import { exactCover, independentlyValidSolution } from '../../tools/catalog/orac
 const solved = Array.from({ length: 81 }, (_, cell) => (Math.floor(cell / 9) * 3 + Math.floor(cell / 27) + cell % 9) % 9 + 1);
 
 describe('bounded exact MRV solver', () => {
+  it('rejects an isolated column contradiction before consuming a search budget', () => {
+    const columnConflict = Array(81).fill(0); columnConflict[1] = 1; columnConflict[28] = 1;
+    // Rows 0/3 and boxes 0/3 differ; only column 1 repeats its given digit.
+    expect(countSolutions(columnConflict, { nodeBudget: 0 })).toEqual({ kind: 'invalid', reason: 'contradictory-clues' });
+    const consistent = Array(81).fill(0); consistent[1] = 1; consistent[29] = 1;
+    expect(countSolutions(consistent, { nodeBudget: 0 })).toEqual({ kind: 'unknown', reason: 'budget', nodes: 0 });
+  });
   it('retains the declared MRV resource floor on an original independently certified subset', () => {
     // Original algebraic-grid subset, generator seed 0x5397 sample 0. No first-witness promise.
     // Dropping candidate cardinality or breaking on a nonsingleton exceeds this bound.

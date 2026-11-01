@@ -256,14 +256,16 @@ test('production feature chunks and workers load only at their actual requested 
   await writeFile(`${evidence}/feature-network.json`, JSON.stringify({ network, workers }, null, 2));
 });
 
-test('closing a delayed feature import preserves authority and late resolution cannot reopen it', async ({ page }) => {
+for(const dismissal of ['Close','Escape','Back'] as const)test(`closing a delayed feature import with ${dismissal} preserves authority and late resolution cannot reopen it`, async ({ page }) => {
   test.setTimeout(60000); await page.goto('/'); await quick(page, 'Easy'); const original = roleAttempt(await snapshot(page), 'quick'), puzzle = await domPuzzle(page), cell = puzzle.givens.indexOf('0');
   let release!: () => void, blocked = 0; const held = new Promise<void>(resolve => release = resolve);
   await page.route('**/assets/GameDialog-*.js', async route => { blocked++; await held; await route.continue(); });
   await page.locator(`[data-cell="${cell}"]`).click(); await more(page); await expect.poll(() => blocked).toBe(1); await expect(page.getByRole('status')).toContainText('Loading');
   await page.keyboard.press(String(puzzle.solution[cell])); expect(roleAttempt(await snapshot(page), 'quick').entries[cell]).toBe(0);
-  await page.getByRole('button', { name: 'Close', exact: true }).click(); await expect(page.getByRole('dialog')).toHaveCount(0); release();
-  await digit(page, cell, Number(puzzle.solution[cell])); await waitForDurableEntry(page, 'quick', cell, Number(puzzle.solution[cell]));
+  if(dismissal==='Back')await page.goBack();else if(dismissal==='Escape')await page.keyboard.press('Escape');else await page.getByRole('button', { name: 'Close', exact: true }).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+  try{await expect(page.locator('.dock').getByRole('button',{name:puzzle.solution[cell],exact:true})).toBeEnabled();await digit(page,cell,Number(puzzle.solution[cell]));await waitForDurableEntry(page,'quick',cell,Number(puzzle.solution[cell]));}
+  catch(error){await writeFile(`${evidence}/delayed-dialog-${dismissal}-before-release-state.json`,JSON.stringify(await page.evaluate(()=>({url:location.href,dialogs:document.querySelectorAll('dialog').length,keys:[...document.querySelectorAll<HTMLButtonElement>('.dock button')].map(key=>({label:key.textContent,disabled:key.disabled}))}))));throw error;}
+  finally{release();}
   await more(page); await expect(page.getByRole('heading', { name: 'Game', exact: true })).toBeVisible(); await closeDialogs(page);
   expect(roleAttempt(await snapshot(page), 'quick').id).toBe(original.id); await expect(page.getByRole('dialog')).toHaveCount(0);
 });
@@ -293,9 +295,8 @@ test('a failed actual feature chunk offers honest retry and reload without losin
   await page.getByRole('button', { name: 'Retry', exact: true }).click(); await expect(page.getByRole('dialog')).toContainText(appCopy.en.featureLoadError);
   await page.getByRole('button', { name: 'Close', exact: true }).click(); await expect(page.getByRole('dialog')).toHaveCount(0); expect(roleAttempt(await snapshot(page), 'quick').id).toBe(original.id);
   await more(page); await expect(page.getByRole('dialog')).toContainText(appCopy.en.featureLoadError); await page.unroute('**/assets/GameDialog-*.js');
-  await page.getByRole('button', { name: 'Reload app', exact: true }).click(); await page.waitForLoadState('domcontentloaded');
-  // Explicit root navigation after reload leaves the restored hash route without changing saved state.
-  await page.goto('/'); await page.getByRole('button', { name: 'Quick Play', exact: true }).click(); await page.getByRole('button', { name: 'Resume', exact: true }).click(); await settleResume(page);
+  const reloaded=page.waitForEvent('domcontentloaded');await page.getByRole('button', { name: 'Reload app', exact: true }).click();await reloaded;
+  await page.getByRole('button', { name: 'Quick Play', exact: true }).click(); await page.getByRole('button', { name: 'Resume', exact: true }).click(); await settleResume(page);
   const resumed = roleAttempt(await snapshot(page), 'quick'); expect(resumed.id).toBe(original.id); expect(resumed.entries[cell]).toBe(Number(puzzle.solution[cell])); await more(page); await expect(page.getByRole('heading', { name: 'Game', exact: true })).toBeVisible();
   await writeFile(`${evidence}/failed-feature-urls.json`, JSON.stringify(failed));
 });

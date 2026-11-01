@@ -1,6 +1,43 @@
 import { test, expect } from '@playwright/test';
 import { openNativeHarness } from './harness';
 import { writeFileSync } from 'node:fs';
+import type { MetadataOutcome } from './metadata-native';
+
+test('native essential metadata values match their actual role pool and generation keys', async ({ page }) => {
+  await openNativeHarness(page);
+  const report: MetadataOutcome[] = await page.evaluate(async () => { const url = '/tests/storage/metadata-native.ts'; return (await import(url)).nativeMetadataKeyBindings(); });
+  console.log(JSON.stringify(report)); expect(report).toHaveLength(12);
+  expect(report.every(result => result.kind === 'corrupt')).toBe(true);
+  expect(report.every(result => !('preferencesKind' in result) || result.preferencesKind === 'corrupt')).toBe(true);
+});
+
+test('native metadata key rejection preserves writes and accepts absent legacy physical tags', async ({ page }) => {
+  await openNativeHarness(page);
+  const report = await page.evaluate(async () => { const url = '/tests/storage/metadata-native.ts'; const cases = await import(url);
+    return { tags: await cases.nativeOptionalGenerationTags(), writes: await cases.nativeMetadataWriteBindings() }; });
+  expect(report.tags).toEqual({ untagged: 2, rejectedPresentTags: 24 }); expect(report.writes.checked).toBe(24); console.log(JSON.stringify(report));
+});
+
+test('native normal backup rejects physically swapped role keys while raw recovery preserves them', async ({ page }) => {
+  await openNativeHarness(page);
+  const report: { normalKind: string; rawPreserved: boolean }[] = await page.evaluate(async () => { const url = '/tests/storage/metadata-native.ts'; return (await import(url)).nativeMetadataExportBindings(); });
+  console.log(JSON.stringify(report)); expect(report.every(row => row.rawPreserved)).toBe(true); expect(report.every(row => row.normalKind === 'corrupt')).toBe(true);
+});
+
+test('native keyed export matrix preserves corruption and valid legacy roundtrips', async ({ page, browser }, testInfo) => {
+  await openNativeHarness(page);
+  const report = await page.evaluate(async () => {
+    const metadataUrl = '/tests/storage/metadata-native.ts', casesUrl = '/tests/storage/native-cases.ts';
+    const metadata = await import(metadataUrl), cases = await import(casesUrl);
+    return { swapped: await metadata.nativeMetadataExportBindings(), prefix: await metadata.nativeGenerationPrefixBindings(),
+      legacy: await cases.nativeLegacyUpgradeCase(), roundtrip: await cases.nativeRepositoryCases() };
+  });
+  expect(report.prefix).toEqual({ metadata: 4, history: 5, quarantine: 3, boundaryKeys: 8 });
+  expect(report.roundtrip).toContain('backup round-trip');
+  writeFileSync(`prototypes/gameplay-validation/storage/keyed-export-${testInfo.project.name}-${Date.now()}.json`,
+    JSON.stringify({ browser: testInfo.project.name, browserVersion: browser.version(), recordedAt: new Date().toISOString(), ...report }, null, 2));
+  console.log(JSON.stringify(report));
+});
 
 test('native raw recovery preserves future corrupt graphs without writes or creation', async ({ page, browser }, testInfo) => {
   page.on('console', message => { if (message.text().startsWith('RECOVERY_NATIVE')) console.log(message.text()); });

@@ -104,6 +104,8 @@ describe('session editing and monotone history', () => {
     }
     state = attemptFixture(); state.undo = Array(1);
     expect(reduceAttempt(state, { type: 'undo' })).toEqual({ kind: 'integrity', reason: 'history' });
+    state = attemptFixture(); state.undo = [undefined as never];
+    expect(reduceAttempt(state, { type: 'undo' })).toEqual({ kind: 'integrity', reason: 'history' });
     state = command(attemptFixture(), { type: 'enter', digit: 2 }); state.undo[0].cell = 80;
     expect(reduceAttempt(state, { type: 'undo' })).toEqual({ kind: 'integrity', reason: 'history' });
     state = attemptFixture(); state.commandSeq = Number.MAX_SAFE_INTEGER;

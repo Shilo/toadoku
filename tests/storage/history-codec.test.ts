@@ -14,13 +14,17 @@ function issued(index = 1): IssuedRecord {
     catalogVersion: '1', pool: 'easy', firstAttemptId: 'a', issues: 1 };
 }
 function sample() { return receipt(attempt(generation)); }
-const fails = (run: () => unknown) => expect(run).toThrow();
+const fails = (run: () => unknown, kind = 'corrupt') => {
+  let failure: unknown; try { run(); } catch (error) { failure = error; }
+  expect(failure).toMatchObject({ issue: { kind } });
+};
 
 describe('versioned bounded physical history codec', () => {
   it('keeps legacy, new and unsupported layouts explicit', () => {
     fails(() => decodeLayout(undefined, generation));
     for (const layout of ['rows-v1', 'buckets-v1']) expect(decodeLayout({ generation, layout }, generation)).toBe(layout);
-    for (const input of [{ generation, layout: 'future' }, { generation: 'other', layout: 'rows-v1' }, { generation, layout: 'rows-v1', extra: true }]) fails(() => decodeLayout(input, generation));
+    fails(() => decodeLayout({ generation, layout: 'future' }, generation), 'unsupported-future');
+    for (const input of [{ generation: 'other', layout: 'rows-v1' }, { generation, layout: 'rows-v1', extra: true }]) fails(() => decodeLayout(input, generation));
     expect(bucketKey(generation, 'id', issued().id)).toEqual([generation, 'id:ab']);
     expect(overflowKey(generation, 'group', issued().groupId)).toEqual([generation, `overflow:group:${issued().groupId}`]);
     expect(rowKey(generation, 'receipt', 'a')).toEqual([generation, 'a']);
@@ -29,6 +33,7 @@ describe('versioned bounded physical history codec', () => {
     expect(rowStore('receipt')).toBe('receipts'); expect(rowStore('group')).toBe('issued');
     expect(recordId('receipt', sample())).toBe(sample().attemptId); expect(recordId('group', issued())).toBe(issued().groupId);
     fails(() => bucketId('id', 'not-a-hash')); fails(() => bucketId('receipt', 'bad space'));
+    for (const id of [`x${issued().id}`, `${issued().id}x`]) fails(() => bucketId('id', id));
     expect(bucketId('receipt', '__proto__')).toMatch(/^[a-f0-9]{2}$/);
   });
   it('validates every bucket row and all address/schema/array bindings', () => {
@@ -39,6 +44,7 @@ describe('versioned bounded physical history codec', () => {
       { ...bucket, bucket: '00' }, { ...bucket, extra: 1 }, { ...bucket, items: null }, { ...bucket, items: [value, value] },
       { ...bucket, items: [{ ...value, id: 'ff'.repeat(32) }] }, { ...bucket, items: [{ ...value, generation: 'other' }] }]) fails(() => decodeBucket(changed, generation, 'id', value.id));
     fails(() => decodeStoredBucket(bucket, generation, 'id', 'wrong'));
+    for (const address of ['xab', 'abx']) fails(() => decodeStoredBucket({ ...bucket, bucket: address, items: [] }, generation, 'id', address));
     const sparse = [value, value]; delete sparse[0]; Object.assign(sparse, { extra: true });
     fails(() => decodeBucket({ ...bucket, items: sparse }, generation, 'id', value.id));
     const hidden = [value]; Object.defineProperty(hidden, 0, { enumerable: false }); Object.assign(hidden, { extra: true });
@@ -76,9 +82,13 @@ describe('versioned bounded physical history codec', () => {
     let remaining = BUCKET_BYTES_LIMIT - bucketBytes(bucket);
     expect(remaining).toBeGreaterThan(0);
     for (const item of items) { const delta = Math.min(remaining, 15); item.issues = 10 ** delta; remaining -= delta; }
+    const original = [...items].reverse().find(item => item.issues === 1)!;
+    const originalIndex = items.indexOf(original);
+    [items[0], items[originalIndex]] = [items[originalIndex], items[0]];
+    expect(items[0]).toBe(original);
     expect(remaining).toBe(0); expect(bucketBytes(bucket)).toBe(BUCKET_BYTES_LIMIT);
     expect(decodeBucket(bucket, generation, 'id', items[0].id).items).toHaveLength(1024);
-    const original = items.find(item => item.issues === 1)!, changed = { ...original, issues: 10 };
+    const changed = { ...original, issues: 10 };
     const next = putInBucket(bucket, changed);
     expect(next.overflow!.record).toEqual(changed); expect(next.bucket!.items).toHaveLength(1023);
     expect(next.bucket!.items.some(item => item.id === original.id)).toBe(false);
@@ -110,11 +120,14 @@ describe('versioned bounded physical history codec', () => {
     expect(collectHistory('rows-v1', generation, 'receipt', [sample()], [[generation, sample().id]], [], [])).toEqual([sample()]);
     for (const run of [
       () => collectHistory('rows-v1', generation, 'issued', [value], keys, [], []),
+      () => collectHistory('rows-v1', generation, 'issued', [], [keys[0]], [], []),
+      () => collectHistory('buckets-v1', generation, 'issued', [], [], [], [bucketKey(generation, 'id', value.id)]),
       () => collectHistory('rows-v1', generation, 'issued', [], [], [value], []),
       () => collectHistory('rows-v1', generation, 'issued', [value], [['wrong', 'id:a']], [], []),
       () => collectHistory('rows-v1', generation, 'issued', [value], ['bad'], [], []),
       () => collectHistory('rows-v1', generation, 'issued', [value], [[generation, 'wrong']], [], []),
       () => collectHistory('rows-v1', generation, 'issued', [value], [keys[0]], [], []),
+      () => collectHistory('rows-v1', generation, 'issued', [value], [keys[1]], [], []),
       () => collectHistory('rows-v1', generation, 'issued', [value, { ...value, issues: 2 }], keys, [], []),
     ]) fails(run);
   });
@@ -126,6 +139,8 @@ describe('versioned bounded physical history codec', () => {
     fails(() => collectHistory('buckets-v1', generation, 'issued', [overflowRecord(generation, 'id', value)], [overflowKey(generation, 'id', value.id)], buckets, keys));
     for (const address of ['wrong', 'receipt:ab', 'id:gg']) fails(() => collectHistory('buckets-v1', generation, 'issued', [], [], [idBucket], [[generation, address]]));
     fails(() => collectHistory('buckets-v1', generation, 'receipt', [], [], [idBucket], [[generation, 'id:ab']]));
+    const emptyReceipt = emptyBucket(generation, 'receipt', sample().attemptId);
+    fails(() => collectHistory('buckets-v1', generation, 'issued', [], [], [emptyReceipt], [bucketKey(generation, 'receipt', sample().attemptId)]));
     fails(() => collectHistory('rows-v1', generation, 'issued', [], [], [idBucket], [keys[0]]));
     for (const address of ['wrong', `overflow:receipt:${value.id}`]) fails(() => collectHistory('buckets-v1', generation, 'issued', [overflowRecord(generation, 'id', value)], [[generation, address]], [], []));
     fails(() => collectHistory('buckets-v1', generation, 'receipt', [overflowRecord(generation, 'id', value)], [overflowKey(generation, 'id', value.id)], [], []));

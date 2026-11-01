@@ -101,6 +101,13 @@
     if(!trigger.isConnected||trigger.disabled||view!==pane||fileReadId!==readId||attempt?.id!==attemptId)return;
     if(document.activeElement===document.body||document.activeElement===trigger)trigger.focus();
   }
+  async function editorCommand(event:MouseEvent,command:SessionCommand){
+    const trigger=event.currentTarget as HTMLButtonElement,dialog=trigger.closest('dialog'),id=attempt?.id,generation=attempt?.generation;
+    await onCommand(command);await tick();
+    if(!dialog?.isConnected||!trigger.isConnected||view!=='notes'||!attempt||attempt.id!==id||attempt.generation!==generation)return;
+    if(document.activeElement!==document.body&&document.activeElement!==trigger)return;
+    if(!trigger.disabled)trigger.focus();else dialog.querySelector<HTMLElement>('#game-dialog-title')?.focus();
+  }
   function backTarget(): DialogView { return view === 'backup' || view === 'restart' ? 'settings' : 'more'; }
 </script>
 
@@ -155,7 +162,7 @@
       <button class="secondary" aria-pressed={attempt.notesMode} disabled={busy || frozen} onclick={() => onCommand({ type: 'toggle-notes' })}><Pencil size={20} />{c.notes}<span class="toggle" aria-hidden="true">{attempt.notesMode ? '✓' : ''}</span></button>
       <p>{attempt.notesMode ? value ? c.filledNotes : c.noteHelp : c.entryHelp}</p>
       <div class="large-keys" aria-label={attempt.notesMode ? c.notes : c.value}>{#each [1,2,3,4,5,6,7,8,9] as digit (digit)}<button aria-label={attempt.notesMode ? c.note(digit) : String(digit)} aria-pressed={attempt.notesMode ? !!(notes & (1 << (digit - 1))) : undefined} disabled={busy || frozen || !!clue || attempt.notesMode && !!value} onclick={() => onCommand({ type: 'enter', digit })}>{digit}</button>{/each}</div>
-      <div class="inline-actions"><button class="secondary" disabled={busy || frozen || !attempt.undo.length} onclick={() => onCommand({ type: 'undo' })}><Undo2 size={20} /><span>{c.undo}</span></button><button class="secondary" disabled={busy || !canErase} onclick={() => onCommand({ type: 'erase' })}><Eraser size={20} /><span>{c.erase}</span></button></div>
+      <div class="inline-actions"><button class="secondary" disabled={busy || frozen || !attempt.undo.length} onclick={event => editorCommand(event,{ type: 'undo' })}><Undo2 size={20} /><span>{c.undo}</span></button><button class="secondary" disabled={busy || !canErase} onclick={event => editorCommand(event,{ type: 'erase' })}><Eraser size={20} /><span>{c.erase}</span></button></div>
     </div>
   {:else if view === 'hint'}
     <div class="pane hint-pane">

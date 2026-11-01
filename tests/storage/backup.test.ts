@@ -168,5 +168,19 @@ describe('backup canonical cross-record authority', () => {
     const total = currentAlias.receipts.reduce((sum, item) => sum + item.result.dewdrops, 0); currentAlias.profile.wallet = total; currentAlias.profile.lifetimeEarned = total;
     expect(() => decodeBackup(currentAlias)).toThrow('backup-current-run-alias');
     const duplicateGrant = progressedBackup(); changeBinding(duplicateGrant, 1, { leap: 1 }); expect(() => decodeBackup(duplicateGrant)).toThrow('backup-grant');
+    const omittedRun = secondRunBackup(); omittedRun.receipts.splice(60); omittedRun.issued.splice(60);
+    const earned = omittedRun.receipts.reduce((sum, item) => sum + item.result.dewdrops, 0);
+    omittedRun.profile.wallet = earned; omittedRun.profile.lifetimeEarned = earned;
+    omittedRun.profile.frontier = { runId: 'run-2', metamorphosis: 2, leap: 1, scheduleVersion: 1 };
+    for (const pool of omittedRun.pools) { const count = omittedRun.issued.filter(item => item.pool === pool.pool).length; pool.cursor = count; pool.lifetimeIssued = count; }
+    expect(decodeBackup(omittedRun)).toEqual(omittedRun);
+    omittedRun.profile.frontier = { runId: 'run-3', metamorphosis: 3, leap: 1, scheduleVersion: 1 };
+    let omitted: unknown; try { decodeBackup(omittedRun); } catch (error) { omitted = error; }
+    expect(omitted).toMatchObject({ issue: { kind: 'corrupt' } });
+    const allAliased = secondRunBackup();
+    for (let index = 60; index < allAliased.receipts.length; index++) changeBinding(allAliased, index, { runId: 'run-1' });
+    allAliased.profile.frontier.runId = 'run-1';
+    let aliased: unknown; try { decodeBackup(allAliased); } catch (error) { aliased = error; }
+    expect(aliased).toMatchObject({ issue: { kind: 'corrupt' } });
   });
 });
