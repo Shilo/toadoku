@@ -7,7 +7,7 @@ export interface Layout {
   cells: CellGeometry[]; keySize: number; menuPanel: Rect; menuReserve: number; menuActionHeight: number;
   menuTitle: Rect; menuArt: Rect; titleFontSize: number;
 }
-import { pond } from './theme/pond';
+import { presentation as pond } from './theme/presentation';
 export const SMALL = pond.spacing.small;
 export const LARGE = pond.spacing.large;
 export const rectStyle = (r: Rect) => `left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px`;

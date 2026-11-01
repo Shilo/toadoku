@@ -10,9 +10,10 @@
     value?: number;
     notes?: readonly number[];
     time: number;
+    facePath?: (id: number) => string;
   }
-  let { id, diameter, selected, focused = false, value, notes = [], time }: Props = $props();
-  const shape = $derived(leafShape(id));
+  let { id, diameter, selected, focused = false, value, notes = [], time, facePath }: Props = $props();
+  const path = $derived(facePath?.(id) ?? leafShape(id).path);
   const offset = $derived(floatOffset(id, time, 'leaf'));
   const candidates = $derived(noteGeometry(diameter));
   const digitBox = $derived(digitGeometry(diameter));
@@ -21,10 +22,10 @@
 
 <span class={['leaf', { selected }]} aria-hidden="true" style:--diameter={`${diameter}px`}>
   <span class="floating" style:transform={`translate(${offset.x}px, ${offset.y}px)`}>
-    <svg class="lip" viewBox="0 0 100 100" focusable="false"><path d={shape.path} /></svg>
+    <svg class="lip" viewBox="0 0 100 100" focusable="false"><path d={path} /></svg>
     <span class="front">
       <svg class="face" viewBox="0 0 100 100" focusable="false">
-        <path d={shape.path} />
+        <path d={path} />
         {#if selected}<circle class="selection-dew" cx="15" cy="51" r="2.7" />{/if}
       </svg>
       {#if focused}
@@ -63,3 +64,4 @@
   .digit { position: absolute; top: 50%; left: 50%; translate: -50% -50%; overflow: clip; display: flex; align-items: center; justify-content: center; font-size: clamp(var(--type-digit-min), calc(var(--diameter) * .64), var(--type-digit-max)); font-weight: var(--weight-digit); line-height: var(--line-number); }
   .note { position: absolute; top: 50%; left: 50%; display: grid; place-items: center; font-weight: var(--weight-note); line-height: var(--line-number); translate: -50% -50%; }
 </style>
+

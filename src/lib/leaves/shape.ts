@@ -1,4 +1,4 @@
-import { pond } from '../theme/pond';
+import { presentation as pond } from '../theme/presentation';
 import { seededUnit } from '../motion/float';
 
 export interface Point { x: number; y: number }

@@ -2,9 +2,13 @@
   import type { Layout } from '../layout';
   import { boardWater, menuWater, shore } from './geometry';
 
-  let { layout, screen, time = 0 }: { layout: Layout; screen: 'menu' | 'game'; time?: number } = $props();
-  const water = $derived(screen === 'game' ? boardWater(layout, time).layers : menuWater(layout, time));
-  const ground = $derived(shore(layout, screen));
+  let { layout, screen, time = 0, theme = 'pond', vessel }: {
+    layout: Layout; screen: 'menu' | 'game'; time?: number; theme?: 'pond' | 'cauldron';
+    vessel?: (layout: Layout, screen: 'menu' | 'game') => { wet: string; dry: string; transpose: boolean };
+  } = $props();
+  const liquidTime = $derived(theme === 'cauldron' ? 0 : time);
+  const water = $derived(screen === 'game' ? boardWater(layout, liquidTime).layers : menuWater(layout, liquidTime));
+  const ground = $derived(vessel?.(layout, screen) ?? shore(layout, screen));
   const colors = ['var(--water-deep)', 'var(--water-middle)', 'var(--water-shallow)'];
 </script>
 
@@ -30,3 +34,4 @@
     user-select: none;
   }
 </style>
+

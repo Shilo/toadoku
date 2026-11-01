@@ -66,3 +66,14 @@ This explicit temporary exception does not approve AI illustrations as final pro
 - [W3C WCAG 2.2 contrast minimum](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html): luminance contrast, normal text thresholds and inactive-control exception.
 
 Module acceptance still requires the lead's review and integrated browser evidence; unit checks alone cannot establish visual fidelity, focus discovery, localization fit or final typography.
+
+## Isolated Cauldron font addition
+
+On branch `codex/themes`, Creepster is used only for the Cauldron title. Outfit remains UI/digits and Chewy remains the Pond title. Creepster by Sideshow is obtained unchanged from [Google Fonts at revision 50f8ff96f9de584858108a44a7b3dd4065dce11f](https://github.com/google/fonts/tree/50f8ff96f9de584858108a44a7b3dd4065dce11f/ofl/creepster), with SIL OFL 1.1 notice retained in source and `dist/licenses/`. The font and its title metrics are reviewed separately from the preserved application logo/sketch. Title fonts are explicit lazy FontFace URL resources; shared Outfit remains in `fonts.css`.
+
+| File | SHA-256 |
+| --- | --- |
+| `Creepster-Regular.ttf` | `402aeb734586c74aecd3dbdc454589b1fb12e2e1c71f782fd019ae68066d9f44` |
+| `Creepster-OFL.txt` | `c09e3b81d9cfeec46bc29a3374000e8ad013d694bdf24a288088491dd4cd5c69` |
+
+No museum photograph, new bitmap illustration or ImageGen output is shipped. Potion medallions/vessel are reviewed code-native control/background geometry. The temporary menu sketch is unchanged. Isolated implementation evidence and limitations are recorded in [theme progress](theme-progress.md).

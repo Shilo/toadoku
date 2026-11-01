@@ -1,5 +1,5 @@
 import type { Layout, Rect } from '../layout';
-import { pond } from '../theme/pond';
+import { presentation as pond } from '../theme/presentation';
 
 export interface Point { x: number; y: number }
 export type Curve = readonly [Point, Point, Point, Point];
