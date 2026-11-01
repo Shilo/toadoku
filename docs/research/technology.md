@@ -50,7 +50,7 @@ English, German, and Spanish are complete first-class dictionaries. Persist an e
 
 ## GitHub Pages and PWA
 
-For a project URL such as `https://owner.github.io/toadoku/`, Vite needs `base: '/toadoku/'`; a user site or custom domain uses `/`. The public name Toadodu need not rename the existing repository. Use the configured base for images, manifest links, and service-worker registration. Deploy the built `dist` folder through GitHub Actions. [Vite GitHub Pages instructions](https://vite.dev/guide/static-deploy).
+For a project URL such as `https://owner.github.io/toadoku/`, Vite needs `base: '/toadoku/'`; a user site or custom domain uses `/`. The product and repository name is Toadoku. Use the configured base for images, manifest links, and service-worker registration. Deploy the built `dist` folder through GitHub Actions. [Vite GitHub Pages instructions](https://vite.dev/guide/static-deploy).
 
 Keep menu/game/settings as in-app state, or use hash navigation if shareable screens become necessary. This avoids depending on server rewrites for direct links. Test the production build beneath the repository subpath, not only the development server root.
 

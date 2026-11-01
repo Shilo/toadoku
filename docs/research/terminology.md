@@ -19,7 +19,7 @@ Proposed localized labels: Metamorphosis / Metamorphose / Metamorfosis; Leap / S
 
 Sources: [Clicker Heroes](https://blog.clickerheroes.com/understanding-clicker-heroes-mechanics-heroes-and-strategies/), [Cookie Clicker game source](https://orteil.dashnet.org/cookieclicker/main.js), [Realm Grinder developer announcements](https://steamcommunity.com/app/610080/allnews/), [Hyper Hippo support](https://screenzilla.helpshift.com/hc/en/5-adventure-capitalist/faq/33-why-would-i-use-gold-to-claim-angels/).
 
-These are reference terminology, not mechanics to copy. Ascension and prestige often accompany lasting benefits in these examples; Toadodu's current scope adds earned currency, without upgrades or power changes.
+These are reference terminology, not mechanics to copy. Ascension and prestige often accompany lasting benefits in these examples; Toadoku's current scope adds earned currency, without upgrades or power changes.
 
 ## Ranked names for the repeat counter
 

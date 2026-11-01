@@ -1,5 +1,27 @@
 # Theme requirements and proposals
 
+Isolated activation update: the user authorized Auto/Pond/Cauldron work on `codex/themes` only. [Theme progress](theme-progress.md) records implementation, researched decisions, validation and integration limits. The [isolated handoff](theme-implementation-handoff.md) supersedes conflicting historical deferrals and shared-cell proposals below for that branch. Gameplay/main remains separate.
+
+## Active isolated theme contract
+
+For future themes, start with the [theme authoring guide](theme-authoring.md). It defines the reusable visual rules, actual extension points, event behavior and acceptance process. Material from the heading "Historical Pond baseline and earlier proposals" onward preserves earlier proposals, not additional current requirements.
+
+The reopened polish uses three liquid fills per theme plus separate decorative bubble and ground-rim roles. Pond retains deep `#0D6267`, middle `#329D9A`, shallow `#7ED1B8`, wet reed `#6D9F81` and dry sage `#B6BA86`; a narrow `#4D7E68` bank seam follows the existing shore. Cauldron uses deep broth `#4D190A`, pumpkin `#BC5B1E`, pale broth `#FFD08A`, inner iron `#1A1D22`, enamel `#30363D` and a narrow metal lip `#899398`. Its pot boundary has one concavity, never a wavy shoreline. Bubble paint is a distinct semantic decoration, not another group fill. No gradients or generated bitmap scenery are shipped.
+
+Lazy definitions own palette, one optional UI font, baked wordmark vectors, cell silhouette/detail, liquid renderer, optional bubble renderer and vessel renderer. Shared components consume those functions and CSS roles without theme-ID branches. The fixed layout and active motion clock remain separate. Cauldron has rounded simmer contours, sparse safe rings and opaque pale squash faces with peripheral rind; Pond retains its lily-pad silhouette. Both preserve digit/note geometry, all 81 rectangular targets, logical IDs and game state.
+
+A theme has one optional `font` family with a nonempty list of actual faces: Almendra 400/700 for Pond and Germania One 400 for Cauldron. UI, SUDOKU and bottom/right dock numbers follow this family. All grid digits, notes and the enlarged cell editor retain the shared 4.6KB Outfit subset. Larger grid figures scale at 0.68D, capped at 36px, within a circular mask inside each unchanged rounded face. All UI faces load together before the winning family registers; any failure uses the readable native system stack without stale-family inheritance. Each theme supplies baked Toadoku lettering, preserving the accessible heading without a second font download. The [future-title recipe](theme-authoring.md#bake-a-title-for-every-future-theme), [font audition](research/theme-font-readability-audition.md) and [delivery comparison](research/theme-font-asset-comparison.md) record authoring, fit checks, byte costs, source pins and reproduction.
+
+Fresh defaults are Auto theme, System appearance, the first supported browser-preferred language (English fallback), System motion and Fill space. Auto shows the actually applied theme in Settings. During October 24 through November 6 inclusive, its countdown names Cauldron and associates Halloween, ending at local November 7. Pending/failed imports retain the applied theme and describe the transition; minute countdown refresh does not retry chunks. Existing saved choices remain unchanged.
+
+Auto's [annual schedule](../src/lib/theme/calendar.ts) is an ordered metadata list containing actual event dates. A single shared rule derives each yearly window: seven local calendar days before until seven after, end excluded, totaling 14 calendar dates. First active entry wins an overlap; no active entry falls back to Pond. Selection and countdown share the resolved event. Add future event dates as data using the [authoring recipe](theme-authoring.md#add-a-yearly-event).
+
+User-authorized layout polish is bounded: every main-menu action shares one responsive height across base, Quick Play and Progression, including More, while the largest submenu reservation keeps identity/shore anchors fixed. Suitable wide bottom-dock allocations may use ten equal-height keys in one row. Narrow portrait keeps 2x5 and landscape retains the established right 5x2. The gameplay grid remains the existing flat Winding shallows design, with improved local curve clearance rather than an enclosing pot illustration.
+
+Overlays preserve their underlying screen, mounted board and normal control appearance. Native modal behavior blocks background input; ordinary readable windows remain timed. Explicit Pause/restore and hidden-page presentation blur the retained scene while study is suspended. Ownership loss continues to conceal stale puzzle values. These shared product behaviors are independent of theme colors/materials.
+
+## Historical Pond baseline and earlier proposals
+
 Current scope is basic Pond only. Halloween and seasonal selection remain future requirements, explicitly deferred in [TODO.md](../TODO.md). Preserve modular theme boundaries without implementing the deferred theme now.
 
 Themes retain classic Sudoku rules and exactly the same frog and lily-pad sprites. Their definitions customize semantic UI colors, CSS gradients and background shapes, button styling, font roles, suitable motion parameters and localized text. Theme code stays independent of puzzle correctness and progress.

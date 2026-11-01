@@ -1,16 +1,14 @@
-/* Original upstream font files and notices: docs/production-assets.md. */
-@font-face {
-  font-family: 'Outfit';
-  src: url('../../assets/fonts/Outfit.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
+/* Licensed, renamed font subsets and reproducible provenance: docs/production-assets.md. */
+:root {
+  --font-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-grid: "ToadokuSolving", ui-sans-serif, system-ui, sans-serif;
+  --font-note: var(--font-grid);
 }
 
 @font-face {
-  font-family: 'Chewy';
-  src: url('../../assets/fonts/Chewy-Regular.ttf') format('truetype');
+  font-family: 'ToadokuSolving';
+  src: url('../../assets/fonts/Outfit-Solving.woff2') format('woff2');
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 900;
   font-display: swap;
 }

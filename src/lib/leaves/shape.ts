@@ -1,4 +1,4 @@
-import { pond } from '../theme/pond';
+import { presentation as pond } from '../theme/presentation';
 import { seededUnit } from '../motion/float';
 
 export interface Point { x: number; y: number }
@@ -83,9 +83,9 @@ export function noteGeometry(diameter: number) {
   }));
 }
 
-/** This complete paint box fits the guaranteed opaque disk, including fallback fonts. */
+/** The square is a circular clipping frame: its radius stays inside the opaque disk. */
 export function digitGeometry(diameter: number) {
-  return { width: diameter * 0.44, height: diameter * 0.56 };
+  return { width: diameter * 0.72, height: diameter * 0.72 };
 }
 
 /** Focus cues use a physical-size semantic token while their centers follow the leaf. */

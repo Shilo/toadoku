@@ -1,5 +1,11 @@
 # Isolated theme implementation handoff
 
+Integration update: the user subsequently authorized reviewed integration of the completed branch into main. [Theme integration](theme-integration.md) records that work and its validation. The isolation instructions below retain the original implementation contract, rather than prohibiting that later authorized merge.
+
+Implementation status: [theme progress](theme-progress.md) records the explicitly activated isolated `codex/themes` branch, validation and remaining integration/hardware limits. The brief below remains its scope contract.
+
+Future theme implementations should also follow the [theme authoring guide](theme-authoring.md), which consolidates the accepted design boundaries and actual extension points after Pond/Cauldron polish.
+
 This brief activates the theme task only when the user sends it to a new agent. Work autonomously in a separate Git worktree and branch. Gameplay continues independently in the original checkout and must finish before theme integration.
 
 ## Isolation and ownership
@@ -20,11 +26,19 @@ This user activation supersedes historical theme-deferral wording for your isola
 
 Use named specialists for bounded theme concepts/research and independent challenge. Research primary documentation for token architecture, CSS custom properties, lazy loading, font licensing/metrics, contrast, motion and native scrollbars. Research Cauldron references too. Challenge every material plan, including your own, and the user's proposed objects/styles. Record concise evidence, alternatives, counterexamples and decisions in `docs/theme-progress.md`. Review actual implementation independently.
 
+## Current visual boundary
+
+Latest active polish direction: challenge and improve the entire theme while retaining the flat full-screen interaction design. Dedicated orange-stew Cauldron liquid/motion, recognizable floating ingredient faces, manufactured pot curves, complete material boundaries, informative Auto status and robust Pond curves across screen proportions are explicitly authorized. Earlier conservative cream/radius choices below are a baseline, not a requirement to stop at a plain recolor. The original rejected mockup remains rejected. New reference-based studies and whole-theme acceptance are recorded in [theme progress](theme-progress.md#reopened-whole-theme-polish).
+
+Latest user refinements permit a narrow third ground/lip color and equal-height control rows, but prohibit a heavy gameplay-grid redesign. The pot edge has one regular concave curve. Preserve landscape board/right-dock allocation; a ten-key row is limited to suitable existing bottom-dock layouts. Narrow phones retain usable compact keys. The main menu may use a single base-action row while keeping submenu reservations and identity anchors fixed. These explicit refinements supersede the earlier two-ground-color and exact dock-row counts only within this bounded scope.
+
+The user's subsequent correction requires preserving the established Quiet Flat C design and current visual choices. Theme work is an adaptation within that design, not a heavy redesign. Use the maintained screens, [design handoff](design-handoff.md), [design](design.md), [UI/UX](ui-ux.md) and [themes](themes.md) as visual authority. The first isolated ImageGen comparison is rejected in its entirety as a design direction. Preserve full-screen composition, Winding shallows B grouping, inward opaque near-circular faces, soft rounded controls, cream light surfaces, existing title/art anchors and exact spacing/dock geometry. Seasonal colors, readable title typography and restrained flat decorative treatments must stay within those boundaries. No scenic frame, enclosed pot illustration, new mascot, gradients or redesigned menu composition.
+
 ## Theme system
 
 Build a small typed semantic token system. Theme swapping must update appearance coherently without changing gameplay state or geometry contracts. Cover:
 
-- Title and normal font families, fallbacks, font colors, weights and necessary metric/line-height adjustments. Keep font sizes stable unless measured font differences require adjustment.
+- Each theme may own one optional UI/dock family, with readable native system fallback: Almendra 400/700 for Pond and Germania One 400 for Cauldron. The user's final decision restores shared Outfit for all grid/notes/enlarged-editor figures, with a tested larger scale and a circular text mask within existing rounded faces. Dock 1-9 and More remain themed. Load the complete UI face list atomically and declare native weights honestly. Every theme must provide a baked Toadoku wordmark rather than another font download; follow the [future-title recipe](theme-authoring.md#bake-a-title-for-every-future-theme), including a theme without an event. Preserve accessibility, fixed targets and licensing. Current authoring and final font-audition decisions supersede temporary themed-grid policies.
 - Three liquid/background colors and two shore/vessel/UI-surface colors.
 - Controls: faces, text/icons, highlights/shadows, pressed, selected, disabled, hover and keyboard focus states; button shape/radius/style.
 - Windows, sheets, dialogs and popovers: surfaces, text, shadow and radius. Each individual surface must have equal radii on all four corners, including mobile sheets.
@@ -32,7 +46,7 @@ Build a small typed semantic token system. Theme swapping must update appearance
 - Scrollbars: transparent track/corner/button background, matching thumb and arrow-glyph color. Do not color the arrow's entire rectangle. Record native browser styling limits honestly.
 - Relevant scene profiles, decorative materials and animation styles. Keep behavior separate from rendering.
 
-Lazy-load theme implementations and theme-specific fonts/assets. Keep only small selection/event metadata eager. Prevent stale imports from applying an old choice or partially mixing themes. Avoid a generic plugin framework or unnecessary dependencies.
+Lazy-load theme implementations and their one optional UI font. Baked wordmarks travel with the theme module; do not download full title fonts for fixed text. Keep only small selection/event metadata eager. Prevent stale imports from applying an old choice or partially mixing themes. Avoid a generic plugin framework or unnecessary dependencies.
 
 ## Choices and calendar
 
@@ -40,7 +54,9 @@ Lazy-load theme implementations and theme-specific fonts/assets. Keep only small
 - **Pond**: preserve the current appearance, organic water, wet/dry ground, frog-associated palette and lily-pad cells.
 - **Cauldron**: Halloween liquid and vessel treatment.
 
-Halloween is October 31 annually. Its window includes October 24 through November 7, inclusive. Outside supported events, Auto resolves to Pond. Use calendar boundaries rather than fixed millisecond offsets across daylight-saving changes. Do not hardcode today's date. Keep the policy small, deterministic and testable, including refresh/resume across a boundary.
+Halloween is October 31 annually. The latest shared 14-calendar-day rule includes October 24 through November 6, ending at local midnight November 7. This supersedes the original 15-date inclusive window. Outside supported events, Auto resolves to Pond. Use calendar boundaries rather than fixed millisecond offsets across daylight-saving changes. Do not hardcode today's date. Keep the policy small, deterministic and testable, including refresh/resume across a boundary.
+
+The implemented annual schedule lives in `src/lib/theme/calendar.ts`: each entry has a theme, localized event label and the actual event `date: { month, day }`. One shared rule expands that date by seven calendar days on each side, with the end excluded. Windows repeat yearly and can cross New Year. First active entry wins overlaps; Pond is the regular fallback. Selection and countdown share one resolved occurrence. The application refreshes at local midnight and on resume, keeping minute countdown work separate from imports. See the [yearly-event recipe](theme-authoring.md#add-a-yearly-event) before adding an event.
 
 Persist the selected preference separately from Auto's effective result. Auto is the default for fresh settings. Preserve existing saved Pond choices: legacy defaults and intentional choices are indistinguishable, so any migration needs a separately justified decision. Unknown theme IDs must degrade safely. Do not silently introduce a storage-schema change while gameplay is frozen.
 
@@ -50,7 +66,7 @@ Brainstorm several coherent concepts with specialists, then use ImageGen for ign
 
 Keep all three liquid colors and readable 3x3 group structure. Decorative bubbles must remain distinct from group boundaries, cell targets and logical state. Explore floating ingredient or potion-surface cell faces that retain opaque readable centers and familiar upright digits. Evaluate carrots, herbs, pumpkin pieces, bubbles and other motifs rather than accepting any suggestion automatically. Avoid visual noise, unnecessary gore and distracting motion.
 
-Choose a cohesive Halloween palette, licensed display lettering and professional readable body font. Matte/enamel/metal controls may suit this theme better than Pond's smooth raised treatment; justify the decision. Theme style may differ substantially while interaction stays familiar.
+Choose a cohesive Halloween palette, licensed baked display lettering for Toadoku and a readable optional UI face. Shared solving numerals remain consistent. Matte/enamel/metal controls may suit this theme better than Pond's smooth raised treatment; justify the decision. Theme style may differ substantially while interaction stays familiar.
 
 Only Pond, the existing app identity/logo and the terminology Dewdrops/Leap/Metamorphosis remain frog-associated by requirement. Keep the existing logo/menu artwork unchanged. New frog animations, mascot transitions, extra features, store and purchases remain deferred.
 

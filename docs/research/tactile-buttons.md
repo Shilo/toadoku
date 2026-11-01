@@ -10,7 +10,7 @@ Research checked 2026-10-31. Proposals for the next visual comparison only. No i
 
 Compare **soft raised pastilles** first and **restrained jelly** second. A shallow lower lip and small highlight can make buttons feel like candy while the surrounding pond stays flat and calm. Keep the board opaque, traditional and unchanged. Put the tactile treatment on menu choices and number-entry buttons, with less emphasis on overflow and Back.
 
-The ranking is a design judgment for Toadodu, not a finding that these styles outperform other Sudoku controls. Google's Material research supports purposeful use of shape, color and size, while warning that unfamiliar interaction patterns can reduce usability. It does not establish a benefit for jelly buttons or this game. [Google Design research](https://design.google/library/expressive-material-design-google-research).
+The ranking is a design judgment for Toadoku, not a finding that these styles outperform other Sudoku controls. Google's Material research supports purposeful use of shape, color and size, while warning that unfamiliar interaction patterns can reduce usability. It does not establish a benefit for jelly buttons or this game. [Google Design research](https://design.google/library/expressive-material-design-google-research).
 
 | Rank | Style | Proposed treatment | Strength | Main cost |
 | --- | --- | --- | --- | --- |

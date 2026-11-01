@@ -41,13 +41,15 @@ describe('stable leaf geometry', () => {
       }
       expect(inside({ x: 50 + Math.cos(shape.notchAngle) * 42,
         y: 50 + Math.sin(shape.notchAngle) * 42 }, polygon)).toBe(false);
-      // Full candidate line boxes, including their corners, rather than centers only.
+      // Digit paint uses a circle; candidate line boxes include their corners.
       for (const diameter of [28, 33.77, 48, 80, 160]) {
         const digit = digitGeometry(diameter);
-        for (const dx of [-0.5, 0.5]) for (const dy of [-0.5, 0.5]) {
-          const point = { x: 50 + dx * digit.width / diameter * 100,
-            y: 50 + dy * digit.height / diameter * 100 };
-          expect(Math.hypot(point.x - 50, point.y - 50)).toBeLessThan(36);
+        expect(digit.width).toBe(digit.height);
+        for (let n = 0; n < 72; n++) {
+          const angle = n * Math.PI * 2 / 72;
+          const point = { x: 50 + Math.cos(angle) * digit.width / diameter * 50,
+            y: 50 + Math.sin(angle) * digit.height / diameter * 50 };
+          expect(Math.hypot(point.x - 50, point.y - 50)).toBeLessThanOrEqual(36 + 1e-9);
           expect(inside(point, polygon)).toBe(true);
         }
         for (const note of noteGeometry(diameter)) {

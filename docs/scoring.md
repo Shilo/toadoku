@@ -49,4 +49,4 @@ Pinned values, assistance, starting counters and rounding are implemented and in
 
 ## Research precedent
 
-Arkadium documents Sudoku rewards combining difficulty, a bounded time bonus, and the share completed without reveals. This supports the feasibility of the structure, not its numerical suitability for Toadodu. [Official scoring explanation](https://support.arkadium.com/support/solutions/articles/44002181769--sudoku-how-to-play-menu-tips-scoring).
+Arkadium documents Sudoku rewards combining difficulty, a bounded time bonus, and the share completed without reveals. This supports the feasibility of the structure, not its numerical suitability for Toadoku. [Official scoring explanation](https://support.arkadium.com/support/solutions/articles/44002181769--sudoku-how-to-play-menu-tips-scoring).

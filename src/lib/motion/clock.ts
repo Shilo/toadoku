@@ -1,4 +1,4 @@
-import { pond } from '../theme/pond';
+import { presentation as pond } from '../theme/presentation';
 
 /** Small injectable browser boundary makes lifecycle behavior independently testable. */
 export interface MotionEnvironment {

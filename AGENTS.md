@@ -1,4 +1,4 @@
-# Toadodu
+# Toadoku
 
 ## Product
 
@@ -19,8 +19,10 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 ## Current task and next phase
 
 - Gameplay implementation and available-environment acceptance are complete. The maintained source includes 100,000 independently certified puzzles, Sudoku/session/hint modules, Quick Play/Progression/replays, direct Dewdrops rewards and transactional IndexedDB storage. [Gameplay acceptance](docs/gameplay-acceptance.md) records actual gates and external hardware/release limits; [progress](docs/gameplay-progress.md) retains the challenged decisions and historical failures. Presentation-only statements below describe completed history.
-- Pause and report gameplay completion. Do not start or integrate theme work in this checkout until the user supplies fresh instructions. Preserve the maintained Pond appearance. The separate theme worktree and earlier Auto/Pond/Cauldron brief do not authorize automatic integration.
-- The [PWA handoff](docs/pwa-implementation-handoff.md), [source research](docs/research/pwa-readiness-audit.md) and [validation matrix](docs/pwa-validation-matrix.md) prepare Android installation, bounded offline play and frequent safe updates. When the user invokes that implementation, use a new separate worktree and branch. This documentation task does not activate PWA coding in main or theme integration.
+- Fresh user instructions authorize the completed theme branch's reviewed integration into main and removal of its feature branch/worktree only after successful validation. Preserve accepted gameplay, concurrent documentation and the separate PWA worktree. [Theme progress](docs/theme-progress.md) records the final implementation handoff; [integration](docs/theme-integration.md) records merged-source acceptance. Current UI/dock fonts are Almendra for Pond and Germania One for Cauldron; all grid/notes/enlarged editor figures use shared Outfit.
+- The [PWA handoff](docs/pwa-implementation-handoff.md), [source research](docs/research/pwa-readiness-audit.md) and [validation matrix](docs/pwa-validation-matrix.md) prepare Android installation, bounded offline play and frequent safe updates. Its separately activated implementation remains in its own worktree/branch. Theme integration does not authorize merging or modifying that PWA worktree.
+- Theme visual boundary: preserve the established Quiet Flat C design and Winding shallows B within all themes. The first isolated ImageGen comparison was rejected by the user as a heavy redesign. Use maintained screens and current design documentation as authority; seasonal adaptation must retain the established composition, soft controls and fixed geometry.
+- Accepted theme scope adds orange Cauldron stew, dedicated simmer motion, pale squash faces, one concave pot curve, a narrow third ground lip, complete control boundaries and Auto status/countdown. Preserve the gameplay grid design. Landscape retains the right 5x2 dock; existing bottom-dock allocations may use one row only with 596px usable width for ten 56px keys. Main-menu actions share one responsive height, capped at 64px, while submenu/identity/shore reservations stay fixed. Current theme contracts supersede historical two-ground-color/exact-row wording below.
 
 - Historical preparation produced the [autonomous gameplay handoff](docs/gameplay-implementation-handoff.md), its data/state/validation specifications and receiving-agent prompt. That brief now governs the explicitly activated gameplay phase and supersedes historical UI-only restrictions.
 - Every plan in the activated gameplay phase must be researched online and challenged before execution, including the lead's own overall/architecture/integration plans, each specialist plan, test plans and every proposed fix or material revision. Assign a named specialist to challenge lead-authored plans. Record evidence-supported agreement, review actual implementations reciprocally, test integrated journeys personally with Codex browser, and commit accepted green slices periodically. See the [mandatory research/challenge loop](docs/gameplay-implementation-handoff.md#6-mandatory-research-and-reciprocal-challenge-loop).
@@ -43,7 +45,7 @@ A cute, full-screen frog Sudoku game for mobile and desktop browsers. Keep class
 
 - Basic Pond theme; Quick Play and randomized Progression.
 - Metamorphosis: repeat counter. Leap: level. Dewdrops: currency.
-- More stays disabled in the completed prototype reference. The accepted tracked gameplay has functional tools/Settings, modes, storage and rewards with three active roles rather than arbitrary save slots. External hardware/release limits remain explicit. Theme integration awaits fresh user instructions.
+- More stays disabled in the completed prototype reference. The accepted tracked gameplay has functional tools/Settings, modes, storage and rewards with three active roles rather than arbitrary save slots. External hardware/release limits remain explicit. Current theme integration follows the fresh authorization above.
 - The tracked UI integrates fresh water, pads, shore and floating modules. Physical hardware validation remains deferred. See [production progress](docs/production-ui-progress.md) and the separate [prototype record](docs/prototype-progress.md).
 - No store, purchases or upgrades.
 
@@ -84,7 +86,7 @@ For gameplay, start with the [autonomous gameplay handoff](docs/gameplay-impleme
 | --- | --- |
 | Layout, pads, controls, menus | [UI/UX](docs/ui-ux.md), [menu flow](docs/menu.md) |
 | Visual constraints and artwork | [Design](docs/design.md) |
-| Tokens, backgrounds, appearance | [Themes](docs/themes.md) |
+| Tokens, backgrounds, appearance, future themes | [Theme authoring](docs/theme-authoring.md), [themes](docs/themes.md) |
 | Pad cutouts or animated water | [Future visual research](docs/future-visual-research.md) |
 | Stack, modules, validation | [Architecture](docs/architecture.md) |
 | Rules, catalogs, deduction patterns | [Data/correctness](docs/gameplay-data-and-correctness.md), [source audit](docs/research/gameplay-readiness-audit.md) |

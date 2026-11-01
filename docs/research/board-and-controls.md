@@ -14,7 +14,7 @@ This is design judgment informed by the sources below. The sources establish exi
 
 ## What existing games actually provide
 
-| Primary source | Observed or documented behavior | Implication for Toadodu |
+| Primary source | Observed or documented behavior | Implication for Toadoku |
 | --- | --- | --- |
 | [Sudoku.com live web interface](https://sudoku.com/) | Lists Undo, Erase, Notes, Hint and digits 1 through 9 | These four tools are recognizable reference actions, not an obligation to copy its action row |
 | [Apple News sudoku help](https://support.apple.com/en-lamr/guide/iphone/iph9b53d2906/27/ios/27) | Pen and Notes input, Eraser, Undo, hints and checks; additional options and settings in menus | Input mode matters during solving; help and settings can occupy separate layers |

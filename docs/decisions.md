@@ -34,7 +34,7 @@ The continuous wet/dry bank supports all menu/dock controls and bleeds across or
 
 ## Accepted requirements
 
-- Name: Toadodu. Classic numbered Sudoku with frogs in every theme.
+- Name: Toadoku. Classic numbered Sudoku with frogs in every theme.
 - Immersive, colorful, minimal gameplay; large board and one consolidated secondary entry point, with exact More-menu behavior under review.
 - Mobile and desktop, portrait and landscape; Motorola G31/G32 targets.
 - Persistent English, German, and Spanish.

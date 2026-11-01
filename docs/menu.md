@@ -2,6 +2,8 @@
 
 Current activated gameplay supersedes the historical preparation notes below. Quick Play has Easy/Medium/Hard and a separate Resume action. Progression has Start/Resume and Completed Leaps. Each role retains its own attempt; there is no slot manager. Menu More opens Settings. Gameplay More groups Tools on the left and Menu on the right, with no extra dock key or permanent HUD. Small related choices use a popover; larger tasks use a bottom sheet on mobile and a centered desktop dialog, with equal four-corner radii.
 
+On the isolated theme branch, every main-menu action uses the same responsive layout-owned height across base, Quick Play and Progression, including More. Opening Settings or a nested window preserves the current menu underneath and returns focus to More on dismissal. Gameplay overlays retain the owned board and dock in place behind the native modal backdrop. Readable dialogs remain timed; explicit Pause/restore blur the scene while suspending study. See the current [theme authoring contract](theme-authoring.md#implementation-boundaries).
+
 Completed results remain until explicit Continue. Selecting another Quick difficulty opens the retained result with a visibly labelled target, such as Continue · Hard. Reload retains the receipt but clears that transient choice; explicit Resume restores the result without silent allocation. Replacement and Continue bind the role identity the player reviewed, and reject a changed generation/role before fetching a new puzzle. Pending completion cannot be bypassed. See the [action audit](gameplay-action-audit.md), [state policy](gameplay-state-and-persistence.md#role-status-action-policy) and [actual validation progress](gameplay-progress.md).
 
 ## Historical preparation context

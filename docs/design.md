@@ -1,5 +1,7 @@
 # Visual constraints
 
+Current isolated theme direction: the [theme authoring guide](theme-authoring.md) records accepted extensions to the historical Pond milestone below. Preserve Quiet Flat C and the gameplay grid. Theme-specific cell materials/liquid motion, a narrow third ground lip and bounded shared control rows are accepted; the old Pond-only deferral, identical seasonal cell treatment and two-ground-color limit do not restrict `codex/themes`. Gameplay integration remains separate.
+
 These requirements override earlier visual recommendations in the research notes.
 
 The complete restart record and selected screenshots are in [design handoff](design-handoff.md).

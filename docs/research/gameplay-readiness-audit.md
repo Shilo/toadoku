@@ -95,7 +95,7 @@ Preparation reviewers were `catalog_logic_handoff` for catalog/oracles/patterns,
 
 ## 5. Primary source index and limits
 
-These references establish technical facts or precedents, not Toadodu's numerical balance or final certification. Recheck relevant versions when implementing.
+These references establish technical facts or precedents, not Toadoku's numerical balance or final certification. Recheck relevant versions when implementing.
 
 - [Knuth, Dancing Links](https://arxiv.org/abs/cs/0011047): independent exact-cover algorithm reference.
 - [Norvig, Solving Every Sudoku Puzzle](https://www.norvig.com/sudoku.html): units/peers and solving explanation. Do not blindly inherit permissive parsing or third-party benchmark rights.
