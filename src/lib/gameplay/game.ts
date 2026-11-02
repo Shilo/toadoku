@@ -12,7 +12,8 @@ import { isComplete } from '../sudoku/index.ts';
 import { AttemptSaveQueue } from './controller.ts';
 import { same } from '../storage/decode.ts';
 
-export const TIME_SAVE_INTERVAL_MS = 10000;
+import { TIME_SAVE_INTERVAL_MS } from './save-policy';
+export { TIME_SAVE_INTERVAL_MS } from './save-policy';
 
 export interface HintComputer { compute(input: HintInput): Promise<HintResult>; cancel(): void }
 export interface GameState {
@@ -100,7 +101,7 @@ export class GameController {
   }
   private scheduleCheckpoint(reset = false): void {
     const attempt = this.value.attempt, queue = this.queue;
-    if (this.destroyed || !this.value.canStudy || !this.value.owned || attempt?.status !== 'playing' ||
+    if (this.destroyed || this.repository.durability === 'ephemeral' || !this.value.canStudy || !this.value.owned || attempt?.status !== 'playing' ||
         this.value.busy || !this.clock || !queue || queue.state.failure) { this.cancelCheckpoint(); return; }
     if (this.checkpointTimer !== undefined && !reset) return;
     this.cancelCheckpoint();
@@ -112,8 +113,12 @@ export class GameController {
   }
   /** Visibility and concealment change synchronously, before presentation reveals any values. */
   setView(view: Partial<typeof this.view>): void {
+    const wasTiming = this.value.canStudy && this.value.attempt?.status === 'playing';
     this.view = { ...this.view, ...view };
-    this.syncClock(); this.checkpoint(); this.publish();
+    this.syncClock();
+    // Ordinary readable overlays keep the same active segment and fallback deadline.
+    if (wasTiming && !this.value.canStudy) this.checkpoint();
+    this.publish();
     // Hide/menu/Pause also drain a cursor-only batch when time did not advance.
     if (!this.value.canStudy) void this.queue?.flush();
   }
@@ -141,6 +146,9 @@ export class GameController {
     this.clock = createActivePlayClock(Math.max(attempt.elapsedMs, carriedTime), this.now);
     this.queue = new AttemptSaveQueue(persisted, {
       save: (snapshot, revision) => this.repository.saveSnapshot(this.guard(snapshot), revision, snapshot),
+      ...(this.repository.saveTime ? { saveTime: (time: Pick<Attempt, 'id' | 'generation' | 'writer' | 'commandSeq' | 'elapsedMs'>,
+        revision: number, sequence: number) => this.repository.saveTime!({ generation: time.generation, attemptId: time.id, writer: time.writer },
+        revision, sequence, time.commandSeq, time.elapsedMs) } : {}),
     }, saved => {
       const latest = this.value.attempt;
       if (latest?.id !== saved.id) return;
@@ -308,7 +316,7 @@ export class GameController {
     const elapsedMs = this.clock.sample();
     if (elapsedMs <= attempt.elapsedMs) return;
     const result = reduceAttempt(attempt, { type: 'checkpoint', elapsedMs });
-    if (result.kind === 'changed') { this.value.attempt = result.attempt; this.queue!.enqueue(result.attempt); this.scheduleCheckpoint(true); }
+    if (result.kind === 'changed') { this.value.attempt = result.attempt; this.queue!.enqueueTime(result.attempt); this.scheduleCheckpoint(true); }
   }
   private async finish(): Promise<boolean> {
     return this.barrier(() => this.commitCompletion(true));

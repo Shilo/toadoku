@@ -4,6 +4,8 @@ export const SELECTION_SAVE_DELAY_MS = 250;
 
 export interface SavePort {
   save(snapshot: Attempt, expectedRevision: number): Promise<StorageResult<Attempt>>;
+  saveTime?(metadata: Pick<Attempt, 'id' | 'generation' | 'writer' | 'commandSeq' | 'elapsedMs'>,
+    expectedRevision: number, expectedCommittedSeq: number): Promise<StorageResult<Attempt>>;
 }
 export interface SaveState {
   committedSeq: number;
@@ -18,6 +20,7 @@ export interface SaveState {
  */
 export class AttemptSaveQueue {
   private pending?: Attempt;
+  private pendingTimeOnly = false;
   private running?: Promise<void>;
   private committed: Attempt;
   private failure?: SaveState['failure'];
@@ -37,6 +40,15 @@ export class AttemptSaveQueue {
   }
 
   enqueue(snapshot: Attempt, selectionOnly = false): void {
+    this.enqueueSnapshot(snapshot, selectionOnly, false);
+  }
+
+  /** Explicit provenance: a clock sample must never replace an unsaved board edit. */
+  enqueueTime(snapshot: Attempt): void {
+    this.enqueueSnapshot(snapshot, false, true);
+  }
+
+  private enqueueSnapshot(snapshot: Attempt, selectionOnly: boolean, timeOnly: boolean): void {
     if (this.closed) throw new Error('Closed save queue');
     const old = this.committed;
     if (snapshot.id !== old.id || snapshot.generation !== old.generation ||
@@ -49,6 +61,7 @@ export class AttemptSaveQueue {
     this.highestEnqueuedSeq = snapshot.commandSeq;
     const hadPending = !!this.pending;
     this.pending = snapshot;
+    this.pendingTimeOnly = timeOnly && (!hadPending || this.pendingTimeOnly);
     // Keep a fixed first-selection deadline. A cursor update cannot postpone an edit.
     if (!selectionOnly) this.urgent();
     else if (!hadPending && !this.failure) {
@@ -80,15 +93,25 @@ export class AttemptSaveQueue {
   private async pump(): Promise<void> {
     while (this.pending && !this.failure && !this.deferred) {
       const sent = this.pending;
+      const timeOnly = this.pendingTimeOnly;
       this.pending = undefined;
+      this.pendingTimeOnly = false;
       let result: StorageResult<Attempt>;
-      try { result = await this.port.save({ ...sent, revision: this.committed.revision }, this.committed.revision); }
+      try {
+        result = timeOnly && this.port.saveTime
+          ? await this.port.saveTime({ id: sent.id, generation: sent.generation,
+            writer: { token: sent.writer.token, epoch: sent.writer.epoch }, commandSeq: sent.commandSeq, elapsedMs: sent.elapsedMs },
+          this.committed.revision, this.committed.commandSeq)
+          : await this.port.save({ ...sent, revision: this.committed.revision }, this.committed.revision);
+      }
       catch (error) { result = { kind: 'unavailable', reason: 'abort', detail: error instanceof Error ? error.name : 'UnknownError' }; }
       if (result.kind !== 'committed') {
         this.failure = result;
         this.urgent();
         // Keep the newest unsaved state, not only the failed older in-flight snapshot.
         this.pending ??= sent;
+        // The failed write may contain a board edit missing from the durable base.
+        this.pendingTimeOnly = false;
         this.publish();
         return;
       }
@@ -99,6 +122,7 @@ export class AttemptSaveQueue {
         this.failure = { kind: 'corrupt', reason: 'invalid-save-acknowledgement' };
         this.urgent();
         this.pending ??= sent;
+        this.pendingTimeOnly = false;
         this.publish();
         return;
       }

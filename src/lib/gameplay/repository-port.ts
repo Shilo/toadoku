@@ -4,4 +4,4 @@ import type { Repository } from '../storage/repository.ts';
 export type GameRepositoryPort = Pick<Repository,
   'readCurrent' | 'readIssued' | 'acquireWriter' | 'saveSnapshot' | 'savePreferences' |
   'disclose' | 'allocate' | 'complete' | 'exportBackup' | 'previewRestore' | 'stageRestore' |
-  'activateRestore' | 'close'> & { readonly durability: 'durable' | 'ephemeral'; cancelBackupWork?: () => void; exportRecovery?: Repository['exportRecovery'] };
+  'activateRestore' | 'close'> & { readonly durability: 'durable' | 'ephemeral'; saveTime?: Repository['saveTime']; cancelBackupWork?: () => void; exportRecovery?: Repository['exportRecovery'] };

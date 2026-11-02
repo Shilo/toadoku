@@ -359,7 +359,7 @@
     if (overlay?.panel === 'backup' || recoveryBusy) cancelBackupOperation();
     if (inGame && controller && reason !== 'menu') {
       const current = controller, focusAfterCheck = reason === 'tool' || reason === 'undo';
-      void visibilityGuard.show().then(() => {
+      void visibilityGuard.show(gameState.canStudy).then(() => {
         if (focusAfterCheck && !disposed && controller === current && route === 'board' && authorityAllowed && gameState.canStudy) void focusCell();
       });
     }

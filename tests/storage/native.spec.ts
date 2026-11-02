@@ -3,6 +3,17 @@ import { openNativeHarness } from './harness';
 import { writeFileSync } from 'node:fs';
 import type { MetadataOutcome } from './metadata-native';
 
+test('native compact time checkpoints preserve state and reject unsafe writes atomically', async ({ page }) => {
+  await openNativeHarness(page);
+  const report = await page.evaluate(async () => {
+    const url = '/tests/storage/time-checkpoint-native.ts'; return (await import(url)).nativeTimeCheckpointCases();
+  });
+  expect(report.invalidScalarCases).toBe(20);
+  expect(report.passed).toContain('request-success abort never acknowledges or partially writes');
+  expect(report.passed).toContain('concurrent compact writes serialize through CAS');
+  console.log(JSON.stringify(report));
+});
+
 test('native essential metadata values match their actual role pool and generation keys', async ({ page }) => {
   await openNativeHarness(page);
   const report: MetadataOutcome[] = await page.evaluate(async () => { const url = '/tests/storage/metadata-native.ts'; return (await import(url)).nativeMetadataKeyBindings(); });

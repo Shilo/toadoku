@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { staticHost } from '../pwa/server.mjs';
+import { TIME_SAVE_INTERVAL_MS } from '../../src/lib/gameplay/save-policy.ts';
 
 // Serial production benchmark. A CPU slowdown is host-relative simulation, not Android hardware evidence.
 // Run: node tests/browser/autosave-long-game.mjs <build-root> <fresh-label>
@@ -14,6 +15,8 @@ const dir = resolve('prototypes/pwa-validation/autosave-long-game', process.argv
 const fixtureArg = process.argv.find(arg => arg.startsWith('--restore-fixture='));
 const fixtureFile = fixtureArg?.slice('--restore-fixture='.length);
 const pacedOnly = process.argv.includes('--paced-only');
+const interval = Number(process.argv.find(arg => arg.startsWith('--interval='))?.slice('--interval='.length) ?? TIME_SAVE_INTERVAL_MS);
+assert(Number.isSafeInteger(interval) && interval > 0);
 await mkdir(dir, { recursive: true });
 assert.equal(await stat(resolve(dir, 'profile')).then(() => true, error => {
   if (error.code === 'ENOENT') return false;
@@ -27,14 +30,15 @@ const context = await chromium.launchPersistentContext(resolve(dir, 'profile'), 
 context.setDefaultTimeout(20000);
 let page = context.pages()[0];
 const report = {
+  interval,
   release: JSON.parse(await readFile(resolve(root, 'release.json'), 'utf8')),
   environment: 'Desktop Chromium, 360x800 CSS px, DPR 3; 6x main-thread CPU slowdown after warm setup. This is host-relative simulation, not a particular phone or battery test.',
   instrumentation: 'Identical before/after hooks record constant-work metadata, native Attempt structuredClone/put duration, transaction boundaries, animation frames, trusted input to next animation-frame callback, and long tasks. Cross-phase frame gaps remain in boundaryFrames. Full-record readback runs in a separate verification phase. No JSON serialization inside timed hooks. Input timing is not full paint/INP. Checkpoint-overlap inputs begin at put, so frame gaps across the entire thinking period also cover earlier validation.',
   stages: [],
 };
-await context.addInitScript(() => {
+await context.addInitScript(interval => {
   const audit = window.__longSaveAudit = {
-    phase: 'setup', frames: [], boundaryFrames: [], inputs: [], clones: [], transactions: [], checkpoints: [],
+    phase: 'setup', phases: [{ name: 'setup', at: performance.now() }], frames: [], boundaryFrames: [], inputs: [], clones: [], transactions: [], checkpoints: [],
     longTasks: [], visibility: [], boardChanges: [], checkpointInputs: false,
   };
   let previousFrame, previousFramePhase;
@@ -48,7 +52,9 @@ await context.addInitScript(() => {
   }
   requestAnimationFrame(frame);
   new PerformanceObserver(list => {
-    for (const entry of list.getEntries()) if (audit.phase !== 'setup') audit.longTasks.push({ at: entry.startTime, duration: entry.duration, phase: audit.phase });
+    for (const entry of list.getEntries()) audit.longTasks.push({ at: entry.startTime, duration: entry.duration,
+      phase: audit.phases.findLast(phase => phase.at <= entry.startTime)?.name ?? 'setup',
+      crossesPhaseBoundary: audit.phases.some(phase => phase.at > entry.startTime && phase.at < entry.startTime + entry.duration) });
   }).observe({ type: 'longtask', buffered: false });
   document.addEventListener('visibilitychange', () => audit.visibility.push({ at: performance.now(), hidden: document.hidden }));
   document.addEventListener('keydown', event => {
@@ -66,7 +72,7 @@ await context.addInitScript(() => {
   };
   const timeout = window.setTimeout;
   window.setTimeout = function (callback, delay, ...args) {
-    if (delay !== 10000 || typeof callback !== 'function') return timeout.call(this, callback, delay, ...args);
+    if (delay !== interval || typeof callback !== 'function') return timeout.call(this, callback, delay, ...args);
     return timeout.call(this, (...values) => {
       if (audit.phase === 'setup') return callback(...values);
       const event = { at: performance.now(), duration: null, phase: audit.phase };
@@ -108,7 +114,7 @@ await context.addInitScript(() => {
     }
     return request;
   };
-});
+}, interval);
 
 async function snapshot(target = page) {
   return target.evaluate(async () => {
@@ -133,7 +139,7 @@ async function snapshot(target = page) {
 }
 const current = data => data.attempts.values.find(attempt => attempt.role === 'quick');
 async function persisted(predicate) { await expect.poll(async () => predicate(current(await snapshot())), { timeout: 20000 }).toBe(true); }
-async function phase(name) { await page.evaluate(name => { window.__longSaveAudit.phase = name; }, name); }
+async function phase(name) { await page.evaluate(name => { const audit = window.__longSaveAudit; audit.phases.push({ name, at: performance.now() }); audit.phase = name; }, name); }
 async function audit() { return page.evaluate(() => window.__longSaveAudit); }
 async function drained() { await expect.poll(() => page.evaluate(() => window.__longSaveAudit.transactions.every(tx => tx.complete !== null))).toBe(true); }
 async function resume() {
@@ -269,7 +275,7 @@ try {
   });
   await phase('thinking');
   // Pure thinking has no input, so time-only saves must not alter board DOM.
-  await page.waitForTimeout(31200);
+  await page.waitForTimeout(interval * 3 + 1200);
   const thinking = await audit();
   report.stages.push(summarize(thinking, 'thinking'));
   assert.equal(report.stages.at(-1).attemptTransactions, 3);
@@ -278,9 +284,9 @@ try {
   await page.evaluate(() => window.__longBoardObserver.disconnect());
   // One additional real checkpoint overlapping a native input. Small n is reported raw.
   await phase('checkpoint-overlap');
-  await page.evaluate(() => { window.__longSaveAudit.phase = 'thinking'; window.__longSaveAudit.checkpointInputs = true; });
+  await phase('thinking'); await page.evaluate(() => { window.__longSaveAudit.checkpointInputs = true; });
   const overlapStart = await page.evaluate(() => performance.now());
-  await expect.poll(() => page.evaluate(start => window.__longSaveAudit.inputs.filter(input => input.phase === 'thinking' && input.at > start).length, overlapStart), { timeout: 15000 }).toBe(1);
+  await expect.poll(() => page.evaluate(start => window.__longSaveAudit.inputs.filter(input => input.phase === 'thinking' && input.at > start).length, overlapStart), { timeout: interval + 5000 }).toBe(1);
   await page.waitForTimeout(500);
   const afterOverlap = await audit();
   report.stages.push({ name: 'checkpoint-put-overlap-input', samples: afterOverlap.inputs.filter(input => input.phase === 'thinking' && input.at > overlapStart), limitation: 'One real timer checkpoint sample, reported raw. Native input starts at put; earlier validation is covered by the full thinking frame trace.' });
@@ -297,7 +303,7 @@ try {
   assert(report.stages.at(-1).inputNextFrameP95Ms < 200, 'Rapid-edit input responsiveness exceeded 200ms at 6x slowdown');
   await phase('navigation'); await more(); await page.getByRole('button', { name: 'Main menu', exact: true }).click();
   await expect(page.locator('.menu-more')).toBeEnabled(); await drained();
-  await phase('menu'); await page.waitForTimeout(10500);
+  await phase('menu'); await page.waitForTimeout(interval + 500);
   report.stages.push(summarize(await audit(), 'menu')); assert.equal(report.stages.at(-1).attemptTransactions, 0);
   await phase('navigation'); await resume();
   let hiddenMethod = 'Native background tab after disabling Playwright focus emulation';
@@ -311,7 +317,7 @@ try {
     await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
   }
   await expect(page.locator('div.scene')).toHaveCSS('filter', 'blur(12px)');
-  await drained(); await phase('hidden'); await page.waitForTimeout(10500);
+  await drained(); await phase('hidden'); await page.waitForTimeout(interval + 500);
   report.stages.push({ ...summarize(await audit(), 'hidden'), method: hiddenMethod }); assert.equal(report.stages.at(-1).attemptTransactions, 0);
   await phase('navigation');
   if (nativeHidden) { await page.bringToFront(); await cover.close(); }

@@ -46,6 +46,16 @@ The panel keeps four independent facts:
 
 `ensureShell()` waits for actual activation and fresh readback before puzzle preparation. The verified worker takes control after setup. Each page identifies its own build; an unidentified page receives no arbitrary mutable files from another build. Installation remains optional for browser offline use.
 
+## Automatic saving
+
+Digits, notes and other changed progress save promptly with the current thinking time. Rapid cell selection batches for up to 250 ms. Pause, returning to the menu and hiding the app stop the clock, capture the final time and drain pending input. Ordinary readable More/Settings windows keep timing without forcing another save. A visible, owned unfinished game also has a thirty-second time-only fallback. Menu, hidden, paused, completed, failed-save and RAM-only states have no recurring save timer; RAM-only play remains explicitly unsaved.
+
+The fallback is about two writes per idle visible minute, versus six at the former ten-second interval. Sixty seconds would save only one further write per minute while doubling nominal average unsaved thinking time from fifteen to thirty seconds. These averages assume an abrupt stop evenly distributed between checkpoints; scheduling delays prevent a hard crash-loss deadline. Real edits and lifecycle boundaries still save without waiting for the fallback.
+
+Clock-only commands validate the stored game once and check generation, writer, revision, sequence and active-role authority before changing only time metadata. The full stored record and schema stay the same; ordinary edited snapshots retain all three validation passes. The queue preserves pending real edits and retries the newest full state after failure. Storage is asynchronous, while validation/copying still runs on the UI thread. No separate save worker is used; its message-copying and lifetime costs need measured justification. Without an earlier ownership check, an idle old window can stay readable until the nominal thirty-second fallback plus delay, but stale writes fail immediately.
+
+Closing is best effort. An actual Android navigation delivered pagehide then freeze about 18.7 ms later, before its final time tail committed; acknowledged moves survived. A close/minimize event does not prove a game save finished. Keep lifecycle saves and periodic protection together, and rely on acknowledged storage/readback for update safety. See [lifecycle limits](https://developer.chrome.com/docs/web-platform/page-lifecycle-api), the [persistence policy](gameplay-state-and-persistence.md#current-autosave-policy-2026-11-02) and [actual acceptance evidence](pwa-acceptance.md). Earlier one-, five- and ten-second measurements remain historical.
+
 ## Exact online play and disposable reserves
 
 The existing allocator chooses the exact certified ordinal. The loader checks a verified compact record first, then its existing recent-file cache, then downloads the requested shard on demand. Online allocation is never restricted by optional pack targets, admission allowances or an unsuccessful extra-cache write. The saved active puzzle is self-contained. If the exact replacement is unavailable offline, the current attempt/result remains and the UI gives connection/preparation guidance.

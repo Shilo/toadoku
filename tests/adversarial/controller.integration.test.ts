@@ -24,7 +24,7 @@ async function until(predicate: () => boolean): Promise<void> {
 const committed = <T>(value: T): StorageResult<T> => ({ kind: 'committed', value: structuredClone(value) });
 
 /** Pure deferred ports test coordination only. They do not substitute for Sage's real-IDB cases. */
-function harness(initial = attemptFixture()) {
+function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral' = 'durable', compact = false) {
   const manifest = JSON.parse(readFileSync('public/catalog/v1/manifest.json', 'utf8')) as CatalogManifest;
   let now = 0, ids = 0;
   const data: CurrentSave = {
@@ -32,7 +32,7 @@ function harness(initial = attemptFixture()) {
     roles: (['quick', 'frontier', 'replay'] as Role[]).map(role => ({ generation: initial.generation, role, revision: 0, lastIntentSeq: 0, ...(role === initial.role ? { attemptId: initial.id } : {}) })),
     attempts: [structuredClone(initial)], pools: pools().map(pool => ({ ...pool, count: manifest.pools[pool.pool].count })),
   };
-  const calls = { saves: [] as Attempt[], disclosures: [] as Disclosure[], acquisitions: [] as string[], allocations: [] as AllocationRequest[], reads: 0, catalogInitializations: 0, records: 0, exports: 0, previews: 0, stages: 0, activations: 0, cancellations: 0 };
+  const calls = { saves: [] as Attempt[], timeSaves: [] as Parameters<Repository['saveTime']>[], disclosures: [] as Disclosure[], acquisitions: [] as string[], allocations: [] as AllocationRequest[], reads: 0, catalogInitializations: 0, records: 0, exports: 0, previews: 0, stages: 0, activations: 0, cancellations: 0 };
   let saveWait: Promise<void> | undefined, discloseWait: Promise<void> | undefined, acquireWait: Promise<void> | undefined, preferenceWait: Promise<void> | undefined, allocateWait: Promise<void> | undefined, activationWait: Promise<void> | undefined, exportWait: Promise<void> | undefined, previewWait: Promise<void> | undefined, stageWait: Promise<void> | undefined;
   let saveIssue: Exclude<StorageResult<Attempt>, { kind: 'committed' }> | undefined;
   let acquireIssue: Exclude<StorageResult<Attempt>, { kind: 'committed' }> | undefined;
@@ -41,7 +41,7 @@ function harness(initial = attemptFixture()) {
   const reads: Promise<StorageResult<CurrentSave>>[] = [];
   const hints: HintComputer = { compute: () => computations.shift() ?? Promise.resolve({ kind: 'unavailable', reason: 'invalid' }), cancel: () => {} };
   const repository = {
-    durability: 'durable',
+    durability,
     readCurrent: async () => { calls.reads++; return reads.shift() ?? committed(data); },
     acquireWriter: async (_generation: string, id: string, token: string) => {
       calls.acquisitions.push(id); await acquireWait;
@@ -91,6 +91,14 @@ function harness(initial = attemptFixture()) {
     },
     close: () => {},
   } as unknown as Repository;
+  if (compact) repository.saveTime = async (guard, revision, sequence, nextSequence, elapsedMs) => {
+    calls.timeSaves.push([structuredClone(guard), revision, sequence, nextSequence, elapsedMs]); await saveWait;
+    if (saveIssue) return saveIssue;
+    const index = data.attempts.findIndex(item => item.id === guard.attemptId), attempt = data.attempts[index];
+    if (attempt.revision !== revision || attempt.commandSeq !== sequence) return { kind: 'conflict', reason: 'revision' };
+    data.attempts[index] = { ...attempt, revision: revision + 1, commandSeq: nextSequence, elapsedMs: Math.max(attempt.elapsedMs, elapsedMs) };
+    return committed(data.attempts[index]);
+  };
   const catalog = {
     initialize: async () => { calls.catalogInitializations++; return { kind: 'ready', value: manifest }; },
     getRecord: async () => { calls.records++; return { kind: 'ready', value: initial.definition }; },
@@ -118,10 +126,10 @@ describe('active-only autosave scheduling', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it('saves idle thinking at the ten-second boundary and has no inactive timer', async () => {
+  it('saves idle thinking at the thirty-second boundary and has no inactive timer', async () => {
     const h = harness(); await h.reveal();
     try {
-      expect(TIME_SAVE_INTERVAL_MS).toBe(10000);
+      expect(TIME_SAVE_INTERVAL_MS).toBe(30000);
       h.setNow(TIME_SAVE_INTERVAL_MS - 1); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS - 1); expect(h.calls.saves).toHaveLength(0);
       h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(1);
       expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([TIME_SAVE_INTERVAL_MS]);
@@ -137,6 +145,75 @@ describe('active-only autosave scheduling', () => {
       h.game.setView({ board: false }); h.setNow(resumedAt + TIME_SAVE_INTERVAL_MS * 4 + 135); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS * 3);
       expect(h.calls.saves).toHaveLength(4); expect(vi.getTimerCount()).toBe(0);
     } finally { await h.game.dispose(); }
+  });
+
+  it('does no recurring RAM-only saving but retains exact time at the menu boundary', async () => {
+    const h = harness({ ...attemptFixture(), scored: false }, 'ephemeral'); await h.reveal();
+    try {
+      h.setNow(60_123); await vi.advanceTimersByTimeAsync(60_123);
+      expect(h.calls.saves).toHaveLength(0); expect(vi.getTimerCount()).toBe(0);
+      h.game.setView({ board: false }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.calls.saves).toHaveLength(1); expect(h.data.attempts[0].elapsedMs).toBe(60_123);
+      expect(h.game.state.saveState).toBe('unsaved'); expect(vi.getTimerCount()).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('routes a successful hide through the compact adapter with the committed base and no duplicate hide write', async () => {
+    const h = harness(attemptFixture(), 'durable', true); await h.reveal();
+    const before = structuredClone(h.game.state.attempt!);
+    try {
+      h.setNow(321); h.game.setView({ visible: false });
+      await until(() => h.game.state.saveState === 'saved');
+      expect(h.calls.saves).toEqual([]);
+      expect(h.calls.timeSaves).toEqual([[{ generation: before.generation, attemptId: before.id, writer: before.writer },
+        before.revision, before.commandSeq, before.commandSeq + 1, 321]]);
+      h.setNow(999); h.game.setView({ visible: false }); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS * 2);
+      expect(h.calls.timeSaves).toHaveLength(1); expect(h.data.attempts[0].elapsedMs).toBe(321);
+      expect(h.data.attempts[0].entries).toEqual(before.entries); expect(vi.getTimerCount()).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('does not save or postpone the fallback for ordinary readable overlay updates', async () => {
+    const h = harness(attemptFixture(), 'durable', true); await h.reveal();
+    try {
+      h.setNow(TIME_SAVE_INTERVAL_MS - 1000); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS - 1000);
+      h.game.setView({ board: true, visible: true, concealed: false });
+      expect(h.calls.saves).toEqual([]); expect(h.calls.timeSaves).toEqual([]);
+      h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(1000);
+      expect(h.calls.timeSaves).toHaveLength(1); expect(h.calls.timeSaves[0][4]).toBe(TIME_SAVE_INTERVAL_MS);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('captures the exact stopped time after hiding while a guarded operation is held', async () => {
+    const h = harness(attemptFixture(), 'durable', true); await h.reveal();
+    const gate = deferred<void>(); h.waits.disclose(gate.promise);
+    h.computations.push(Promise.resolve({ kind: 'ready', payload: { kind: 'inconsistent', logicalRevision: 0 } }));
+    try {
+      h.setNow(125); const request = h.game.requestHint('logical');
+      await until(() => h.calls.disclosures.length === 1);
+      h.setNow(917); h.game.setView({ visible: false });
+      h.setNow(50000); gate.resolve(); await request;
+      await until(() => h.game.state.saveState === 'saved');
+      expect(h.game.state.attempt!.elapsedMs).toBe(917);
+      expect(h.data.attempts[0].elapsedMs).toBe(917);
+      expect(h.calls.timeSaves.at(-1)?.[4]).toBe(917);
+      expect(h.game.state.canStudy).toBe(false); expect(vi.getTimerCount()).toBe(0);
+    } finally { gate.resolve(); await h.game.dispose(); }
+  });
+
+  it('hiding during a failed full save retries the newest board and frozen time through the full adapter', async () => {
+    const h = harness(attemptFixture(), 'durable', true); await h.reveal(); const gate = deferred<void>();
+    try {
+      h.waits.save(gate.promise); h.setNow(125); h.game.command({ type: 'enter', digit: 2 });
+      await until(() => h.calls.saves.length === 1);
+      h.setNow(917); h.game.setView({ visible: false }); h.setNow(999); h.game.setView({ visible: false });
+      h.saveIssue({ kind: 'unavailable', reason: 'quota' }); gate.resolve(); await until(() => h.game.state.saveState === 'unsaved');
+      expect(h.calls.timeSaves).toEqual([]); expect(h.calls.saves).toHaveLength(1);
+      h.waits.save(undefined); h.saveIssue(); expect(await h.game.retry()).toBe(true);
+      expect(h.calls.saves).toHaveLength(2); expect(h.calls.saves[1].elapsedMs).toBe(917);
+      expect(h.data.attempts[0].entries[1]).toBe(2); expect(h.data.attempts[0].elapsedMs).toBe(917);
+      expect(h.calls.timeSaves).toEqual([]); expect(vi.getTimerCount()).toBe(0);
+    } finally { gate.resolve(); await h.game.dispose(); }
   });
 
   it('includes exact time in edits without a redundant nearby periodic save', async () => {

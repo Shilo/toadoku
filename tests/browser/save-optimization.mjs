@@ -2,16 +2,20 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { staticHost } from '../pwa/server.mjs';
+import { TIME_SAVE_INTERVAL_MS } from '../../src/lib/gameplay/save-policy.ts';
 
 process.env.PLAYWRIGHT_BROWSERS_PATH = resolve('prototypes/production-ui-evidence/browsers');
 const { chromium, expect } = await import('@playwright/test');
 const root = resolve(process.argv[2] ?? 'dist');
 const dir = resolve('prototypes/pwa-validation/save-optimization-browser', process.argv[3] ?? String(Date.now()));
 const recoveryOnly = process.argv.includes('--recovery-only');
+const overlayOnly = process.argv.includes('--overlay-only');
+const interval = Number(process.argv.find(arg => arg.startsWith('--interval='))?.slice('--interval='.length) ?? TIME_SAVE_INTERVAL_MS);
+assert(Number.isSafeInteger(interval) && interval > 0);
 await mkdir(dir, { recursive: true });
 await mkdir(resolve(dir, 'downloads'), { recursive: true });
 const release = JSON.parse(await readFile(resolve(root, 'release.json'), 'utf8'));
-const report = { release, environment: 'Production Chromium on desktop, fresh isolated profile; JSON sizes are logical record bytes, not physical disk writes or phone measurements.', stages: [] };
+const report = { release, interval, environment: 'Production Chromium on desktop, fresh isolated profile; JSON sizes are logical record bytes, not physical disk writes or phone measurements.', stages: [] };
 const host = await staticHost({ root, port: 0 });
 const context = await chromium.launchPersistentContext(resolve(dir, 'profile'), { headless: true, acceptDownloads: true, downloadsPath: resolve(dir, 'downloads'), artifactsDir: resolve(dir, 'artifacts'), viewport: { width: 360, height: 800 } });
 let page = context.pages()[0];
@@ -102,6 +106,32 @@ async function persisted(predicate) {
 try {
   await page.goto(host.origin + '/toadoku/');
   await expect(page.locator('.menu-more')).toBeEnabled();
+  if (overlayOnly) {
+    await page.getByRole('button', { name: 'Quick Play', exact: true }).click();
+    await page.getByRole('button', { name: 'Easy', exact: true }).click();
+    await expect(page.locator('.cell')).toHaveCount(81);
+    const selected = Number(await page.locator('[data-clue=false]').first().getAttribute('data-cell'));
+    await page.locator(`[data-cell="${selected}"]`).click(); await page.keyboard.press('1');
+    await persisted(attempt => attempt.entries[selected] === 1);
+    const before = await writes(), boundary = before.at(-1).at;
+    for (let index = 0; index < 3; index++) {
+      await more();
+      if (index !== 1) {
+        await page.getByRole('button', { name: 'Settings', exact: true }).click();
+        await expect(page.locator('#game-dialog-title')).toHaveText('Settings');
+      }
+      await closeDialogs(); await page.waitForTimeout(200);
+      await expect(page.locator('.cell')).toHaveCount(81);
+      await expect(page.locator('div.scene')).toHaveCSS('filter', 'none');
+    }
+    assert(await page.evaluate(start => performance.now() - start, boundary) < interval - 1000, 'Overlay sample crossed fallback deadline');
+    assert.equal((await writes()).length, before.length, 'Readable overlay close forced a save');
+    await expect.poll(async () => (await writes()).length, { timeout: interval + 2000 }).toBe(before.length + 1);
+    const checkpoint = (await writes()).at(-1), delta = checkpoint.at - boundary;
+    assert(delta >= interval - 500 && delta < interval + 1500, 'Overlay close postponed fallback');
+    assert(checkpoint.complete !== null && !checkpoint.aborted);
+    report.stages.push({ name: 'real-readable-more-settings-open-close', roundTrips: 3, forcedSaves: 0, originalDeadlineMs: delta });
+  } else {
   let original, cell;
   if (recoveryOnly) {
     await page.getByRole('button', { name: 'Quick Play', exact: true }).click();
@@ -114,7 +144,7 @@ try {
     original = await snapshot();
     report.stages.push({ name: 'focused-recovery-fixture', notesModeAndNoteCommitted: true });
   } else {
-  await sample('fresh-main-menu-no-recurring-save', 10500, 0);
+  await sample('fresh-main-menu-no-recurring-save', interval + 500, 0);
   await page.getByRole('button', { name: 'Quick Play', exact: true }).click();
   await page.getByRole('button', { name: 'Easy', exact: true }).click();
   await expect(page.locator('.cell')).toHaveCount(81);
@@ -126,9 +156,9 @@ try {
     window.__boardObserver.observe(document.querySelector('.board'), { subtree: true, childList: true, characterData: true, attributes: true,
       attributeFilter: ['aria-label', 'aria-pressed', 'data-clue', 'data-conflict'] });
   });
-  const idle = await sample('visible-thinking-31-seconds', 31000, 3);
-  assert(idle.slice(1).every((event, index) => event.at - idle[index].at >= 9500));
-  assert(current(await snapshot()).elapsedMs >= 30000);
+  const idle = await sample('visible-thinking-three-checkpoints', interval * 3 + 1000, 3);
+  assert(idle.slice(1).every((event, index) => event.at - idle[index].at >= interval - 500));
+  assert(current(await snapshot()).elapsedMs >= interval * 3);
   const boardChanges = await page.evaluate(() => { window.__boardObserver.disconnect(); return window.__boardChanges; });
   assert.equal(boardChanges.length, 0, 'Time-only saves changed board text, accessibility labels or cell states');
   report.stages.push({ name: 'time-saves-do-not-refresh-board', changes: boardChanges });
@@ -136,7 +166,7 @@ try {
   await more();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.locator('#game-dialog-title')).toHaveText('Settings');
-  const geometry = await page.evaluate(async () => {
+  const geometry = await page.evaluate(async interval => {
     const dialog = document.querySelector('dialog'), states = new Set();
     let running = true, frames = 0;
     function frame() {
@@ -146,9 +176,9 @@ try {
       frames++; requestAnimationFrame(frame);
     }
     const start = window.__saveAudit.length; frame();
-    await new Promise(done => setTimeout(done, 20500)); running = false;
+    await new Promise(done => setTimeout(done, interval * 2 + 500)); running = false;
     return { frames, states: [...states], transactions: window.__saveAudit.slice(start).filter(tx => tx.writes.some(write => write.store === 'attempts')) };
-  });
+  }, interval);
   assert.equal(geometry.states.length, 1, 'Settings changed layout during routine saves');
   assert(geometry.transactions.length >= 2, 'Settings sample did not span two real saves');
   report.stages.push({ name: 'settings-layout-across-time-saves', ...geometry });
@@ -190,7 +220,7 @@ try {
   await expect(page.locator('div.scene')).toHaveCSS('filter', 'blur(12px)');
   await page.waitForTimeout(100);
   const paused = current(await snapshot());
-  await sample('explicit-pause-no-recurring-save', 10500, 0);
+  await sample('explicit-pause-no-recurring-save', interval + 500, 0);
   assert.equal(current(await snapshot()).elapsedMs, paused.elapsedMs);
   await page.getByRole('button', { name: 'Resume', exact: true }).click();
   const boundaryBefore = current(await snapshot()).elapsedMs;
@@ -199,7 +229,7 @@ try {
   await expect(page.locator('div.scene')).toHaveCSS('filter', 'blur(12px)');
   await persisted(attempt => attempt.elapsedMs > boundaryBefore + 1000);
   const hiddenTime = current(await snapshot()).elapsedMs;
-  await sample('delivered-pagehide-no-recurring-save', 10500, 0);
+  await sample('delivered-pagehide-no-recurring-save', interval + 500, 0);
   assert.equal(current(await snapshot()).elapsedMs, hiddenTime);
   report.stages.push({ name: 'lifecycle-final-sub-five-second-sample', beforeElapsed: boundaryBefore, hiddenElapsed: hiddenTime, method: 'Synthetic pagehide/pageshow events; no claim about mobile event delivery or OS suspension.' });
   await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
@@ -208,7 +238,7 @@ try {
   await more(); await page.getByRole('button', { name: 'Main menu', exact: true }).click();
   await expect(page.locator('.menu-more')).toBeEnabled();
   await page.waitForTimeout(100);
-  await sample('main-menu-after-playing-no-recurring-save', 10500, 0);
+  await sample('main-menu-after-playing-no-recurring-save', interval + 500, 0);
   const beforeReopen = await snapshot();
   await page.close(); page = await context.newPage();
   await page.goto(host.origin + '/toadoku/'); await resume();
@@ -228,11 +258,11 @@ try {
   const failures = await page.evaluate(() => window.__failedAttemptPuts);
   assert(failures > 0);
   const failureElapsed = current(await snapshot()).elapsedMs;
-  // Span the actual ten-second checkpoint interval, not only the former five-second cadence.
+  // Span the declared checkpoint interval, including future reviewed cadence changes.
   const quietStarted = await page.evaluate(() => performance.now());
-  await page.waitForTimeout(11000);
+  await page.waitForTimeout(interval + 1000);
   const quietObservedMs = await page.evaluate(start => performance.now() - start, quietStarted);
-  assert(quietObservedMs >= 10000, 'Failure sample did not span one real checkpoint interval');
+  assert(quietObservedMs >= interval, 'Failure sample did not span one real checkpoint interval');
   assert.equal(await page.evaluate(() => window.__failedAttemptPuts), failures, 'Failed save retried automatically');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export emergency recovery', exact: true }).click();
@@ -241,11 +271,11 @@ try {
   catch (error) { report.downloadFailure = { failure: await download.failure(), pageClosed: page.isClosed(), url: download.url() }; throw error; }
   const recovery = JSON.parse(await readFile(resolve(dir, 'emergency-recovery.json'), 'utf8'));
   assert.equal(recovery.localAttempt.notes[cell], 4 | 16);
-  assert(recovery.localAttempt.elapsedMs >= failureElapsed + 10000);
+  assert(recovery.localAttempt.elapsedMs >= failureElapsed + interval);
   await page.evaluate(() => { window.__failAttemptPuts = false; });
   await page.getByRole('button', { name: 'Retry saving', exact: true }).click();
   await expect(page.getByText('Changes are not saved', { exact: true })).toHaveCount(0);
-  await persisted(attempt => attempt.notes[cell] === (4 | 16) && attempt.elapsedMs >= failureElapsed + 10000);
+  await persisted(attempt => attempt.notes[cell] === (4 | 16) && attempt.elapsedMs >= failureElapsed + interval);
   report.stages.push({ name: 'native-quota-no-retry-loop-and-explicit-recovery', failedPuts: failures, quietObservedMs, durableBeforeElapsed: failureElapsed, recoveredElapsed: current(await snapshot()).elapsedMs });
   await closeDialogs();
 
@@ -256,7 +286,7 @@ try {
   await page.bringToFront();
   const visibility = await page.evaluate(() => ({ hidden: document.hidden, online: navigator.onLine }));
   assert.equal(visibility.hidden, false, 'Old owner was not visible for automatic detection');
-  await expect(page.locator('.cell')).toHaveCount(0, { timeout: 12000 });
+  await expect(page.locator('.cell')).toHaveCount(0, { timeout: interval + 2000 });
   const concealmentMs = performance.now() - takeoverAt;
   const winner = current(await snapshot(second));
   assert.equal(winner.id, oldOwner.id); assert(winner.writer.epoch > oldOwner.writer.epoch);
@@ -271,6 +301,7 @@ try {
     newOwnerVisibilityEvents: await second.evaluate(() => window.__visibilityAudit),
     winnerEpoch: winner.writer.epoch, staleInputCouldNotChangeProgressOrWallet: true });
   await second.close();
+  }
   report.browser = context.browser().version(); report.passed = true;
 } catch (error) {
   report.error = String(error); report.stack = error.stack; process.exitCode = 1;

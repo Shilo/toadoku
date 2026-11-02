@@ -50,8 +50,8 @@ describe('cancellable update orchestration', () => {
 
 function visibilityHarness() {
   const result = deferred<boolean>(), allowed = vi.fn(), writes: boolean[] = [];
-  const client = { state: { attempt: { id: 'attempt', generation: 'generation', writer: { token: 'owner', epoch: 1 } } },
-    setView: ({ visible }: { visible: boolean }) => { writes.push(visible); }, checkAuthority: vi.fn(() => result.promise) };
+  const client = { state: { canStudy: true, attempt: { id: 'attempt', generation: 'generation', writer: { token: 'owner', epoch: 1 } } },
+    setView: ({ visible }: { visible: boolean }) => { writes.push(visible); client.state.canStudy = visible; }, checkAuthority: vi.fn(() => result.promise) };
   let hidden = true, current: typeof client | undefined = client;
   const guard = createVisibilityGuard(() => current, () => hidden, allowed);
   return { guard, client, result, allowed, writes, hidden: (value: boolean) => { hidden = value; },
@@ -59,6 +59,53 @@ function visibilityHarness() {
 }
 
 describe('visibility authority orchestration', () => {
+  it('checks a changed identity anew and never lets an older completion clear the newer pending check', async () => {
+    const h = visibilityHarness(), newer = deferred<boolean>(); h.hidden(false);
+    const old = h.guard.show(true); await Promise.resolve();
+    h.client.state.attempt.writer.epoch++; h.client.checkAuthority = vi.fn(() => newer.promise);
+    const fresh = h.guard.show(); expect(fresh).not.toBe(old); await Promise.resolve();
+    h.result.resolve(true); await old;
+    expect(h.allowed).not.toHaveBeenCalledWith(true); expect(h.guard.show()).toBe(fresh);
+    newer.resolve(true); await fresh; expect(h.allowed).toHaveBeenLastCalledWith(true);
+  });
+
+  it('clears a completed stale check so a later show can verify the new identity', async () => {
+    const h = visibilityHarness(); h.hidden(false); const old = h.guard.show();
+    await Promise.resolve(); h.client.state.attempt.writer.epoch++; h.result.resolve(true); await old;
+    h.client.checkAuthority = vi.fn(async () => true); await h.guard.show();
+    expect(h.client.checkAuthority).toHaveBeenCalledTimes(1); expect(h.writes.at(-1)).toBe(true);
+  });
+
+  it('rechecks a readable overlay without fabricating a hidden transition and coalesces repeated checks', async () => {
+    const h = visibilityHarness(); h.hidden(false);
+    const first = h.guard.show(true), repeated = h.guard.show(true);
+    expect(repeated).toBe(first); expect(h.writes).toEqual([]); expect(h.allowed).not.toHaveBeenCalled();
+    await Promise.resolve(); expect(h.client.checkAuthority).toHaveBeenCalledTimes(1);
+    h.result.resolve(true); await first;
+    expect(h.writes).toEqual([true]); expect(h.allowed.mock.calls).toEqual([[true]]);
+  });
+
+  it('conceals immediately for a native return during an already pending readable check', async () => {
+    const h = visibilityHarness(); h.hidden(false); const readable = h.guard.show(true);
+    const returning = h.guard.show(); expect(returning).toBe(readable);
+    expect(h.writes).toEqual([false]); expect(h.allowed).toHaveBeenLastCalledWith(false);
+    h.guard.hide(); h.hidden(true); h.result.resolve(true); await readable;
+    expect(h.writes).not.toContain(true); expect(h.allowed).not.toHaveBeenCalledWith(true);
+  });
+
+  it.each(['failure', 'exception'] as const)('conceals a readable overlay after authority %s', async failure => {
+    const h = visibilityHarness(); h.hidden(false);
+    if (failure === 'exception') h.client.checkAuthority = vi.fn(async () => { throw Error('Unavailable'); });
+    const readable = h.guard.show(true); h.result.resolve(false); await readable;
+    expect(h.writes).toEqual([false]); expect(h.allowed.mock.calls).toEqual([[false]]);
+  });
+
+  it('does not let the readable opt-in reveal a concealed Pause before verification', async () => {
+    const h = visibilityHarness(); h.hidden(false); h.client.state.canStudy = false;
+    const shown = h.guard.show(true); expect(h.writes).toEqual([false]);
+    h.result.resolve(true); await shown; expect(h.writes).toEqual([false, true]);
+  });
+
   it('conceals synchronously and coalesces pageshow/visibility until authority is verified', async () => {
     const h = visibilityHarness(); h.guard.hide(); h.hidden(false);
     const shown = h.guard.show(); const duplicate = h.guard.show();

@@ -35,7 +35,7 @@ export function createUpdateGuard(busy: (value: boolean) => void) {
 }
 
 interface AuthorityClient {
-  state: { attempt?: { id: string; generation: string; writer: { epoch: number; token: string } } };
+  state: { canStudy?: boolean; attempt?: { id: string; generation: string; writer: { epoch: number; token: string } } };
   setView(view: { visible: boolean }): void;
   checkAuthority(): Promise<boolean>;
 }
@@ -46,24 +46,26 @@ const identity = (client: AuthorityClient | undefined) => {
 /** Only the board waits for authority. Menus and explicit recovery remain reachable. */
 export function createVisibilityGuard(current: () => AuthorityClient | undefined, hidden: () => boolean,
   allowed: (value: boolean) => void) {
-  let sequence = 0, pending: { client: AuthorityClient | undefined; promise: Promise<void> } | undefined;
+  let sequence = 0, pending: { client: AuthorityClient | undefined; identity: string | undefined; request: number; promise: Promise<void> } | undefined;
   function invalidate() { sequence++; pending = undefined; }
   return {
     invalidate,
     hide() { invalidate(); allowed(false); current()?.setView({ visible: false }); },
-    show(): Promise<void> {
+    show(keepReadable = false): Promise<void> {
       if (hidden()) { this.hide(); return Promise.resolve(); }
-      const client = current();
-      if (pending && pending.client === client) return pending.promise;
-      const request = ++sequence, before = identity(client);
-      allowed(false); client?.setView({ visible: false });
+      const client = current(), before = identity(client);
+      // Closing a readable overlay needs an authority read, not a pretend hide/save.
+      // Actual returning-page events still conceal immediately, even during that read.
+      if (!keepReadable || client?.state.canStudy !== true) { allowed(false); client?.setView({ visible: false }); }
+      if (pending && pending.client === client && pending.identity === before) return pending.promise;
+      const request = ++sequence;
       const promise = Promise.resolve().then(async () => {
         let verified = !client?.state.attempt;
         try { if (!verified && client) verified = await client.checkAuthority(); } catch { /* Explicit Resume remains available. */ }
         if (sequence !== request || hidden() || current() !== client || identity(client) !== before) return;
         pending = undefined; allowed(verified); client?.setView({ visible: verified });
-      });
-      pending = { client, promise };
+      }).finally(() => { if (pending?.request === request) pending = undefined; });
+      pending = { client, identity: before, request, promise };
       return promise;
     },
   };

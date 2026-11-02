@@ -396,6 +396,31 @@ export class Repository {
     }));
   }
 
+  /** Time-only commands cannot carry local board data across the persistence boundary. */
+  saveTime(inputGuard: WriterGuard, expectedRevision: number, expectedCommittedSeq: number,
+    commandSeq: number, elapsedMs: number): Promise<StorageResult<Attempt>> {
+    let guard: WriterGuard;
+    try {
+      guard = captureGuard(inputGuard);
+      integer(expectedRevision); integer(expectedCommittedSeq); integer(commandSeq); integer(elapsedMs);
+      if (commandSeq <= expectedCommittedSeq) corrupt('time-command-sequence');
+    } catch (error) { return Promise.resolve(storageFailure(error).issue); }
+    return transact(this.database, ['meta', 'attempts', 'roles'], 'readwrite', context => current(context, guard.generation, active => {
+      context.request(context.store('attempts').get(key(guard.generation, guard.attemptId)), value => {
+        // The authoritative stored capture receives the complete existing validation once.
+        const attempt = attemptAt(value, guard.generation, guard.attemptId);
+        guardAttempt(attempt, guard, expectedRevision);
+        if (attempt.commandSeq !== expectedCommittedSeq || attempt.status !== 'playing') issue('revision');
+        context.request(context.store('roles').get(key(guard.generation, attempt.role)), value => {
+          if (roleAt(value, guard.generation, attempt.role).attemptId !== attempt.id) issue('role');
+          const next: Attempt = { ...attempt, commandSeq, elapsedMs: Math.max(attempt.elapsedMs, elapsedMs),
+            revision: increment(attempt.revision) };
+          context.store('attempts').put(next, key(guard.generation, attempt.id)); touch(context, active); context.result(next);
+        });
+      });
+    }));
+  }
+
   savePreferences(generation: string, input: Preferences): Promise<StorageResult<Preferences>> {
     let preferences: Preferences;
     try { preferences = decodePreferences(input); } catch (error) { return Promise.resolve(storageFailure(error).issue); }
