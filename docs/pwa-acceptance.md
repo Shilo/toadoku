@@ -217,6 +217,12 @@ Menu delivery grows by about 2.4 kB; median changes are about 31/25 ms. These sm
 
 Current shaped-network preparation remains responsive: 95% of measured inputs reach the next frame within 16.2 ms during app setup and 17.9 ms during optional puzzle work. A demanded Hard puzzle arrives in 0.949 seconds while an optional Easy response is held. Cancellation keeps completed work. Additional automatic app setup transfers 1,439,667 compressed bytes over 42 requests, including worker/release metadata; it begins after the first usable board plus the existing two-second delay. `preparation-1793597158758/results.json` binds these results. The unchanged full travel reference remains 3.31 MB compressed across 102 files; this revision's travel action was cancelled rather than presented as another full-pack measurement.
 
+### Published automatic-update release
+
+[Pages run 41394943889](https://github.com/Shilo/toadoku/actions/runs/41394943889) publishes 0.0.49 from `fbf22da0278b44e957a29b9cc922c4c09eade911`. All 790 tests across 87 files, types, complete build/artifact validation, retention, capacity and actual hosted-byte/header checks pass. Published build is `d346dc30be785215ce0fb24ba5990b951dade5baebb41a4157d671cd23c4f78f`; worker SHA-256 is `f409ba2d2ff2f5d3ebcad6f619b48dc56a5c7898079dc86c07612d94d5132acc`. Artifact projection is 189,573,072 bytes within 419,430,400; account-wide quota remains unverified. The live metadata response has GitHub Pages max-age=600 and gzip; app update requests still use the stable worker URL with browser-cache bypass.
+
+The lead's actual Codex browser kept the existing 0.0.46 game open while a second normal navigation received 0.0.49. One ordinary refresh of the old window then loaded 0.0.49 without closing the other window; explicit Resume retained row 1, column 3's entered 1. Both menu Version links and the running content identity were checked. This is actual legacy migration evidence, distinct from the already-tested local automatic B/C transition. A fresh isolated portrait browser also captured `automatic-live/version-49.jpg`. Actual CI logs, release metadata and screenshot proof are retained under `prototypes/pwa-validation/automatic-live/`.
+
 ## Plain-language behavior and current measured results
 
 - **Before playing:** about 109 kB arrives before the menu works and 374-394 kB before the first puzzle. Slower-connection desktop medians are 1.22/2.75 seconds, versus 1.19/2.72 for the published app. This is a simulation, not a phone measurement.
