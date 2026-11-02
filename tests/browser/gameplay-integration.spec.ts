@@ -373,6 +373,67 @@ test('failed raw worker retains the newest local attempt and announces a partial
   await digit(page,cell,value);await expect(page.locator('.dock .more')).toContainText(appCopy.en.unsavedShort);await more(page);let blocked=0;await page.route('**/assets/raw-recovery.worker-*.js',route=>{blocked++;return route.fulfill({status:404,body:'explicit missing worker'});});const pending=page.waitForEvent('download');await page.getByRole('dialog').getByRole('button',{name:uiCopy.en.emergencyExport,exact:true}).click();const file=`${evidence}/partial-local-recovery.json`;await(await pending).saveAs(file);expect(blocked).toBeGreaterThan(0);const artifact=JSON.parse(await readFile(file,'utf8'));expect(artifact.kind).toBe('toadodu-emergency-recovery');expect(artifact.importableBackup).toBe(false);expect(artifact.localAttempt.id).toBe(original.id);expect(artifact.localAttempt.entries[cell]).toBe(value);await expect(page.getByRole('dialog').getByRole('status').filter({hasText:uiCopy.en.recoveryPartial})).toHaveCount(1);
 });
 
+test('active backup review freezes its revision, cancels cleanly and restores after a long review', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/'); await quick(page, 'Easy');
+  const puzzle = await domPuzzle(page), empty = [...puzzle.givens].flatMap((value, cell) => value === '0' ? [cell] : []);
+  await digit(page, empty[0], Number(puzzle.solution[empty[0]]));
+  await notesMode(page, true); await digit(page, empty[1], 2); await notesMode(page, false);
+  await settings(page); await page.getByRole('button', { name: 'Backup', exact: true }).click();
+  const download = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export backup', exact: true }).click();
+  const file = `${evidence}/active-review-backup.json`; await (await download).saveAs(file);
+  const backup = JSON.parse(await readFile(file, 'utf8'));
+  const preview = async () => {
+    await page.getByLabel('Choose backup file', { exact: true }).setInputFiles(file);
+    await page.getByRole('button', { name: 'Preview restore', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Replace with this backup', exact: true })).toBeEnabled();
+    await expect(page.locator('.scene')).toHaveClass(/study-paused/);
+  };
+  await preview();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.locator('.scene')).not.toHaveClass(/study-paused/);
+  await expect(page.getByRole('heading', { name: 'Review backup', exact: true })).toHaveCount(0);
+  await page.getByLabel('Choose backup file', { exact: true }).setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
+  await page.getByRole('button', { name: 'Preview restore', exact: true }).click();
+  await expect(page.getByText(uiCopy.en.restoreInvalid, { exact: true })).toBeVisible();
+  await expect(page.locator('.scene')).not.toHaveClass(/study-paused/);
+  await preview(); const reviewed = await snapshot(page);
+  await page.clock.fastForward(65000);
+  expect((await snapshot(page)).meta).toEqual(reviewed.meta);
+  await page.getByRole('button', { name: 'Replace with this backup', exact: true }).click();
+  await expect(page.locator('.menu-panel')).toBeVisible();
+  const restored = await snapshot(page), attempt = roleAttempt(restored, 'quick');
+  expect(restored.meta.generation).not.toBe(reviewed.meta.generation);
+  expect(restored.profile.wallet).toBe(backup.profile.wallet);
+  for (const field of ['entries', 'notes', 'undo', 'assistance'] as const) expect(attempt[field]).toEqual(backup.attempts[0][field]);
+  const recovery = await page.evaluate(() => new Promise<any>((done, fail) => {
+    const request = indexedDB.open('toadodu:%2F'); request.onerror = () => fail(request.error);
+    request.onsuccess = () => { const db = request.result, tx = db.transaction('meta'), row = tx.objectStore('meta').get('recovery');
+      row.onsuccess = () => done(row.result); tx.oncomplete = () => db.close(); };
+  }));
+  expect(recovery.generation).toBe(reviewed.meta.generation);
+});
+
+test('backup review still rejects a real preference write from another window', async ({ page, context }) => {
+  await page.goto('/'); await quick(page, 'Easy'); await settings(page);
+  await page.getByRole('button', { name: 'Backup', exact: true }).click();
+  const download = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export backup', exact: true }).click();
+  const file = `${evidence}/foreign-review-backup.json`; await (await download).saveAs(file);
+  await page.getByLabel('Choose backup file', { exact: true }).setInputFiles(file);
+  await page.getByRole('button', { name: 'Preview restore', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Replace with this backup', exact: true })).toBeEnabled();
+  const reviewed = await snapshot(page), other = await context.newPage();
+  await other.goto('/'); await settings(other); await other.getByRole('combobox').first().selectOption('pond');
+  await expect.poll(async () => (await snapshot(other)).meta.essentialRevision).toBeGreaterThan(reviewed.meta.essentialRevision);
+  await page.getByRole('button', { name: 'Replace with this backup', exact: true }).click();
+  await expect(page.getByText(uiCopy.en.restoreInvalid, { exact: true })).toBeVisible();
+  const kept = await snapshot(page);
+  expect(kept.meta.generation).toBe(reviewed.meta.generation);
+  expect(kept.preferences.theme).toBe('pond'); expect(kept.profile).toEqual(reviewed.profile);
+  expect(roleAttempt(kept, 'quick').entries).toEqual(roleAttempt(reviewed, 'quick').entries);
+  await other.close();
+});
+
 for (const cancellation of ['Close','Escape','Back'] as const) test(`actual backup preview worker cancels with ${cancellation} and a fresh preview still works`, async ({ page }) => {
   test.setTimeout(60000); await page.goto('/'); await quick(page,'Easy'); await settings(page); await page.getByRole('button',{name:'Backup',exact:true}).click();
   const downloaded=page.waitForEvent('download'); await page.getByRole('button',{name:'Export backup',exact:true}).click(); const file=`${evidence}/cancellation-${cancellation}.json`; await(await downloaded).saveAs(file);

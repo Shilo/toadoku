@@ -30,7 +30,7 @@ export interface GameState {
   /** An event counter, incremented only for a newly committed completion. */
   completionEvent: number;
   durability?: 'durable' | 'ephemeral';
-  restorePhase?: 'staging' | 'activating';
+  restorePhase?: 'reviewing' | 'staging' | 'activating';
   conflictedChanges?: boolean;
 }
 export interface StartRequest {
@@ -57,6 +57,7 @@ export class GameController {
   private allocationAbort?: AbortController;
   private destroyed = false;
   private checkpointTimer?: ReturnType<typeof setTimeout>;
+  private previewPending = false;
   private reloadPreparing = false;
   private reloadSequence = 0;
   private preferencesPending = 0;
@@ -168,13 +169,13 @@ export class GameController {
     if (recoverSolved) this.queue.enqueue(attempt);
     this.checkpoint(true); this.publish();
   }
-  private async barrier(work: () => Promise<boolean>, allowConflictedFlush = false): Promise<boolean> {
-    if (this.value.busy || this.destroyed) return false;
+  private async barrier(work: () => Promise<boolean>, options: { allowConflictedFlush?: boolean; restore?: boolean } = {}): Promise<boolean> {
+    if (this.value.busy || this.destroyed || this.value.restorePhase && !options.restore) return false;
     this.value.busy = true; this.cancelCheckpoint(); this.publish();
     try {
       this.checkpoint(true);
       const flushed = await this.queue?.flush();
-      if (flushed && flushed.kind !== 'committed' && !(allowConflictedFlush && flushed.kind === 'conflict')) { this.problem(flushed); return false; }
+      if (flushed && flushed.kind !== 'committed' && !(options.allowConflictedFlush && flushed.kind === 'conflict')) { this.problem(flushed); return false; }
       return await work();
     } finally { this.value.busy = false; this.checkpoint(); this.scheduleCheckpoint(); this.publish(); }
   }
@@ -206,10 +207,10 @@ export class GameController {
       }
       if (recovered || owned.value.status === 'completed' || owned.value.status === 'pending-completion') return this.commitCompletion(false);
       return true;
-    }, allowConflictedFlush);
+    }, { allowConflictedFlush });
   }
   async start(input: StartRequest): Promise<boolean> {
-    if (this.value.busy) return false;
+    if (this.value.busy || this.value.restorePhase) return false;
     // Capture the decision before any flush/read can refresh the displayed role or caller DTO.
     const request: StartRequest = { role: input.role, band: input.band, leap: input.leap, authorization: input.authorization,
       ...(input.expectedCurrent ? { expectedCurrent: { generation: input.expectedCurrent.generation, attemptId: input.expectedCurrent.attemptId } } : {}) };
@@ -338,7 +339,7 @@ export class GameController {
     this.publish(); return true;
   }
   async retry(): Promise<boolean> {
-    if (this.value.busy) return false;
+    if (this.value.busy || this.value.restorePhase) return false;
     this.checkpoint(true);
     const result = await this.queue?.retry();
     if (result && result.kind !== 'committed') { this.problem(result); return false; }
@@ -364,7 +365,7 @@ export class GameController {
   }
   async requestHint(choice: 'logical' | 'reveal'): Promise<boolean> {
     const frozen = this.value.attempt;
-    if (!frozen || frozen.status !== 'playing' || !this.value.owned || this.value.busy || this.value.hintComputing) return false;
+    if (!frozen || frozen.status !== 'playing' || !this.value.owned || this.value.busy || this.value.restorePhase || this.value.hintComputing) return false;
     const request = ++this.hintSequence;
     this.value.hintComputing = true; this.value.problem = undefined; this.publish();
     let computed: HintResult;
@@ -395,7 +396,7 @@ export class GameController {
     });
   }
   async preferences(preferences: Preferences): Promise<boolean> {
-    if (this.reloadPreparing || this.destroyed) return false;
+    if (this.reloadPreparing || this.destroyed || this.value.restorePhase) return false;
     const save = this.value.save;
     if (!save) return false;
     this.preferencesPending++;
@@ -489,6 +490,7 @@ export class GameController {
     if (!this.destroyed) { this.syncClock(); this.publish(); }
   }
   async exportBackup() {
+    if (this.previewPending) return { kind: 'unavailable' as const, reason: 'abort' as const, detail: 'backup-busy' };
     const request = ++this.backupSequence;
     const flushed = await this.flush();
     if (request !== this.backupSequence) return { kind: 'unavailable' as const, reason: 'abort' as const, detail: 'backup-cancelled' };
@@ -518,17 +520,40 @@ export class GameController {
     if (new TextEncoder().encode(text).byteLength > limit) throw new Error('Recovery artifact exceeds its bounded format');
     return { text };
   }
-  async previewRestore(text: string) {
+  async previewRestore(text: string): Promise<StorageResult<RestorePreview>> {
+    if (this.value.busy || this.destroyed || this.reloadPreparing || this.preferencesPending ||
+        this.value.restorePhase && this.value.restorePhase !== 'reviewing') {
+      return { kind: 'unavailable', reason: 'abort', detail: 'backup-busy' };
+    }
     const request = ++this.backupSequence;
-    const flushed = await this.flush();
-    if (request !== this.backupSequence) return { kind: 'unavailable' as const, reason: 'abort' as const, detail: 'backup-cancelled' };
-    if (flushed.kind !== 'committed') { this.problem(flushed); return flushed; }
-    const result = await this.repository.previewRestore(text);
-    return request === this.backupSequence ? result : { kind: 'unavailable' as const, reason: 'abort' as const, detail: 'backup-cancelled' };
+    this.previewPending = true;
+    // Freeze before the final flush and revision witness. A later clock save must
+    // not invalidate our own review; foreign mutations still fail repository CAS.
+    this.cancelHint(); this.cancelStart();
+    this.value.restorePhase = 'reviewing'; this.syncClock(); this.publish();
+    let reviewed = false;
+    try {
+      const flushed = await this.flush();
+      if (request !== this.backupSequence) return { kind: 'unavailable', reason: 'abort', detail: 'backup-cancelled' };
+      if (flushed.kind !== 'committed') { this.problem(flushed); return flushed; }
+      const result = await this.repository.previewRestore(text);
+      if (request !== this.backupSequence) return { kind: 'unavailable', reason: 'abort', detail: 'backup-cancelled' };
+      reviewed = result.kind === 'committed';
+      return result;
+    } finally {
+      if (request === this.backupSequence) this.previewPending = false;
+      if (!reviewed && request === this.backupSequence && this.value.restorePhase === 'reviewing') {
+        this.value.restorePhase = undefined; this.syncClock(); this.publish();
+      }
+    }
   }
   cancelBackupWork(): void {
     if (this.value.restorePhase === 'activating') return;
     this.backupSequence++; this.repository.cancelBackupWork?.();
+    this.previewPending = false;
+    if (this.value.restorePhase === 'reviewing') {
+      this.value.restorePhase = undefined; this.syncClock(); this.publish();
+    }
   }
   async restore(preview: RestorePreview): Promise<boolean> {
     if (this.value.busy || this.destroyed) return false;
@@ -549,7 +574,7 @@ export class GameController {
         this.value.owned = false; this.syncClock();
         return await this.initialize();
       } finally { this.value.restorePhase = undefined; this.syncClock(); this.publish(); }
-    });
+    }, { restore: true });
   }
   async dispose(): Promise<void> {
     this.setView({ board: false }); this.destroyed = true; this.cancelHint(); this.cancelStart(); this.cancelBackupWork();
