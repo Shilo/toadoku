@@ -15,6 +15,7 @@ const dir = resolve('prototypes/pwa-validation/autosave-long-game', process.argv
 const fixtureArg = process.argv.find(arg => arg.startsWith('--restore-fixture='));
 const fixtureFile = fixtureArg?.slice('--restore-fixture='.length);
 const pacedOnly = process.argv.includes('--paced-only');
+const rapidOnly = process.argv.includes('--rapid-only');
 const interval = Number(process.argv.find(arg => arg.startsWith('--interval='))?.slice('--interval='.length) ?? TIME_SAVE_INTERVAL_MS);
 assert(Number.isSafeInteger(interval) && interval > 0);
 await mkdir(dir, { recursive: true });
@@ -266,6 +267,7 @@ try {
   await page.locator(`[data-cell="${fixture.main}"]`).click();
   await page.keyboard.press('2'); await persisted(attempt => attempt.entries[fixture.main] === 2);
   if (!pacedOnly) {
+  if (!rapidOnly) {
   await page.evaluate(() => {
     window.__longSaveAudit.boardChanges = [];
     window.__longBoardObserver = new MutationObserver(records => {
@@ -290,17 +292,23 @@ try {
   await page.waitForTimeout(500);
   const afterOverlap = await audit();
   report.stages.push({ name: 'checkpoint-put-overlap-input', samples: afterOverlap.inputs.filter(input => input.phase === 'thinking' && input.at > overlapStart), limitation: 'One real timer checkpoint sample, reported raw. Native input starts at put; earlier validation is covered by the full thinking frame trace.' });
-  await phase('rapid-edits');
+  }
+  await phase('rapid-setup');
   await page.locator(`[data-cell="${fixture.main}"]`).click();
   await persisted(attempt => attempt.selection === fixture.main);
   const beforeRapidSequence = current(await snapshot()).commandSeq;
+  await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+  await phase('rapid-edits');
   for (let index = 0; index < 40; index++) await page.keyboard.press(index % 2 ? '2' : '1');
+  // Keep all pending application saves inside the measured phase; full readback is separate.
+  await drained(); await page.waitForTimeout(100);
+  await phase('rapid-verification');
   await persisted(attempt => attempt.entries[fixture.main] === 2 && attempt.undo.length === 512 && attempt.commandSeq >= beforeRapidSequence + 40);
-  await page.waitForTimeout(300);
   const rapid = await audit(); report.stages.push(summarize(rapid, 'rapid-edits'));
   assert.equal(report.stages.at(-1).inputCount, 40);
   assert(report.stages.at(-1).inputNextFrameSamplesMs.every(value => value !== null));
   assert(report.stages.at(-1).inputNextFrameP95Ms < 200, 'Rapid-edit input responsiveness exceeded 200ms at 6x slowdown');
+  if (!rapidOnly) {
   await phase('navigation'); await more(); await page.getByRole('button', { name: 'Main menu', exact: true }).click();
   await expect(page.locator('.menu-more')).toBeEnabled(); await drained();
   await phase('menu'); await page.waitForTimeout(interval + 500);
@@ -324,6 +332,8 @@ try {
   else await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
   await expect(page.locator('div.scene')).toHaveCSS('filter', 'none');
   }
+  }
+  if (!rapidOnly) {
   await phase('paced-setup');
   await page.locator(`[data-cell="${fixture.main}"]`).click();
   await persisted(attempt => attempt.selection === fixture.main); await drained();
@@ -350,6 +360,7 @@ try {
   assert(pacedSummary.inputNextFrameSamplesMs.every(value => value !== null));
   assert(pacedSummary.inputNextFrameP95Ms < 200, 'Paced-edit input responsiveness exceeded 200ms at 6x slowdown');
   report.stages.push({ ...pacedSummary, spacingAfterEachNativeKeyMs: 175, eachEditCommittedBeforeNextInput: true, finalSequenceAndValueReadbackPassed: true });
+  }
   await phase('navigation');
   await more(); await page.getByRole('button', { name: 'Main menu', exact: true }).click();
   await expect(page.locator('.menu-more')).toBeEnabled();
