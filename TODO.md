@@ -16,7 +16,8 @@
 - [x] Implement PWA in the separate `codex/pwa-offline` managed worktree with challenged plans, bounded verified reserves, in-app installation and safe frequent-release discovery/activation. Preserve Pond and the corpus; no automatic theme integration.
 - [x] Prove available-environment cold offline dependency coverage, allocation authority, durable readiness and rapid multi-build/multi-tab updates. Deliver committed branch and [actual measurements/acceptance](docs/pwa-acceptance.md) for review.
 - [x] Review autosave on an actual USB Pixel 8 Pro, including native Chrome close/reopen, background/screen-off and an installed standalone test app. Record [measurements and lifecycle limits](docs/pwa-acceptance.md#lifecycle-and-compact-autosave-review-2026-11-02); this does not complete every Android/PWA gate.
-- [ ] Complete remaining physical Motorola/energy/thermals, Android in-app prompt/airplane-mode and actual hosted multi-release rollback/account-capacity checks. Published desktop hosting/update evidence and Pixel autosave checks are recorded separately.
+- [x] Check real public-release in-app Chrome installation/dismissal, installed airplane-mode play, offline first-use features, live 52-to-53 saved-game updating, old/new Chrome views and a long-review offline backup restore on the Pixel. Record precise boundaries in [Android follow-up](docs/pwa-acceptance.md#public-release-android-follow-up-2026-11-02).
+- [ ] Complete physical Motorola/low-end and sustained unplugged energy/thermal checks, an isolated real hosted rapid-release/compatible-rollback run and owner-visible account storage usage. Pixel tests and repository artifact capacity do not replace these checks.
 
 ## Production UI handoff and next phase
 
