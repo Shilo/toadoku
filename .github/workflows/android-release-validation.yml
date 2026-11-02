@@ -1,0 +1,47 @@
+name: Android release validation
+on:
+  push:
+    branches: [codex/android-release-validation]
+permissions:
+  contents: read
+concurrency:
+  group: android-release-validation
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test -- --maxWorkers=1
+      - run: npm run build
+      - run: node tools/pwa/validate.mjs dist
+      - run: node tools/test.mjs install --with-deps
+      - name: Native production backup journeys
+        run: node tools/test.mjs browser --config .github/validation/android-release.playwright.mjs --grep 'backup review|actual backup preview worker' --workers=1
+      - name: Record small review artifact
+        if: always()
+        run: |
+          mkdir -p prototypes/android-release-build
+          if test -f dist/index.html; then
+            cp -r dist/assets dist/pwa dist/licenses prototypes/android-release-build/
+            cp dist/index.html dist/worker.js dist/manifest.webmanifest dist/release.json prototypes/android-release-build/
+          fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: android-release-validation
+          retention-days: 7
+          path: |
+            prototypes/android-release-build
+            prototypes/gameplay-validation/journeys/*.json
+            prototypes/production-ui-evidence/restore-review
+          if-no-files-found: error
