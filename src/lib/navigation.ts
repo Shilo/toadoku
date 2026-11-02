@@ -86,7 +86,7 @@ export function createNavigation(host: NavigationHost, render: (route: Route, ov
       consumeUntil(); active = undefined;
       host.history.pushState(screenState(next), '', `#${next}`); current = next; render(current);
     },
-    openMore() { if (current === 'board') openPanel('more'); },
+    openMore() { if (isScreen(current)) openPanel('more'); },
     openPanel,
     closeMore: closeTop,
     closeAll() {

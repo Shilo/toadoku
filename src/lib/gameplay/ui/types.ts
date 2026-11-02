@@ -11,6 +11,8 @@ export interface RestoreSummary { replaceWallet: number; importedWallet: number;
 type Action = void | Promise<void>;
 export interface GameDialogProps {
   view: DialogView;
+  /** Distinguish the menu popover from gameplay, including when a saved attempt exists. */
+  inGame?: boolean;
   pwa?: PwaClient;
   install?: InstallSupport;
   offline?: OfflineSupport;

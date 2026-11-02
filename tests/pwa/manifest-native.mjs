@@ -1,3 +1,4 @@
+import { openMenuSettings } from './ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -47,7 +48,7 @@ async function menu(){
  await expect(page.locator('.menu-more')).toBeEnabled();
 }
 async function panel(){
- await menu();await page.locator('.menu-more').click();await page.getByRole('button',{name:'Install and offline',exact:true}).click();
+ await menu();await openMenuSettings(page);await page.getByRole('button',{name:'Install and offline',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Upcoming puzzles at last check',exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Check saved puzzles',exact:true})).toBeEnabled({timeout:40000});
 }

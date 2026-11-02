@@ -128,8 +128,8 @@
   $effect(() => { controller?.setView({ board: inGame, concealed: studyPaused, visible: documentVisible }); });
   $effect(() => {
     width; height; layout.landscape;
-    const rect = dockElement?.getBoundingClientRect();
-    anchor = rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height, landscape: layout.landscape } : undefined;
+    const rect = (inGame ? dockElement : menuMoreButton)?.getBoundingClientRect();
+    anchor = rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height, landscape: inGame && layout.landscape } : undefined;
   });
   function motionEnvironment(choice: Preferences['motion']): MotionEnvironment {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -543,7 +543,7 @@
           <button class="cream" onclick={() => {controller?.cancelStart();nav?.go('menu');}}>{copy.back}</button>
         {/if}
       </nav>
-      <button class="cream menu-more" bind:this={menuMoreButton} aria-label={copy.more} disabled={sceneBlocked || !controller} onclick={() => nav?.openPanel('settings')} style={`right:0;bottom:0;width:${menuMoreSize}px;height:${menuMoreSize}px`}><Ellipsis size={28} /></button>
+      <button class="cream menu-more" bind:this={menuMoreButton} aria-label={copy.more} aria-haspopup="dialog" disabled={sceneBlocked || !controller} onclick={() => nav?.openMore()} style={`right:0;bottom:0;width:${menuMoreSize}px;height:${menuMoreSize}px`}><Ellipsis size={28} /></button>
       {#if booting || gameState.busy}
         <p class="scene-status" role="status">{a.loading}</p>
       {:else if bootError}
@@ -561,7 +561,7 @@
   </div>
   {#if route === 'more' && overlay}
     {#if DialogComponent}
-    <DialogComponent view={overlay.panel} {locale} {pwa} {install} {offline} {offlineUnavailable} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
+    <DialogComponent view={overlay.panel} {inGame} {locale} {pwa} {install} {offline} {offlineUnavailable} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
       puzzleProblem={puzzleLoadFailed ? a.puzzleUnavailable : undefined} receipt={gameState.receipt} {continueBand} hint={gameState.canStudy ? gameState.hint : undefined} {hintProblem} busy={blocked || gameState.hintComputing} {closingBlocked} {saveState} {anchor} restorePreview={restorePreview?.summary} {restoreError} {exportError} {recoveryBusy} {recoveryProblem}
       {themeError} {automaticThemeInfo} activeThemeId={appliedTheme.id} onThemeRetry={refreshTheme}
       onCommand={command => dispatch(command)} onNavigate={navigatePanel} onClose={closeDialog} onPreference={changePreferences}

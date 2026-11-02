@@ -1,7 +1,7 @@
 import type { HintPayload, Technique } from '../contracts';
 export type UiLocale = 'en' | 'de' | 'es';
 const en = {
-  game: 'Game', tools: 'Tools', menu: 'Menu', close: 'Close', back: 'Back', cancel: 'Cancel', continue: 'Continue',
+  game: 'Game', tools: 'Tools', menu: 'Menu', version: 'Version', versionSource: 'Open GitHub source in a new tab', close: 'Close', back: 'Back', cancel: 'Cancel', continue: 'Continue',
   viewResult: 'View result', newPuzzle: 'New puzzle',
   continueLeap: (leap: number) => `Continue at Leap ${leap}`,
   unscoredIdentity: 'This puzzle earns no Dewdrops.',
@@ -29,7 +29,7 @@ const en = {
   recoveryPartial: 'Local recovery only. Stored data unavailable.', recoveryUnavailable: 'Recovery export failed. Try again.',
   chooseFile: 'Choose backup file', preview: 'Preview restore', confirmRestore: 'Replace with this backup', restoreInvalid: 'Invalid backup. Choose another file. Your save is kept.',
   currentWallet: 'Current Dewdrops', importedWallet: 'Backup Dewdrops', activeAttempts: 'Active puzzles', receipts: 'Completions', issued: 'Issued puzzles',
-  saved: 'Saved', saving: 'Saving…', unsaved: 'Changes are not saved', conflict: 'This view no longer owns the save', unavailable: 'Storage is unavailable', retry: 'Retry saving',
+  autoSaving: 'Automatic saving', saved: 'Saved', saving: 'Saving…', unsaved: 'Changes are not saved', conflict: 'This view no longer owns the save', unavailable: 'Storage is unavailable', retry: 'Retry saving',
   chooseLeap: 'Choose a completed Leap', replayHelp: 'Play a fresh puzzle for Dewdrops. Your progression stays unchanged.',
   startReplay: 'Start replay', resumeReplay: 'Resume replay', replaceReplay: 'Replace unfinished replay',
   cell: (row: number, column: number) => `Row ${row}, column ${column}`,
@@ -46,6 +46,7 @@ const en = {
 };
 export type UiCopy = typeof en;
 const de: UiCopy = {
+  version: 'Version', versionSource: 'GitHub-Quellcode in einem neuen Tab öffnen',
   game: 'Spiel', tools: 'Werkzeuge', menu: 'Menü', close: 'Schließen', back: 'Zurück', cancel: 'Abbrechen', continue: 'Weiter',
   viewResult: 'Ergebnis ansehen', newPuzzle: 'Neues Rätsel',
   continueLeap: leap => `Bei Sprung ${leap} fortfahren`,
@@ -74,7 +75,7 @@ const de: UiCopy = {
   recoveryPartial: 'Nur lokale Rettung. Gespeicherte Daten nicht verfügbar.', recoveryUnavailable: 'Rettungsexport fehlgeschlagen. Versuche es erneut.',
   chooseFile: 'Sicherungsdatei wählen', preview: 'Wiederherstellung prüfen', confirmRestore: 'Mit dieser Sicherung ersetzen', restoreInvalid: 'Ungültige Sicherung. Wähle eine andere Datei. Dein Spielstand bleibt.',
   currentWallet: 'Aktuelle Tautropfen', importedWallet: 'Tautropfen der Sicherung', activeAttempts: 'Aktive Rätsel', receipts: 'Abgeschlossene Rätsel', issued: 'Ausgegebene Rätsel',
-  saved: 'Gespeichert', saving: 'Wird gespeichert…', unsaved: 'Änderungen sind nicht gespeichert', conflict: 'Diese Ansicht besitzt den Spielstand nicht mehr', unavailable: 'Speicher nicht verfügbar', retry: 'Speichern wiederholen',
+  autoSaving: 'Automatisches Speichern', saved: 'Gespeichert', saving: 'Wird gespeichert…', unsaved: 'Änderungen sind nicht gespeichert', conflict: 'Diese Ansicht besitzt den Spielstand nicht mehr', unavailable: 'Speicher nicht verfügbar', retry: 'Speichern wiederholen',
   chooseLeap: 'Abgeschlossenen Sprung wählen', replayHelp: 'Spiele ein neues Rätsel für Tautropfen. Dein Fortschritt bleibt unverändert.',
   startReplay: 'Wiederholung starten', resumeReplay: 'Wiederholung fortsetzen', replaceReplay: 'Unfertige Wiederholung ersetzen',
   cell: (row, column) => `Zeile ${row}, Spalte ${column}`, note: digit => `Notiz ${digit}`, answer: (cell, digit) => `${cell}: ${digit}.`,
@@ -86,6 +87,7 @@ const de: UiCopy = {
   fishReason: (units, cells, digits) => `${digits} hat genau zwei Positionen je Basiseinheit: ${cells}. Die gemeinsamen Quereinheiten sind ${units}. Entferne die angegebenen Kandidaten außerhalb der vier Ecken.`
 };
 const es: UiCopy = {
+  version: 'Versión', versionSource: 'Abrir el código fuente de GitHub en una pestaña nueva',
   game: 'Juego', tools: 'Herramientas', menu: 'Menú', close: 'Cerrar', back: 'Atrás', cancel: 'Cancelar', continue: 'Continuar',
   viewResult: 'Ver resultado', newPuzzle: 'Nuevo rompecabezas',
   continueLeap: leap => `Continuar en el Salto ${leap}`,
@@ -114,7 +116,7 @@ const es: UiCopy = {
   recoveryPartial: 'Solo recuperación local. Datos guardados no disponibles.', recoveryUnavailable: 'Error al exportar la recuperación. Reintenta.',
   chooseFile: 'Elegir archivo de copia', preview: 'Revisar restauración', confirmRestore: 'Reemplazar con esta copia', restoreInvalid: 'Copia no válida. Elige otro archivo. Se conserva tu partida.',
   currentWallet: 'Gotas de rocío actuales', importedWallet: 'Gotas de rocío de la copia', activeAttempts: 'Rompecabezas activos', receipts: 'Rompecabezas completados', issued: 'Rompecabezas iniciados',
-  saved: 'Guardado', saving: 'Guardando…', unsaved: 'Los cambios no están guardados', conflict: 'Esta vista ya no controla la partida', unavailable: 'Almacenamiento no disponible', retry: 'Reintentar guardado',
+  autoSaving: 'Guardado automático', saved: 'Guardado', saving: 'Guardando…', unsaved: 'Los cambios no están guardados', conflict: 'Esta vista ya no controla la partida', unavailable: 'Almacenamiento no disponible', retry: 'Reintentar guardado',
   chooseLeap: 'Elegir un Salto completado', replayHelp: 'Juega un rompecabezas nuevo para ganar gotas de rocío. Tu progresión no cambia.',
   startReplay: 'Empezar repetición', resumeReplay: 'Reanudar repetición', replaceReplay: 'Reemplazar repetición sin terminar',
   cell: (row, column) => `Fila ${row}, columna ${column}`, note: digit => `Nota ${digit}`, answer: (cell, digit) => `${cell}: ${digit}.`,

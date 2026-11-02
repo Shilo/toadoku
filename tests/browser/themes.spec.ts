@@ -52,8 +52,8 @@ async function ready(page: Page) {
 async function settings(page: Page) {
   if (await page.locator('.dock').count()) {
     await page.locator('.dock .more').click();
-    await page.getByRole('dialog').getByRole('button', { name: /^(Settings|Einstellungen|Ajustes)$/ }).click();
   } else await page.locator('.menu-more').click();
+  await page.getByRole('dialog').getByRole('button', { name: /^(Settings|Einstellungen|Ajustes)$/ }).click();
   await expect(page.getByRole('dialog').getByRole('heading', { name: /^(Settings|Einstellungen|Ajustes)$/ })).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('combobox', { name: /^(Theme|Thema|Tema)$/ })).toBeVisible();
 }

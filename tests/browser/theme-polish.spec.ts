@@ -61,15 +61,15 @@ async function ready(page: Page) {
 async function settings(page: Page) {
   if (await page.locator('.dock').count()) {
     await page.locator('.dock .more').click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Settings', exact: true }).click();
   } else await page.locator('.menu-more').click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('combobox', { name: 'Theme', exact: true })).toBeVisible();
 }
 async function closeDialogs(page: Page) {
   for (let i = 0; i < 4 && await page.getByRole('dialog').count(); i++) {
     const pane = await page.evaluate(() => history.state?.overlay);
-    await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: /^(Close|Schlie.+en|Cerrar)$/ }).click();
     await expect.poll(() => page.evaluate(() => history.state?.overlay)).not.toBe(pane);
   }
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -170,6 +170,7 @@ test('fresh defaults follow system preferences and saved choices survive reload'
       await expect(page.locator('.world')).toHaveAttribute('data-theme', 'cauldron');
       await expect(page.locator('.world')).toHaveAttribute('data-appearance', 'dark');
       await page.locator('.menu-more').click();
+      await page.getByRole('dialog').getByRole('button', { name: uiCopy[entry.expected].settings, exact: true }).click();
       const dialog = page.getByRole('dialog'), c = uiCopy[entry.expected], t = themeCopy[entry.expected];
       for (const [name, value] of [[t.theme, 'auto'], [t.appearance, 'system'], [c.language, entry.expected], [c.motion, 'system'], [c.boardShape, 'fill']]) {
         await expect(dialog.getByRole('combobox', { name, exact: true })).toHaveValue(value);
@@ -179,11 +180,12 @@ test('fresh defaults follow system preferences and saved choices survive reload'
       await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
       await expect(page.locator('.world')).toHaveAttribute('data-appearance', 'light');
       expect((await snapshot(page)).preferences.appearance).toBe('system');
-      await dialog.getByRole('button', { name: c.close, exact: true }).click();
+      await closeDialogs(page);
       const still = await sceneFrame(page, 'menu');
       await page.evaluate(async () => { for (let i = 0; i < 12; i++) await new Promise(requestAnimationFrame); });
       expect(await sceneFrame(page, 'menu')).toEqual(still);
       await page.locator('.menu-more').click();
+      await dialog.getByRole('button', { name: c.settings, exact: true }).click();
       for (const [name, value] of [[t.theme, 'pond'], [t.appearance, 'light'], [c.motion, 'full'], [c.boardShape, 'square']]) {
         const control = dialog.getByRole('combobox', { name, exact: true });
         await expect(control).toBeEnabled(); await control.selectOption(value);
@@ -651,12 +653,12 @@ test('theme UI fonts retain readable English, German and Spanish controls at all
       await expect(page.locator('svg.scene[data-scene="menu"]')).toHaveAttribute('viewBox', `0 0 ${width - 16} ${height - 16}`);
       for (const locale of ['en', 'de', 'es'] as const) {
         await page.locator('.menu-more').click();
+        await page.getByRole('dialog').getByRole('button', { name: /^(Settings|Einstellungen|Ajustes)$/ }).click();
         const field = page.getByRole('dialog').getByRole('combobox', { name: /^(Language|Sprache|Idioma)$/ });
         await field.selectOption(locale);
         await expect(page.getByRole('dialog').getByRole('combobox', { name: uiCopy[locale].language, exact: true })).toBeEnabled();
         await fittingButtons();
-        await page.getByRole('dialog').getByRole('button', { name: uiCopy[locale].close, exact: true }).click();
-        await expect(page.getByRole('dialog')).toHaveCount(0);
+        await closeDialogs(page);
         await fittingButtons();
         await page.getByRole('button', { name: dictionaries[locale].quick, exact: true }).click(); await fittingButtons();
         if ((width === 320 && locale !== 'en') || (width === 800 && locale === 'de')) await page.screenshot({ path: `${evidence}/${theme}-font-${locale}-${width}x${height}-quick.png` });
@@ -666,6 +668,7 @@ test('theme UI fonts retain readable English, German and Spanish controls at all
       }
     }
     await page.locator('.menu-more').click();
+    await page.getByRole('dialog').getByRole('button', { name: uiCopy.es.settings, exact: true }).click();
     await page.getByRole('dialog').getByRole('combobox', { name: uiCopy.es.language, exact: true }).selectOption('en');
     await expect(page.getByRole('dialog').getByRole('combobox', { name: 'Language', exact: true })).toBeEnabled();
     await closeDialogs(page);
@@ -849,8 +852,8 @@ test('HUD rows keep localized labels and identity anchors while condensing only 
   const openSettings = async () => {
     if (await page.locator('.dock').count()) {
       await page.locator('.dock .more').click();
-      await page.getByRole('dialog').getByRole('button', { name: /^(Settings|Einstellungen|Ajustes)$/ }).click();
     } else await page.locator('.menu-more').click();
+    await page.getByRole('dialog').getByRole('button', { name: /^(Settings|Einstellungen|Ajustes)$/ }).click();
     await expect(page.getByRole('dialog').getByRole('combobox', { name: /^(Language|Sprache|Idioma)$/ })).toBeVisible();
   };
   const close = async () => {

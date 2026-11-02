@@ -20,6 +20,18 @@ function browser(initial = '#menu') {
 }
 
 describe('P007 nested single-pane history', () => {
+  it.each(['menu', 'quick', 'progression'] as const)('opens More on %s and restores Settings parent and trigger screen', screen => {
+    const b = browser(); let current: Route = 'menu', pane: OverlayState | undefined;
+    const nav = createNavigation(b.host, (route, overlay) => { current = route; pane = overlay; });
+    nav.go(screen); nav.openMore(); const parent = pane;
+    expect(parent).toMatchObject({ base: screen, panel: 'more' });
+    nav.openMore(); expect(pane).toBe(parent);
+    nav.openPanel('settings'); expect(pane?.parentId).toBe(parent?.id);
+    nav.closeMore(); b.flush(); expect(current).toBe('more'); expect(pane).toBe(parent);
+    nav.closeMore(); b.flush(); expect(current).toBe(screen);
+    b.traverse(2); b.flush(); expect(current).toBe(screen); expect(pane).toBeUndefined();
+    nav.destroy();
+  });
   it('Back closes the child first, then consumes its parent and never resurrects either', () => {
     const b = browser(); let current: Route = 'menu', pane: OverlayState | undefined;
     const nav = createNavigation(b.host, (route, overlay) => { current = route; pane = overlay; });

@@ -1,3 +1,4 @@
+import { openMenuSettings } from './ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -29,7 +30,7 @@ async function settings() {
   await closeDialogs();
   if (await page.locator('.dock .more').count()) {
     await page.locator('.dock .more').click(); await page.getByRole('button', { name: /^(Settings|Einstellungen|Ajustes)$/ }).click();
-  } else await page.locator('.menu-more').click();
+  } else await openMenuSettings(page);
 }
 async function panel() {
   await settings(); await page.getByRole('button', { name: /^(Install and offline|Installation und offline|Instalación y sin conexión)$/ }).click();

@@ -1,3 +1,4 @@
+import { openMenuSettings } from './ui.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -19,7 +20,7 @@ function essential(save){return {generation:save.current.generation,attempt:logi
 async function build(){return page.locator('meta[name=toadoku-build]').getAttribute('content');}
 async function shell(which='active'){return page.evaluate(async which=>{const worker=(await navigator.serviceWorker.getRegistration())?.[which];if(!worker)return null;return new Promise((done,fail)=>{const ch=new MessageChannel(),timer=setTimeout(()=>fail(Error('Shell verification timeout')),15000);ch.port1.onmessage=e=>{clearTimeout(timer);done(e.data);};worker.postMessage({type:'TOADOKU_SHELL_VERIFY',protocol:1},[ch.port2]);});},which);}
 async function closeAll(){for(let i=0;i<8&&await page.getByRole('dialog').count();i++){const title=await page.locator('#game-dialog-title').textContent();await page.getByRole('dialog').getByRole('button',{name:/^(Close|Schlie\u00dfen|Cerrar)$/}).click();await page.waitForFunction(previous=>{const title=document.querySelector('#game-dialog-title');return !title||title.textContent!==previous;},title);}await expect(page.getByRole('dialog')).toHaveCount(0);}
-async function settings(){if(await page.getByRole('combobox',{name:/^(Theme|Thema|Tema)$/}).count())return;await closeAll();if(await page.locator('.dock .more').count()){await page.locator('.dock .more').click();await page.getByRole('button',{name:/^(Settings|Einstellungen|Ajustes)$/}).click();}else await page.locator('.menu-more').click();}
+async function settings(){if(await page.getByRole('combobox',{name:/^(Theme|Thema|Tema)$/}).count())return;await closeAll();if(await page.locator('.dock .more').count()){await page.locator('.dock .more').click();await page.getByRole('button',{name:/^(Settings|Einstellungen|Ajustes)$/}).click();}else await openMenuSettings(page);}
 async function panel(locale='en'){await settings();await page.getByRole('button',{name:/^(Install and offline|Installation und offline|Instalaci\u00f3n y sin conexi\u00f3n)$/}).click();await expect(page.getByRole('button',{name:names[locale].prepare,exact:true})).toBeEnabled({timeout:30000});}
 async function prepareOld(){await panel();await page.getByRole('button',{name:names.en.prepare,exact:true}).click();await expect(page.getByText('Puzzle reserve verified.',{exact:true})).toBeVisible({timeout:60000});assert((await shell()).ready);}
 async function choose(field,value){const control=page.getByRole('combobox',{name:field});await expect(control).toBeEnabled();await control.selectOption(value);await expect(control).toBeEnabled();}

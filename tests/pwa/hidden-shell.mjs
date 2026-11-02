@@ -1,3 +1,4 @@
+import { openMenuSettings } from './ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdir,writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -7,7 +8,7 @@ const {chromium,expect}=await import('@playwright/test'),root=process.argv[2],di
 await mkdir(dir,{recursive:true});const host=await staticHost({root,port:5198}),events=[];let release=()=>{},context;
 try{
  context=await chromium.launchPersistentContext(resolve(dir,'profile'),{headless:true,viewport:{width:360,height:800}});
- const page=context.pages()[0];await page.goto(host.origin+'/toadoku/',{waitUntil:'domcontentloaded'});await expect(page.locator('.menu-more')).toBeEnabled();await page.locator('.menu-more').click();await page.getByRole('button',{name:'Install and offline',exact:true}).click();await expect(page.getByRole('button',{name:'Prepare offline play',exact:true})).toBeEnabled();
+ const page=context.pages()[0];await page.goto(host.origin+'/toadoku/',{waitUntil:'domcontentloaded'});await expect(page.locator('.menu-more')).toBeEnabled();await openMenuSettings(page);await page.getByRole('button',{name:'Install and offline',exact:true}).click();await expect(page.getByRole('button',{name:'Prepare offline play',exact:true})).toBeEnabled();
  let held=false;const gate=new Promise(done=>release=done);host.state.fault=pathname=>{if(/\/assets\/raw-recovery\.worker-[^/]+\.js$/.test(pathname)){held=true;return {wait:gate};}};
  await page.getByRole('button',{name:'Prepare offline play',exact:true}).click();await expect.poll(()=>held,{timeout:15000}).toBe(true);
  const other=await context.newPage();await other.goto('about:blank');await other.bringToFront();const realHidden=await page.evaluate(()=>document.hidden);

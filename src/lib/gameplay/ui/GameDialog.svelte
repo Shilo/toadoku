@@ -18,6 +18,7 @@
   import Droplet from '@lucide/svelte/icons/droplet';
   import Footprints from '@lucide/svelte/icons/footprints';
   import Sprout from '@lucide/svelte/icons/sprout';
+  import ExternalLink from '@lucide/svelte/icons/external-link';
   import { appCopy } from '../app-copy';
   import { themeCopy } from '../../theme/copy';
   import { THEME_CHOICES as themeChoices, APPEARANCE_CHOICES as appearanceChoices } from '../../theme/policy';
@@ -25,7 +26,7 @@
   import { bandForPool, poolForLeap } from '../../modes';
   import type { CloseReason, DialogView, GameDialogProps } from './types';
   import type { SessionCommand } from '../../session';
-  let { view, locale, pwa, install, offline, offlineUnavailable, puzzleProblem, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, themeError = false, activeThemeId, automaticThemeInfo, onThemeRetry, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
+  let { view, inGame = true, locale, pwa, install, offline, offlineUnavailable, puzzleProblem, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, themeError = false, activeThemeId, automaticThemeInfo, onThemeRetry, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
     onCommand, onNavigate, onClose, onPreference, onHint, onContinue, onReplay, onRestart, onReplace, onExport, onRecovery, onResumeSaved, onRestore, onRestoreInput, onRetry }: GameDialogProps = $props();
   const c = $derived(uiCopy[locale]);
   const themeText = $derived(themeCopy[locale]);
@@ -39,7 +40,25 @@
   const notes = $derived(attempt?.notes[selected] ?? 0);
   const canErase = $derived(!frozen && !clue && !!(value || notes));
   const canRecover = $derived(!!onRecovery && (exportError || ['unsaved', 'conflict', 'unavailable'].includes(saveState)));
-  const title = $derived(view === 'pwa' ? pwaCopy[locale].title : view === 'more' ? c.game : view === 'settings' ? c.settings : view === 'notes' ? c.cell(Math.floor(selected / 9) + 1, selected % 9 + 1) : view === 'result' ? c.completed : view === 'pause' ? c.paused : view === 'replay' ? c.replay : view === 'backup' ? c.backup : view === 'restart' ? c.restartTitle : view === 'replace' ? c.replaceTitle : view === 'recover' ? c.recoverTitle : c.hint);
+  let saveFeedbackShown = $state(false), prolongedSave = $state(false);
+  let saveFeedbackPane: DialogView | undefined;
+  // Fast study-time checkpoints need no transient layout. Show slow writes, then keep the
+  // row stable for this pane without announcing every subsequent heartbeat as a new save.
+  $effect(() => {
+    const pane = view, status = saveState;
+    if (saveFeedbackPane !== pane) { saveFeedbackPane = pane; saveFeedbackShown = false; }
+    prolongedSave = false;
+    if (status === 'saving') {
+      const timer = setTimeout(() => {
+        if (view === pane && saveState === 'saving') { saveFeedbackShown = true; prolongedSave = true; }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    if (status !== 'saved') saveFeedbackShown = true;
+  });
+  const showSaveFeedback = $derived(saveFeedbackShown || !['saved', 'saving'].includes(saveState));
+  const saveFeedback = $derived(saveState === 'saving' && prolongedSave ? c.saving : ['saved', 'saving'].includes(saveState) ? c.autoSaving : c[saveState]);
+  const title = $derived(view === 'pwa' ? pwaCopy[locale].title : view === 'more' ? inGame ? c.game : c.menu : view === 'settings' ? c.settings : view === 'notes' ? c.cell(Math.floor(selected / 9) + 1, selected % 9 + 1) : view === 'result' ? c.completed : view === 'pause' ? c.paused : view === 'replay' ? c.replay : view === 'backup' ? c.backup : view === 'restart' ? c.restartTitle : view === 'replace' ? c.replaceTitle : view === 'recover' ? c.recoverTitle : c.hint);
   const hintDescription = $derived(hint ? describeHint(hint, locale) : undefined);
   const popoverStyle = $derived.by(() => {
     if (view !== 'more' || !anchor) return '';
@@ -62,7 +81,7 @@
     if (event.repeat && ['Enter', ' '].includes(event.key) && (event.target as HTMLElement).tagName === 'BUTTON') { event.preventDefault(); return; }
     if (event.key !== 'Tab') return;
     const node = event.currentTarget as HTMLDialogElement;
-    const controls = [...node.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),summary')].filter(el => el.getClientRects().length > 0);
+    const controls = [...node.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),summary')].filter(el => el.getClientRects().length > 0);
     if (!controls.length) { event.preventDefault(); return; }
     const first = controls[0], last = controls.at(-1)!;
     if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement as HTMLElement))) { event.preventDefault(); last.focus(); }
@@ -119,7 +138,11 @@
 
 <svelte:window bind:innerWidth={viewportWidth} bind:innerHeight={viewportHeight} />
 
-<dialog class={['game-dialog', view === 'more' ? 'popover' : 'sheet']} style={popoverStyle} lang={locale} aria-labelledby="game-dialog-title"
+{#snippet versionItem()}
+  <a class="tool-row version-link" href="https://github.com/Shilo/toadoku" target="_blank" rel="noopener noreferrer" aria-label={`${c.version} ${__APP_VERSION__}: ${c.versionSource}`}><ExternalLink size={20} aria-hidden="true" /><span>{c.version} {__APP_VERSION__}</span></a>
+{/snippet}
+
+<dialog class={['game-dialog', view === 'more' ? 'popover' : 'sheet', { 'menu-popover': view === 'more' && !inGame }]} style={popoverStyle} lang={locale} aria-labelledby="game-dialog-title"
   {@attach mountDialog} onkeydown={keyboard} onclick={outside} oncancel={event => { event.preventDefault(); event.stopPropagation(); if (!closingBlocked) void onClose('dismiss'); }}>
   <header>
     {#if !['more', 'result', 'pause', 'replace', 'replay', 'recover'].includes(view)}<button class="icon-button back" disabled={closingBlocked} aria-label={c.back} onclick={() => navigate(backTarget())}><ArrowLeft size={22} /></button>{/if}
@@ -129,7 +152,13 @@
   {#if puzzleProblem && ['replace','result','replay'].includes(view)}<p role="alert">{puzzleProblem}</p>{/if}
   {#if view === 'more' && attempt?.scored === false || view === 'result' && receipt?.scored === false}<p class="eligibility">{c.unscoredIdentity}</p>{/if}
 
-  {#if view === 'more'}
+  {#if view === 'more' && !inGame}
+    <div class="menu-options">
+      <button class="tool-row" disabled={busy} onclick={() => navigate('settings')}><Settings size={20} /><span>{c.settings}</span></button>
+      <hr />
+      {@render versionItem()}
+    </div>
+  {:else if view === 'more'}
     <div class="more-groups">
       <section aria-labelledby="tools-heading"><h3 id="tools-heading">{c.tools}</h3>
         {#if attempt?.status === 'completed'}
@@ -146,6 +175,8 @@
         {#if attempt?.status !== 'completed'}<button class="tool-row" disabled={busy || frozen} onclick={() => navigate('pause')}><Pause size={20} /><span>{c.pause}</span></button>{/if}
         <button class="tool-row" disabled={busy} onclick={() => navigate('settings')}><Settings size={20} /><span>{c.settings}</span></button>
         <button class="tool-row" disabled={busy} onclick={() => onClose('menu')}><House size={20} /><span>{c.mainMenu}</span></button>
+        <hr />
+        {@render versionItem()}
       </section>
     </div>
   {:else if view === 'settings'}
@@ -226,13 +257,14 @@
     <div class="pane"><p>{c.recoverHelp}</p><button class="secondary" disabled={closingBlocked || recoveryBusy || !onRecovery} onclick={event => exportWithFocus(event,() => onRecovery?.())}><Download size={20} /><span>{c.emergencyExport}</span></button><button class="primary" disabled={busy || !onResumeSaved} onclick={() => onResumeSaved?.(true)}>{c.resumeSaved}<ArrowRight size={20} /></button><button class="secondary" disabled={closingBlocked} onclick={() => onClose('dismiss')}>{c.cancel}</button></div>
   {/if}
   {#if recoveryProblem}<p role="status">{recoveryProblem==='partial'?c.recoveryPartial:c.recoveryUnavailable}</p>{/if}
-  {#if saveState !== 'saved'}<footer><p role="status">{c[saveState]}</p>{#if onRetry && ['unsaved', 'unavailable'].includes(saveState)}<button class="secondary" disabled={busy} onclick={onRetry}>{c.retry}</button>{/if}{#if canRecover && view !== 'backup' && view !== 'recover'}<p>{c.emergencyHelp}</p><button class="secondary" disabled={closingBlocked || recoveryBusy} onclick={event => exportWithFocus(event,() => onRecovery?.())}><Download size={20} /><span>{c.emergencyExport}</span></button>{/if}</footer>{/if}
+  {#if showSaveFeedback}<footer><p role="status">{saveFeedback}</p>{#if onRetry && ['unsaved', 'unavailable'].includes(saveState)}<button class="secondary" disabled={busy} onclick={onRetry}>{c.retry}</button>{/if}{#if canRecover && view !== 'backup' && view !== 'recover'}<p>{c.emergencyHelp}</p><button class="secondary" disabled={closingBlocked || recoveryBusy} onclick={event => exportWithFocus(event,() => onRecovery?.())}><Download size={20} /><span>{c.emergencyExport}</span></button>{/if}</footer>{/if}
 </dialog>
 
 <style>
   .game-dialog { position: fixed; box-sizing: border-box; padding: 8px; border: 1px solid var(--dialog-edge); border-radius: var(--dialog-radius); background: var(--dialog-surface); color: var(--dialog-ink); font: 500 1rem/1.3 var(--font-ui); width: min(448px, calc(100vw - 16px)); max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow: auto; overflow-wrap: anywhere; overscroll-behavior: contain; }
   .game-dialog::backdrop { background: var(--dialog-backdrop); }
   .popover { --popover-width: min(384px, calc(100vw - 16px)); --popover-right: clamp(8px, var(--anchor-right, 8px), calc(100vw - var(--popover-width) - 8px)); --popover-bottom: clamp(8px, var(--anchor-bottom, 8px), max(8px, calc(100dvh - 180px))); margin: 0; width: var(--popover-width); inset: auto var(--popover-right) var(--popover-bottom) auto; max-height: max(0px, calc(100dvh - var(--popover-bottom) - 8px)); }
+  .menu-popover { --popover-width: min(280px, calc(100vw - 16px)); }
   .sheet { margin: auto; }
   header { display: flex; align-items: center; gap: 4px; min-height: 44px; }
   h2 { flex: 1; margin: 0; font-size: 1.35rem; line-height: 1.2; overflow-wrap: anywhere; }
@@ -240,11 +272,13 @@
   h3 { font-size: 1rem; margin: 8px 0 4px; }
   h4 { margin: 8px 0 4px; }
   p { margin: 8px 0; }
-  button, select, input { box-sizing: border-box; color: inherit; font: inherit; }
+  button, a, select, input { box-sizing: border-box; color: inherit; font: inherit; }
+  a.tool-row { display: flex; align-items: center; min-height: 44px; border-radius: var(--button-radius); text-decoration: none; }
+  hr { border: 0; border-top: 1px solid var(--control-lip); margin: 4px 0; }
   button { cursor: pointer; border: 0; border-radius: var(--button-radius); min-height: 44px; padding: 8px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; white-space: normal; overflow-wrap: anywhere; }
   button:disabled { cursor: default; opacity: .48; }
-  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--control-focus); outline-offset: 2px; }
-  button :global(svg) { flex-shrink: 0; }
+  button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--control-focus); outline-offset: 2px; }
+  button :global(svg), a :global(svg) { flex-shrink: 0; }
   button > span { min-width: 0; overflow-wrap: anywhere; }
   .icon-button { width: 44px; min-width: 44px; height: 44px; background: transparent; }
   .more-groups { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }

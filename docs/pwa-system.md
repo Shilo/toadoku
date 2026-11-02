@@ -1,10 +1,10 @@
 # PWA system walkthrough
 
-For players: installing is optional, and online play works without offline setup. Open More, then Install and offline (during a game, choose Settings first). Prepare puzzles before a trip. When an update is ready, finish saving or export recovery, close every Toadoku window, then reopen.
+For players: installing is optional, and online play works without offline setup. Open More → Settings → Install and offline from either screen. Prepare puzzles before a trip. When an update is ready, finish saving or export recovery, close every Toadoku window, then reopen.
 
 ## Player workflow
 
-1. **While online:** open **More → Install and offline** from the menu, or **More → Settings → Install and offline** during a game.
+1. **While online:** open **More → Settings → Install and offline** from the menu or during a game.
 2. Choose **Prepare offline play** for **3 upcoming puzzles per difficulty**. For a longer trip, open **More offline options → Prepare a longer trip** for **25 per difficulty**. A completed travel pack covers a 60-game Progression run if Quick Play, replays and replacements do not consume the same reserve.
 3. Wait for preparation to finish. Check that app files are verified and the displayed Easy/Medium/Hard counts cover the play you need. Installing the app or seeing a saved game alone does not prove those extra puzzles are ready.
 4. After first setup, finish saving or export recovery, **close every Toadoku tab and app window, then reopen once** before relying on offline play. Keep a backup of important progress.

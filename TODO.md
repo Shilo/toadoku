@@ -44,6 +44,8 @@ This section records completed prototype scope; it does not authorize further pr
 
 ## More and settings
 
+- [ ] Deferred: if the GitHub repository becomes private, remove the GitHub-opening behavior from the single Version item in both main-menu and gameplay More popovers. Keep the installed app's version number visible, replace the link with non-interactive text, and remove the external-link icon/new-tab description. Do not add a separate GitHub source item.
+
 - [x] Preserve disabled More in the historical prototype; the maintained gameplay uses its tenth key for functional navigation.
 - [x] Supersede the historical tools-on-right proposal with accepted Tools-left/Menu-right gameplay choices, responsive popovers and accessible larger sheets/dialogs.
 - [x] Review menu alternatives and retain direct solving-tool access without a nested Tools step.

@@ -8,7 +8,7 @@ See [gameplay acceptance](docs/gameplay-acceptance.md), [theme authoring](docs/t
 
 ## Installation, offline play and updates
 
-Ordinary online play needs no setup. Installation is optional: open More, then Install and offline (during a game, choose Settings first), and use the browser's installation option when available.
+Ordinary online play needs no setup. Both three-dot menus contain Settings and a Version link to the source repository. Installation is optional: open More → Settings → Install and offline, and use the browser's installation option when available.
 
 Before a trip, choose Prepare offline play for 3 upcoming puzzles per difficulty. More offline options contains the longer-trip target of 25 per difficulty and storage cleanup. Packs do not refill automatically; prepare again online when needed. Cancel keeps completed puzzles. After first setup, save and close every Toadoku window, then reopen once before going offline. Keep a backup of important progress because browsers can remove local data. See the [practical offline checklist](docs/pwa-system.md#player-workflow) for readiness, downloads and partial preparation.
 
