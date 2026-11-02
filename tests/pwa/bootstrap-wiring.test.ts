@@ -11,7 +11,7 @@ const sha = 'a'.repeat(40), priorSha = 'b'.repeat(40), repository = 'Owner/Game'
 const current = { id: 100, workflow_id: 5, head_sha: sha, head_branch: 'main', event: 'push', run_attempt: 1, status: 'in_progress', conclusion: null, path: '.github/workflows/pages.yml', repository: { id: 10, full_name: repository } };
 const prior = { ...current, id: 99, head_sha: priorSha, status: 'completed', conclusion: 'failure' };
 const page = (key: string, values: unknown[]) => ({ total_count: values.length, [key]: values });
-async function runPrevious(options: { priorDeploy?: string; archive?: boolean; rerun?: boolean; hostStatus?: number; probeError?: boolean; noSource?: boolean; event?: string; malformedHistory?: boolean; baseOverride?: string } = {}) {
+async function runPrevious(options: { priorDeploy?: string; archive?: boolean; rerun?: boolean; hostStatus?: number; probeError?: boolean; noSource?: boolean; event?: string; malformedHistory?: boolean; baseOverride?: string; noRunner?: boolean } = {}) {
   await mkdir('prototypes/pwa-validation', { recursive: true });
   const cwd = await mkdtemp(resolve('prototypes/pwa-validation/bootstrap-wiring-'));
   await mkdir(join(cwd, '.github/workflows'), { recursive: true });
@@ -24,15 +24,19 @@ async function runPrevious(options: { priorDeploy?: string; archive?: boolean; r
     { number: 1, name: 'Stage retained asset archive', status: 'completed', conclusion: options.archive ? 'success' : 'skipped', started_at: date(10), completed_at: date(12) },
     { number: 2, name: options.rerun ? 'Deploy verified Pages artifact' : 'Run actions/deploy-pages@v4', status: 'completed', conclusion: options.priorDeploy ?? 'skipped' },
   ] }];
-  const hasPrior = options.priorDeploy !== undefined || options.archive;
+  if (options.noRunner) Object.assign(jobs[0], { run_attempt: 1, runner_id: null, runner_name: null, runner_group_id: null, runner_group_name: null,
+    started_at: '2026-11-02T01:05:18Z', completed_at: '2026-11-02T01:05:18Z', steps: [] });
+  const hasDeployment = options.priorDeploy !== undefined || options.archive;
+  const hasPrior = hasDeployment || options.noRunner;
+  const historicalSource = options.noRunner ? await readFile('.github/workflows/pages.yml', 'utf8') : legacySource;
   const routes: Record<string, unknown> = {
     'actions/workflows/pages.yml/runs?per_page=100': options.malformedHistory ? { total_count: 999, workflow_runs: [run] } : page('workflow_runs', hasPrior && !options.rerun ? [run, prior] : [run]),
-    'deployments?environment=github-pages&per_page=100&page=1': hasPrior ? [{ id: 17, environment: 'github-pages', ref: 'main', sha: old.head_sha, created_at: date(-10), updated_at: date(30) }] : [],
+    'deployments?environment=github-pages&per_page=100&page=1': hasDeployment ? [{ id: 17, environment: 'github-pages', ref: 'main', sha: old.head_sha, created_at: date(-10), updated_at: date(30) }] : [],
     'deployments/17/statuses?per_page=100': [{ id: 18, created_at: date(30), log_url: jobUrl }],
     'actions/jobs/77': jobs[0],
     [`actions/runs/${old.id}`]: old,
-    [`contents/.github/workflows/pages.yml?ref=${priorSha}`]: { type: 'file', path: '.github/workflows/pages.yml', encoding: 'base64', content: Buffer.from(legacySource).toString('base64'), size: Buffer.byteLength(legacySource) },
-    [`actions/runs/${old.id}/attempts/1/jobs?per_page=100`]: page('jobs', options.rerun ? [{ id: 78, run_id: old.id, head_sha: old.head_sha, name: 'changes', status: 'completed', conclusion: 'success', steps: [] }, ...jobs] : jobs),
+    [`contents/.github/workflows/pages.yml?ref=${priorSha}`]: { type: 'file', path: '.github/workflows/pages.yml', encoding: 'base64', content: Buffer.from(historicalSource).toString('base64'), size: Buffer.byteLength(historicalSource) },
+    [`actions/runs/${old.id}/attempts/1/jobs?per_page=100`]: page('jobs', options.rerun || options.noRunner ? [{ id: 78, run_id: old.id, head_sha: old.head_sha, name: 'changes', status: 'completed', conclusion: 'success', steps: [] }, ...jobs] : jobs),
     [`actions/runs/${old.id}/artifacts?per_page=100`]: page('artifacts', options.archive ? [{ id: 7, name: 'toadoku-retained-assets', expired: false, size_in_bytes: 15, created_at: date(11), workflow_run: { id: old.id, repository_id: 10, head_repository_id: 10, head_sha: old.head_sha, head_branch: 'main' } }] : []),
   };
   await writeFile(join(cwd, 'routes.json'), JSON.stringify(routes));
@@ -74,6 +78,12 @@ it('actual previous helper automatically recovers an early failed first release 
   const f = await runPrevious({ priorDeploy: 'skipped' }); expect(f.history.bootstrap).toBe(true);
   expect(f.history.priorAttempts).toBe(1);
   expect(workflowHash(Buffer.from(legacySource))).toBe('b0b6ff33a973346600918f306a09b1fb58e150309c00d677ebbee28a875db7ad');
+});
+it('actual helper recovers the observed missing-environment failure with no runner, steps or deployment record', async () => {
+  const f = await runPrevious({ noRunner: true });
+  expect(f.history).toMatchObject({ bootstrap: true, priorAttempts: 1 });
+  expect(f.calls.some(path => path.includes('actions/runs/99/attempts/1/jobs'))).toBe(true);
+  expect(f.calls.some(path => path.includes('/artifacts'))).toBe(false);
 });
 it('actual archive discovery retains a pre-deploy archive without mistaking it for publication', async () => {
   const f = await runPrevious({ archive: true });

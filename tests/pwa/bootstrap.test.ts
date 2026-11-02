@@ -7,6 +7,10 @@ const current = { id: 100, workflow_id: 5, head_sha: sha, head_branch: 'main', r
 const prior = { ...current, id: 99, head_sha: otherSha, status: 'completed', conclusion: 'failure' };
 const job = (run: Pick<typeof prior, 'id' | 'head_sha'> = prior, conclusion = 'skipped') => ({ id: 42, run_id: run.id, head_sha: run.head_sha, name: 'release', status: 'completed', conclusion: 'failure', steps: [{ number: 1, name: 'Build current complete offline closure', status: 'completed', conclusion: 'failure' }, { number: 2, name: 'Deploy verified Pages artifact', status: 'completed', conclusion }] });
 const gate = (run: Pick<typeof prior, 'id' | 'head_sha'> = prior, conclusion = 'success') => ({ id: 43, run_id: run.id, head_sha: run.head_sha, name: 'changes', status: 'completed', conclusion, steps: [] });
+// Observed GitHub environment-setup failure: Shilo/toadoku job 125039993902, before any runner assignment.
+const noRunnerJob = (run: Pick<typeof prior, 'id' | 'head_sha'> = prior) => ({ ...job(run), run_attempt: 1,
+  runner_id: null, runner_name: null, runner_group_id: null, runner_group_name: null,
+  started_at: '2026-11-02T01:05:18Z', completed_at: '2026-11-02T01:05:18Z', steps: [] });
 const page = (key: string, values: any[]) => ({ data: { total_count: values.length, [key]: values }, hasNext: false });
 function fixture(runs: any[] = [current], jobs: any[] = [gate(), job()]) {
   const read = vi.fn(async (path: string) => {
@@ -30,6 +34,42 @@ it('recovers an early failure only from complete source-bound skipped deployment
   const f = fixture([current, prior]);
   expect(await initialReleaseProof(f.context)).toMatchObject({ bootstrap: true, priorAttempts: 1 });
   expect(f.read.mock.calls.map(call => call[0])).toContain('actions/runs/99/attempts/1/jobs?per_page=100');
+});
+it.each(['2026-11-02T01:05:18Z', '2026-11-02T01:05:18.000Z'])('recovers a known inline release failed before runner assignment at %s', async timestamp => {
+  const failed = { ...noRunnerJob(), started_at: timestamp, completed_at: timestamp };
+  expect((await initialReleaseProof(fixture([current, prior], [gate(), failed]).context)).bootstrap).toBe(true);
+});
+it('binds an unassigned runner failure to the examined prior rerun attempt', async () => {
+  const run = { ...current, run_attempt: 2 }, failed = noRunnerJob(run);
+  const f = fixture([run], [gate(run), failed]); f.context.attempt = 2;
+  expect((await initialReleaseProof(f.context)).bootstrap).toBe(true);
+  failed.run_attempt = 2;
+  expect((await initialReleaseProof(f.context)).bootstrap).toBe(false);
+});
+it.each([
+  ...['runner_id', 'runner_name', 'runner_group_id', 'runner_group_name'].flatMap(field => [
+    { name: `missing ${field}`, patch: (candidate: any) => { delete candidate[field]; } },
+    { name: `assigned ${field}`, patch: (candidate: any) => { candidate[field] = field.endsWith('_id') ? 1 : 'assigned runner'; } },
+  ]),
+  { name: 'missing attempt', patch: (candidate: any) => { delete candidate.run_attempt; } },
+  { name: 'wrong attempt', patch: (candidate: any) => { candidate.run_attempt = 2; } },
+  { name: 'nonzero duration', patch: (candidate: any) => { candidate.completed_at = '2026-11-02T01:05:19Z'; } },
+  { name: 'missing timestamp', patch: (candidate: any) => { delete candidate.started_at; } },
+  { name: 'malformed timestamps', patch: (candidate: any) => { candidate.started_at = candidate.completed_at = 'invalid'; } },
+  { name: 'impossible calendar date', patch: (candidate: any) => { candidate.started_at = candidate.completed_at = '2026-02-31T01:05:18Z'; } },
+  { name: 'an executed step', patch: (candidate: any) => { candidate.steps = [{ number: 1, name: 'Set up job', status: 'completed', conclusion: 'failure' }]; } },
+  ...['cancelled', 'success', 'startup_failure', 'timed_out'].map(conclusion => ({ name: `conclusion ${conclusion}`, patch: (candidate: any) => { candidate.conclusion = conclusion; } })),
+])('refuses an uncertain empty failure with $name', async ({ patch }) => {
+  const failed = noRunnerJob(); patch(failed);
+  expect((await initialReleaseProof(fixture([current, prior], [gate(), failed]).context)).bootstrap).toBe(false);
+});
+it('does not accept an unassigned runner failure from unrecognized historical workflow source', async () => {
+  const f = fixture([current, prior], [gate(), noRunnerJob()]), read = f.context.read;
+  const unknown = Buffer.from('unrecognized workflow');
+  f.context.read = async path => path.startsWith('contents/')
+    ? { data: { type: 'file', path: '.github/workflows/pages.yml', encoding: 'base64', content: unknown.toString('base64'), size: unknown.length }, hasNext: false }
+    : read(path);
+  expect((await initialReleaseProof(f.context)).bootstrap).toBe(false);
 });
 it('still recognizes the previously reviewed single-job named-deployment workflow', async () => {
   const previousSource = readFileSync('tests/pwa/fixtures/pages-single-job.yml');

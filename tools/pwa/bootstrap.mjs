@@ -29,6 +29,15 @@ function complete(page, key) {
 function workflowPath(run) {
   return run.path === WORKFLOW || run.path === `${WORKFLOW}@${run.head_branch}` || run.path === `${WORKFLOW}@refs/heads/${run.head_branch}`;
 }
+function failedBeforeRunner(job, attempt) {
+  if (job.conclusion !== 'failure' || job.run_attempt !== attempt || job.steps.length !== 0 ||
+    !['runner_id', 'runner_name', 'runner_group_id', 'runner_group_name'].every(key => job[key] === null)) return false;
+  const value = job.started_at;
+  if (typeof value !== 'string' || value !== job.completed_at || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value)) return false;
+  const time = Date.parse(value);
+  const canonical = value.includes('.') ? value.replace(/\.(\d+)Z$/, (_, digits) => `.${digits.padEnd(3, '0')}Z`) : value.replace('Z', '.000Z');
+  return Number.isFinite(time) && new Date(time).toISOString() === canonical;
+}
 /** Automatic new-site initialization assumes the repository/URL have no erased or external publication history. */
 export async function initialReleaseProof(context) {
   const no = reason => ({ bootstrap: false, reason });
@@ -76,6 +85,9 @@ export async function initialReleaseProof(context) {
         const job = jobs.find(job => job.name === 'release');
         // A trusted needs/if gate can skip the entire protected job, including after gate failure.
         if (!previousDeployName && job.conclusion === 'skipped' && job.steps.every(step => step.conclusion === 'skipped')) continue;
+        // GitHub marks an environment-setup failure completed before assigning a runner. The known
+        // inline deployment cannot execute with no assigned runner, no steps and zero duration.
+        if (failedBeforeRunner(job, number)) continue;
         const deployments = job.steps.filter(step => step.name === deployName);
         if (deployments.length !== 1 || deployments[0].conclusion !== 'skipped') throw new Error('Deployment was attempted or its skipped state is unknown');
       }
