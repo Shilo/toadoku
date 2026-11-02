@@ -146,7 +146,9 @@ try {
       await closeDialogs();
       await expect.poll(() => page.evaluate(() => window.__certAudit.held)).toBe(true);
       await more(); await page.getByRole('button', { name: 'Settings', exact: true }).click();
-      await page.getByLabel('Language', { exact: true }).selectOption('de');
+      await expect(page.locator('#game-dialog-title')).toHaveText('Settings');
+      const language = page.getByRole('dialog').getByLabel(/^Language/);
+      await expect(language).toHaveCount(1); await language.selectOption('de');
       await expect(page.locator('#game-dialog-title')).toHaveText('Einstellungen');
       await page.evaluate(() => window.__certAudit.release());
       await expect.poll(() => page.evaluate(() => window.__certAudit.pending === 0 && performance.now() - window.__certAudit.last > 200)).toBe(true);
@@ -335,6 +337,7 @@ try {
   report.browser = context.browser().version(); report.passed = true;
 } catch (error) {
   report.error = String(error); report.stack = error.stack; process.exitCode = 1;
+  report.failureDialogText = await page.locator('dialog').allTextContents().catch(() => []);
 } finally {
   await context.close(); await host.close();
   await writeFile(resolve(dir, 'results.json'), JSON.stringify(report, null, 2));
