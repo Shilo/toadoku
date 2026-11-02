@@ -228,7 +228,11 @@ try {
   const failures = await page.evaluate(() => window.__failedAttemptPuts);
   assert(failures > 0);
   const failureElapsed = current(await snapshot()).elapsedMs;
-  await page.waitForTimeout(5500);
+  // Span the actual ten-second checkpoint interval, not only the former five-second cadence.
+  const quietStarted = await page.evaluate(() => performance.now());
+  await page.waitForTimeout(11000);
+  const quietObservedMs = await page.evaluate(start => performance.now() - start, quietStarted);
+  assert(quietObservedMs >= 10000, 'Failure sample did not span one real checkpoint interval');
   assert.equal(await page.evaluate(() => window.__failedAttemptPuts), failures, 'Failed save retried automatically');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export emergency recovery', exact: true }).click();
@@ -237,12 +241,12 @@ try {
   catch (error) { report.downloadFailure = { failure: await download.failure(), pageClosed: page.isClosed(), url: download.url() }; throw error; }
   const recovery = JSON.parse(await readFile(resolve(dir, 'emergency-recovery.json'), 'utf8'));
   assert.equal(recovery.localAttempt.notes[cell], 4 | 16);
-  assert(recovery.localAttempt.elapsedMs >= failureElapsed + 5000);
+  assert(recovery.localAttempt.elapsedMs >= failureElapsed + 10000);
   await page.evaluate(() => { window.__failAttemptPuts = false; });
   await page.getByRole('button', { name: 'Retry saving', exact: true }).click();
   await expect(page.getByText('Changes are not saved', { exact: true })).toHaveCount(0);
-  await persisted(attempt => attempt.notes[cell] === (4 | 16) && attempt.elapsedMs >= failureElapsed + 5000);
-  report.stages.push({ name: 'native-quota-no-retry-loop-and-explicit-recovery', failedPuts: failures, durableBeforeElapsed: failureElapsed, recoveredElapsed: current(await snapshot()).elapsedMs });
+  await persisted(attempt => attempt.notes[cell] === (4 | 16) && attempt.elapsedMs >= failureElapsed + 10000);
+  report.stages.push({ name: 'native-quota-no-retry-loop-and-explicit-recovery', failedPuts: failures, quietObservedMs, durableBeforeElapsed: failureElapsed, recoveredElapsed: current(await snapshot()).elapsedMs });
   await closeDialogs();
 
   const oldOwner = current(await snapshot());
