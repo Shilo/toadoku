@@ -8,7 +8,7 @@ import { workflowHash } from '../../tools/pwa/bootstrap.mjs';
 const execute = promisify(execFile), root = process.cwd();
 const legacySource = "name: Toadoku Pages\non:\n  push:\n    branches: [main]\n  workflow_dispatch:\npermissions:\n  contents: read\n  actions: read\n  pages: write\n  id-token: write\nconcurrency:\n  group: toadoku-pages\n  cancel-in-progress: false\njobs:\n  release:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n      url: ${{ steps.deployment.outputs.page_url }}\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: '24'\n          cache: npm\n      - id: pages\n        uses: actions/configure-pages@v5\n      - run: npm ci\n      - run: npm run check\n      - run: npm test -- --maxWorkers=2\n      - name: Build current complete offline closure\n        run: npm run build\n        env:\n          TOADOKU_BASE: ${{ steps.pages.outputs.base_path }}/\n      - run: node tools/pwa/validate.mjs dist\n      - name: Read monotonic retained publication archive\n        env:\n          GH_TOKEN: ${{ github.token }}\n        run: node tools/pwa/previous.mjs\n      - name: Expand validated archive path\n        shell: bash\n        run: |\n          if [ -f prototypes/pwa-validation/previous.zip ]; then\n            if unzip -Z1 prototypes/pwa-validation/previous.zip | grep -Eq '(^/|(^|/)\\.\\.(/|$))'; then exit 1; fi\n            unzip -q prototypes/pwa-validation/previous.zip -d prototypes/pwa-validation/previous\n          fi\n      - name: Retain supported assets and protect currently hosted release\n        run: node tools/pwa/retain.mjs dist prototypes/pwa-validation/previous prototypes/pwa-validation/retained-assets \"${{ steps.pages.outputs.base_url }}/\"\n      - name: Validate complete publication artifact after retention\n        run: node tools/pwa/validate.mjs dist\n      - name: Build compact complete rollback snapshot\n        run: node tools/pwa/snapshot.mjs dist prototypes/pwa-validation/rollback\n      - name: Check repository artifact capacity without removing anything\n        id: capacity\n        run: node tools/pwa/capacity.mjs prototypes/pwa-validation/retained-assets prototypes/pwa-validation/rollback dist\n        env:\n          GH_TOKEN: ${{ github.token }}\n          TOADOKU_ARTIFACT_BUDGET_MIB: ${{ vars.TOADOKU_ARTIFACT_BUDGET_MIB || '400' }}\n      - name: Stage retained asset archive\n        uses: actions/upload-artifact@v4\n        with:\n          name: toadoku-retained-assets\n          path: prototypes/pwa-validation/retained-assets\n          retention-days: 30\n      - uses: actions/upload-pages-artifact@v3\n        with:\n          path: dist\n      - id: deployment\n        uses: actions/deploy-pages@v4\n      - uses: actions/upload-artifact@v4\n        with:\n          name: toadoku-rollback-release\n          path: prototypes/pwa-validation/rollback\n          retention-days: 30\n      - name: Verify actual published bytes and response headers\n        run: node tools/pwa/verify-host.mjs \"${{ steps.deployment.outputs.page_url }}\" dist prototypes/pwa-validation/hosting.json\n      - uses: actions/upload-artifact@v4\n        if: always() && steps.capacity.outcome == 'success'\n        with:\n          name: toadoku-hosting-evidence\n          path: |\n            prototypes/pwa-validation/hosting.json\n            prototypes/pwa-validation/artifact-capacity.json\n          if-no-files-found: ignore\n";
 const sha = 'a'.repeat(40), priorSha = 'b'.repeat(40), repository = 'Owner/Game', base = 'https://owner.github.io/game/';
-const current = { id: 100, workflow_id: 5, head_sha: sha, head_branch: 'main', run_attempt: 1, status: 'in_progress', conclusion: null, path: '.github/workflows/pages.yml', repository: { full_name: repository } };
+const current = { id: 100, workflow_id: 5, head_sha: sha, head_branch: 'main', event: 'workflow_dispatch', run_attempt: 1, status: 'in_progress', conclusion: null, path: '.github/workflows/pages.yml', repository: { id: 10, full_name: repository } };
 const prior = { ...current, id: 99, head_sha: priorSha, status: 'completed', conclusion: 'failure' };
 const page = (key: string, values: unknown[]) => ({ total_count: values.length, [key]: values });
 async function runPrevious(options: { assertion?: string; priorDeploy?: string; archive?: boolean; rerun?: boolean } = {}) {
@@ -18,18 +18,22 @@ async function runPrevious(options: { assertion?: string; priorDeploy?: string; 
   await writeFile(join(cwd, '.github/workflows/pages.yml'), await readFile('.github/workflows/pages.yml'));
   const run = options.rerun ? { ...current, run_attempt: 2 } : current;
   const old = options.rerun ? run : prior;
-  const jobs = [{ id: 77, run_id: old.id, head_sha: old.head_sha, name: 'release', status: 'completed', conclusion: 'failure', steps: [
-    { number: 1, name: 'Stage retained asset archive', status: 'completed', conclusion: options.archive ? 'success' : 'skipped' },
+  const date = (seconds: number) => new Date(Date.now() - 3600_000 + seconds * 1000).toISOString();
+  const jobUrl = `https://github.com/${repository}/actions/runs/${old.id}/job/77`;
+  const jobs = [{ id: 77, run_id: old.id, run_attempt: 1, head_sha: old.head_sha, head_branch: 'main', html_url: jobUrl, name: 'release', status: 'completed', conclusion: 'failure', started_at: date(0), completed_at: date(30), steps: [
+    { number: 1, name: 'Stage retained asset archive', status: 'completed', conclusion: options.archive ? 'success' : 'skipped', started_at: date(10), completed_at: date(12) },
     { number: 2, name: options.rerun ? 'Deploy verified Pages artifact' : 'Run actions/deploy-pages@v4', status: 'completed', conclusion: options.priorDeploy ?? 'skipped' },
   ] }];
   const hasPrior = options.priorDeploy !== undefined || options.archive;
   const routes: Record<string, unknown> = {
     'actions/workflows/pages.yml/runs?per_page=100': page('workflow_runs', hasPrior && !options.rerun ? [run, prior] : [run]),
-    'actions/workflows/pages.yml/runs?branch=main&status=completed&per_page=100': page('workflow_runs', hasPrior && !options.rerun ? [prior] : []),
+    'deployments?environment=github-pages&per_page=100&page=1': hasPrior ? [{ id: 17, environment: 'github-pages', ref: 'main', sha: old.head_sha, created_at: date(-10), updated_at: date(30) }] : [],
+    'deployments/17/statuses?per_page=100': [{ id: 18, created_at: date(30), log_url: jobUrl }],
+    'actions/jobs/77': jobs[0],
+    [`actions/runs/${old.id}`]: old,
     [`contents/.github/workflows/pages.yml?ref=${priorSha}`]: { type: 'file', path: '.github/workflows/pages.yml', encoding: 'base64', content: Buffer.from(legacySource).toString('base64'), size: Buffer.byteLength(legacySource) },
-    [`actions/runs/${old.id}/attempts/1/jobs?per_page=100`]: page('jobs', jobs),
-    'actions/runs/99/jobs?filter=all&per_page=100': page('jobs', jobs),
-    'actions/runs/99/artifacts?per_page=100': page('artifacts', options.archive ? [{ id: 7, name: 'toadoku-retained-assets', expired: false, size_in_bytes: 15 }] : []),
+    [`actions/runs/${old.id}/attempts/1/jobs?per_page=100`]: page('jobs', options.rerun ? [{ id: 78, run_id: old.id, head_sha: old.head_sha, name: 'changes', status: 'completed', conclusion: 'success', steps: [] }, ...jobs] : jobs),
+    [`actions/runs/${old.id}/artifacts?per_page=100`]: page('artifacts', options.archive ? [{ id: 7, name: 'toadoku-retained-assets', expired: false, size_in_bytes: 15, created_at: date(11), workflow_run: { id: old.id, repository_id: 10, head_repository_id: 10, head_sha: old.head_sha, head_branch: 'main' } }] : []),
   };
   await writeFile(join(cwd, 'routes.json'), JSON.stringify(routes));
   const preload = join(cwd, 'fetch-fixture.mjs');
@@ -54,7 +58,7 @@ globalThis.fetch = async (input, init) => {
 }
 it('actual previous helper defaults to no bootstrap and does not scan proof history without assertion', async () => {
   const f = await runPrevious(); expect(f.history.bootstrap).toBe(false);
-  expect(f.calls).toHaveLength(1); expect(f.calls[0]).toContain('branch=main&status=completed');
+  expect(f.calls).toHaveLength(1); expect(f.calls[0]).toContain('deployments?environment=github-pages');
 });
 it('actual previous helper accepts pristine and early failed first releases with exact scoped assertion', async () => {
   const assertion = `${repository}|${base}|${sha}`;
@@ -70,6 +74,6 @@ it('actual archive discovery retains a pre-deploy archive without mistaking it f
 });
 it('actual wiring refuses an earlier deployed rerun and malformed scoped assertion', async () => {
   const assertion = `${repository}|${base}|${sha}`;
-  expect((await runPrevious({ assertion, rerun: true, priorDeploy: 'success' })).history.bootstrap).toBe(false);
+  expect((await runPrevious({ assertion, rerun: true, priorDeploy: 'success', archive: true })).history.bootstrap).toBe(false);
   expect((await runPrevious({ assertion: `${repository}|https://different.example/|${sha}` })).history.bootstrap).toBe(false);
 });

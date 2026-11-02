@@ -11,42 +11,78 @@ on:
         type: string
 permissions:
   contents: read
-  actions: read
-  pages: write
-  id-token: write
-concurrency:
-  group: toadoku-pages
-  cancel-in-progress: false
 jobs:
-  release:
+  changes:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.changed.outputs.release }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          sparse-checkout: tools/pwa
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Check complete push inputs without building
+        id: changed
+        run: node tools/pwa/release-inputs.mjs changed
+  release:
+    needs: changes
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      deployments: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: toadoku-pages
+      queue: max
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: npm
+      - name: Refuse superseded app inputs after entering the release queue
+        id: current
+        run: node tools/pwa/release-inputs.mjs current
       - id: pages
-        uses: actions/configure-pages@v5
+        if: steps.current.outputs.release == 'true'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - run: npm ci
+        if: steps.current.outputs.release == 'true'
       - run: npm run check
+        if: steps.current.outputs.release == 'true'
       - run: npm test -- --maxWorkers=2
+        if: steps.current.outputs.release == 'true'
       - name: Build current complete offline closure
+        if: steps.current.outputs.release == 'true'
         run: npm run build
         env:
           TOADOKU_BASE: ${{ steps.pages.outputs.base_path }}/
       - run: node tools/pwa/validate.mjs dist
+        if: steps.current.outputs.release == 'true'
       - name: Read monotonic retained publication archive
+        if: steps.current.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TOADOKU_INITIAL_RELEASE: ${{ inputs.initial_release }}
           TOADOKU_PAGES_BASE: ${{ steps.pages.outputs.base_url }}/
         run: node tools/pwa/previous.mjs
       - name: Expand validated archive path
+        if: steps.current.outputs.release == 'true'
         shell: bash
         run: |
           if [ -f prototypes/pwa-validation/previous.zip ]; then
@@ -54,40 +90,52 @@ jobs:
             unzip -q prototypes/pwa-validation/previous.zip -d prototypes/pwa-validation/previous
           fi
       - name: Retain supported assets and protect currently hosted release
+        if: steps.current.outputs.release == 'true'
         run: node tools/pwa/retain.mjs dist prototypes/pwa-validation/previous prototypes/pwa-validation/retained-assets "${{ steps.pages.outputs.base_url }}/"
       - name: Validate complete publication artifact after retention
+        if: steps.current.outputs.release == 'true'
         run: node tools/pwa/validate.mjs dist
       - name: Build compact complete rollback snapshot
+        if: steps.current.outputs.release == 'true'
         run: node tools/pwa/snapshot.mjs dist prototypes/pwa-validation/rollback
       - name: Check repository artifact capacity without removing anything
+        if: steps.current.outputs.release == 'true'
         id: capacity
         run: node tools/pwa/capacity.mjs prototypes/pwa-validation/retained-assets prototypes/pwa-validation/rollback dist
         env:
           GH_TOKEN: ${{ github.token }}
           TOADOKU_ARTIFACT_BUDGET_MIB: ${{ vars.TOADOKU_ARTIFACT_BUDGET_MIB || '400' }}
       - name: Stage retained asset archive
-        uses: actions/upload-artifact@v4
+        if: steps.current.outputs.release == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: toadoku-retained-assets
           path: prototypes/pwa-validation/retained-assets
           retention-days: 30
-      - uses: actions/upload-pages-artifact@v3
+          archive: true
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        if: steps.current.outputs.release == 'true'
         with:
           path: dist
       - name: Deploy verified Pages artifact
+        if: steps.current.outputs.release == 'true'
         id: deployment
-        uses: actions/deploy-pages@v4
-      - uses: actions/upload-artifact@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.current.outputs.release == 'true'
         with:
           name: toadoku-rollback-release
           path: prototypes/pwa-validation/rollback
           retention-days: 30
+          archive: true
       - name: Verify actual published bytes and response headers
+        if: steps.current.outputs.release == 'true'
         run: node tools/pwa/verify-host.mjs "${{ steps.deployment.outputs.page_url }}" dist prototypes/pwa-validation/hosting.json
-      - uses: actions/upload-artifact@v4
-        if: always() && steps.capacity.outcome == 'success'
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && steps.current.outputs.release == 'true' && steps.capacity.outcome == 'success'
         with:
           name: toadoku-hosting-evidence
+          archive: true
           path: |
             prototypes/pwa-validation/hosting.json
             prototypes/pwa-validation/artifact-capacity.json

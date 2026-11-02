@@ -16,6 +16,8 @@ Updates download without interrupting games. When an update is ready, finish sav
 
 Maintainers: [how the PWA works](docs/pwa-system.md), [make or replace installation icons](docs/pwa-icons.md), [integration and review](docs/pwa-integration.md). The Pages workflow is provided; publishing still requires the documented real-device and hosting checks.
 
+For GitHub hosting, follow [Pages setup and conditional publication](docs/pwa-ci.md). Relevant pushes to main build and publish after checks; documentation-only and test-only pushes skip production. A manual run supports initial setup and deliberate retries.
+
 ## Local workflow
 
 Use Node >=24.11. The locked toolchain was verified with Node 25.0.0 and npm 11.16.0.

@@ -1,0 +1,94 @@
+name: Toadoku Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      initial_release:
+        description: 'Only for a never-published target: OWNER/REPO|https://configured-pages-base/|FULL_MAIN_SHA (see docs/pwa-system.md)'
+        required: false
+        default: ''
+        type: string
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: toadoku-pages
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm ci
+      - run: npm run check
+      - run: npm test -- --maxWorkers=2
+      - name: Build current complete offline closure
+        run: npm run build
+        env:
+          TOADOKU_BASE: ${{ steps.pages.outputs.base_path }}/
+      - run: node tools/pwa/validate.mjs dist
+      - name: Read monotonic retained publication archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TOADOKU_INITIAL_RELEASE: ${{ inputs.initial_release }}
+          TOADOKU_PAGES_BASE: ${{ steps.pages.outputs.base_url }}/
+        run: node tools/pwa/previous.mjs
+      - name: Expand validated archive path
+        shell: bash
+        run: |
+          if [ -f prototypes/pwa-validation/previous.zip ]; then
+            if unzip -Z1 prototypes/pwa-validation/previous.zip | grep -Eq '(^/|(^|/)\.\.(/|$))'; then exit 1; fi
+            unzip -q prototypes/pwa-validation/previous.zip -d prototypes/pwa-validation/previous
+          fi
+      - name: Retain supported assets and protect currently hosted release
+        run: node tools/pwa/retain.mjs dist prototypes/pwa-validation/previous prototypes/pwa-validation/retained-assets "${{ steps.pages.outputs.base_url }}/"
+      - name: Validate complete publication artifact after retention
+        run: node tools/pwa/validate.mjs dist
+      - name: Build compact complete rollback snapshot
+        run: node tools/pwa/snapshot.mjs dist prototypes/pwa-validation/rollback
+      - name: Check repository artifact capacity without removing anything
+        id: capacity
+        run: node tools/pwa/capacity.mjs prototypes/pwa-validation/retained-assets prototypes/pwa-validation/rollback dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TOADOKU_ARTIFACT_BUDGET_MIB: ${{ vars.TOADOKU_ARTIFACT_BUDGET_MIB || '400' }}
+      - name: Stage retained asset archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: toadoku-retained-assets
+          path: prototypes/pwa-validation/retained-assets
+          retention-days: 30
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Deploy verified Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: toadoku-rollback-release
+          path: prototypes/pwa-validation/rollback
+          retention-days: 30
+      - name: Verify actual published bytes and response headers
+        run: node tools/pwa/verify-host.mjs "${{ steps.deployment.outputs.page_url }}" dist prototypes/pwa-validation/hosting.json
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.capacity.outcome == 'success'
+        with:
+          name: toadoku-hosting-evidence
+          path: |
+            prototypes/pwa-validation/hosting.json
+            prototypes/pwa-validation/artifact-capacity.json
+          if-no-files-found: ignore

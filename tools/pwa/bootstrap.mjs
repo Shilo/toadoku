@@ -3,6 +3,11 @@ import { createHash } from 'node:crypto';
 const WORKFLOW = '.github/workflows/pages.yml';
 // git show 6e73320:.github/workflows/pages.yml, normalized only from CRLF to LF.
 const LEGACY_WORKFLOW_SHA256 = 'b0b6ff33a973346600918f306a09b1fb58e150309c00d677ebbee28a875db7ad';
+// Reviewed single-job workflow before conditional publication; canonical LF bytes.
+const SINGLE_JOB_WORKFLOWS = new Map([
+  [LEGACY_WORKFLOW_SHA256, 'Run actions/deploy-pages@v4'],
+  ['de430de62d48920f76ee189671f7c734e8e0d43deea3720aca1fdbd88131fcce', 'Deploy verified Pages artifact'],
+]);
 const positive = value => Number.isSafeInteger(value) && value > 0;
 const terminal = value => ['success', 'failure', 'cancelled', 'skipped', 'timed_out', 'action_required', 'neutral', 'stale', 'startup_failure'].includes(value);
 const commit = value => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
@@ -48,18 +53,24 @@ export async function initialReleaseProof(context) {
         if (!Number.isSafeInteger(file.size) || file.size !== bytes.length) throw new Error('Incomplete historical workflow source');
         hash = workflowHash(bytes); hashes.set(run.head_sha, hash);
       }
-      if (hash !== currentHash && hash !== LEGACY_WORKFLOW_SHA256) throw new Error('Unrecognized historical workflow source');
-      const deployName = hash === LEGACY_WORKFLOW_SHA256 ? 'Run actions/deploy-pages@v4' : 'Deploy verified Pages artifact';
+      const previousDeployName = SINGLE_JOB_WORKFLOWS.get(hash);
+      if (hash !== currentHash && !previousDeployName) throw new Error('Unrecognized historical workflow source');
+      const deployName = previousDeployName ?? 'Deploy verified Pages artifact';
       for (let number = 1; number <= count; number++) {
         const jobs = complete(await read(`actions/runs/${run.id}/attempts/${number}/jobs?per_page=100`), 'jobs');
-        if (jobs.length !== 1) throw new Error('Missing or unknown release job');
-        const job = jobs[0];
-        if (!positive(job.id) || job.run_id !== run.id || job.head_sha !== run.head_sha || job.name !== 'release' || job.status !== 'completed' || !terminal(job.conclusion) || !Array.isArray(job.steps) || !job.steps.length) throw new Error('Unknown release job provenance/status');
-        const numbers = new Set();
-        for (const step of job.steps) {
-          if (!positive(step.number) || numbers.has(step.number) || typeof step.name !== 'string' || !step.name || step.status !== 'completed' || !terminal(step.conclusion)) throw new Error('Incomplete release steps');
-          numbers.add(step.number);
+        const names = previousDeployName ? ['release'] : ['changes', 'release'];
+        if (jobs.length !== names.length || new Set(jobs.map(job => job.name)).size !== names.length) throw new Error('Missing or unknown release jobs');
+        for (const candidate of jobs) {
+          if (!positive(candidate.id) || candidate.run_id !== run.id || candidate.head_sha !== run.head_sha || !names.includes(candidate.name) || candidate.status !== 'completed' || !terminal(candidate.conclusion) || !Array.isArray(candidate.steps)) throw new Error('Unknown release job provenance/status');
+          const numbers = new Set();
+          for (const step of candidate.steps) {
+            if (!positive(step.number) || numbers.has(step.number) || typeof step.name !== 'string' || !step.name || step.status !== 'completed' || !terminal(step.conclusion)) throw new Error('Incomplete release steps');
+            numbers.add(step.number);
+          }
         }
+        const job = jobs.find(job => job.name === 'release');
+        // A trusted needs/if gate can skip the entire protected job, including after gate failure.
+        if (!previousDeployName && job.conclusion === 'skipped' && job.steps.every(step => step.conclusion === 'skipped')) continue;
         const deployments = job.steps.filter(step => step.name === deployName);
         if (deployments.length !== 1 || deployments[0].conclusion !== 'skipped') throw new Error('Deployment was attempted or its skipped state is unknown');
       }

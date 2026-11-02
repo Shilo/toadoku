@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { initialReleaseProof } from './bootstrap.mjs';
+import { previousArchive } from './previous-history.mjs';
 import { createWriteStream } from 'node:fs';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -29,22 +30,7 @@ const proof = await initialReleaseProof({
   runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT),
   source: process.env.TOADOKU_INITIAL_RELEASE ? await readFile('.github/workflows/pages.yml') : new Uint8Array(), read: api,
 });
-const { data: { workflow_runs: runs } } = await api('actions/workflows/pages.yml/runs?branch=main&status=completed&per_page=100');
-if (!Array.isArray(runs)) throw new Error('Invalid workflow history');
-let found;
-for (const run of runs) {
-  if (run.head_branch !== 'main' || !/^\.github\/workflows\/pages\.yml(?:@[^?\s]+)?$/.test(run.path)) throw new Error('Unexpected publication workflow identity');
-  const { data: { artifacts, total_count: artifactCount }, hasNext: moreArtifacts } = await api(`actions/runs/${run.id}/artifacts?per_page=100`);
-  if (!Array.isArray(artifacts) || moreArtifacts || artifactCount !== artifacts.length) throw new Error('Incomplete publication artifact inventory');
-  const archive = artifacts.find(artifact => artifact.name === 'toadoku-retained-assets');
-  if (archive && !archive.expired) { found = archive; break; }
-  // An expired archive is harmless only after every superseded asset's 30-day window.
-  if (Date.now() - Date.parse(run.updated_at) > 30 * 86400_000) break;
-  const { data: { jobs, total_count: jobCount }, hasNext: moreJobs } = await api(`actions/runs/${run.id}/jobs?filter=all&per_page=100`);
-  if (!Array.isArray(jobs) || moreJobs || jobCount !== jobs.length) throw new Error('Incomplete publication job inventory');
-  if (jobs.some(job => job.steps?.some(step => step.name === 'Stage retained asset archive' && step.conclusion === 'success'))) throw new Error('A recent uploaded archive is missing; publication refused');
-}
-if (!found && runs.length === 100 && runs.every(run => Date.now() - Date.parse(run.updated_at) <= 30 * 86400_000)) throw new Error('Publication history exceeds bounded scan; restore retained archive explicitly');
+const found = await previousArchive({ repository, runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT), read: api });
 await writeFile(`${directory}/previous/history.json`, JSON.stringify({ ...proof, archiveId: found?.id }));
 if (found) {
   if (found.size_in_bytes > 300 * 1024 * 1024) throw new Error('Retained archive exceeds download budget');
