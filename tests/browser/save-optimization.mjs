@@ -131,6 +131,36 @@ try {
     assert(delta >= interval - 500 && delta < interval + 1500, 'Overlay close postponed fallback');
     assert(checkpoint.complete !== null && !checkpoint.aborted);
     report.stages.push({ name: 'real-readable-more-settings-open-close', roundTrips: 3, forcedSaves: 0, originalDeadlineMs: delta });
+    await more();
+    await page.evaluate(() => {
+      const original = SubtleCrypto.prototype.digest;
+      const audit = window.__certAudit = { held: false, pending: 0, resolved: 0, last: performance.now(), original };
+      SubtleCrypto.prototype.digest = async function (...args) {
+        audit.pending++; const value = await original.apply(this, args);
+        if (!audit.held) { audit.held = true; await new Promise(done => audit.release = done); }
+        audit.pending--; audit.resolved++; audit.last = performance.now(); return value;
+      };
+    });
+    try {
+      // A real authority read has ended its IDB transaction but is still certifying.
+      await closeDialogs();
+      await expect.poll(() => page.evaluate(() => window.__certAudit.held)).toBe(true);
+      await more(); await page.getByRole('button', { name: 'Settings', exact: true }).click();
+      await page.getByLabel('Language', { exact: true }).selectOption('de');
+      await expect(page.locator('#game-dialog-title')).toHaveText('Einstellungen');
+      await page.evaluate(() => window.__certAudit.release());
+      await expect.poll(() => page.evaluate(() => window.__certAudit.pending === 0 && performance.now() - window.__certAudit.last > 200)).toBe(true);
+      await expect(page.locator('#game-dialog-title')).toHaveText('Einstellungen');
+      const generation = current(await snapshot()).generation;
+      const savedLanguage = await page.evaluate(async generation => {
+        const db = await new Promise((done, fail) => { const r = indexedDB.open('toadodu:' + encodeURIComponent('/toadoku/')); r.onsuccess = () => done(r.result); r.onerror = () => fail(r.error); });
+        try { return await new Promise((done, fail) => { const tx = db.transaction('settings', 'readonly'), request = tx.objectStore('settings').get(generation); request.onsuccess = () => done(request.result.language); request.onerror = () => fail(request.error); }); }
+        finally { db.close(); }
+      }, generation);
+      assert.equal(savedLanguage, 'de');
+      report.stages.push({ name: 'held-certification-retains-acknowledged-language', savedLanguage,
+        certifiedDigests: await page.evaluate(() => window.__certAudit.resolved), visibleLanguageRetained: true });
+    } finally { await page.evaluate(() => { window.__certAudit.release?.(); SubtleCrypto.prototype.digest = window.__certAudit.original; }); }
   } else {
   let original, cell;
   if (recoveryOnly) {

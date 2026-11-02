@@ -861,6 +861,23 @@ describe('independent integrated controller interleavings', () => {
     expect(h.calls.allocations[1].intent).toEqual(intent);
     await h.game.dispose();
   });
+  it.each([false, true])('a late certified authority read retains acknowledged preferences; foreign owner=%s', async foreignOwner => {
+    const h = harness(); await h.reveal(); const gate = deferred<StorageResult<CurrentSave>>();
+    try {
+      const previous = structuredClone(h.data);
+      if (foreignOwner) previous.attempts[0].writer = { token: 'other-owner', epoch: previous.attempts[0].writer.epoch + 1 };
+      h.reads.push(gate.promise); const checking = h.game.checkAuthority();
+      // The real repository can finish its readonly transaction, then await certification.
+      const updated = { ...h.data.preferences, language: 'de' as const };
+      expect(await h.game.preferences(updated)).toBe(true);
+      const latest = h.game.state.attempt;
+      gate.resolve(committed(previous)); expect(await checking).toBe(!foreignOwner);
+      expect(h.game.state.save?.preferences).toEqual(updated); expect(h.data.preferences).toEqual(updated);
+      expect(h.game.state.attempt).toBe(latest); expect(h.game.state.owned).toBe(!foreignOwner);
+      expect(h.game.state.canStudy).toBe(!foreignOwner); expect(h.calls.saves).toEqual([]);
+    } finally { gate.resolve(committed(h.data)); await h.game.dispose(); }
+  });
+
   it('ignores old authority replies after explicit reacquisition without concealing the new writer', async () => {
     const h = harness(); await h.reveal(); const previous = structuredClone(h.data), gate = deferred<StorageResult<CurrentSave>>();
     h.reads.push(gate.promise); const authority = h.game.checkAuthority();

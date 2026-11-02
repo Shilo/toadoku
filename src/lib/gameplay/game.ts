@@ -412,6 +412,7 @@ export class GameController {
   async checkAuthority(): Promise<boolean> {
     const frozen = this.value.attempt;
     if (!frozen) return false;
+    const cached = this.value.save;
     const request = ++this.authoritySequence;
     const result = await this.repository.readCurrent();
     const current = this.value.attempt;
@@ -422,7 +423,9 @@ export class GameController {
     if (result.value.meta.generation !== frozen.generation || !durable || durable.writer.epoch !== frozen.writer.epoch || durable.writer.token !== frozen.writer.token) {
       this.problem({ kind: 'conflict', reason: 'owner' }); return false;
     }
-    this.value.save = result.value; this.syncClock(); this.publish(); return this.value.owned;
+    // Certification awaits crypto after the read; keep newer acknowledged local settings.
+    if (this.value.save === cached) this.value.save = result.value;
+    this.syncClock(); this.publish(); return this.value.owned;
   }
   async flush(): Promise<StorageResult<Attempt | undefined>> {
     this.checkpoint();
