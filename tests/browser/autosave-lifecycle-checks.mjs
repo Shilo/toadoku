@@ -20,7 +20,7 @@ const sourceFiles = [...git('ls-files', 'src', 'package.json', 'package-lock.jso
   'tests/browser/autosave-long-game.mjs', 'tests/browser/save-optimization.mjs', 'tests/storage/time-checkpoint-native.ts', fixture];
 report.sourceFiles = await Promise.all(sourceFiles.map(async path => ({ path, sha256: hash(await readFile(path)) })));
 for (const path of sourceFiles.filter(path => path.startsWith('src/') || path === 'package.json' || path === 'package-lock.json')) {
-  assert.equal(hash(await readFile(path)), hash(execFileSync('git', ['show', report.acceptedAppCommit + ':' + path])));
+  assert.equal(hash(await readFile(path)), hash(execFileSync('git', ['show', report.acceptedAppCommit + ':' + path], { maxBuffer: 8 * 1024 * 1024 })));
 }
 function identity(pid) {
   try { return readFileSync(`/proc/${pid}/stat`, 'utf8').split(') ').at(-1).split(' ')[19]; } catch { return; }
@@ -67,13 +67,11 @@ async function browser(label, script, args, resultPath) {
   report.results.push({ label, sha256: hash(await readFile(resultPath)), buildId: result.release?.buildId, stages: result.stages });
 }
 try {
-  await run('types-svelte', ['node_modules/svelte-check/bin/svelte-check', '--tsconfig', './tsconfig.json']);
-  await run('types-node', ['node_modules/typescript/bin/tsc', '--noEmit', '-p', 'tsconfig.node.json']);
-  await run('units', ['tools/test.mjs', 'unit', '--maxWorkers=1']);
+  // Reuse completed local unit/type/native gates against the exact verified runtime.
+  // This runner finishes only the production browser checks blocked by local RAM.
   await run('build', ['node_modules/vite/bin/vite.js', 'build']);
   await run('validate', ['tools/pwa/validate.mjs', 'dist']);
   await copyFile('dist/release.json', resolve(output, 'release.json'));
-  await run('native-compact', ['tools/test.mjs', 'browser', '--config', 'tests/storage/playwright.config.ts', '--project=chromium', '--workers=1', '--grep', 'native compact time']);
   await browser('long-slow-phone', 'tests/browser/autosave-long-game.mjs', ['dist', 'remote-lifecycle-dense', '--restore-fixture=' + fixture],
     'prototypes/pwa-validation/autosave-long-game/remote-lifecycle-dense/results.json');
   await browser('readable-overlays', 'tests/browser/save-optimization.mjs', ['dist', 'remote-lifecycle-overlays', '--overlay-only'],
