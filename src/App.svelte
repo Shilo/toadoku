@@ -222,8 +222,7 @@
     const appearanceChanged = () => { systemDark = darkMedia.matches; };
     appearanceChanged(); darkMedia.addEventListener('change', appearanceChanged);
     refreshTheme();
-    const timer = setInterval(() => controller?.checkpoint(), 1000);
-    return () => { disposed = true; clearTimeout(themeTimer); clearTimeout(themeStatusTimer); themeRuntime.dispose(); darkMedia.removeEventListener('change', appearanceChanged); bootSequence++; if (shellTimer) clearTimeout(shellTimer); releaseOfflineSupport(); pwa?.dispose(); install?.dispose(); cancelBackupOperation(); clearInterval(timer); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
+    return () => { disposed = true; clearTimeout(themeTimer); clearTimeout(themeStatusTimer); themeRuntime.dispose(); darkMedia.removeEventListener('change', appearanceChanged); bootSequence++; if (shellTimer) clearTimeout(shellTimer); releaseOfflineSupport(); pwa?.dispose(); install?.dispose(); cancelBackupOperation(); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
   });
   async function focusCell() {
     await tick(); if (route !== 'board' || !gameState.canStudy) return;

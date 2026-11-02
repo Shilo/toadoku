@@ -6,7 +6,7 @@ export interface ActivePlayClock {
 
 /**
  * One document's monotonic segments, independent of decoration and input events.
- * Caller conceals board/notes before deactivation and checkpoints at most once a second.
+ * Caller conceals board/notes before deactivation and owns periodic and semantic saves.
  * No Date subtraction across documents and no artificial cap on long thinking tasks.
  * Browser monotonic clocks differ during OS sleep; this class cannot promise uniform sleep accounting.
  */

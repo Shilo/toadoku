@@ -11,6 +11,8 @@ import type { ActivePlayClock, SessionCommand, SessionResult } from '../session/
 import { isComplete } from '../sudoku/index.ts';
 import { AttemptSaveQueue } from './controller.ts';
 
+export const TIME_SAVE_INTERVAL_MS = 5000;
+
 export interface HintComputer { compute(input: HintInput): Promise<HintResult>; cancel(): void }
 export interface GameState {
   save?: CurrentSave;
@@ -52,6 +54,7 @@ export class GameController {
   private backupSequence = 0;
   private allocationAbort?: AbortController;
   private destroyed = false;
+  private checkpointTimer?: ReturnType<typeof setTimeout>;
   private readonly writerToken: string;
   constructor(
     readonly repository: GameRepositoryPort,
@@ -86,11 +89,29 @@ export class GameController {
     const readable = !!attempt && this.value.owned && this.view.board && this.view.visible && !this.view.concealed && !this.value.restorePhase;
     this.value.canStudy = readable;
     this.clock?.setActive(readable && attempt?.status === 'playing');
+    this.scheduleCheckpoint();
+  }
+  private cancelCheckpoint(): void {
+    clearTimeout(this.checkpointTimer); this.checkpointTimer = undefined;
+  }
+  private scheduleCheckpoint(reset = false): void {
+    const attempt = this.value.attempt, queue = this.queue;
+    if (this.destroyed || !this.value.canStudy || !this.value.owned || attempt?.status !== 'playing' ||
+        this.value.busy || !this.clock || !queue || queue.state.failure) { this.cancelCheckpoint(); return; }
+    if (this.checkpointTimer !== undefined && !reset) return;
+    this.cancelCheckpoint();
+    this.checkpointTimer = setTimeout(() => {
+      if (this.queue !== queue || this.value.attempt?.id !== attempt.id) return;
+      this.checkpointTimer = undefined;
+      this.checkpoint(); this.scheduleCheckpoint();
+    }, TIME_SAVE_INTERVAL_MS);
   }
   /** Visibility and concealment change synchronously, before presentation reveals any values. */
   setView(view: Partial<typeof this.view>): void {
     this.view = { ...this.view, ...view };
     this.syncClock(); this.checkpoint(); this.publish();
+    // Hide/menu/Pause also drain a cursor-only batch when time did not advance.
+    if (!this.value.canStudy) void this.queue?.flush();
   }
 
   async initialize(): Promise<boolean> {
@@ -99,6 +120,7 @@ export class GameController {
     this.value.save = result.value; this.value.problem = undefined; this.publish(); return true;
   }
   private attach(attempt: Attempt, recoverSolved = false): void {
+    this.cancelCheckpoint();
     const persisted = attempt;
     if (recoverSolved) attempt = { ...attempt, status: 'pending-completion', commandSeq: attempt.commandSeq + 1 };
     this.authoritySequence++;
@@ -125,6 +147,7 @@ export class GameController {
     }, state => {
       this.value.conflictedChanges = state.failure?.kind === 'conflict';
       this.value.saveState = state.failure || this.repository.durability === 'ephemeral' ? 'unsaved' : state.pending ? 'pending' : 'saved';
+      if (state.failure) this.cancelCheckpoint();
       if (state.failure) this.problem(state.failure);
       else this.publish();
     });
@@ -135,13 +158,13 @@ export class GameController {
   }
   private async barrier(work: () => Promise<boolean>, allowConflictedFlush = false): Promise<boolean> {
     if (this.value.busy || this.destroyed) return false;
-    this.value.busy = true; this.publish();
+    this.value.busy = true; this.cancelCheckpoint(); this.publish();
     try {
       this.checkpoint(true);
       const flushed = await this.queue?.flush();
       if (flushed && flushed.kind !== 'committed' && !(allowConflictedFlush && flushed.kind === 'conflict')) { this.problem(flushed); return false; }
       return await work();
-    } finally { this.value.busy = false; this.checkpoint(); this.publish(); }
+    } finally { this.value.busy = false; this.checkpoint(); this.scheduleCheckpoint(); this.publish(); }
   }
   cancelStart(): void { this.allocationSequence++; this.allocationAbort?.abort(); }
   cancelHint(): void { this.hintSequence++; this.hints.cancel(); this.value.hintComputing = false; }
@@ -254,6 +277,8 @@ export class GameController {
     const previous = this.value.attempt;
     const result = reduceAttempt(previous, command);
     if (result.kind === 'changed') {
+      // Real saves carry exact thinking time, so a timer write need not follow an edit.
+      result.attempt = { ...result.attempt, elapsedMs: Math.max(result.attempt.elapsedMs, this.clock?.sample() ?? result.attempt.elapsedMs) };
       const completed = result.attempt.status === 'playing' && this.solved(result.attempt);
       // Recognition is part of the final command, before queue callbacks or observers.
       // Storage latency is not thinking time and a failed save must never unfreeze it.
@@ -263,7 +288,7 @@ export class GameController {
       if ((command.type === 'select' || result.attempt.logicalRevision !== previous.logicalRevision) && this.value.problem?.startsWith('hint-unavailable:')) this.value.problem = undefined;
       if (result.attempt.logicalRevision !== previous.logicalRevision) { this.cancelHint(); this.value.hint = undefined; }
       if (completed) { this.cancelHint(); this.value.hint = undefined; this.syncClock(); }
-      this.queue!.enqueue(result.attempt); this.publish();
+      this.queue!.enqueue(result.attempt, command.type === 'select'); this.scheduleCheckpoint(true); this.publish();
       if (completed) void this.finish();
     }
     return result;
@@ -273,9 +298,11 @@ export class GameController {
   }
   checkpoint(force = false): void {
     const attempt = this.value.attempt;
-    if (!attempt || !this.value.owned || attempt.status !== 'playing' || !this.clock || this.value.busy && !force) return;
-    const result = reduceAttempt(attempt, { type: 'checkpoint', elapsedMs: this.clock.sample() });
-    if (result.kind === 'changed') { this.value.attempt = result.attempt; this.queue!.enqueue(result.attempt); }
+    if (!attempt || !this.value.owned || attempt.status !== 'playing' || !this.clock || !force && (this.value.busy || this.queue?.state.failure)) return;
+    const elapsedMs = this.clock.sample();
+    if (elapsedMs <= attempt.elapsedMs) return;
+    const result = reduceAttempt(attempt, { type: 'checkpoint', elapsedMs });
+    if (result.kind === 'changed') { this.value.attempt = result.attempt; this.queue!.enqueue(result.attempt); this.scheduleCheckpoint(true); }
   }
   private async finish(): Promise<boolean> {
     return this.barrier(() => this.commitCompletion(true));
@@ -298,11 +325,12 @@ export class GameController {
   }
   async retry(): Promise<boolean> {
     if (this.value.busy) return false;
+    this.checkpoint(true);
     const result = await this.queue?.retry();
     if (result && result.kind !== 'committed') { this.problem(result); return false; }
     this.value.problem = undefined;
     if (this.value.attempt?.status === 'pending-completion') return this.barrier(() => this.commitCompletion(true));
-    this.publish(); return true;
+    this.scheduleCheckpoint(); this.publish(); return true;
   }
   async restart(): Promise<boolean> {
     const initial = this.value.attempt;
@@ -447,6 +475,7 @@ export class GameController {
   }
   async dispose(): Promise<void> {
     this.setView({ board: false }); this.destroyed = true; this.cancelHint(); this.cancelStart(); this.cancelBackupWork();
+    this.cancelCheckpoint();
     await this.queue?.flush(); this.clock?.dispose(); this.catalog.dispose(); this.repository.close(); this.listeners.clear();
   }
 }

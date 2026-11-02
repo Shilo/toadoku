@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { GameController } from '../../src/lib/gameplay/game.ts';
+import { GameController, TIME_SAVE_INTERVAL_MS } from '../../src/lib/gameplay/game.ts';
 import type { HintComputer, StartRequest } from '../../src/lib/gameplay/game.ts';
 import type { Attempt, Disclosure, Preferences, Role, StorageResult } from '../../src/lib/gameplay/contracts.ts';
 import type { AllocationRequest, CurrentSave, Repository, RestorePreview, RestoreStage } from '../../src/lib/storage/repository.ts';
@@ -113,6 +113,117 @@ function harness(initial = attemptFixture()) {
     async reveal() { expect(await game.resume(initial.role)).toBe(true); game.setView({ board: true, visible: true }); },
   };
 }
+
+describe('active-only autosave scheduling', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('saves idle thinking every five seconds and has no inactive timer', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.setNow(4999); await vi.advanceTimersByTimeAsync(4999); expect(h.calls.saves).toHaveLength(0);
+      h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(1);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([5000]);
+      h.setNow(5432); h.game.setView({ visible: false }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].elapsedMs).toBe(5432); expect(vi.getTimerCount()).toBe(0);
+      h.setNow(15432); await vi.advanceTimersByTimeAsync(10000); expect(h.calls.saves).toHaveLength(2);
+      h.game.setView({ visible: true }); h.setNow(20432); await vi.advanceTimersByTimeAsync(5000);
+      expect(h.data.attempts[0].elapsedMs).toBe(10432);
+      h.setNow(20567); h.game.setView({ concealed: true }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].elapsedMs).toBe(10567); expect(vi.getTimerCount()).toBe(0);
+      h.game.setView({ board: false }); h.setNow(50567); await vi.advanceTimersByTimeAsync(30000);
+      expect(h.calls.saves).toHaveLength(4); expect(vi.getTimerCount()).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('includes exact time in edits without a redundant nearby periodic save', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.setNow(4900); await vi.advanceTimersByTimeAsync(4900);
+      h.game.command({ type: 'enter', digit: 2 }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].elapsedMs).toBe(4900); expect(h.data.attempts[0].entries[1]).toBe(2);
+      h.setNow(5000); await vi.advanceTimersByTimeAsync(100); expect(h.calls.saves).toHaveLength(1);
+      h.setNow(9899); await vi.advanceTimersByTimeAsync(4899); expect(h.calls.saves).toHaveLength(1);
+      h.setNow(9900); await vi.advanceTimersByTimeAsync(1);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([4900,9900]);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('does not postpone a deadline for read-only checks or noop input', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.setNow(4000); await vi.advanceTimersByTimeAsync(4000); expect(await h.game.checkAuthority()).toBe(true);
+      expect(h.game.command({ type: 'select', cell: 1 })).toEqual({ kind: 'noop' });
+      expect(h.game.command({ type: 'enter', digit: 0 })).toEqual({ kind: 'rejected', reason: 'digit' });
+      h.setNow(5000); await vi.advanceTimersByTimeAsync(1000);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([5000]);
+      h.setNow(9000); await vi.advanceTimersByTimeAsync(4000); expect(await h.game.checkAuthority()).toBe(true);
+      h.setNow(10000); await vi.advanceTimersByTimeAsync(1000);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([5000,10000]);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('drains a cursor on hide even when elapsed time is unchanged', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.game.command({ type: 'select', cell: 2 });
+      expect(h.game.state.saveState).toBe('pending'); expect(h.calls.saves).toHaveLength(0);
+      h.game.setView({ visible: false }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].selection).toBe(2); expect(h.game.state.saveState).toBe('saved');
+      expect(vi.getTimerCount()).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('stops periodic work on failure and includes the failed interval on retry', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.saveIssue({ kind: 'unavailable', reason: 'quota' }); h.setNow(5000); await vi.advanceTimersByTimeAsync(5000);
+      expect(h.game.state.saveState).toBe('unsaved'); expect(vi.getTimerCount()).toBe(0);
+      h.setNow(15000); await vi.advanceTimersByTimeAsync(10000); expect(h.calls.saves).toHaveLength(1);
+      h.game.command({ type: 'enter', digit: 2 }); expect(h.calls.saves).toHaveLength(1);
+      h.setNow(16123); h.saveIssue(); expect(await h.game.retry()).toBe(true);
+      expect(h.data.attempts[0].elapsedMs).toBe(16123); expect(h.data.attempts[0].entries[1]).toBe(2);
+      expect(vi.getTimerCount()).toBe(1);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('rejects stale ownership on the next periodic save without committing it', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      const before = structuredClone(h.data); h.saveIssue({ kind: 'conflict', reason: 'owner' });
+      h.setNow(4999); await vi.advanceTimersByTimeAsync(4999); expect(h.game.state.owned).toBe(true);
+      h.setNow(5000); await vi.advanceTimersByTimeAsync(1);
+      expect(h.game.state.owned).toBe(false); expect(h.game.state.canStudy).toBe(false);
+      expect(h.data).toEqual(before); expect(vi.getTimerCount()).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('cancels the timer throughout a held barrier and rearms after its noop tail', async () => {
+    const h = harness(); await h.reveal(); const gate = deferred<void>(); h.waits.acquire(gate.promise);
+    try {
+      const resumed = h.game.resume('quick'); await until(() => h.calls.acquisitions.length === 2);
+      expect(vi.getTimerCount()).toBe(0);
+      h.setNow(5000); await vi.advanceTimersByTimeAsync(5000); expect(h.calls.saves).toHaveLength(0);
+      gate.resolve(); expect(await resumed).toBe(true); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].elapsedMs).toBe(5000); expect(vi.getTimerCount()).toBe(1);
+      h.setNow(10000); await vi.advanceTimersByTimeAsync(5000); expect(h.data.attempts[0].elapsedMs).toBe(10000);
+    } finally { gate.resolve(); await h.game.dispose(); }
+  });
+
+  it('captures exact completion time between checkpoints and has no completed timer', async () => {
+    const initial = oneBlankAttempt(), h = harness(initial); await h.reveal();
+    try {
+      h.setNow(1234); await vi.advanceTimersByTimeAsync(1234);
+      h.game.command({ type: 'enter', digit: Number(initial.definition.solution[0]) });
+      await until(() => h.game.state.completionEvent === 1);
+      expect(h.game.state.receipt?.result.elapsedMs).toBe(1234); expect(vi.getTimerCount()).toBe(0);
+      const writes = h.calls.saves.length; h.setNow(61234); await vi.advanceTimersByTimeAsync(60000);
+      expect(h.calls.saves).toHaveLength(writes);
+      h.game.command({ type: 'select', cell: 2 }); h.game.setView({ board: false }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].selection).toBe(2); expect(vi.getTimerCount()).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+});
 
 describe('independent integrated controller interleavings', () => {
   it('waits for durable disclosure, counts barrier thinking time and preserves newest notes/time', async () => {
