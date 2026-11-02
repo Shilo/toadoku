@@ -24,12 +24,18 @@ function api(path) {
   })());
   return reads.get(path);
 }
-const proof = await initialReleaseProof({
-  confirmation: process.env.TOADOKU_INITIAL_RELEASE === 'true', repository, base: process.env.TOADOKU_PAGES_BASE,
-  sha: process.env.GITHUB_SHA, event: process.env.GITHUB_EVENT_NAME, ref: process.env.GITHUB_REF,
+// A normal hosted release needs no first-publication history scan. Never send the GitHub token to the site.
+const site = new URL(process.env.TOADOKU_PAGES_BASE);
+if (site.protocol !== 'https:' || site.href !== process.env.TOADOKU_PAGES_BASE || site.username || site.password || site.search || site.hash || !site.pathname.endsWith('/')) throw new Error('Invalid configured Pages base');
+const probe = await fetch(new URL('release.json', site), { redirect: 'error', headers: { 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(30_000) });
+await probe.body?.cancel();
+if (![200, 404].includes(probe.status)) throw new Error(`Cannot establish hosted release presence: HTTP ${probe.status}`);
+const proof = probe.status === 404 ? await initialReleaseProof({
+  repository, base: site.href, sha: process.env.GITHUB_SHA,
+  event: process.env.GITHUB_EVENT_NAME, ref: process.env.GITHUB_REF,
   runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT),
-  source: process.env.TOADOKU_INITIAL_RELEASE === 'true' ? await readFile('.github/workflows/pages.yml') : new Uint8Array(), read: api,
-});
+  source: await readFile('.github/workflows/pages.yml'), read: api,
+}) : { bootstrap: false, reason: 'Hosted release exists; normal asset retention applies' };
 const found = await previousArchive({ repository, runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT), read: api });
 await writeFile(`${directory}/previous/history.json`, JSON.stringify({ ...proof, archiveId: found?.id }));
 if (found) {

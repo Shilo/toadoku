@@ -7,9 +7,9 @@ const workflow = load(readFileSync('.github/workflows/pages.yml','utf8'));
 
 it('checks every main push, without GitHub truncated path filtering', () => {
   expect(workflow.on.push).toEqual({ branches: ['main'] });
-  expect(workflow.on.workflow_dispatch.inputs.initial_release.required).toBe(false);
-  expect(workflow.on.workflow_dispatch.inputs.initial_release.type).toBe('boolean');
-  expect(workflow.on.workflow_dispatch.inputs.initial_release.default).toBe(false);
+  expect(workflow.on).toHaveProperty('workflow_dispatch');
+  expect(workflow.on.workflow_dispatch?.inputs).toBeUndefined();
+  expect(readFileSync('.github/workflows/pages.yml', 'utf8')).not.toMatch(/initial_release|TOADOKU_INITIAL_RELEASE/);
   expect(workflow.permissions).toEqual({ contents: 'read' });
   expect(workflow.concurrency).toBeUndefined();
 });

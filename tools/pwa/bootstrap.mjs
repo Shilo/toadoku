@@ -8,9 +8,10 @@ const SINGLE_JOB_WORKFLOWS = new Map([
   [LEGACY_WORKFLOW_SHA256, 'Run actions/deploy-pages@v4'],
   ['de430de62d48920f76ee189671f7c734e8e0d43deea3720aca1fdbd88131fcce', 'Deploy verified Pages artifact'],
 ]);
-// Reviewed gated workflow before the simpler first-publication confirmation.
+// Reviewed gated workflows before automatic first publication.
 const GATED_WORKFLOWS = new Set([
   '605485d0dfb6391eca1274f2f61de909b455ae264fc5bac7e251d2da3391914c',
+  '0a3bf2611d7a1075e4b196fc6d530af2dfc112a91f9c95dd2bbafe281a60e04f',
 ]);
 const positive = value => Number.isSafeInteger(value) && value > 0;
 const terminal = value => ['success', 'failure', 'cancelled', 'skipped', 'timed_out', 'action_required', 'neutral', 'stale', 'startup_failure'].includes(value);
@@ -28,14 +29,13 @@ function complete(page, key) {
 function workflowPath(run) {
   return run.path === WORKFLOW || run.path === `${WORKFLOW}@${run.head_branch}` || run.path === `${WORKFLOW}@refs/heads/${run.head_branch}`;
 }
-/** Owner confirmation covers provenance outside returned history; identities are derived, never typed. */
+/** Automatic new-site initialization assumes the repository/URL have no erased or external publication history. */
 export async function initialReleaseProof(context) {
   const no = reason => ({ bootstrap: false, reason });
-  if (context.confirmation !== true) return no('First publication requires the one-time never-published confirmation; see docs/pwa-system.md');
   try {
     const { repository, base, sha, event, ref, runId, attempt, source, read } = context;
     const site = new URL(base);
-    if (!/^[\w.-]+\/[\w.-]+$/.test(repository ?? '') || site.protocol !== 'https:' || site.href !== base || !site.pathname.endsWith('/') || site.search || site.hash || site.username || site.password || !commit(sha) || event !== 'workflow_dispatch' || ref !== 'refs/heads/main' || !positive(runId) || !positive(attempt) || attempt > 100) return no('Invalid confirmed first-publication target or current main workflow identity');
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repository ?? '') || site.protocol !== 'https:' || site.href !== base || !site.pathname.endsWith('/') || site.search || site.hash || site.username || site.password || !commit(sha) || !['push', 'workflow_dispatch'].includes(event) || ref !== 'refs/heads/main' || !positive(runId) || !positive(attempt) || attempt > 100) return no('Invalid first-publication target or current main workflow identity');
     const assertion = `${repository}|${base}|${sha}`;
     const currentHash = workflowHash(source);
     const hashes = new Map([[sha, currentHash]]);
@@ -80,6 +80,6 @@ export async function initialReleaseProof(context) {
         if (deployments.length !== 1 || deployments[0].conclusion !== 'skipped') throw new Error('Deployment was attempted or its skipped state is unknown');
       }
     }
-    return { bootstrap: true, reason: 'Confirmed never-published target and complete returned history with skipped deployment', priorAttempts, assertion, identity: { repository, site: base, sha, runId, attempt } };
+    return { bootstrap: true, reason: 'Automatic new-site initialization with complete returned history showing skipped deployment', priorAttempts, assertion, identity: { repository, site: base, sha, runId, attempt } };
   } catch (error) { return no(`First-publication proof unavailable: ${error.message}`); }
 }

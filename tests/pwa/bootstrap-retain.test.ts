@@ -36,7 +36,7 @@ it('allows a proven initial empty target only when both metadata and index are40
   expect(f.requests).toEqual(['/game/release.json', '/game/index.html']);
   expect(JSON.parse(await readFile(join(f.dist, 'retention.json'), 'utf8')).files).toEqual([]);
 });
-it('without a confirmed proof refuses metadata404 with setup guidance and makes no extra probe', async () => {
+it('without an automatic history proof refuses metadata404 with recovery guidance and makes no extra probe', async () => {
   const f = await retainFixture(404, false); expect(f.passed).toBe(false);
   expect(f.error).toContain('docs/pwa-system.md'); expect(f.error).toContain('fixture scoped proof');
   expect(f.requests).toEqual(['/game/release.json']);
@@ -50,7 +50,7 @@ it('refuses a proof from a different supplied current workflow identity', async 
   const f = await retainFixture(404, true, {}, { GITHUB_RUN_ID: '101' });
   expect(f.passed).toBe(false); expect(f.error).toContain('does not match this workflow');
 });
-it('keeps the automatically derived confirmation bound to its exact internal identity', async () => {
+it('keeps the automatic history proof bound to its exact internal identity', async () => {
   const f = await retainFixture(404, true, {}, {}, { assertion: 'Owner/Game|https://other.example/|'.concat('a'.repeat(40)) });
   expect(f.passed).toBe(false); expect(f.error).toContain('proof identity');
   expect(f.requests).toEqual(['/game/release.json']);

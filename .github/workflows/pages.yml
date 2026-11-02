@@ -3,12 +3,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      initial_release:
-        description: 'First publication only: this Pages website has never served an app'
-        required: false
-        default: false
-        type: boolean
 permissions:
   contents: read
 jobs:
@@ -79,7 +73,6 @@ jobs:
         if: steps.current.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          TOADOKU_INITIAL_RELEASE: ${{ inputs.initial_release }}
           TOADOKU_PAGES_BASE: ${{ steps.pages.outputs.base_url }}/
         run: node tools/pwa/previous.mjs
       - name: Expand validated archive path
