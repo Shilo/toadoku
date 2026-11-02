@@ -29,18 +29,22 @@ let page = context.pages()[0];
 const report = {
   release: JSON.parse(await readFile(resolve(root, 'release.json'), 'utf8')),
   environment: 'Desktop Chromium, 360x800 CSS px, DPR 3; 6x main-thread CPU slowdown after warm setup. This is host-relative simulation, not a particular phone or battery test.',
-  instrumentation: 'Identical before/after hooks record constant-work metadata, native Attempt structuredClone/put duration, transaction boundaries, all animation frames, trusted input to next animation-frame callback, and long tasks. No JSON serialization inside timed hooks. Input timing is not full paint/INP. Checkpoint-overlap inputs begin at put, so frame gaps across the entire thinking period also cover earlier validation.',
+  instrumentation: 'Identical before/after hooks record constant-work metadata, native Attempt structuredClone/put duration, transaction boundaries, animation frames, trusted input to next animation-frame callback, and long tasks. Cross-phase frame gaps remain in boundaryFrames. Full-record readback runs in a separate verification phase. No JSON serialization inside timed hooks. Input timing is not full paint/INP. Checkpoint-overlap inputs begin at put, so frame gaps across the entire thinking period also cover earlier validation.',
   stages: [],
 };
 await context.addInitScript(() => {
   const audit = window.__longSaveAudit = {
-    phase: 'setup', frames: [], inputs: [], clones: [], transactions: [], checkpoints: [],
+    phase: 'setup', frames: [], boundaryFrames: [], inputs: [], clones: [], transactions: [], checkpoints: [],
     longTasks: [], visibility: [], boardChanges: [], checkpointInputs: false,
   };
-  let previousFrame;
+  let previousFrame, previousFramePhase;
   function frame(at) {
-    if (audit.phase !== 'setup' && previousFrame !== undefined) audit.frames.push({ at, gap: at - previousFrame, phase: audit.phase });
-    previousFrame = at; requestAnimationFrame(frame);
+    if (audit.phase !== 'setup' && previousFrame !== undefined) {
+      const sample = { at, gap: at - previousFrame, phase: audit.phase };
+      if (previousFramePhase === audit.phase) audit.frames.push(sample);
+      else audit.boundaryFrames.push({ ...sample, previousPhase: previousFramePhase });
+    }
+    previousFrame = at; previousFramePhase = audit.phase; requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   new PerformanceObserver(list => {
@@ -319,13 +323,16 @@ try {
   await persisted(attempt => attempt.selection === fixture.main); await drained();
   const beforePaced = current(await snapshot());
   const firstDigit = beforePaced.entries[fixture.main] === 1 ? 2 : 1;
+  // Let setup serialization and its observer callbacks finish before the first measured key.
+  await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
   await phase('paced-edits');
   for (let index = 0; index < 40; index++) {
     await page.keyboard.press(String(index % 2 ? 3 - firstDigit : firstDigit));
     await page.waitForTimeout(175);
   }
-  await persisted(attempt => attempt.commandSeq >= beforePaced.commandSeq + 40 && attempt.entries[fixture.main] === 3 - firstDigit && attempt.undo.length === 512);
   await drained(); await page.waitForTimeout(100);
+  await phase('paced-verification');
+  await persisted(attempt => attempt.commandSeq >= beforePaced.commandSeq + 40 && attempt.entries[fixture.main] === 3 - firstDigit && attempt.undo.length === 512);
   const paced = await audit(), pacedSummary = summarize(paced, 'paced-edits');
   const pacedTransactions = paced.transactions.filter(tx => tx.phase === 'paced-edits' && tx.writes.length);
   const pacedInputs = paced.inputs.filter(input => input.phase === 'paced-edits');

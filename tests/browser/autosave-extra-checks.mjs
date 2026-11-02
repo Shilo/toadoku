@@ -12,6 +12,7 @@ const baseline = '6eaf5b1911dd57d11683dda3b088bc28d9696afd';
 const before = resolve(process.env.RUNNER_TEMP, 'toadoku-autosave-before');
 const fixture = resolve('tests/browser/fixtures/autosave-validation.json');
 const fixtureHash = '43cc2a395101a16f2281264b8fdda96f829f150fe2754fb12c58bc5edbd4086a';
+const comparisonOnly = process.argv.includes('--comparison-only');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 await mkdir(output, { recursive: true });
@@ -21,7 +22,7 @@ const report = {
     host: 'GitHub-hosted Ubuntu 24.04; CPU slowdown is simulation, not Android hardware',
     run: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` },
   currentCommit: git('rev-parse', 'HEAD'), baselineCommit: baseline, fixtureHash,
-  order: ['optimized-paced', 'baseline-paced', 'native-recovery'], jobs: [], results: [],
+  order: ['optimized-paced', 'baseline-paced', ...(comparisonOnly ? [] : ['native-recovery'])], jobs: [], results: [],
 };
 const files = ['src/lib/storage/decode.ts', 'src/lib/gameplay/game.ts', 'tests/browser/autosave-long-game.mjs', 'tests/browser/save-optimization.mjs'];
 report.sourceFiles = await Promise.all(files.map(async path => ({ path, sha256: hash(await readFile(path)) })));
@@ -116,7 +117,7 @@ try {
     resolve('prototypes/pwa-validation/autosave-long-game/remote-baseline/results.json'));
   assert.equal(optimized.fixture.sha256, fixtureHash); assert.equal(original.fixture.sha256, fixtureHash);
   assert(optimized.pwaReadiness.reply.ready && original.pwaReadiness.reply.ready);
-  await browser('native-recovery', 'tests/browser/save-optimization.mjs', ['dist', 'remote-extra-recovery', '--recovery-only'],
+  if (!comparisonOnly) await browser('native-recovery', 'tests/browser/save-optimization.mjs', ['dist', 'remote-extra-recovery', '--recovery-only'],
     resolve('prototypes/pwa-validation/save-optimization-browser/remote-extra-recovery/results.json'));
   report.accepted = true;
 } catch (error) {
