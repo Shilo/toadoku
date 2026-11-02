@@ -1,6 +1,6 @@
 # Toadoku
 
-**Hop into a calmer kind of Sudoku.** A frog-themed puzzle game with 100,000 certified puzzles, saved progress and offline play.
+**Hop into a calmer kind of Sudoku.** A frog-themed puzzle game with 100,000 certified puzzles, saved progress and offline play. · [Play Toadoku](https://shilo.github.io/toadoku/)
 
 Play Quick Play or Progression with 100,000 independently certified puzzles, notes, undo, hints, saved progress and Dewdrops rewards. Settings remember language, board shape, motion, appearance and theme. English, German and Spanish are supported. Pond and Cauldron share the same game; Auto follows the seasonal schedule.
 
@@ -16,7 +16,7 @@ Updates download without interrupting games. When an update is ready, finish sav
 
 Maintainers: [how the PWA works](docs/pwa-system.md), [make or replace installation icons](docs/pwa-icons.md), [integration and review](docs/pwa-integration.md). [PWA acceptance](docs/pwa-acceptance.md) records the remaining physical-device and hosting checks.
 
-For GitHub hosting, follow [Pages setup and conditional publication](docs/pwa-ci.md). Relevant pushes to main build and publish after checks; documentation-only and test-only pushes skip production. A manual run supports initial setup and deliberate retries.
+For GitHub hosting, follow [Pages setup and conditional publication](docs/pwa-ci.md). Relevant pushes to main build and publish after checks; documentation-only and test-only pushes skip production. A manual run supports deliberate retries.
 
 ## Local workflow
 
