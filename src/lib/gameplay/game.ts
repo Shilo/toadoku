@@ -422,12 +422,12 @@ export class GameController {
   async prepareReload(): Promise<boolean> {
     const expectedSave = this.value.save;
     const attempt = this.value.attempt, queueState = this.queue?.state;
-    const cleanUnownedMenu = !!attempt && !this.view.board && !this.value.owned && !!queueState &&
+    const cleanMenu = !!attempt && !this.view.board && !!queueState &&
       !queueState.pending && !queueState.failure && !this.value.conflictedChanges && queueState.committedSeq === attempt.commandSeq;
     if (this.destroyed || this.value.busy || this.value.hintComputing || this.preferencesPending ||
         this.repository.durability === 'ephemeral' || !expectedSave || this.value.restorePhase ||
         this.value.conflictedChanges || this.queue?.state.failure ||
-        attempt && (!this.value.owned && !cleanUnownedMenu || attempt.status === 'pending-completion' || !this.queue)) return false;
+        attempt && (!this.value.owned && !cleanMenu || attempt.status === 'pending-completion' || !this.queue)) return false;
     const request = ++this.reloadSequence;
     this.reloadPreparing = true; this.value.busy = true; this.syncClock(); this.publish();
     let accepted = false;
@@ -438,7 +438,7 @@ export class GameController {
       if (flushed && flushed.kind !== 'committed') { this.problem(flushed); return false; }
       // A clean menu has no local attempt promise left to preserve. Another window may
       // legitimately own or replace its former board; never acquire it just to reload.
-      const expectedAttempt = cleanUnownedMenu ? undefined : this.value.attempt;
+      const expectedAttempt = cleanMenu ? undefined : this.value.attempt;
       const readback = await this.repository.readCurrent();
       if (request !== this.reloadSequence || this.destroyed) return false;
       if (readback.kind !== 'committed') { this.problem(readback); return false; }
@@ -458,6 +458,10 @@ export class GameController {
       }
       // Settled local preferences are already acknowledged. Another window may legitimately
       // supersede them or change another role/profile; retain that validated current state.
+      if (cleanMenu && attempt && (saved.roles.find(role => role.role === attempt.role)?.attemptId !== attempt.id ||
+          !same(saved.attempts.find(current => current.id === attempt.id && current.role === attempt.role), this.value.attempt))) {
+        this.value.owned = false;
+      }
       this.value.save = saved; this.publish(); accepted = true;
       return true;
     } catch {

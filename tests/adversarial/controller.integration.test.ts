@@ -381,6 +381,24 @@ describe('verified reload preparation', () => {
     } finally { await dirty.game.dispose(); }
   });
 
+  it('accepts a clean menu when the other owner was not discovered before reload preparation', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.setNow(123); h.game.command({ type: 'enter', digit: 2 }); await h.game.flush();
+      h.game.setView({ board: false }); await h.game.flush();
+      const old = structuredClone(h.game.state.attempt), writes = h.calls.saves.length;
+      h.data.attempts[0].writer.epoch++; h.data.attempts[0].entries[1] = 3;
+      expect(h.game.state.owned).toBe(true);
+      expect(await h.game.prepareReload()).toBe(true);
+      expect(h.game.state.save?.attempts[0].entries[1]).toBe(3);
+      expect(h.game.state.attempt).toEqual(old);
+      expect(h.calls.saves).toHaveLength(writes); expect(h.calls.acquisitions).toHaveLength(1);
+      h.game.cancelReload(); h.game.setView({ board: true });
+      expect(h.game.state.owned).toBe(false); expect(h.game.state.canStudy).toBe(false);
+      expect(vi.getTimerCount()).toBe(0); expect(h.calls.acquisitions).toHaveLength(1);
+    } finally { h.game.cancelReload(); await h.game.dispose(); }
+  });
+
   it('refuses an earlier preferences write and blocks later preferences until cancellation', async () => {
     const h = harness(); await h.reveal(); const gate = deferred<void>(); h.waits.preferences(gate.promise);
     try {
