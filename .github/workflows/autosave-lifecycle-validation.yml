@@ -1,0 +1,36 @@
+name: Isolated autosave lifecycle validation
+on:
+  push:
+    branches: [codex/autosave-lifecycle-validation]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TOADOKU_BASE: /toadoku/
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/prototypes/production-ui-evidence/browsers
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node tools/test.mjs install --with-deps
+      - name: Run bounded validation serially
+        id: checks
+        run: node tests/browser/autosave-lifecycle-checks.mjs
+      - name: Upload bounded evidence
+        if: always() && steps.checks.outputs.receipts_ready == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: autosave-lifecycle-checks
+          path: prototypes/pwa-validation/autosave-lifecycle-checks
+          retention-days: 2
+          if-no-files-found: error
+          archive: true
