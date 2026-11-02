@@ -24,7 +24,7 @@ async function until(predicate: () => boolean): Promise<void> {
 const committed = <T>(value: T): StorageResult<T> => ({ kind: 'committed', value: structuredClone(value) });
 
 /** Pure deferred ports test coordination only. They do not substitute for Sage's real-IDB cases. */
-function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral' = 'durable', compact = false) {
+function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral' = 'durable', compact = false, restoreCAS = false) {
   const manifest = JSON.parse(readFileSync('public/catalog/v1/manifest.json', 'utf8')) as CatalogManifest;
   let now = 0, ids = 0;
   const data: CurrentSave = {
@@ -37,6 +37,13 @@ function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral'
   let saveIssue: Exclude<StorageResult<Attempt>, { kind: 'committed' }> | undefined;
   let acquireIssue: Exclude<StorageResult<Attempt>, { kind: 'committed' }> | undefined;
   let allocateIssue: Exclude<StorageResult<Attempt>, { kind: 'committed' }> | undefined;
+  let previewIssue: Exclude<StorageResult<RestorePreview>, { kind: 'committed' }> | undefined;
+  const touch = () => { if (restoreCAS) data.meta.essentialRevision++; };
+  const restoreConflict = (expected: RestorePreview['expected']): Exclude<StorageResult<never>, { kind: 'committed' }> | undefined => {
+    if (!restoreCAS) return;
+    if (data.meta.generation !== expected.generation) return { kind: 'conflict', reason: 'generation' };
+    if (data.meta.essentialRevision !== expected.essentialRevision) return { kind: 'conflict', reason: 'revision' };
+  };
   const computations: Promise<HintResult>[] = [];
   const reads: Promise<StorageResult<CurrentSave>>[] = [];
   const hints: HintComputer = { compute: () => computations.shift() ?? Promise.resolve({ kind: 'unavailable', reason: 'invalid' }), cancel: () => {} };
@@ -47,7 +54,7 @@ function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral'
       calls.acquisitions.push(id); await acquireWait;
       if (acquireIssue) return acquireIssue;
       const attempt = data.attempts.find(item => item.id === id)!;
-      attempt.writer = { token, epoch: attempt.writer.epoch + 1 }; attempt.revision++;
+      attempt.writer = { token, epoch: attempt.writer.epoch + 1 }; attempt.revision++; touch();
       return committed(attempt);
     },
     saveSnapshot: async (_guard: unknown, revision: number, snapshot: Attempt) => {
@@ -56,15 +63,17 @@ function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral'
       const index = data.attempts.findIndex(item => item.id === snapshot.id);
       if (data.attempts[index].revision !== revision) return { kind: 'conflict', reason: 'revision' };
       data.attempts[index] = { ...structuredClone(snapshot), revision: revision + 1 };
+      touch();
       return committed(data.attempts[index]);
     },
     disclose: async (_guard: unknown, disclosure: Disclosure) => {
       calls.disclosures.push(structuredClone(disclosure)); await discloseWait;
       const index = data.attempts.findIndex(item => item.id === disclosure.attemptId), attempt = data.attempts[index];
       data.attempts[index] = { ...attempt, revision: attempt.revision + 1, pendingDisclosure: structuredClone(disclosure), assistance: { used: true, exposed: [...new Set([...attempt.assistance.exposed, ...disclosure.exposed])] } };
+      touch();
       return committed(data.attempts[index]);
     },
-    savePreferences: async (_generation: string, value: Preferences) => { await preferenceWait; data.preferences = structuredClone(value); return committed(value); },
+    savePreferences: async (_generation: string, value: Preferences) => { await preferenceWait; data.preferences = structuredClone(value); touch(); return committed(value); },
     readIssued: async () => committed({}),
     allocate: async (request: AllocationRequest) => {
       calls.allocations.push(structuredClone(request)); await allocateWait;
@@ -72,20 +81,27 @@ function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral'
       const role = data.roles.find(item => item.role === request.attempt.role)!;
       data.attempts = data.attempts.filter(item => item.role !== request.attempt.role).concat(structuredClone(request.attempt));
       role.attemptId = request.attempt.id; role.revision++; role.lastIntentSeq = request.intent.sequence;
+      touch();
       return committed(request.attempt);
     },
     complete: async (_guard: unknown, _revision: number) => {
       const attempt = data.attempts[0]; const paid = receipt(attempt);
       attempt.status = 'completed'; attempt.receiptId = paid.id; attempt.revision++;
       data.profile.wallet += paid.result.dewdrops; data.profile.lifetimeEarned += paid.result.dewdrops;
+      touch();
       return committed({ attempt, receipt: paid, profile: data.profile });
     },
     exportBackup: async () => { calls.exports++; await exportWait; return committed({ text: '{}', meta: data.meta }); },
-    previewRestore: async () => { calls.previews++; await previewWait; return committed({ expected: data.meta } as RestorePreview); },
+    previewRestore: async () => { calls.previews++; await previewWait; return previewIssue ?? committed({ expected: data.meta } as RestorePreview); },
     cancelBackupWork: () => { calls.cancellations++; },
-    stageRestore: async (preview: RestorePreview) => { calls.stages++; await stageWait; return committed({ generation: 'restored-generation', expected: preview.expected }); },
+    stageRestore: async (preview: RestorePreview) => {
+      calls.stages++; await stageWait;
+      return restoreConflict(preview.expected) ?? committed({ generation: 'restored-generation', expected: preview.expected });
+    },
     activateRestore: async (stage: RestoreStage) => {
-      calls.activations++; await activationWait; data.meta = { generation: stage.generation, essentialRevision: 0 }; data.attempts = [];
+      calls.activations++; await activationWait;
+      const conflict = restoreConflict(stage.expected); if (conflict) return conflict;
+      data.meta = { generation: stage.generation, essentialRevision: 0 }; data.attempts = [];
       data.roles = data.roles.map(role => ({ generation: stage.generation, role: role.role, revision: 0, lastIntentSeq: 0 }));
       return committed(data.meta);
     },
@@ -97,6 +113,7 @@ function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral'
     const index = data.attempts.findIndex(item => item.id === guard.attemptId), attempt = data.attempts[index];
     if (attempt.revision !== revision || attempt.commandSeq !== sequence) return { kind: 'conflict', reason: 'revision' };
     data.attempts[index] = { ...attempt, revision: revision + 1, commandSeq: nextSequence, elapsedMs: Math.max(attempt.elapsedMs, elapsedMs) };
+    touch();
     return committed(data.attempts[index]);
   };
   const catalog = {
@@ -118,9 +135,130 @@ function harness(initial = attemptFixture(), durability: 'durable' | 'ephemeral'
     saveIssue: (value?: typeof saveIssue) => { saveIssue = value; },
     acquireIssue: (value?: typeof acquireIssue) => { acquireIssue = value; },
     allocateIssue: (value?: typeof allocateIssue) => { allocateIssue = value; },
+    previewIssue: (value?: typeof previewIssue) => { previewIssue = value; },
     async reveal() { expect(await game.resume(initial.role)).toBe(true); game.setView({ board: true, visible: true }); },
   };
 }
+
+describe('restore review against essential revision changes', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it.each([false, true])('keeps a reviewed restore valid across short and long thinking delays; compact=%s', async compact => {
+    for (const delay of [100, TIME_SAVE_INTERVAL_MS * 3]) {
+      const h = harness(attemptFixture(), 'durable', compact, true); await h.reveal();
+      try {
+        h.setNow(120);
+        const preview = await h.game.previewRestore('{}');
+        expect(preview.kind).toBe('committed'); if (preview.kind !== 'committed') throw new Error('Expected preview');
+        expect(h.data.attempts[0].elapsedMs).toBe(120);
+        expect(preview.value.expected).toEqual(h.data.meta);
+        const revision = h.data.meta.essentialRevision, writes = h.calls.saves.length + h.calls.timeSaves.length;
+        expect(h.game.state.restorePhase).toBe('reviewing'); expect(h.game.state.canStudy).toBe(false);
+        h.setNow(120 + delay); await vi.advanceTimersByTimeAsync(delay);
+        h.game.setView({ visible: false }); h.game.setView({ visible: true, concealed: false });
+        expect(h.game.state.canStudy).toBe(false); expect(vi.getTimerCount()).toBe(0);
+        expect(h.data.meta.essentialRevision).toBe(revision);
+        expect(await h.game.restore(preview.value)).toBe(true);
+        expect(h.calls.saves.length + h.calls.timeSaves.length).toBe(writes);
+        expect(h.calls.activations).toBe(1); expect(h.data.meta.generation).toBe('restored-generation');
+        expect(h.game.state.restorePhase).toBeUndefined(); expect(h.game.state.problem).toBeUndefined();
+      } finally { await h.game.dispose(); }
+    }
+  });
+
+  it('resumes exact thinking time and commands when a successful review is canceled', async () => {
+    const h = harness(attemptFixture(), 'durable', true, true); await h.reveal();
+    try {
+      h.setNow(100); expect((await h.game.previewRestore('{}')).kind).toBe('committed');
+      h.setNow(10_100); await vi.advanceTimersByTimeAsync(10_000);
+      expect(h.data.attempts[0].elapsedMs).toBe(100); expect(h.calls.timeSaves).toHaveLength(1);
+      h.game.cancelBackupWork(); expect(h.game.state.restorePhase).toBeUndefined(); expect(h.game.state.canStudy).toBe(true);
+      h.setNow(10_150); await h.game.flush();
+      expect(h.data.attempts[0].elapsedMs).toBe(150);
+      expect(h.game.command({ type: 'enter', digit: 2 }).kind).toBe('changed'); await h.game.flush();
+      expect(h.data.attempts[0].entries[1]).toBe(2); expect(h.calls.activations).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('releases a failed preview without losing ownership or leaving an untimed readable game', async () => {
+    const h = harness(attemptFixture(), 'durable', true, true); await h.reveal();
+    try {
+      h.previewIssue({ kind: 'corrupt', reason: 'backup-json' }); h.setNow(100);
+      expect(await h.game.previewRestore('invalid')).toEqual({ kind: 'corrupt', reason: 'backup-json' });
+      expect(h.game.state.restorePhase).toBeUndefined(); expect(h.game.state.owned).toBe(true); expect(h.game.state.canStudy).toBe(true);
+      expect(vi.getTimerCount()).toBe(1);
+      h.setNow(150); await h.game.flush(); expect(h.data.attempts[0].elapsedMs).toBe(150);
+      expect(h.calls.stages).toBe(0); expect(h.calls.activations).toBe(0);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('keeps readonly export available but blocks mutators and reload during a live review', async () => {
+    const h = harness(attemptFixture(), 'durable', true, true); await h.reveal();
+    try {
+      h.setNow(100); const preview = await h.game.previewRestore('{}');
+      expect(preview.kind).toBe('committed'); if (preview.kind !== 'committed') throw new Error('Expected preview');
+      const previous = structuredClone(h.data);
+      expect(h.game.command({ type: 'enter', digit: 2 })).toEqual({ kind: 'rejected', reason: 'frozen' });
+      expect(await h.game.restart()).toBe(false); expect(await h.game.resume('quick')).toBe(false);
+      expect(await h.game.retry()).toBe(false); expect(await h.game.requestHint('reveal')).toBe(false);
+      expect(await h.game.preferences({ ...h.data.preferences, language: 'de' })).toBe(false);
+      expect(await h.game.start({ role: 'quick', band: 'easy', authorization: 'replace' })).toBe(false);
+      expect(await h.game.prepareReload()).toBe(false);
+      h.setNow(50_100); expect((await h.game.exportBackup()).kind).toBe('committed');
+      expect(h.game.state.restorePhase).toBe('reviewing'); expect(h.game.state.canStudy).toBe(false);
+      expect(h.data).toEqual(previous); expect(h.calls.allocations).toEqual([]); expect(h.calls.disclosures).toEqual([]);
+      expect(await h.game.restore(preview.value)).toBe(true);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('cancels an outstanding hint before it can invalidate the destructive-action review', async () => {
+    const h = harness(attemptFixture(), 'durable', true, true); await h.reveal();
+    const hint = deferred<HintResult>(); h.computations.push(hint.promise);
+    try {
+      const pending = h.game.requestHint('logical'); expect(h.game.state.hintComputing).toBe(true);
+      h.setNow(100); expect((await h.game.previewRestore('{}')).kind).toBe('committed');
+      hint.resolve({ kind: 'ready', payload: { kind: 'inconsistent', logicalRevision: 0 } });
+      expect(await pending).toBe(false); expect(h.calls.disclosures).toEqual([]);
+      expect(h.game.state.restorePhase).toBe('reviewing'); expect(h.game.state.canStudy).toBe(false);
+      expect(h.game.state.hintComputing).toBe(false);
+    } finally { hint.resolve({ kind: 'unavailable', reason: 'invalid' }); await h.game.dispose(); }
+  });
+
+  it('refuses export during a pending preview without canceling it or orphaning the review freeze', async () => {
+    const h = harness(attemptFixture(), 'durable', true, true); await h.reveal();
+    const gate = deferred<void>(); h.waits.preview(gate.promise);
+    try {
+      h.setNow(100); const preview = h.game.previewRestore('{}');
+      await until(() => h.calls.previews === 1);
+      expect(h.game.state.restorePhase).toBe('reviewing'); expect(h.game.state.canStudy).toBe(false);
+      expect(await h.game.exportBackup()).toEqual({ kind: 'unavailable', reason: 'abort', detail: 'backup-busy' });
+      expect(h.calls.exports).toBe(0); expect(h.calls.cancellations).toBe(0);
+      gate.resolve(); expect((await preview).kind).toBe('committed');
+      expect(h.game.state.restorePhase).toBe('reviewing'); expect(h.game.state.canStudy).toBe(false);
+      h.game.cancelBackupWork(); expect(h.game.state.restorePhase).toBeUndefined(); expect(h.game.state.canStudy).toBe(true);
+    } finally { gate.resolve(); await h.game.dispose(); }
+  });
+
+  it.each(['stage', 'activation'] as const)('retains the foreign essential-change guard at %s', async boundary => {
+    const h = harness(attemptFixture(), 'durable', true, true); await h.reveal();
+    const gate = deferred<void>();
+    try {
+      h.setNow(100); const preview = await h.game.previewRestore('{}');
+      expect(preview.kind).toBe('committed'); if (preview.kind !== 'committed') throw new Error('Expected preview');
+      if (boundary === 'activation') h.waits.activate(gate.promise);
+      const restoring = boundary === 'activation' ? h.game.restore(preview.value) : undefined;
+      if (restoring) await until(() => h.calls.activations === 1);
+      h.data.profile.wallet += 37; h.data.profile.revision++; h.data.meta.essentialRevision++;
+      const changed = structuredClone(h.data);
+      gate.resolve();
+      expect(await (restoring ?? h.game.restore(preview.value))).toBe(false);
+      expect(h.data).toEqual(changed); expect(h.data.meta.generation).toBe('generation-test');
+      expect(h.game.state.problem).toBe('conflict:revision'); expect(h.game.state.restorePhase).toBeUndefined();
+      expect(h.calls.activations).toBe(boundary === 'activation' ? 1 : 0);
+    } finally { gate.resolve(); await h.game.dispose(); }
+  });
+});
 
 describe('active-only autosave scheduling', () => {
   beforeEach(() => vi.useFakeTimers());
@@ -922,7 +1060,8 @@ describe('independent integrated controller interleavings', () => {
     h.game.cancelBackupWork(); h.waits.preview();
     expect((await h.game.previewRestore('new')).kind).toBe('committed'); gate.resolve();
     expect(await old).toEqual({ kind: 'unavailable', reason: 'abort', detail: 'backup-cancelled' });
-    expect(h.calls.previews).toBe(2); expect(h.game.state.restorePhase).toBeUndefined(); await h.game.dispose();
+    expect(h.calls.previews).toBe(2); expect(h.game.state.restorePhase).toBe('reviewing'); expect(h.game.state.canStudy).toBe(false);
+    h.game.cancelBackupWork(); expect(h.game.state.canStudy).toBe(true); await h.game.dispose();
   });
   it('conceals and pauses staging independently of presentation, then cancels without activation', async () => {
     const h = harness(); await h.reveal(); const gate = deferred<void>(); h.waits.stage(gate.promise);
