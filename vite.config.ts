@@ -4,9 +4,14 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { integrity, pwaRelease } from './tools/pwa/build.ts';
+import { appVersion } from './tools/pwa/version.ts';
 
-export default defineConfig({
-  plugins: [svelte(), pwaRelease(), VitePWA({
+export default defineConfig(({ command }) => {
+  const { version, commit } = appVersion(import.meta.dirname);
+  const label = command === 'serve' ? `${version}-dev` : version;
+  return {
+  define: { __APP_VERSION__: JSON.stringify(label), __APP_COMMIT__: JSON.stringify(commit) },
+  plugins: [svelte(), pwaRelease({ version: label, commit }), VitePWA({
     strategies: 'injectManifest', srcDir: 'src/lib/pwa', filename: 'worker.ts',
     injectRegister: null, registerType: 'prompt', includeManifestIcons: false,
     integration: { closeBundleOrder: 'post' },
@@ -31,4 +36,5 @@ export default defineConfig({
     modulePreload: { resolveDependencies: (filename, deps, { hostType }) => hostType === 'js' ? deps.filter(dep => dep !== filename) : deps },
     license: { fileName: 'licenses/dependencies.json' },
   },
+  };
 });

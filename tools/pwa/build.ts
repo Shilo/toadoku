@@ -25,7 +25,7 @@ export function mime(path: string): string {
   return path.endsWith('.js') ? 'javascript' : path.endsWith('.css') ? 'text/css' : path.endsWith('.html') ? 'text/html' : path.endsWith('.json') || path.endsWith('.webmanifest') ? 'json' : path.endsWith('.png') ? 'image/png' : path.endsWith('.svg') ? 'image/svg+xml' : /\.(?:ttf|woff2?)$/.test(path) ? 'font/' : path.endsWith('.txt') ? 'text/plain' : '';
 }
 /** Runs after emitted files exist and before the PWA plugin inventories them. */
-export function pwaRelease(): Plugin {
+export function pwaRelease(app: { version: string; commit: string }): Plugin {
   let output = 'dist', failed = false;
   let originalError: unknown;
   return {
@@ -56,7 +56,7 @@ export function pwaRelease(): Plugin {
       await writeFile(join(output, 'index.html'), index);
       const inventory = await Promise.all(shell.map(async path => { const bytes = await readFile(join(output, path)); if (bytes.length > MAX_RESOURCE_BYTES) throw new Error(`Oversized shell resource: ${path}`); return { path, bytes: bytes.length, sha256: digest(bytes), integrity: integrity(bytes), mime: mime(path) }; }));
       const bytes = inventory.reduce((sum, file) => sum + file.bytes, 0);
-      const metadata = JSON.stringify({ protocol: 1, buildId, bytes, themePacks, files: inventory });
+      const metadata = JSON.stringify({ protocol: 1, version: app.version, commit: app.commit, buildId, bytes, themePacks, files: inventory });
       assertCachedShellBudget(bytes, Buffer.byteLength(metadata));
       await writeFile(join(output, 'release.json'), metadata);
     } },

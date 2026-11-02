@@ -126,7 +126,7 @@
   </section>
   <section aria-label={c.update}>
     {#if updateNeedsAttention}<h3>{c.update}</h3><p role="status">{updateText}</p>{/if}
-    <details><summary>{c.versionHelp}</summary>{#if !updateNeedsAttention}<p role="status">{updateText}</p>{/if}<p>{c.updateHelp}</p>
+    <details><summary>{c.versionHelp}</summary><p class="app-version">{c.version} {__APP_VERSION__} · {__APP_COMMIT__}</p>{#if !updateNeedsAttention}<p role="status">{updateText}</p>{/if}<p>{c.updateHelp}</p>
     {#if delivery?.phase !== 'failed'}<button class="secondary" disabled={!client || delivery?.phase === 'checking' || delivery?.phase === 'unavailable'} onclick={() => client?.check()}>{c.check}</button>{/if}</details>
     {#if delivery?.phase === 'failed'}<button class="secondary" onclick={() => client?.check()}>{c.check}</button>{/if}
   </section>

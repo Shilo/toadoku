@@ -66,7 +66,7 @@ const en = {
 
   persist: 'Ask browser to keep data', persisted: 'Browser retention permission granted. Backups are still needed.', denied: 'Browser retention permission was not granted.',
 
-  update: 'App updates', build: 'Running build', lastCheck: 'Last checked', never: 'Not checked yet', check: 'Check for updates',
+  version: 'Version', update: 'App updates', build: 'Running build', lastCheck: 'Last checked', never: 'Not checked yet', check: 'Check for updates',
 
   idle: 'No new update reported.', downloading: 'Downloading app files.', updateReady: 'Update downloaded. Wait until progress is saved in every window. Then close every Toadoku tab and installed-app window and reopen.',
 
@@ -144,7 +144,7 @@ const de: Copy = {
 
   persist:'Browser um dauerhafte Speicherung bitten', persisted:'Speichererlaubnis erteilt. Backups bleiben nötig.', denied:'Speichererlaubnis nicht erteilt.',
 
-  update:'App-Updates', build:'Aktueller Build', lastCheck:'Zuletzt geprüft', never:'Noch nicht geprüft', check:'Nach Updates suchen',
+  version:'Version', update:'App-Updates', build:'Aktueller Build', lastCheck:'Zuletzt geprüft', never:'Noch nicht geprüft', check:'Nach Updates suchen',
 
   idle:'Kein neues Update gemeldet.', downloading:'App-Dateien werden geladen.', updateReady:'Update geladen. Warte, bis der Fortschritt in jedem Fenster gespeichert ist. Schließe dann alle Toadoku-Tabs und App-Fenster und öffne die App erneut.',
 
@@ -219,7 +219,7 @@ const es: Copy = {
 
   persist:'Pedir al navegador que conserve los datos', persisted:'Permiso concedido. Aún necesitas copias de seguridad.', denied:'El navegador no concedió el permiso.',
 
-  update:'Actualizaciones', build:'Versión en ejecución', lastCheck:'Última comprobación', never:'Sin comprobar aún', check:'Buscar actualizaciones',
+  version:'Versión', update:'Actualizaciones', build:'Versión en ejecución', lastCheck:'Última comprobación', never:'Sin comprobar aún', check:'Buscar actualizaciones',
 
   idle:'No se informa de nuevas actualizaciones.', downloading:'Descargando archivos de la aplicación.', updateReady:'Actualización descargada. Espera a que cada ventana guarde el progreso. Después cierra todas las pestañas y ventanas de Toadoku y vuelve a abrir.',
 

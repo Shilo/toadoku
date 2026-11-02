@@ -8,6 +8,10 @@ const SINGLE_JOB_WORKFLOWS = new Map([
   [LEGACY_WORKFLOW_SHA256, 'Run actions/deploy-pages@v4'],
   ['de430de62d48920f76ee189671f7c734e8e0d43deea3720aca1fdbd88131fcce', 'Deploy verified Pages artifact'],
 ]);
+// Reviewed gated workflow before the simpler first-publication confirmation.
+const GATED_WORKFLOWS = new Set([
+  '605485d0dfb6391eca1274f2f61de909b455ae264fc5bac7e251d2da3391914c',
+]);
 const positive = value => Number.isSafeInteger(value) && value > 0;
 const terminal = value => ['success', 'failure', 'cancelled', 'skipped', 'timed_out', 'action_required', 'neutral', 'stale', 'startup_failure'].includes(value);
 const commit = value => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
@@ -24,14 +28,15 @@ function complete(page, key) {
 function workflowPath(run) {
   return run.path === WORKFLOW || run.path === `${WORKFLOW}@${run.head_branch}` || run.path === `${WORKFLOW}@refs/heads/${run.head_branch}`;
 }
-/** Owner assertion covers provenance outside currently returned Actions history, not a 404 override. */
+/** Owner confirmation covers provenance outside returned history; identities are derived, never typed. */
 export async function initialReleaseProof(context) {
   const no = reason => ({ bootstrap: false, reason });
-  if (!context.assertion) return no('First publication requires the scoped initial_release assertion; see docs/pwa-system.md');
+  if (context.confirmation !== true) return no('First publication requires the one-time never-published confirmation; see docs/pwa-system.md');
   try {
     const { repository, base, sha, event, ref, runId, attempt, source, read } = context;
     const site = new URL(base);
-    if (!/^[\w.-]+\/[\w.-]+$/.test(repository ?? '') || site.protocol !== 'https:' || site.href !== base || !site.pathname.endsWith('/') || site.search || site.hash || site.username || site.password || !commit(sha) || event !== 'workflow_dispatch' || ref !== 'refs/heads/main' || !positive(runId) || !positive(attempt) || attempt > 100 || context.assertion !== `${repository}|${base}|${sha}`) return no('Invalid scoped initial_release assertion or current main workflow identity');
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repository ?? '') || site.protocol !== 'https:' || site.href !== base || !site.pathname.endsWith('/') || site.search || site.hash || site.username || site.password || !commit(sha) || event !== 'workflow_dispatch' || ref !== 'refs/heads/main' || !positive(runId) || !positive(attempt) || attempt > 100) return no('Invalid confirmed first-publication target or current main workflow identity');
+    const assertion = `${repository}|${base}|${sha}`;
     const currentHash = workflowHash(source);
     const hashes = new Map([[sha, currentHash]]);
     const runs = complete(await read('actions/workflows/pages.yml/runs?per_page=100'), 'workflow_runs');
@@ -54,7 +59,7 @@ export async function initialReleaseProof(context) {
         hash = workflowHash(bytes); hashes.set(run.head_sha, hash);
       }
       const previousDeployName = SINGLE_JOB_WORKFLOWS.get(hash);
-      if (hash !== currentHash && !previousDeployName) throw new Error('Unrecognized historical workflow source');
+      if (hash !== currentHash && !previousDeployName && !GATED_WORKFLOWS.has(hash)) throw new Error('Unrecognized historical workflow source');
       const deployName = previousDeployName ?? 'Deploy verified Pages artifact';
       for (let number = 1; number <= count; number++) {
         const jobs = complete(await read(`actions/runs/${run.id}/attempts/${number}/jobs?per_page=100`), 'jobs');
@@ -75,6 +80,6 @@ export async function initialReleaseProof(context) {
         if (deployments.length !== 1 || deployments[0].conclusion !== 'skipped') throw new Error('Deployment was attempted or its skipped state is unknown');
       }
     }
-    return { bootstrap: true, reason: 'Scoped pristine-target assertion and complete returned prior-attempt history with skipped deployment steps', priorAttempts, assertion: context.assertion, identity: { repository, site: base, sha, runId, attempt } };
+    return { bootstrap: true, reason: 'Confirmed never-published target and complete returned history with skipped deployment', priorAttempts, assertion, identity: { repository, site: base, sha, runId, attempt } };
   } catch (error) { return no(`First-publication proof unavailable: ${error.message}`); }
 }

@@ -33,7 +33,7 @@ if (hostedBase) {
   const body = await bounded(new URL('release.json', base), 128 * 1024);
   if (!body) {
     const history = JSON.parse(await readFile(join(previous, 'history.json'), 'utf8'));
-    if (history.bootstrap !== true) throw new Error(`Hosted release metadata unavailable; publication refused. First-publication setup: docs/pwa-system.md. ${history.reason ?? 'Scoped pristine-target assertion and complete skipped-deployment proof required'}`);
+    if (history.bootstrap !== true) throw new Error(`Hosted release metadata unavailable; publication refused. First-publication setup: docs/pwa-system.md. ${history.reason ?? 'One-time never-published confirmation and complete skipped-deployment proof required'}`);
     const identity = history.identity;
     if (!identity || !/^[\w.-]+\/[\w.-]+$/.test(identity.repository ?? '') || identity.site !== base.href || !/^[a-f0-9]{40}$/.test(identity.sha ?? '') || !Number.isSafeInteger(identity.runId) || identity.runId < 1 || !Number.isSafeInteger(identity.attempt) || identity.attempt < 1 || identity.attempt > 100 || history.assertion !== `${identity.repository}|${identity.site}|${identity.sha}`) throw new Error('Invalid or mismatched first-publication proof identity; see docs/pwa-system.md');
     for (const [key, value] of [['GITHUB_REPOSITORY', identity.repository], ['GITHUB_SHA', identity.sha], ['GITHUB_RUN_ID', String(identity.runId)], ['GITHUB_RUN_ATTEMPT', String(identity.attempt)]]) if (process.env[key] !== undefined && process.env[key] !== value) throw new Error('First-publication proof does not match this workflow; see docs/pwa-system.md');

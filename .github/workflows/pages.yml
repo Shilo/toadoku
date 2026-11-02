@@ -5,10 +5,10 @@ on:
   workflow_dispatch:
     inputs:
       initial_release:
-        description: 'Only for a never-published target: OWNER/REPO|https://configured-pages-base/|FULL_MAIN_SHA (see docs/pwa-system.md)'
+        description: 'First publication only: this Pages website has never served an app'
         required: false
-        default: ''
-        type: string
+        default: false
+        type: boolean
 permissions:
   contents: read
 jobs:
@@ -50,7 +50,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 1
+          fetch-depth: 0 # PixelDoll-style versioning counts the complete relevant commit history.
+          filter: blob:none # Fetch historical commits/trees without historical file bodies.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'

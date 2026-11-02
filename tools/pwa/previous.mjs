@@ -25,10 +25,10 @@ function api(path) {
   return reads.get(path);
 }
 const proof = await initialReleaseProof({
-  assertion: process.env.TOADOKU_INITIAL_RELEASE, repository, base: process.env.TOADOKU_PAGES_BASE,
+  confirmation: process.env.TOADOKU_INITIAL_RELEASE === 'true', repository, base: process.env.TOADOKU_PAGES_BASE,
   sha: process.env.GITHUB_SHA, event: process.env.GITHUB_EVENT_NAME, ref: process.env.GITHUB_REF,
   runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT),
-  source: process.env.TOADOKU_INITIAL_RELEASE ? await readFile('.github/workflows/pages.yml') : new Uint8Array(), read: api,
+  source: process.env.TOADOKU_INITIAL_RELEASE === 'true' ? await readFile('.github/workflows/pages.yml') : new Uint8Array(), read: api,
 });
 const found = await previousArchive({ repository, runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT), read: api });
 await writeFile(`${directory}/previous/history.json`, JSON.stringify({ ...proof, archiveId: found?.id }));

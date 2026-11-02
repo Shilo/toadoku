@@ -98,11 +98,9 @@ For offline failure, reconnect and inspect/prepare again. Manual preparation can
 
 This is maintainer setup, not a player setting. A missing release file does not prove that a website is empty. Before the first publication, independently confirm that this exact Pages website has never served an app, including older workflows and deleted run history. If it already has a site, preserve and verify its existing files through a separately reviewed migration. Do not delete it or invent an empty history to get past the check.
 
-For a confirmed never-published website, use the Pages workflow's manual Run workflow action on main. Its one-time initial_release field is exactly:
+For a confirmed new website, open **Actions → Toadoku Pages → Run workflow**, choose main, tick **First publication only: this Pages website has never served an app**, and run it. The repository, exact Pages URL and source commit are filled in automatically. No copying identifiers or custom secrets is required. After the first successful publication, app changes pushed to main publish automatically and the checkbox stays off.
 
-`OWNER/REPO|https://configured-pages-base/|FULL_MAIN_SHA`
-
-Replace all three parts with the actual repository, the exact configured Pages base URL including its trailing slash, and the full forty-character main commit. This is a confirmation about that specific target and source, not a force/reset switch. The workflow passes the value as environment data, not executable shell text. No publication has been performed as part of this implementation.
+This confirmation is a Toadoku safeguard, not a GitHub requirement. Future updates keep files that older open games may still need. A website returning "not found" could be new, temporarily unavailable, private, or previously published with its history removed. The checkbox supplies the one fact the available APIs cannot prove: this target has never hosted an app. It cannot override a detected existing website or an earlier attempted deployment. No publication has been performed as part of this implementation.
 
 The read-only proof checks complete currently returned workflow history, across branches and earlier rerun attempts, within bounded run/attempt/API limits. Known workflow source and an explicitly skipped deployment step, or a wholly skipped protected release job in the recognized gated workflow, are required for each prior attempt. An uploaded archive does not prove deployment. A failed or cancelled deployment might already have published, so it is not considered safe initial setup. Missing, unknown, changed or truncated history refuses recovery. The normal hosted release must remain recoverable. An existing index page without a release inventory also refuses initial publication.
 
@@ -120,7 +118,7 @@ Remove extra puzzles removes the current extras and asks other windows to cancel
 | Update protocol and pure policies | `src/lib/pwa/client.ts`, `policy.ts`, `worker.ts`. |
 | Exact delivery and trust | `src/lib/catalog/load.ts`, `manifest.v1.ts`, existing decode/attestation modules. |
 | Disposable planning/storage/readiness | `src/lib/offline/plan.ts`, `store.ts`, `verify.ts`, `reserve.ts`. |
-| Inventory, identities and manifest | `vite.config.ts`, `tools/pwa/build.ts`, `validate.mjs`, `catalog-artifact.mjs`. |
+| Inventory, identities and manifest | `vite.config.ts`, `tools/pwa/build.ts`, `version.ts`, `validate.mjs`, `catalog-artifact.mjs`. Human version labels follow the [PixelDoll commit-count workflow](pwa-ci.md#automatic-app-versions); the full content fingerprint controls updates. |
 | Retention/publication checks | `tools/pwa/{release-inputs,bootstrap,previous,previous-history,retain,snapshot,capacity,verify-host,host-mime}.mjs`, `.github/workflows/pages.yml`. |
 | Icon maintenance | [Icon recipe](pwa-icons.md), `public/pwa/`, `tools/pwa/icons.mjs`. |
 

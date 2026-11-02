@@ -11,7 +11,7 @@ const sha = 'a'.repeat(40), priorSha = 'b'.repeat(40), repository = 'Owner/Game'
 const current = { id: 100, workflow_id: 5, head_sha: sha, head_branch: 'main', event: 'workflow_dispatch', run_attempt: 1, status: 'in_progress', conclusion: null, path: '.github/workflows/pages.yml', repository: { id: 10, full_name: repository } };
 const prior = { ...current, id: 99, head_sha: priorSha, status: 'completed', conclusion: 'failure' };
 const page = (key: string, values: unknown[]) => ({ total_count: values.length, [key]: values });
-async function runPrevious(options: { assertion?: string; priorDeploy?: string; archive?: boolean; rerun?: boolean } = {}) {
+async function runPrevious(options: { confirmation?: boolean | string; priorDeploy?: string; archive?: boolean; rerun?: boolean } = {}) {
   await mkdir('prototypes/pwa-validation', { recursive: true });
   const cwd = await mkdtemp(resolve('prototypes/pwa-validation/bootstrap-wiring-'));
   await mkdir(join(cwd, '.github/workflows'), { recursive: true });
@@ -52,28 +52,30 @@ globalThis.fetch = async (input, init) => {
     ...process.env, GH_TOKEN: 'fixture-read-token', GITHUB_REPOSITORY: repository, GITHUB_SHA: sha,
     GITHUB_EVENT_NAME: 'workflow_dispatch', GITHUB_REF: 'refs/heads/main', GITHUB_RUN_ID: '100',
     GITHUB_RUN_ATTEMPT: options.rerun ? '2' : '1', TOADOKU_PAGES_BASE: base,
-    TOADOKU_INITIAL_RELEASE: options.assertion ?? '',
+    TOADOKU_INITIAL_RELEASE: String(options.confirmation ?? false),
   } });
   return { cwd, history: JSON.parse(await readFile(join(cwd, 'prototypes/pwa-validation/previous/history.json'), 'utf8')), calls: JSON.parse(await readFile(join(cwd, 'calls.json'), 'utf8')) as string[] };
 }
-it('actual previous helper defaults to no bootstrap and does not scan proof history without assertion', async () => {
+it('actual previous helper defaults to no bootstrap and does not scan proof history without confirmation', async () => {
   const f = await runPrevious(); expect(f.history.bootstrap).toBe(false);
   expect(f.calls).toHaveLength(1); expect(f.calls[0]).toContain('deployments?environment=github-pages');
 });
-it('actual previous helper accepts pristine and early failed first releases with exact scoped assertion', async () => {
+it('actual previous helper accepts one boolean confirmation and derives scoped proof for pristine and early failed releases', async () => {
   const assertion = `${repository}|${base}|${sha}`;
-  expect((await runPrevious({ assertion })).history).toMatchObject({ bootstrap: true, assertion, identity: { repository, site: base, sha, runId: 100, attempt: 1 } });
-  const f = await runPrevious({ assertion, priorDeploy: 'skipped' }); expect(f.history.bootstrap).toBe(true);
+  expect((await runPrevious({ confirmation: true })).history).toMatchObject({ bootstrap: true, assertion, identity: { repository, site: base, sha, runId: 100, attempt: 1 } });
+  const f = await runPrevious({ confirmation: true, priorDeploy: 'skipped' }); expect(f.history.bootstrap).toBe(true);
   expect(f.history.priorAttempts).toBe(1);
   expect(workflowHash(Buffer.from(legacySource))).toBe('b0b6ff33a973346600918f306a09b1fb58e150309c00d677ebbee28a875db7ad');
 });
 it('actual archive discovery retains a pre-deploy archive without mistaking it for publication', async () => {
-  const f = await runPrevious({ assertion: `${repository}|${base}|${sha}`, archive: true });
+  const f = await runPrevious({ confirmation: true, archive: true });
   expect(f.history).toMatchObject({ bootstrap: true, archiveId: 7 });
   expect(await readFile(join(f.cwd, 'prototypes/pwa-validation/previous.zip'), 'utf8')).toBe('archive-fixture');
 });
-it('actual wiring refuses an earlier deployed rerun and malformed scoped assertion', async () => {
-  const assertion = `${repository}|${base}|${sha}`;
-  expect((await runPrevious({ assertion, rerun: true, priorDeploy: 'success', archive: true })).history.bootstrap).toBe(false);
-  expect((await runPrevious({ assertion: `${repository}|https://different.example/|${sha}` })).history.bootstrap).toBe(false);
+it('actual wiring refuses an earlier deployed rerun and obsolete or malformed confirmation strings', async () => {
+  expect((await runPrevious({ confirmation: true, rerun: true, priorDeploy: 'success', archive: true })).history.bootstrap).toBe(false);
+  for (const confirmation of [`${repository}|${base}|${sha}`, 'yes', 'TRUE']) {
+    const f = await runPrevious({ confirmation }); expect(f.history.bootstrap).toBe(false);
+    expect(f.calls).toHaveLength(1);
+  }
 });

@@ -1,6 +1,6 @@
 export interface ReadPage { data: any; hasNext: boolean }
 export interface BootstrapContext {
-  assertion?: string; repository?: string; base?: string; sha?: string; event?: string; ref?: string;
+  confirmation?: boolean; repository?: string; base?: string; sha?: string; event?: string; ref?: string;
   runId: number; attempt: number; source: Uint8Array;
   read(path: string): Promise<ReadPage>;
 }

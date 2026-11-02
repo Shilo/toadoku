@@ -15,18 +15,22 @@ function fixture(runs: any[] = [current], jobs: any[] = [gate(), job()]) {
     if (/^actions\/runs\/\d+\/attempts\/\d+\/jobs\?per_page=100$/.test(path)) return page('jobs', jobs);
     throw Error('Unexpected fixture read: ' + path);
   });
-  const context: BootstrapContext = { assertion: `${repository}|${base}|${sha}`, repository, base, sha, event: 'workflow_dispatch', ref: 'refs/heads/main', runId: 100, attempt: 1, source, read };
+  const context: BootstrapContext = { confirmation: true, repository, base, sha, event: 'workflow_dispatch', ref: 'refs/heads/main', runId: 100, attempt: 1, source, read };
   return { context, read };
 }
-it('requires a scoped manual pristine assertion even when no previous runs exist', async () => {
-  const f = fixture(); f.context.assertion = '';
+it('requires one confirmation and automatically binds the exact repository, configured site and source', async () => {
+  const f = fixture(); f.context.confirmation = false;
   expect(await initialReleaseProof(f.context)).toMatchObject({ bootstrap: false });
   expect(f.read).not.toHaveBeenCalled();
-  f.context.assertion = `${repository}|${base}|${sha}`;
+  f.context.confirmation = true;
   expect(await initialReleaseProof(f.context)).toMatchObject({ bootstrap: true, priorAttempts: 0, assertion: `${repository}|${base}|${sha}`, identity: { repository, site: base, sha, runId: 100, attempt: 1 } });
 });
-it.each(['assertion', 'repository', 'base', 'sha', 'event', 'ref', 'runId', 'attempt'] as const)('refuses a mismatched or malformed %s', async field => {
+it.each(['confirmation', 'repository', 'base', 'sha', 'event', 'ref', 'runId', 'attempt'] as const)('refuses a mismatched or malformed %s', async field => {
   const f = fixture(); (f.context as any)[field] = field === 'runId' || field === 'attempt' ? 0 : 'wrong';
+  expect((await initialReleaseProof(f.context)).bootstrap).toBe(false); expect(f.read).not.toHaveBeenCalled();
+});
+it.each([undefined, false, 'true', 'false', `${repository}|${base}|${sha}`])('does not mistake %s for an explicit boolean confirmation', async confirmation => {
+  const f = fixture(); (f.context as any).confirmation = confirmation;
   expect((await initialReleaseProof(f.context)).bootstrap).toBe(false); expect(f.read).not.toHaveBeenCalled();
 });
 it('recovers an early failure only from complete source-bound skipped deployment evidence', async () => {
@@ -42,6 +46,18 @@ it('still recognizes the previously reviewed single-job named-deployment workflo
     ? { data: { type:'file',path:'.github/workflows/pages.yml',encoding:'base64',content:previousSource.toString('base64'),size:previousSource.length },hasNext:false }
     : read(path);
   expect((await initialReleaseProof(f.context)).bootstrap).toBe(true);
+});
+it('recovers a skipped first deployment from the previously reviewed gated string-input workflow', async () => {
+  const previousSource = readFileSync('tests/pwa/fixtures/pages-gated-string-input.yml');
+  expect(workflowHash(previousSource)).toBe('605485d0dfb6391eca1274f2f61de909b455ae264fc5bac7e251d2da3391914c');
+  const f = fixture([current, prior]), read = f.context.read;
+  f.context.read = async path => path.startsWith('contents/')
+    ? { data: { type:'file',path:'.github/workflows/pages.yml',encoding:'base64',content:previousSource.toString('base64'),size:previousSource.length },hasNext:false }
+    : read(path);
+  expect((await initialReleaseProof(f.context)).bootstrap).toBe(true);
+  f.context.read = async path => path.includes('/jobs?') ? page('jobs', [gate(), job(prior, 'success')])
+    : path.startsWith('contents/') ? { data: { type:'file',path:'.github/workflows/pages.yml',encoding:'base64',content:previousSource.toString('base64'),size:previousSource.length },hasNext:false } : read(path);
+  expect((await initialReleaseProof(f.context)).bootstrap).toBe(false);
 });
 it.each(['success','failure','cancelled','startup_failure'])('permits a never-deployed release skipped by a %s change gate', async outcome => {
   const skipped = { ...job(), conclusion: 'skipped', steps: [] };

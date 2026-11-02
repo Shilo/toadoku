@@ -8,6 +8,8 @@ const workflow = load(readFileSync('.github/workflows/pages.yml','utf8'));
 it('checks every main push, without GitHub truncated path filtering', () => {
   expect(workflow.on.push).toEqual({ branches: ['main'] });
   expect(workflow.on.workflow_dispatch.inputs.initial_release.required).toBe(false);
+  expect(workflow.on.workflow_dispatch.inputs.initial_release.type).toBe('boolean');
+  expect(workflow.on.workflow_dispatch.inputs.initial_release.default).toBe(false);
   expect(workflow.permissions).toEqual({ contents: 'read' });
   expect(workflow.concurrency).toBeUndefined();
 });
@@ -33,6 +35,9 @@ it('pins source and official Node24 action revisions, and guards every expensive
     for (const step of job.steps) if (step.uses) expect(step.uses).toMatch(/^actions\/[\w-]+@[a-f0-9]{40}$/);
   }
   const steps = workflow.jobs.release.steps, current = steps.findIndex((s: any) => s.id === 'current');
+  expect(steps[0].with['fetch-depth']).toBe(0);
+  expect(steps[0].with.filter).toBe('blob:none');
+  expect(workflow.jobs.changes.steps[0].with['fetch-depth']).toBe(1);
   expect(current).toBeGreaterThan(0);
   expect(steps[current].run).toBe('node tools/pwa/release-inputs.mjs current');
   for (const step of steps.slice(current+1)) expect(step.if).toContain("steps.current.outputs.release == 'true'");

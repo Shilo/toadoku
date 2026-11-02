@@ -10,14 +10,22 @@ const roots = new Set([
   '.env', '.env.local', '.env.production', '.env.production.local',
   'vitest.config.ts', 'playwright.config.ts', 'tools/test.mjs',
   '.github/workflows/pages.yml',
+  'tsconfig.json',
+  ...['vite', 'svelte'].flatMap(name => ['js', 'ts', 'mjs', 'mts', 'cjs', 'cts'].map(extension => `${name}.config.${extension}`)),
 ]);
+const directories = ['src', 'public', 'data', 'tools/pwa', 'tools/catalog'];
+export const EXCLUDED = ['src/lib/scene/README.md'];
+// Shared with commit-count versioning. Keep these paths stable: removing historical inputs can lower a version.
+export const SHIPPED = [...roots, ...directories.map(path => `${path}/**`), 'tsconfig.*.json'];
+export const releasePathspecs = () => [
+  ...SHIPPED.map(path => `:(top,glob)${path}`),
+  ...EXCLUDED.map(path => `:(top,exclude,literal)${path}`),
+];
 
 /** Update this policy when production starts reading a new input outside these paths. */
 export function isReleaseInput(file) {
-  if (file === 'src/lib/scene/README.md') return false;
-  return roots.has(file) || /^(?:src|public|data)\//.test(file) ||
-    /^tools\/(?:pwa|catalog)\//.test(file) ||
-    /^(?:vite|svelte)\.config\.[cm]?[jt]s$/.test(file) || /^tsconfig(?:\.[\w.-]+)?\.json$/.test(file);
+  if (EXCLUDED.includes(file)) return false;
+  return roots.has(file) || directories.some(path => file.startsWith(`${path}/`)) || /^tsconfig\.[^/]*\.json$/.test(file);
 }
 
 function git(args, cwd) {
@@ -79,7 +87,8 @@ export function currentDecision(source, latest, cwd = '.') {
 
 export function fetchCurrentDecision(source, cwd = '.') {
   try {
-    git(['fetch', '--no-tags', '--depth=1', '--filter=blob:none', 'origin', '+refs/heads/main:refs/remotes/origin/toadoku-release-main'], cwd);
+    // Release versioning requires the complete graph; --depth=1 would make a full checkout shallow.
+    git(['fetch', '--no-tags', '--filter=blob:none', 'origin', '+refs/heads/main:refs/remotes/origin/toadoku-release-main'], cwd);
     const latest = decode(git(['rev-parse', '--verify', 'refs/remotes/origin/toadoku-release-main^{commit}'], cwd)).trim();
     return currentDecision(source, latest, cwd);
   } catch { throw new Error('Cannot verify current main production inputs; publication refused'); }
