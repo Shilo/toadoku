@@ -10,8 +10,9 @@ import { createActivePlayClock, getValues, reduceAttempt } from '../session/inde
 import type { ActivePlayClock, SessionCommand, SessionResult } from '../session/index.ts';
 import { isComplete } from '../sudoku/index.ts';
 import { AttemptSaveQueue } from './controller.ts';
+import { same } from '../storage/decode.ts';
 
-export const TIME_SAVE_INTERVAL_MS = 5000;
+export const TIME_SAVE_INTERVAL_MS = 10000;
 
 export interface HintComputer { compute(input: HintInput): Promise<HintResult>; cancel(): void }
 export interface GameState {
@@ -55,6 +56,9 @@ export class GameController {
   private allocationAbort?: AbortController;
   private destroyed = false;
   private checkpointTimer?: ReturnType<typeof setTimeout>;
+  private reloadPreparing = false;
+  private reloadSequence = 0;
+  private preferencesPending = 0;
   private readonly writerToken: string;
   constructor(
     readonly repository: GameRepositoryPort,
@@ -86,7 +90,7 @@ export class GameController {
   }
   private syncClock(): void {
     const attempt = this.value.attempt;
-    const readable = !!attempt && this.value.owned && this.view.board && this.view.visible && !this.view.concealed && !this.value.restorePhase;
+    const readable = !!attempt && this.value.owned && this.view.board && this.view.visible && !this.view.concealed && !this.value.restorePhase && !this.reloadPreparing;
     this.value.canStudy = readable;
     this.clock?.setActive(readable && attempt?.status === 'playing');
     this.scheduleCheckpoint();
@@ -381,14 +385,18 @@ export class GameController {
     });
   }
   async preferences(preferences: Preferences): Promise<boolean> {
+    if (this.reloadPreparing || this.destroyed) return false;
     const save = this.value.save;
     if (!save) return false;
-    const result = await this.repository.savePreferences(save.meta.generation, preferences);
-    if (result.kind !== 'committed') { this.problem(result); return false; }
-    if (this.value.save?.meta.generation !== save.meta.generation) {
-      this.value.owned = false; this.syncClock(); await this.initialize(); return false;
-    }
-    this.value.save = { ...this.value.save, preferences: result.value }; this.publish(); return true;
+    this.preferencesPending++;
+    try {
+      const result = await this.repository.savePreferences(save.meta.generation, preferences);
+      if (result.kind !== 'committed') { this.problem(result); return false; }
+      if (this.value.save?.meta.generation !== save.meta.generation) {
+        this.value.owned = false; this.syncClock(); await this.initialize(); return false;
+      }
+      this.value.save = { ...this.value.save, preferences: result.value }; this.publish(); return true;
+    } finally { this.preferencesPending--; }
   }
   /** Read-only check: returning from a concealed pane never silently takes another tab's writer. */
   async checkAuthority(): Promise<boolean> {
@@ -409,6 +417,59 @@ export class GameController {
   async flush(): Promise<StorageResult<Attempt | undefined>> {
     this.checkpoint();
     return await this.queue?.flush() ?? { kind: 'committed', value: undefined };
+  }
+  /** Freeze input and thinking time, then verify acknowledged local state before navigation. */
+  async prepareReload(): Promise<boolean> {
+    const expectedSave = this.value.save;
+    const attempt = this.value.attempt, queueState = this.queue?.state;
+    const cleanUnownedMenu = !!attempt && !this.view.board && !this.value.owned && !!queueState &&
+      !queueState.pending && !queueState.failure && !this.value.conflictedChanges && queueState.committedSeq === attempt.commandSeq;
+    if (this.destroyed || this.value.busy || this.value.hintComputing || this.preferencesPending ||
+        this.repository.durability === 'ephemeral' || !expectedSave || this.value.restorePhase ||
+        this.value.conflictedChanges || this.queue?.state.failure ||
+        attempt && (!this.value.owned && !cleanUnownedMenu || attempt.status === 'pending-completion' || !this.queue)) return false;
+    const request = ++this.reloadSequence;
+    this.reloadPreparing = true; this.value.busy = true; this.syncClock(); this.publish();
+    let accepted = false;
+    try {
+      this.checkpoint(true);
+      const flushed = await this.queue?.flush();
+      if (request !== this.reloadSequence || this.destroyed) return false;
+      if (flushed && flushed.kind !== 'committed') { this.problem(flushed); return false; }
+      // A clean menu has no local attempt promise left to preserve. Another window may
+      // legitimately own or replace its former board; never acquire it just to reload.
+      const expectedAttempt = cleanUnownedMenu ? undefined : this.value.attempt;
+      const readback = await this.repository.readCurrent();
+      if (request !== this.reloadSequence || this.destroyed) return false;
+      if (readback.kind !== 'committed') { this.problem(readback); return false; }
+      const saved = readback.value;
+      const durable = expectedAttempt && saved.attempts.find(attempt => attempt.id === expectedAttempt.id && attempt.role === expectedAttempt.role);
+      const binding = expectedAttempt && saved.roles.find(role => role.role === expectedAttempt.role);
+      if (saved.meta.generation !== expectedSave.meta.generation ||
+          expectedAttempt && (!this.value.owned || !durable || binding?.attemptId !== expectedAttempt.id ||
+            durable.writer.token !== expectedAttempt.writer.token || durable.writer.epoch !== expectedAttempt.writer.epoch)) {
+        this.problem({ kind: 'conflict', reason: 'owner' }); return false;
+      }
+      // Attempt acknowledgements do not return meta. Own writes legitimately advance this
+      // revision beyond lastKnown; exact content/authority checks must use the latest Attempt.
+      if (!Number.isSafeInteger(saved.meta.essentialRevision) || saved.meta.essentialRevision < expectedSave.meta.essentialRevision ||
+          expectedAttempt && !same(durable, expectedAttempt)) {
+        this.problem({ kind: 'conflict', reason: 'revision' }); return false;
+      }
+      // Settled local preferences are already acknowledged. Another window may legitimately
+      // supersede them or change another role/profile; retain that validated current state.
+      this.value.save = saved; this.publish(); accepted = true;
+      return true;
+    } catch {
+      if (request === this.reloadSequence && !this.destroyed) this.problem({ kind: 'unavailable', reason: 'abort' });
+      return false;
+    } finally { if (!accepted && request === this.reloadSequence) this.cancelReload(); }
+  }
+  /** A changed update candidate or cancelled navigation restores the previous view. */
+  cancelReload(): void {
+    if (!this.reloadPreparing) return;
+    this.reloadSequence++; this.reloadPreparing = false; this.value.busy = false;
+    if (!this.destroyed) { this.syncClock(); this.publish(); }
   }
   async exportBackup() {
     const request = ++this.backupSequence;

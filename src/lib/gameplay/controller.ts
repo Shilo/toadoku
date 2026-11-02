@@ -75,7 +75,6 @@ export class AttemptSaveQueue {
       this.publish();
       if (this.pending && !this.running && !this.failure && !this.closed && !this.deferred) this.start();
     });
-    this.publish();
   }
 
   private async pump(): Promise<void> {
@@ -124,7 +123,9 @@ export class AttemptSaveQueue {
 
   async retry(): Promise<StorageResult<Attempt>> {
     if (this.failure?.kind === 'conflict' || this.failure?.kind === 'corrupt' || this.failure?.kind === 'unsupported-future') return this.failure;
+    const failed = !!this.failure;
     this.failure = undefined;
+    if (failed) this.publish();
     return this.flush();
   }
 

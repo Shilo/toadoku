@@ -118,20 +118,23 @@ describe('active-only autosave scheduling', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it('saves idle thinking every five seconds and has no inactive timer', async () => {
+  it('saves idle thinking at the ten-second boundary and has no inactive timer', async () => {
     const h = harness(); await h.reveal();
     try {
-      h.setNow(4999); await vi.advanceTimersByTimeAsync(4999); expect(h.calls.saves).toHaveLength(0);
+      expect(TIME_SAVE_INTERVAL_MS).toBe(10000);
+      h.setNow(TIME_SAVE_INTERVAL_MS - 1); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS - 1); expect(h.calls.saves).toHaveLength(0);
       h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(1);
-      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([5000]);
-      h.setNow(5432); h.game.setView({ visible: false }); await vi.advanceTimersByTimeAsync(0);
-      expect(h.data.attempts[0].elapsedMs).toBe(5432); expect(vi.getTimerCount()).toBe(0);
-      h.setNow(15432); await vi.advanceTimersByTimeAsync(10000); expect(h.calls.saves).toHaveLength(2);
-      h.game.setView({ visible: true }); h.setNow(20432); await vi.advanceTimersByTimeAsync(5000);
-      expect(h.data.attempts[0].elapsedMs).toBe(10432);
-      h.setNow(20567); h.game.setView({ concealed: true }); await vi.advanceTimersByTimeAsync(0);
-      expect(h.data.attempts[0].elapsedMs).toBe(10567); expect(vi.getTimerCount()).toBe(0);
-      h.game.setView({ board: false }); h.setNow(50567); await vi.advanceTimersByTimeAsync(30000);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([TIME_SAVE_INTERVAL_MS]);
+      const hiddenAt = TIME_SAVE_INTERVAL_MS + 432;
+      h.setNow(hiddenAt); h.game.setView({ visible: false }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].elapsedMs).toBe(hiddenAt); expect(vi.getTimerCount()).toBe(0);
+      const resumedAt = hiddenAt + TIME_SAVE_INTERVAL_MS * 2;
+      h.setNow(resumedAt); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS * 2); expect(h.calls.saves).toHaveLength(2);
+      h.game.setView({ visible: true }); h.setNow(resumedAt + TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS);
+      expect(h.data.attempts[0].elapsedMs).toBe(hiddenAt + TIME_SAVE_INTERVAL_MS);
+      h.setNow(resumedAt + TIME_SAVE_INTERVAL_MS + 135); h.game.setView({ concealed: true }); await vi.advanceTimersByTimeAsync(0);
+      expect(h.data.attempts[0].elapsedMs).toBe(hiddenAt + TIME_SAVE_INTERVAL_MS + 135); expect(vi.getTimerCount()).toBe(0);
+      h.game.setView({ board: false }); h.setNow(resumedAt + TIME_SAVE_INTERVAL_MS * 4 + 135); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS * 3);
       expect(h.calls.saves).toHaveLength(4); expect(vi.getTimerCount()).toBe(0);
     } finally { await h.game.dispose(); }
   });
@@ -139,27 +142,28 @@ describe('active-only autosave scheduling', () => {
   it('includes exact time in edits without a redundant nearby periodic save', async () => {
     const h = harness(); await h.reveal();
     try {
-      h.setNow(4900); await vi.advanceTimersByTimeAsync(4900);
+      const editedAt = TIME_SAVE_INTERVAL_MS - 100;
+      h.setNow(editedAt); await vi.advanceTimersByTimeAsync(editedAt);
       h.game.command({ type: 'enter', digit: 2 }); await vi.advanceTimersByTimeAsync(0);
-      expect(h.data.attempts[0].elapsedMs).toBe(4900); expect(h.data.attempts[0].entries[1]).toBe(2);
-      h.setNow(5000); await vi.advanceTimersByTimeAsync(100); expect(h.calls.saves).toHaveLength(1);
-      h.setNow(9899); await vi.advanceTimersByTimeAsync(4899); expect(h.calls.saves).toHaveLength(1);
-      h.setNow(9900); await vi.advanceTimersByTimeAsync(1);
-      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([4900,9900]);
+      expect(h.data.attempts[0].elapsedMs).toBe(editedAt); expect(h.data.attempts[0].entries[1]).toBe(2);
+      h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(100); expect(h.calls.saves).toHaveLength(1);
+      h.setNow(editedAt + TIME_SAVE_INTERVAL_MS - 1); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS - 101); expect(h.calls.saves).toHaveLength(1);
+      h.setNow(editedAt + TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(1);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([editedAt, editedAt + TIME_SAVE_INTERVAL_MS]);
     } finally { await h.game.dispose(); }
   });
 
   it('does not postpone a deadline for read-only checks or noop input', async () => {
     const h = harness(); await h.reveal();
     try {
-      h.setNow(4000); await vi.advanceTimersByTimeAsync(4000); expect(await h.game.checkAuthority()).toBe(true);
+      h.setNow(TIME_SAVE_INTERVAL_MS - 1000); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS - 1000); expect(await h.game.checkAuthority()).toBe(true);
       expect(h.game.command({ type: 'select', cell: 1 })).toEqual({ kind: 'noop' });
       expect(h.game.command({ type: 'enter', digit: 0 })).toEqual({ kind: 'rejected', reason: 'digit' });
-      h.setNow(5000); await vi.advanceTimersByTimeAsync(1000);
-      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([5000]);
-      h.setNow(9000); await vi.advanceTimersByTimeAsync(4000); expect(await h.game.checkAuthority()).toBe(true);
-      h.setNow(10000); await vi.advanceTimersByTimeAsync(1000);
-      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([5000,10000]);
+      h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(1000);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([TIME_SAVE_INTERVAL_MS]);
+      h.setNow(TIME_SAVE_INTERVAL_MS * 2 - 1000); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS - 1000); expect(await h.game.checkAuthority()).toBe(true);
+      h.setNow(TIME_SAVE_INTERVAL_MS * 2); await vi.advanceTimersByTimeAsync(1000);
+      expect(h.calls.saves.map(a => a.elapsedMs)).toEqual([TIME_SAVE_INTERVAL_MS, TIME_SAVE_INTERVAL_MS * 2]);
     } finally { await h.game.dispose(); }
   });
 
@@ -177,12 +181,12 @@ describe('active-only autosave scheduling', () => {
   it('stops periodic work on failure and includes the failed interval on retry', async () => {
     const h = harness(); await h.reveal();
     try {
-      h.saveIssue({ kind: 'unavailable', reason: 'quota' }); h.setNow(5000); await vi.advanceTimersByTimeAsync(5000);
+      h.saveIssue({ kind: 'unavailable', reason: 'quota' }); h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS);
       expect(h.game.state.saveState).toBe('unsaved'); expect(vi.getTimerCount()).toBe(0);
-      h.setNow(15000); await vi.advanceTimersByTimeAsync(10000); expect(h.calls.saves).toHaveLength(1);
+      h.setNow(TIME_SAVE_INTERVAL_MS * 3); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS * 2); expect(h.calls.saves).toHaveLength(1);
       h.game.command({ type: 'enter', digit: 2 }); expect(h.calls.saves).toHaveLength(1);
-      h.setNow(16123); h.saveIssue(); expect(await h.game.retry()).toBe(true);
-      expect(h.data.attempts[0].elapsedMs).toBe(16123); expect(h.data.attempts[0].entries[1]).toBe(2);
+      h.setNow(TIME_SAVE_INTERVAL_MS * 3 + 1123); h.saveIssue(); expect(await h.game.retry()).toBe(true);
+      expect(h.data.attempts[0].elapsedMs).toBe(TIME_SAVE_INTERVAL_MS * 3 + 1123); expect(h.data.attempts[0].entries[1]).toBe(2);
       expect(vi.getTimerCount()).toBe(1);
     } finally { await h.game.dispose(); }
   });
@@ -191,8 +195,8 @@ describe('active-only autosave scheduling', () => {
     const h = harness(); await h.reveal();
     try {
       const before = structuredClone(h.data); h.saveIssue({ kind: 'conflict', reason: 'owner' });
-      h.setNow(4999); await vi.advanceTimersByTimeAsync(4999); expect(h.game.state.owned).toBe(true);
-      h.setNow(5000); await vi.advanceTimersByTimeAsync(1);
+      h.setNow(TIME_SAVE_INTERVAL_MS - 1); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS - 1); expect(h.game.state.owned).toBe(true);
+      h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(1);
       expect(h.game.state.owned).toBe(false); expect(h.game.state.canStudy).toBe(false);
       expect(h.data).toEqual(before); expect(vi.getTimerCount()).toBe(0);
     } finally { await h.game.dispose(); }
@@ -203,10 +207,10 @@ describe('active-only autosave scheduling', () => {
     try {
       const resumed = h.game.resume('quick'); await until(() => h.calls.acquisitions.length === 2);
       expect(vi.getTimerCount()).toBe(0);
-      h.setNow(5000); await vi.advanceTimersByTimeAsync(5000); expect(h.calls.saves).toHaveLength(0);
+      h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS); expect(h.calls.saves).toHaveLength(0);
       gate.resolve(); expect(await resumed).toBe(true); await vi.advanceTimersByTimeAsync(0);
-      expect(h.data.attempts[0].elapsedMs).toBe(5000); expect(vi.getTimerCount()).toBe(1);
-      h.setNow(10000); await vi.advanceTimersByTimeAsync(5000); expect(h.data.attempts[0].elapsedMs).toBe(10000);
+      expect(h.data.attempts[0].elapsedMs).toBe(TIME_SAVE_INTERVAL_MS); expect(vi.getTimerCount()).toBe(1);
+      h.setNow(TIME_SAVE_INTERVAL_MS * 2); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS); expect(h.data.attempts[0].elapsedMs).toBe(TIME_SAVE_INTERVAL_MS * 2);
     } finally { gate.resolve(); await h.game.dispose(); }
   });
 
@@ -222,6 +226,206 @@ describe('active-only autosave scheduling', () => {
       h.game.command({ type: 'select', cell: 2 }); h.game.setView({ board: false }); await vi.advanceTimersByTimeAsync(0);
       expect(h.data.attempts[0].selection).toBe(2); expect(vi.getTimerCount()).toBe(0);
     } finally { await h.game.dispose(); }
+  });
+
+  it('publishes newer elapsed time and commands while an older save remains pending', async () => {
+    const h = harness(); await h.reveal(); const gate = deferred<void>(); h.waits.save(gate.promise);
+    const observed: { elapsedMs: number; selection: number; digit: number; pending: boolean }[] = [];
+    const unsubscribe = h.game.subscribe(state => {
+      if (state.attempt) observed.push({ elapsedMs: state.attempt.elapsedMs, selection: state.attempt.selection,
+        digit: state.attempt.entries[1], pending: state.saveState === 'pending' });
+    });
+    try {
+      h.setNow(TIME_SAVE_INTERVAL_MS); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS);
+      expect(h.calls.saves).toHaveLength(1);
+      expect(observed.at(-1)).toMatchObject({ elapsedMs: TIME_SAVE_INTERVAL_MS, pending: true });
+      h.setNow(TIME_SAVE_INTERVAL_MS * 2); await vi.advanceTimersByTimeAsync(TIME_SAVE_INTERVAL_MS);
+      expect(h.calls.saves).toHaveLength(1);
+      expect(observed.at(-1)).toMatchObject({ elapsedMs: TIME_SAVE_INTERVAL_MS * 2, pending: true });
+      h.game.command({ type: 'enter', digit: 2 });
+      expect(observed.at(-1)).toMatchObject({ digit: 2, pending: true });
+      h.game.command({ type: 'select', cell: 2 });
+      expect(observed.at(-1)).toMatchObject({ selection: 2, digit: 2, pending: true });
+      const beforeAcknowledgement = observed.length;
+      gate.resolve(); await h.game.flush();
+      expect(observed.slice(beforeAcknowledgement).every(value => value.elapsedMs === TIME_SAVE_INTERVAL_MS * 2 && value.selection === 2 && value.digit === 2)).toBe(true);
+      expect(observed.at(-1)?.pending).toBe(false);
+      expect(h.data.attempts[0]).toMatchObject({ elapsedMs: TIME_SAVE_INTERVAL_MS * 2, selection: 2 });
+    } finally { gate.resolve(); unsubscribe(); await h.game.dispose(); }
+  });
+});
+
+describe('verified reload preparation', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('freezes synchronously, drains held edits and verifies their full acknowledged readback', async () => {
+    const h = harness(); await h.reveal(); const gate = deferred<void>(); h.waits.save(gate.promise);
+    try {
+      h.setNow(123); h.game.command({ type: 'enter', digit: 2 });
+      await until(() => h.calls.saves.length === 1);
+      h.setNow(456); const prepared = h.game.prepareReload();
+      expect(h.game.state.busy).toBe(true); expect(h.game.state.canStudy).toBe(false); expect(vi.getTimerCount()).toBe(0);
+      expect(h.game.command({ type: 'enter', digit: 3 })).toEqual({ kind: 'rejected', reason: 'frozen' });
+      expect(await h.game.preferences({ ...preferences, language: 'de' })).toBe(false);
+      h.setNow(5000); gate.resolve(); expect(await prepared).toBe(true);
+      expect(h.data.attempts[0]).toMatchObject({ elapsedMs: 456, entries: h.game.state.attempt?.entries });
+      expect(h.game.state.busy).toBe(true); expect(h.game.state.canStudy).toBe(false);
+      h.setNow(6000); h.game.cancelReload();
+      expect(h.game.state.busy).toBe(false); expect(h.game.state.canStudy).toBe(true);
+      h.setNow(6100); h.game.checkpoint(); await h.game.flush();
+      expect(h.data.attempts[0].elapsedMs).toBe(556);
+    } finally { gate.resolve(); h.game.cancelReload(); await h.game.dispose(); }
+  });
+
+  it('accepts newer meta revisions from acknowledged writes without comparing stale saved attempts', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.setNow(321); h.game.command({ type: 'enter', digit: 2 }); await h.game.flush();
+      expect(h.game.state.save?.attempts[0].entries[1]).not.toBe(2);
+      h.data.meta.essentialRevision += 4;
+      expect(await h.game.prepareReload()).toBe(true);
+      expect(h.game.state.save?.meta.essentialRevision).toBe(4);
+    } finally { h.game.cancelReload(); await h.game.dispose(); }
+  });
+
+  it.each(['entries', 'notes', 'elapsed', 'revision', 'sequence', 'role-binding', 'meta'] as const)(
+    'refuses mismatched %s readback and retains local recovery', async mismatch => {
+      const h = harness(); await h.reveal();
+      try {
+        const readback = structuredClone(h.data);
+        if (mismatch === 'entries') readback.attempts[0].entries[1] = 7;
+        if (mismatch === 'notes') readback.attempts[0].notes[1] = 1;
+        if (mismatch === 'elapsed') readback.attempts[0].elapsedMs++;
+        if (mismatch === 'revision') readback.attempts[0].revision++;
+        if (mismatch === 'sequence') readback.attempts[0].commandSeq++;
+        if (mismatch === 'role-binding') readback.roles[0].attemptId = 'other-attempt';
+        if (mismatch === 'meta') readback.meta.essentialRevision = -1;
+        h.reads.push(Promise.resolve(committed(readback)));
+        expect(await h.game.prepareReload()).toBe(false);
+        expect(h.game.state.busy).toBe(false);
+        expect(JSON.parse(h.game.exportRecovery().text).localAttempt.id).toBe(h.data.attempts[0].id);
+        expect(vi.getTimerCount()).toBe(0);
+      } finally { h.game.cancelReload(); await h.game.dispose(); }
+    });
+
+  it('retains legitimate changes to preferences, profile and another role metadata from a second window', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      const readback = structuredClone(h.data);
+      readback.preferences.language = 'de'; readback.profile.wallet += 10;
+      readback.roles[1].revision++;
+      readback.meta.essentialRevision++;
+      h.reads.push(Promise.resolve(committed(readback)));
+      expect(await h.game.prepareReload()).toBe(true);
+      expect(h.game.state.save).toEqual(readback);
+      expect(h.game.state.owned).toBe(true);
+    } finally { h.game.cancelReload(); await h.game.dispose(); }
+  });
+
+  it('rejects lost ownership without acquiring a writer or resuming the board', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      const readback = structuredClone(h.data); readback.attempts[0].writer.epoch++;
+      h.reads.push(Promise.resolve(committed(readback)));
+      expect(await h.game.prepareReload()).toBe(false);
+      expect(h.game.state.owned).toBe(false); expect(h.game.state.canStudy).toBe(false);
+      expect(h.calls.acquisitions).toHaveLength(1);
+    } finally { await h.game.dispose(); }
+  });
+
+  it('preserves pause when cancelled and permits a menu-only verified reload', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.setNow(234); h.game.setView({ concealed: true }); await h.game.flush();
+      expect(await h.game.prepareReload()).toBe(true); h.game.cancelReload();
+      expect(h.game.state.canStudy).toBe(false); expect(vi.getTimerCount()).toBe(0);
+    } finally { await h.game.dispose(); }
+    const menu = harness();
+    try {
+      expect(await menu.game.initialize()).toBe(true);
+      expect(await menu.game.prepareReload()).toBe(true);
+      expect(menu.calls.acquisitions).toHaveLength(0);
+    } finally { menu.game.cancelReload(); await menu.game.dispose(); }
+  });
+
+  it('allows a clean unowned menu to adopt the newer owner without acquiring or overwriting its old RAM board', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.setNow(123); h.game.command({ type: 'enter', digit: 2 }); await h.game.flush();
+      h.game.setView({ board: false }); await h.game.flush();
+      const old = structuredClone(h.game.state.attempt);
+      h.data.attempts[0].writer.epoch++; h.data.attempts[0].entries[1] = 3;
+      expect(await h.game.checkAuthority()).toBe(false);
+      expect(await h.game.prepareReload()).toBe(true);
+      expect(h.game.state.save?.attempts[0].entries[1]).toBe(3);
+      expect(h.game.state.attempt).toEqual(old);
+      expect(h.calls.acquisitions).toHaveLength(1);
+      h.game.cancelReload(); expect(h.game.state.canStudy).toBe(false); expect(vi.getTimerCount()).toBe(0);
+    } finally { h.game.cancelReload(); await h.game.dispose(); }
+  });
+
+  it('refuses an unowned visible board and a dirty ownership-conflict menu', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.data.attempts[0].writer.epoch++;
+      expect(await h.game.checkAuthority()).toBe(false);
+      expect(await h.game.prepareReload()).toBe(false);
+    } finally { await h.game.dispose(); }
+    const dirty = harness(); await dirty.reveal();
+    try {
+      dirty.saveIssue({ kind: 'conflict', reason: 'owner' }); dirty.game.command({ type: 'enter', digit: 2 });
+      await until(() => dirty.game.state.conflictedChanges === true);
+      dirty.game.setView({ board: false }); expect(await dirty.game.prepareReload()).toBe(false);
+      expect(JSON.parse(dirty.game.exportRecovery().text).localAttempt.entries[1]).toBe(2);
+    } finally { await dirty.game.dispose(); }
+  });
+
+  it('refuses an earlier preferences write and blocks later preferences until cancellation', async () => {
+    const h = harness(); await h.reveal(); const gate = deferred<void>(); h.waits.preferences(gate.promise);
+    try {
+      const changed = h.game.preferences({ ...preferences, language: 'de' });
+      expect(await h.game.prepareReload()).toBe(false); expect(h.game.state.busy).toBe(false);
+      gate.resolve(); expect(await changed).toBe(true);
+      expect(await h.game.prepareReload()).toBe(true);
+      expect(await h.game.preferences({ ...preferences, language: 'es' })).toBe(false);
+      expect(h.data.preferences.language).toBe('de');
+      h.game.cancelReload(); expect(await h.game.preferences({ ...preferences, language: 'es' })).toBe(true);
+    } finally { gate.resolve(); h.game.cancelReload(); await h.game.dispose(); }
+  });
+
+  it('refuses busy, computing, ephemeral and pending-completion states', async () => {
+    const h = harness(); await h.reveal(); const gate = deferred<void>(); h.waits.acquire(gate.promise);
+    try {
+      const resumed = h.game.resume('quick'); await until(() => h.calls.acquisitions.length === 2);
+      expect(await h.game.prepareReload()).toBe(false); gate.resolve(); expect(await resumed).toBe(true);
+      Object.assign(h.game.repository, { durability: 'ephemeral' }); expect(await h.game.prepareReload()).toBe(false);
+      Object.assign(h.game.repository, { durability: 'durable' });
+      const computation = deferred<HintResult>(); h.computations.push(computation.promise);
+      const hint = h.game.requestHint('logical'); expect(await h.game.prepareReload()).toBe(false);
+      computation.resolve({ kind: 'unavailable', reason: 'invalid' }); await hint;
+    } finally { gate.resolve(); await h.game.dispose(); }
+    const initial = oneBlankAttempt(), pending = harness(initial), finalSave = deferred<void>(); await pending.reveal();
+    try {
+      pending.waits.save(finalSave.promise);
+      pending.game.command({ type: 'enter', digit: Number(initial.definition.solution[0]) });
+      expect(pending.game.state.attempt?.status).toBe('pending-completion');
+      expect(await pending.game.prepareReload()).toBe(false);
+      finalSave.resolve(); await until(() => pending.game.state.completionEvent === 1);
+    } finally { finalSave.resolve(); await pending.game.dispose(); }
+  });
+
+  it('unfreezes after a failed read and invalidates an earlier cancelled preparation', async () => {
+    const h = harness(); await h.reveal();
+    try {
+      h.reads.push(Promise.resolve({ kind: 'unavailable', reason: 'closed' })); expect(await h.game.prepareReload()).toBe(false);
+      expect(h.game.state.busy).toBe(false); expect(h.game.state.canStudy).toBe(true);
+      const gate = deferred<void>(); h.waits.save(gate.promise); h.setNow(987);
+      const prepared = h.game.prepareReload(); await until(() => h.calls.saves.length === 1);
+      h.game.cancelReload(); h.game.command({ type: 'enter', digit: 2 }); gate.resolve();
+      expect(await prepared).toBe(false); await h.game.flush();
+      expect(h.game.state.busy).toBe(false); expect(h.data.attempts[0].entries[1]).toBe(2);
+    } finally { h.game.cancelReload(); await h.game.dispose(); }
   });
 });
 

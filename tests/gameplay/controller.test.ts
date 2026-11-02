@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Attempt, StorageResult } from '../../src/lib/gameplay/contracts.ts';
+import type { SaveState } from '../../src/lib/gameplay/controller.ts';
 import { AttemptSaveQueue, SELECTION_SAVE_DELAY_MS } from '../../src/lib/gameplay/controller.ts';
 
 // Queue tests use typed inert definitions; catalog trust is exercised in repository tests.
@@ -22,6 +23,47 @@ const deferred = <T>() => {
 const saved = (input: Attempt, revision: number): StorageResult<Attempt> => ({ kind: 'committed', value: { ...input, revision } });
 
 describe('bounded attempt persistence coordinator', () => {
+  it('reports pending, acknowledgement and completion without a duplicate start notification', async () => {
+    const initial = attempt(), gate = deferred<StorageResult<Attempt>>(), states: SaveState[] = [];
+    const queue = new AttemptSaveQueue(initial, { save: () => gate.promise }, () => {}, state => states.push(state));
+    queue.enqueue({ ...initial, commandSeq: 1 });
+    expect(states).toEqual([{ committedSeq: 0, pending: true }]);
+    await Promise.resolve();
+    expect(states).toEqual([{ committedSeq: 0, pending: true }]);
+    gate.resolve(saved({ ...initial, commandSeq: 1 }, 1));
+    await queue.flush();
+    expect(states).toEqual([
+      { committedSeq: 0, pending: true },
+      { committedSeq: 1, pending: true },
+      { committedSeq: 1, pending: false },
+    ]);
+    queue.close();
+  });
+
+  it('publishes a save failure immediately and preserves explicit retry transitions', async () => {
+    const initial = attempt(), states: SaveState[] = [], retryGate = deferred<void>();
+    const failure = { kind: 'unavailable', reason: 'quota' } as const;
+    let fail = true;
+    const queue = new AttemptSaveQueue(initial, { async save(snapshot) {
+      if (fail) return failure;
+      await retryGate.promise;
+      return saved(snapshot, 1);
+    } }, () => {}, state => states.push(state));
+    queue.enqueue({ ...initial, commandSeq: 1 });
+    expect(await queue.flush()).toEqual(failure);
+    expect(states).toContainEqual({ committedSeq: 0, pending: true, failure });
+    fail = false;
+    const retried = queue.retry();
+    expect(states.at(-1)).toEqual({ committedSeq: 0, pending: true });
+    await Promise.resolve();
+    expect(queue.state).toEqual({ committedSeq: 0, pending: true });
+    retryGate.resolve();
+    expect((await retried).kind).toBe('committed');
+    expect(states.at(-2)).toEqual({ committedSeq: 1, pending: true });
+    expect(states.at(-1)).toEqual({ committedSeq: 1, pending: false });
+    queue.close();
+  });
+
   it('coalesces new edits while preserving in-flight acknowledgement order', async () => {
     const initial = attempt(), gate = deferred<StorageResult<Attempt>>();
     const sent: Attempt[] = [], acknowledgements: number[] = [];
