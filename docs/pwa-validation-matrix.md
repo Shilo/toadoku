@@ -50,12 +50,14 @@ Required by the [implementation handoff](pwa-implementation-handoff.md). These a
 
 ## D. Frequent update safety
 
+The user's automatic-update revision supersedes historical default-waiting acceptance. Verify compatible worker activation separately from a page reload: the worker may activate after verified staging while older pages keep running against their retained dependencies. Each actual reload still needs the local save/readback barrier. No other window's acknowledgement or timeout authorizes a forced reload.
+
 | ID | Required evidence |
 | --- | --- |
 | U01 | A stays open while B deploys. Measure discovery at startup/focus/online and chosen visible polling cadence against the time B is actually served. Coalesce triggers, back off failures and keep hidden work bounded. No universal deadline claim for offline/suspended/deferred clients. |
 | U02 | Rapid A to B to C while B is downloading/waiting, repeated checks, new tabs and skipped releases. Version identity/readiness reflect verified assets; no duplicate prompt storm, stuck spinner or old-release activation loop. |
 | U03 | Request update with unacknowledged entries/time, delayed or quota-failed save, owner conflict, RAM-only play, pending disclosure/completion/allocation or restore validation/staging/activation. Block or explicitly resolve; reload only after a successful current-state barrier. No lost local changes, duplicate reward or mid-restore generation switch. |
-| U04 | Two tabs or tab plus installed window: one accepts while the other is dirty, saving, paused, frozen/BFCache or unresponsive. A single acknowledgement/timeout cannot authorize unsafe global activation. Verify actual selected helper/controllerchange behavior, including the audited ignored updateSW(false) parameter. |
+| U04 | Two tabs or tab plus installed window: one accepts while the other is dirty, saving, paused, frozen/BFCache or unresponsive. A single acknowledgement/timeout cannot authorize a global reload or deleting another page's required assets. Verify actual selected helper/controllerchange behavior, including the audited ignored updateSW(false) parameter. |
 | U05 | Old A opens an unused lazy feature after B/C publication, while offline and online; old and new tabs coexist where supported. Required old assets remain available or activation is safely deferred. No deleted chunks, wrong MIME or HTML fallback for JS/CSS/worker/font/data. |
 | U06 | B install fails from one missing/corrupt/oversized resource, network interruption, quota failure, malformed worker or partial deployment. A remains usable; failed/new partial caches are not advertised ready; retry recovers without clearing saves. |
 | U07 | Cached HTML A, network HTML B, worker C and independently stale release/catalog metadata. Prove coherent routing/integrity and recoverable failure, including initial uncontrolled visit. Service-worker freshness checks must not accidentally hit their own cache-first release endpoint. |

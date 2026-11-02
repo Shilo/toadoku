@@ -10,9 +10,9 @@ See [gameplay acceptance](docs/gameplay-acceptance.md), [theme authoring](docs/t
 
 Ordinary online play needs no setup. Both three-dot menus contain Settings and a Version link to the source repository. Installation is optional: open More → Settings → Install and offline, and use the browser's installation option when available.
 
-Before a trip, choose Prepare offline play for 3 upcoming puzzles per difficulty. More offline options contains the longer-trip target of 25 per difficulty and storage cleanup. Packs do not refill automatically; prepare again online when needed. Cancel keeps completed puzzles. After first setup, save and close every Toadoku window, then reopen once before going offline. Keep a backup of important progress because browsers can remove local data. See the [practical offline checklist](docs/pwa-system.md#player-workflow) for readiness, downloads and partial preparation.
+Before a trip, choose Prepare offline play for 3 upcoming puzzles per difficulty. More offline options contains the longer-trip target of 25 per difficulty and storage cleanup. Packs do not refill automatically; prepare again online when needed. Cancel keeps completed puzzles. Once app files and puzzle counts are verified, offline play is ready. Keep a backup of important progress because browsers can remove local data. See the [practical offline checklist](docs/pwa-system.md#player-workflow) for readiness, downloads and partial preparation.
 
-Updates download without interrupting games. When an update is ready, finish saving, close every Toadoku window and reopen. No automatic game reload occurs.
+Updates download automatically. The idle main menu updates safely by itself. During a game, More shows Update; choose it when convenient to save, check your progress and return to the updated main menu. Other windows can stay open. A page already open in 0.0.46 needs one ordinary refresh to gain this new behavior.
 
 Maintainers: [how the PWA works](docs/pwa-system.md), [make or replace installation icons](docs/pwa-icons.md), [integration and review](docs/pwa-integration.md). [PWA acceptance](docs/pwa-acceptance.md) records the remaining physical-device and hosting checks.
 
