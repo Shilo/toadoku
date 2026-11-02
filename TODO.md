@@ -15,7 +15,8 @@
 - [x] Prepare the [isolated-worktree implementation handoff](docs/pwa-implementation-handoff.md), [primary-source/reference-app research](docs/research/pwa-readiness-audit.md) and [validation matrix](docs/pwa-validation-matrix.md), including a copy-ready receiving-agent prompt.
 - [x] Implement PWA in the separate `codex/pwa-offline` managed worktree with challenged plans, bounded verified reserves, in-app installation and safe frequent-release discovery/activation. Preserve Pond and the corpus; no automatic theme integration.
 - [x] Prove available-environment cold offline dependency coverage, allocation authority, durable readiness and rapid multi-build/multi-tab updates. Deliver committed branch and [actual measurements/acceptance](docs/pwa-acceptance.md) for review.
-- [ ] Complete external Android hardware and authorized HTTPS Pages installation/rollout/rollback/account-capacity checks; reconcile and retest the exact later theme-integrated build before publication.
+- [x] Review autosave on an actual USB Pixel 8 Pro, including native Chrome close/reopen, background/screen-off and an installed standalone test app. Record [measurements and lifecycle limits](docs/pwa-acceptance.md#lifecycle-and-compact-autosave-review-2026-11-02); this does not complete every Android/PWA gate.
+- [ ] Complete remaining physical Motorola/energy/thermals, Android in-app prompt/airplane-mode and actual hosted multi-release rollback/account-capacity checks. Published desktop hosting/update evidence and Pixel autosave checks are recorded separately.
 
 ## Production UI handoff and next phase
 
