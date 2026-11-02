@@ -34,6 +34,16 @@ it('retains a release that was current for sixty days and expires actually super
     expect(await readFile(join(f.root, file.path), 'utf8')).toBe(old.toString());
   } finally { await new Promise<void>(done => server.close(() => done())); }
 });
+it.each([{ updateProtocol: 2 }, { storageProtocol: 2 }, { updateProtocol: '2' }, { updateProtocol: null }, { storageProtocol: -1 }])('refuses unsafe or malformed hosted protocols before asset fetch: %j', async protocols => {
+  const f = await fixture(), requests: string[] = [];
+  const server = createServer((request, response) => { requests.push(request.url ?? ''); response.writeHead(200, { 'Content-Type': 'application/json' }); response.end(JSON.stringify({ protocol: 1, ...protocols, buildId: 'a'.repeat(64), files: [] })); });
+  await new Promise<void>(done => server.listen(0, '127.0.0.1', done));
+  const address = server.address(); if (!address || typeof address === 'string') throw new Error('fixture address');
+  try {
+    await expect(execute(process.execPath, ['tools/pwa/retain.mjs', f.root, f.previous, f.retained, `http://127.0.0.1:${address.port}/toadoku/`])).rejects.toThrow(/(?:Unsafe worker rollback refused|Invalid hosted compatibility protocol)/);
+    expect(requests).toEqual(['/toadoku/release.json']);
+  } finally { await new Promise<void>(done => server.close(() => done())); }
+});
 it('fails publication instead of deleting an in-support predecessor at the byte cap', async () => {
   const f = await fixture();
   await writeFile(join(f.previous, 'retention.json'), JSON.stringify({ protocol: 1, files: [{ path: 'assets/large.js', bytes: 256 * 1024 * 1024, sha256: 'a'.repeat(64), lastCurrent: Date.now() }] }));

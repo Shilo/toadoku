@@ -42,6 +42,10 @@ if (hostedBase) {
     } catch (cause) { throw new Error('Target is not proven empty; migrate its assets explicitly before publication (docs/pwa-system.md)', { cause }); }
   } else {
     const current = JSON.parse(body.toString('utf8'));
+    for (const metadata of [current, release]) for (const key of ['updateProtocol', 'storageProtocol']) {
+      if (metadata[key] !== undefined && (!Number.isSafeInteger(metadata[key]) || metadata[key] < 1)) throw new Error('Invalid hosted compatibility protocol');
+    }
+    if ((current.updateProtocol ?? 1) > (release.updateProtocol ?? 1) || (current.storageProtocol ?? 1) > (release.storageProtocol ?? 1)) throw new Error('Unsafe worker rollback refused. Rebuild the older application with the current compatible update router.');
     if (current.protocol !== 1 || !/^[a-f0-9]{64}$/.test(current.buildId) || !Array.isArray(current.files) || current.files.length > 256) throw new Error('Invalid currently hosted release');
     let fetched = 0;
     for (const file of current.files.filter(file => file.path?.startsWith('assets/'))) {

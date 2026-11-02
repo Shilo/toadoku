@@ -15,7 +15,7 @@ export type SessionResult =
   | { kind: 'rejected'; reason: 'cell' | 'digit' | 'clue' | 'filled-notes' | 'frozen' | 'time' }
   | { kind: 'integrity'; reason: 'state' | 'history' | 'overflow' };
 
-export function getValues(attempt: Attempt): number[] {
+export function getValues(attempt: Pick<Attempt, 'definition' | 'entries'>): number[] {
   const givens = decodeGrid(attempt.definition.givens);
   const entries = decodeBoard(attempt.entries);
   if (!givens.ok || !entries.ok) throw new RangeError('Invalid session values');

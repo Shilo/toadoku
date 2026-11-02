@@ -4,6 +4,8 @@ export type PwaPhase = 'unavailable' | 'idle' | 'checking' | 'downloading' | 'wa
 export interface PwaStatus {
   phase: PwaPhase; runningBuild: string; availableBuild?: string; lastCheck?: number;
   shellReady: boolean; shellBytes?: number; problem?: string;
+  /** Only a verified, compatible active router can offer a page-local reload. */
+  canReload?: boolean; capacityDeferred?: boolean;
 }
 export interface PwaClient {
   readonly status: PwaStatus;
@@ -13,9 +15,11 @@ export interface PwaClient {
   check(): Promise<void>;
   ensureShell(): Promise<boolean>;
   inspectShell(): Promise<void>;
+  confirmUpdate(buildId: string): Promise<boolean>;
   dispose(): void;
 }
-interface ShellReply { protocol: 1; cacheName: string; ready: boolean; buildId?: string; bytes?: number }
+interface ShellReply { protocol: 1 | 2; cacheName: string; ready: boolean; buildId?: string; bytes?: number;
+  updateProtocol?: number; activeBuild?: string; activeReady?: boolean; pinned?: boolean; capacityDeferred?: boolean }
 export function createPwaClient(base: URL): PwaClient {
   const supported = 'serviceWorker' in navigator && window.isSecureContext && !import.meta.env.DEV;
   const build = document.querySelector<HTMLMetaElement>('meta[name="toadoku-build"]')?.content ?? 'development';
@@ -23,7 +27,9 @@ export function createPwaClient(base: URL): PwaClient {
   let status: PwaStatus = { phase: supported ? 'idle' : 'unavailable', runningBuild: build, shellReady: false };
   let registration: ServiceWorkerRegistration | undefined, starting: Promise<void> | undefined, checking: Promise<void> | undefined, refreshing: Promise<void> | undefined;
   let setupRequested = false;
+  let refreshAgain = false;
   let disposed = false, failures = 0, nextCheck = 0, lastAttempt = 0;
+  const documentId = crypto.randomUUID(), compatible = new WeakSet<ServiceWorker>();
   const listeners = new Set<(status: PwaStatus) => void>(), cleanups: Array<() => void> = [];
   const backoffKey = `toadoku:pwa:checks:1:${base.pathname}`;
   try { const text = localStorage.getItem(backoffKey) ?? 'null'; const saved = text.length <= 256 ? restoredBackoff(JSON.parse(text), Date.now()) : undefined; if (saved) { failures = saved.failures; nextCheck = saved.nextCheck; } } catch { /* Optional check throttling is best effort. */ }
@@ -41,17 +47,26 @@ export function createPwaClient(base: URL): PwaClient {
   function ours(reg: ServiceWorkerRegistration): boolean {
     return reg.scope === base.href && [reg.active, reg.waiting, reg.installing].filter(Boolean).every(worker => worker!.scriptURL === script);
   }
-  function verify(worker: ServiceWorker, repair = false): Promise<ShellReply> {
+  async function verify(worker: ServiceWorker, repair = false): Promise<ShellReply> {
+    const known = compatible.has(worker);
+    const reply = await request(worker, known ? 2 : 1, repair);
+    if (!known && reply.updateProtocol === 2) {
+      compatible.add(worker);
+      return request(worker, 2, repair);
+    }
+    return reply;
+  }
+  function request(worker: ServiceWorker, protocol: 1 | 2, repair = false): Promise<ShellReply> {
     return new Promise((resolve, reject) => {
       const channel = new MessageChannel();
       const timer = setTimeout(() => { channel.port1.close(); reject(new Error('Offline verification timed out')); }, repair ? 180_000 : 15_000);
-      channel.port1.onmessage = event => { clearTimeout(timer); channel.port1.close(); const reply = event.data as ShellReply; if (reply?.protocol === 1 && typeof reply.ready === 'boolean') resolve(reply); else reject(new Error('Unsupported worker protocol')); };
-      worker.postMessage({ type: repair ? 'TOADOKU_SHELL_REPAIR' : 'TOADOKU_SHELL_VERIFY', protocol: 1, buildId: build }, [channel.port2]);
+      channel.port1.onmessage = event => { clearTimeout(timer); channel.port1.close(); const reply = event.data as ShellReply; if (reply?.protocol === protocol && typeof reply.ready === 'boolean') resolve(reply); else reject(new Error('Unsupported worker protocol')); };
+      worker.postMessage({ type: repair ? 'TOADOKU_SHELL_REPAIR' : protocol === 2 ? 'TOADOKU_PAGE_CONNECT' : 'TOADOKU_SHELL_VERIFY', protocol, buildId: build, ...(protocol === 2 ? { documentId } : {}) }, [channel.port2]);
     });
   }
   function refresh(): Promise<void> {
-    if (refreshing) return refreshing;
-    refreshing = refreshNow().finally(() => { refreshing = undefined; });
+    if (refreshing) { refreshAgain = true; return refreshing; }
+    refreshing = (async () => { do { refreshAgain = false; await refreshNow(); } while (refreshAgain && !disposed); })().finally(() => { refreshing = undefined; });
     return refreshing;
   }
   async function refreshNow(): Promise<void> {
@@ -60,12 +75,18 @@ export function createPwaClient(base: URL): PwaClient {
     let activeReply: ShellReply | undefined, waitingReply: ShellReply | undefined, verificationProblem: string | undefined;
     try { if (active) activeReply = await verify(active); if (waiting) waitingReply = await verify(waiting); }
     catch (error) { verificationProblem = String(error); }
-    if (disposed || active !== registration.active || waiting !== registration.waiting) return;
+    if (disposed) return;
+    if (active !== registration.active || waiting !== registration.waiting) { refreshAgain = true; return; }
     const shellReady = activeReply?.ready === true && activeReply.buildId === build;
-    const newerActive = activeReply?.ready === true && activeReply.buildId !== build;
+    const activeBuild = activeReply?.protocol === 2 ? activeReply.activeBuild : activeReply?.buildId;
+    const activeReady = /^[a-f0-9]{64}$/.test(activeBuild ?? '') && (activeReply?.protocol === 2 ? activeReply.activeReady === true : activeReply?.ready === true);
+    const newerActive = activeReady && activeBuild !== build;
+    if (activeReply?.capacityDeferred) resetFailures();
     if (waiting && waitingReply?.ready !== true) verificationProblem ??= 'Downloaded application is incomplete. Check again while online.';
-    if (active && activeReply?.ready !== true) verificationProblem ??= 'Offline application is incomplete. Prepare it again while online.';
-    publish({ shellReady, shellBytes: shellReady ? activeReply?.bytes : undefined, availableBuild: waitingReply?.ready ? waitingReply.buildId : newerActive ? activeReply?.buildId : undefined,
+    if (active && !shellReady && !newerActive) verificationProblem ??= 'Offline application is incomplete. Prepare it again while online.';
+    publish({ shellReady, shellBytes: shellReady ? activeReply?.bytes : undefined, availableBuild: newerActive ? activeBuild : waitingReply?.ready ? waitingReply.buildId : undefined,
+      canReload: activeReply?.protocol === 2 && newerActive && !installing && !waiting,
+      capacityDeferred: activeReply?.capacityDeferred === true,
       problem: verificationProblem ?? status.problem,
       phase: verificationProblem ? 'failed' : installing ? 'downloading' : waiting || newerActive ? 'waiting' : shellReady ? 'ready' : status.phase === 'failed' ? 'failed' : 'idle' });
   }
@@ -78,7 +99,10 @@ export function createPwaClient(base: URL): PwaClient {
       if (!worker) return;
       publish({ phase: 'downloading', problem: undefined });
       const changed = () => {
-        if (worker.state === 'redundant' && !reg.waiting) failure('Application download failed. Existing game is unchanged.');
+        if (worker.state === 'redundant' && !reg.waiting) void refresh().then(() => {
+          if (status.capacityDeferred) resetFailures();
+          else failure('Application download failed. Existing game is unchanged.');
+        });
         else if (worker.state === 'installed' || worker.state === 'activated') void verify(worker).then(reply => { if (reply.ready) resetFailures(); return refresh(); }).catch(error => failure(error));
       };
       worker.addEventListener('statechange', changed); cleanups.push(() => worker.removeEventListener('statechange', changed)); changed();
@@ -90,7 +114,7 @@ export function createPwaClient(base: URL): PwaClient {
     if (lastAttempt > Date.now()) lastAttempt = 0;
     if (!manual && !automaticCheckAllowed({ failures, nextCheck, lastAttempt, now: Date.now(), hidden: document.hidden, online: navigator.onLine })) return;
     if (manual) resetFailures();
-    lastAttempt = Date.now(); publish({ phase: registration.waiting ? 'waiting' : 'checking', lastCheck: lastAttempt, problem: undefined });
+    lastAttempt = Date.now(); publish({ ...(manual ? { phase: registration.waiting ? 'waiting' as const : 'checking' as const } : {}), lastCheck: lastAttempt, problem: undefined });
     const failuresBefore = failures;
     checking = (async () => { try { await registration!.update(); if (!registration!.installing && failures === failuresBefore) resetFailures(); await refresh(); } catch (error) { failure(error); } finally { checking = undefined; } })();
     return checking;
@@ -145,11 +169,21 @@ export function createPwaClient(base: URL): PwaClient {
     };
     window.addEventListener('focus', checkVisible); window.addEventListener('online', checkVisible); document.addEventListener('visibilitychange', checkVisible);
     const timer = setInterval(checkVisible, 5000);
+    const controlled = () => { void refresh(); };
+    const shown = () => { void refresh(); checkVisible(); };
+    const hidden = (event: PageTransitionEvent) => {
+      const worker = navigator.serviceWorker.controller;
+      if (worker && compatible.has(worker)) worker.postMessage({ type: 'TOADOKU_PAGE_RELEASE', protocol: 2, buildId: build, documentId, persisted: event.persisted });
+    };
+    navigator.serviceWorker.addEventListener?.('controllerchange', controlled);
+    window.addEventListener('pageshow', shown); window.addEventListener('pagehide', hidden);
+    cleanups.push(() => { navigator.serviceWorker.removeEventListener?.('controllerchange', controlled); window.removeEventListener('pageshow', shown); window.removeEventListener('pagehide', hidden); });
     cleanups.push(() => { clearInterval(timer); window.removeEventListener('focus', checkVisible); window.removeEventListener('online', checkVisible); document.removeEventListener('visibilitychange', checkVisible); });
   }
   return {
     get status() { return status; }, subscribe(listener) { listeners.add(listener); listener(status); return () => listeners.delete(listener); },
     connectExisting, start, check: async () => { if (!registration) await start(true); else await requestCheck(true); }, ensureShell, inspectShell: refresh,
+    confirmUpdate: async expected => { await refreshing; await refresh(); return status.canReload === true && status.availableBuild === expected; },
     dispose() { disposed = true; cleanups.splice(0).forEach(clean => clean()); listeners.clear(); },
   };
 }

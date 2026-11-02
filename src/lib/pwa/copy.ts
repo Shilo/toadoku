@@ -1,10 +1,11 @@
 import type { Locale } from '../i18n';
 
 const en = {
+  updateSpace: 'An update is waiting for space. Your game is safe. It will retry automatically.',
   appFilesExtra: "App files download separately.",
   offlineOptions: 'More offline options', smallTarget: 'Save 3 upcoming puzzles for each difficulty.',
 
-  reopenOffline: 'Finish saving or export recovery, then close every Toadoku window and reopen once before going offline.',
+  reopenOffline: 'Offline play is ready once app files and puzzles are verified.',
   installHelp: 'Install from browser menu', downloadHelp: 'How downloads work', versionHelp: "Update options",
   title: 'Install and offline', install: 'Installation', installButton: 'Install app',
 
@@ -68,13 +69,13 @@ const en = {
 
   version: 'Version', update: 'App updates', build: 'Running build', lastCheck: 'Last checked', never: 'Not checked yet', check: 'Check for updates',
 
-  idle: 'No new update reported.', downloading: 'Downloading app files.', updateReady: 'Update downloaded. Wait until progress is saved in every window. Then close every Toadoku tab and installed-app window and reopen.',
+  idle: 'No new update reported.', downloading: 'Downloading app files.', updateReady: 'Update ready. Open More to update.',
 
   current: 'This build is ready for offline launch.', unavailable: 'Offline app installation is unavailable here.',
 
   updateFailed: 'Update check or download failed. Your current app and saved progress are kept.',
 
-  updateHelp: 'Visible online windows check about every minute. Failed checks back off. Games are never automatically reloaded.',
+  updateHelp: 'Updates download automatically. The main menu updates when safe. During a game, open More when Update appears.',
 
   loading: 'Loading offline controls', progress: 'Verified records', bytes: 'Puzzle file bytes received',
 
@@ -83,10 +84,11 @@ const en = {
 type Copy = { [K in keyof typeof en]: string };
 
 const de: Copy = {
+  updateSpace: 'Ein Update wartet auf Speicherplatz. Dein Spiel ist sicher. Es wird automatisch erneut versucht.',
   appFilesExtra: "App-Dateien werden separat geladen.",
   offlineOptions: 'Weitere Offline-Optionen', smallTarget: 'Speichere die nächsten 3 Rätsel pro Schwierigkeit.',
 
-  reopenOffline:'Speichere zuerst oder exportiere die Notfalldatei. Schließe dann alle Toadoku-Fenster und öffne die App einmal neu, bevor du offline gehst.',
+  reopenOffline:'Offline ist bereit, sobald App-Dateien und Rätsel geprüft sind.',
   installHelp:'Über das Browsermenü installieren', downloadHelp:'So funktionieren Downloads', versionHelp: "Update-Optionen",
   title:'Installation und offline', install:'Installation', installButton:'App installieren',
 
@@ -146,23 +148,24 @@ const de: Copy = {
 
   version:'Version', update:'App-Updates', build:'Aktueller Build', lastCheck:'Zuletzt geprüft', never:'Noch nicht geprüft', check:'Nach Updates suchen',
 
-  idle:'Kein neues Update gemeldet.', downloading:'App-Dateien werden geladen.', updateReady:'Update geladen. Warte, bis der Fortschritt in jedem Fenster gespeichert ist. Schließe dann alle Toadoku-Tabs und App-Fenster und öffne die App erneut.',
+  idle:'Kein neues Update gemeldet.', downloading:'App-Dateien werden geladen.', updateReady:'Update bereit. Öffne Mehr zum Aktualisieren.',
 
   current:'Dieser Build ist für den Offline-Start bereit.', unavailable:'Offline-Installation hier nicht verfügbar.',
 
   updateFailed:'Update-Prüfung oder Download fehlgeschlagen. App und Spielstände bleiben erhalten.',
 
-  updateHelp:'Sichtbare Online-Fenster prüfen etwa jede Minute. Bei Fehlern seltener. Spiele werden nie automatisch neu geladen.',
+  updateHelp:'Updates laden automatisch. Das Hauptmenü aktualisiert sich, sobald es sicher ist. Im Spiel öffne Mehr, wenn Update erscheint.',
 
   loading:'Offline-Steuerung wird geladen', progress:'Geprüfte Einträge', bytes:'Empfangene Rätseldatei-Bytes',
 
 };
 
 const es: Copy = {
+  updateSpace: 'Una actualización espera espacio. Tu partida está a salvo. Se reintentará automáticamente.',
   appFilesExtra: "Los archivos de la aplicación se descargan aparte.",
   offlineOptions: 'Más opciones sin conexión', smallTarget: 'Guarda los próximos 3 sudokus por dificultad.',
 
-  reopenOffline:'Antes de quedarte sin conexión, termina de guardar o exporta la recuperación. Cierra todas las ventanas de Toadoku y vuelve a abrir una vez.',
+  reopenOffline:'El juego sin conexión está listo cuando los archivos y sudokus estén verificados.',
   installHelp:'Instalar desde el menú del navegador', downloadHelp:'Cómo funcionan las descargas', versionHelp: "Opciones de actualización",
   title:'Instalación y sin conexión', install:'Instalación', installButton:'Instalar aplicación',
 
@@ -221,13 +224,13 @@ const es: Copy = {
 
   version:'Versión', update:'Actualizaciones', build:'Versión en ejecución', lastCheck:'Última comprobación', never:'Sin comprobar aún', check:'Buscar actualizaciones',
 
-  idle:'No se informa de nuevas actualizaciones.', downloading:'Descargando archivos de la aplicación.', updateReady:'Actualización descargada. Espera a que cada ventana guarde el progreso. Después cierra todas las pestañas y ventanas de Toadoku y vuelve a abrir.',
+  idle:'No se informa de nuevas actualizaciones.', downloading:'Descargando archivos de la aplicación.', updateReady:'Actualización lista. Abre Más para actualizar.',
 
   current:'Esta versión está lista para abrir sin conexión.', unavailable:'La instalación sin conexión no está disponible aquí.',
 
   updateFailed:'La comprobación o descarga falló. Se conservan la aplicación actual y las partidas.',
 
-  updateHelp:'Las ventanas visibles con conexión comprueban cada minuto aproximadamente. Los fallos espacian los intentos. Las partidas nunca se recargan automáticamente.',
+  updateHelp:'Las actualizaciones se descargan automáticamente. El menú principal se actualiza cuando es seguro. Durante una partida, abre Más cuando aparezca Actualizar.',
 
   loading:'Cargando controles sin conexión', progress:'Registros verificados', bytes:'Bytes de sudokus recibidos',
 

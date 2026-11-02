@@ -11,6 +11,7 @@ const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const inventory={};
 for(const name of await readdir(resolve(root,'assets')))inventory[name]=hash(await readFile(resolve(root,'assets',name)));
 const host=await staticHost({root,port:5197,shaping:{latencyMs:150,bytesPerSecond:200000}}), samples=[];
+host.state.catalogRoot=resolve('public');
 try {
 for(let sample=0;sample<repetitions;sample++){
   const profile=resolve(dir,'profile-'+sample+'-'+Date.now());

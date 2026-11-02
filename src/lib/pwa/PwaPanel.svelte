@@ -76,12 +76,6 @@
     try { retained = await navigator.storage?.persist?.() ?? false; } catch { retained = false; }
   }
   const count = (pool: keyof NonNullable<OfflineState['counts']>) => reserve?.counts[pool] ?? 0;
-  const needsReopen = $derived(!!delivery?.shellReady && navigator.serviceWorker?.controller?.scriptURL !== new URL('worker.js', new URL(import.meta.env.BASE_URL, location.href)).href);
-  const updateText = $derived(!delivery ? c.loading : delivery.phase === 'waiting' ? c.updateReady :
-    delivery.phase === 'downloading' ? c.downloading : delivery.phase === 'checking' ? c.checking :
-    delivery.phase === 'failed' ? c.updateFailed : delivery.phase === 'unavailable' ? c.unavailable :
-    delivery.shellReady ? c.current : c.idle);
-  const updateNeedsAttention = $derived(!!delivery && ['waiting', 'downloading', 'failed', 'unavailable'].includes(delivery.phase));
 </script>
 
 <svelte:document onvisibilitychange={() => { if (document.hidden) cancel(); }} />
@@ -98,7 +92,6 @@
   <section aria-labelledby="pwa-offline-title">
     <h3 id="pwa-offline-title">{c.offline}</h3>
     <p role="status">{delivery?.shellReady ? c.shellReady : c.shellMissing}</p>
-    {#if needsReopen}<p>{c.reopenOffline}</p>{/if}
     {#if reserve?.savedGame && !checking && reserve.phase !== 'failed'}<p>{c.saved}</p>{/if}
     {#if reserve}
       <h4>{c.coverage}</h4>
@@ -106,6 +99,7 @@
       <p>{c.smallTarget}</p><p>{c.appFilesExtra}</p>
       {#if small}<p>{c.estimate}: {formatBytes(small.bytes, locale)}</p>{/if}
       <button class="primary" disabled={working || checking || !client || delivery?.phase === 'unavailable'} onclick={() => prepare('default')}>{c.prepare}</button>
+      {#if delivery?.phase === 'unavailable'}<p>{c.unavailable}</p>{/if}
       {#if working}
         <p role="status">{preparingShell ? c.waiting : c.preparing}</p>
         {#if !preparingShell}<progress value={reserve.completed} max={Math.max(1,reserve.total)} aria-label={c.progress}></progress><p>{reserve.completed} / {reserve.total} · {c.bytes}: {formatBytes(reserve.downloadedBytes,locale)}</p>{/if}
@@ -125,10 +119,8 @@
     {#if failed || reserve?.phase === 'failed'}<p role="alert">{c.error}</p>{/if}
   </section>
   <section aria-label={c.update}>
-    {#if updateNeedsAttention}<h3>{c.update}</h3><p role="status">{updateText}</p>{/if}
-    <details><summary>{c.versionHelp}</summary><p class="app-version">{c.version} {__APP_VERSION__} · {__APP_COMMIT__}</p>{#if !updateNeedsAttention}<p role="status">{updateText}</p>{/if}<p>{c.updateHelp}</p>
-    {#if delivery?.phase !== 'failed'}<button class="secondary" disabled={!client || delivery?.phase === 'checking' || delivery?.phase === 'unavailable'} onclick={() => client?.check()}>{c.check}</button>{/if}</details>
-    {#if delivery?.phase === 'failed'}<button class="secondary" onclick={() => client?.check()}>{c.check}</button>{/if}
+    <p>{c.updateHelp}</p>
+    {#if delivery?.capacityDeferred}<p role="status">{c.updateSpace}</p>{/if}
   </section>
 </div>
 

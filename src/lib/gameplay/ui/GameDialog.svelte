@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
   import PwaPanel from '../../pwa/PwaPanel.svelte';
   import { pwaCopy } from '../../pwa/copy';
+  import { updateCopy } from '../../pwa/update-copy';
   import X from '@lucide/svelte/icons/x';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import ArrowRight from '@lucide/svelte/icons/arrow-right';
@@ -27,6 +28,7 @@
   import type { CloseReason, DialogView, GameDialogProps } from './types';
   import type { SessionCommand } from '../../session';
   let { view, inGame = true, locale, pwa, install, offline, offlineUnavailable, puzzleProblem, attempt, replayAttempt, profile, preferences, preferencesAvailable = true, themeError = false, activeThemeId, automaticThemeInfo, onThemeRetry, receipt, continueBand, hint, hintProblem, busy = false, closingBlocked = false, saveState = 'saved', restorePreview, restoreError = false, exportError = false, recoveryProblem, recoveryBusy = false, anchor,
+    updateReady = false, updateProblem = false, onUpdate,
     onCommand, onNavigate, onClose, onPreference, onHint, onContinue, onReplay, onRestart, onReplace, onExport, onRecovery, onResumeSaved, onRestore, onRestoreInput, onRetry }: GameDialogProps = $props();
   const c = $derived(uiCopy[locale]);
   const themeText = $derived(themeCopy[locale]);
@@ -142,6 +144,13 @@
   <a class="tool-row version-link" href="https://github.com/Shilo/toadoku" target="_blank" rel="noopener noreferrer" aria-label={`${c.version} ${__APP_VERSION__}: ${c.versionSource}`}><ExternalLink size={20} aria-hidden="true" /><span>{c.version} {__APP_VERSION__}</span></a>
 {/snippet}
 
+{#snippet updateItem()}
+  {#if updateReady}
+    <button class="tool-row" disabled={busy} onclick={onUpdate}><Download size={20} /><span>{updateCopy[locale].action}</span></button>
+    <p class="quiet">{updateProblem ? updateCopy[locale].blocked : updateCopy[locale].save}</p>
+  {/if}
+{/snippet}
+
 <dialog class={['game-dialog', view === 'more' ? 'popover' : 'sheet', { 'menu-popover': view === 'more' && !inGame }]} style={popoverStyle} lang={locale} aria-labelledby="game-dialog-title"
   {@attach mountDialog} onkeydown={keyboard} onclick={outside} oncancel={event => { event.preventDefault(); event.stopPropagation(); if (!closingBlocked) void onClose('dismiss'); }}>
   <header>
@@ -154,6 +163,7 @@
 
   {#if view === 'more' && !inGame}
     <div class="menu-options">
+      {@render updateItem()}
       <button class="tool-row" disabled={busy} onclick={() => navigate('settings')}><Settings size={20} /><span>{c.settings}</span></button>
       <hr />
       {@render versionItem()}
@@ -172,6 +182,7 @@
         <button class="tool-row" disabled={busy || !attempt} onclick={() => navigate('notes')}><Expand size={20} /><span>{c.largerCell}</span></button>
       </section>
       <section aria-labelledby="menu-heading"><h3 id="menu-heading">{c.menu}</h3>
+        {@render updateItem()}
         {#if attempt?.status !== 'completed'}<button class="tool-row" disabled={busy || frozen} onclick={() => navigate('pause')}><Pause size={20} /><span>{c.pause}</span></button>{/if}
         <button class="tool-row" disabled={busy} onclick={() => navigate('settings')}><Settings size={20} /><span>{c.settings}</span></button>
         <button class="tool-row" disabled={busy} onclick={() => onClose('menu')}><House size={20} /><span>{c.mainMenu}</span></button>

@@ -16,6 +16,47 @@ beforeEach(() => {
 });
 afterEach(() => { clients.splice(0).forEach(value => value.dispose()); vi.useRealTimers(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 describe('app-owned PWA bridge', () => {
+  it('negotiates compatible activation, pins this document and revalidates rapid replacements', async () => {
+    let activeBuild = 'b'.repeat(64);
+    const messages: Array<{ type: string; protocol: number; buildId?: string; documentId?: string; persisted?: boolean }> = [];
+    const worker = Object.assign(new EventTarget(), { state: 'activated', scriptURL: new URL('worker.js', base).href,
+      postMessage(message: typeof messages[number], ports?: MessagePort[]) {
+        messages.push(message);
+        if (!ports?.length) return;
+        ports[0].postMessage(message.protocol === 1 ? { protocol: 1, ready: true, buildId: activeBuild, updateProtocol: 2 } :
+          { protocol: 2, ready: true, pinned: true, buildId: build, activeBuild, activeReady: true, bytes: 123 }); ports[0].close();
+      } });
+    const sw = Object.assign(new EventTarget(), { register, getRegistration, controller: worker });
+    Object.assign(navigator, { serviceWorker: sw });
+    getRegistration.mockResolvedValue(Object.assign(new EventTarget(), { scope: base.href, active: worker, waiting: null, installing: null, update: vi.fn().mockResolvedValue(undefined) }));
+    const pwa = client(); await pwa.start();
+    expect(pwa.status).toMatchObject({ shellReady: true, canReload: true, availableBuild: activeBuild });
+    expect(messages.map(message => message.type)).toEqual(['TOADOKU_SHELL_VERIFY', 'TOADOKU_PAGE_CONNECT']);
+    const token = messages[1].documentId;
+    expect(token).toMatch(/^[a-f0-9-]{36}$/);
+    expect(await pwa.confirmUpdate(activeBuild)).toBe(true);
+    const previous = activeBuild; activeBuild = 'c'.repeat(64);
+    expect(await pwa.confirmUpdate(previous)).toBe(false);
+    expect(pwa.status.availableBuild).toBe(activeBuild);
+    window.dispatchEvent(Object.assign(new Event('pagehide'), { persisted: true }));
+    expect(messages.at(-1)).toMatchObject({ type: 'TOADOKU_PAGE_RELEASE', protocol: 2, documentId: token, persisted: true });
+    window.dispatchEvent(Object.assign(new Event('pagehide'), { persisted: false }));
+    expect(messages.at(-1)).toMatchObject({ persisted: false, documentId: token });
+    activeBuild = build; sw.dispatchEvent(new Event('controllerchange'));
+    await vi.waitFor(() => expect(pwa.status).toMatchObject({ canReload: false, shellReady: true }));
+  });
+
+  it('withholds reload permission if the candidate closure is not verified', async () => {
+    const worker = Object.assign(new EventTarget(), { state: 'activated', scriptURL: new URL('worker.js', base).href,
+      postMessage(message: { protocol: number }, ports: MessagePort[]) {
+        ports[0].postMessage(message.protocol === 1 ? { protocol: 1, ready: true, buildId: build, updateProtocol: 2 } :
+          { protocol: 2, ready: true, pinned: true, buildId: build, activeBuild: 'b'.repeat(64), activeReady: false }); ports[0].close();
+      } });
+    getRegistration.mockResolvedValue(Object.assign(new EventTarget(), { scope: base.href, active: worker, waiting: null, installing: null, update: vi.fn().mockResolvedValue(undefined) }));
+    const pwa = client(); await pwa.start();
+    expect(pwa.status.canReload).toBe(false); expect(await pwa.confirmUpdate('b'.repeat(64))).toBe(false);
+  });
+
   it('preserves failure throttling across new documents and allows explicit preparation retry', async () => {
     register.mockRejectedValue(new Error('offline'));
     await client().start(); expect(register).toHaveBeenCalledTimes(1);

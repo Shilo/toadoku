@@ -5,7 +5,7 @@ import { gzipSync } from 'node:zlib';
 
 /** Strict static production host; optional aggregate shaping includes worker fetches. */
 export async function staticHost({root,port=5197,base='/toadoku/',shaping}) {
-  const state={root:resolve(root),requests:[],fault:undefined,offline:false,fixtures:{}};
+  const state={root:resolve(root),requests:[],fault:undefined,offline:false,fixtures:{},catalogRoot:undefined};
   const sending=[];let tokens=0,last=performance.now();
   const pump=shaping?setInterval(()=>{
     const now=performance.now();tokens=Math.min(8192,tokens+(now-last)*shaping.bytesPerSecond/1000);last=now;
@@ -39,8 +39,10 @@ export async function staticHost({root,port=5197,base='/toadoku/',shaping}) {
     const fixture=state.fixtures[pathname];if(fixture){const body=Buffer.from(fixture.body);entry.logicalBytes=body.length;end(200,body,{'Content-Type':fixture.mime});return;}
     if(pathname===base.slice(0,-1)){end(301,Buffer.alloc(0),{Location:base+url.search});return;}
     if(!pathname.startsWith(base)){end(404);return;}
-    const path=resolve(state.root,pathname.slice(base.length)||'index.html');
-    if(!path.startsWith(state.root+sep)){end(403);return;}
+    const relative=pathname.slice(base.length)||'index.html';
+    const selectedRoot=state.catalogRoot&&relative.startsWith('catalog/')?resolve(state.catalogRoot):state.root;
+    const path=resolve(selectedRoot,relative);
+    if(!path.startsWith(selectedRoot+sep)){end(403);return;}
     try{
       let bytes=await readFile(path);entry.logicalBytes=bytes.length;const fault=state.fault?.(pathname,bytes);
       if(fault?.wait)await fault.wait;

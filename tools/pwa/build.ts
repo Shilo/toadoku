@@ -13,6 +13,8 @@ export function assertCachedShellBudget(resourceBytes: number, metadataBytes: nu
 }
 export const digest = (bytes: Uint8Array | string) => createHash('sha256').update(bytes).digest('hex');
 export const integrity = (bytes: Uint8Array) => `sha256-${createHash('sha256').update(bytes).digest('base64')}`;
+/** Metadata must not change under an existing immutable release/cache identity. */
+export const releaseBuildId = (app: { version: string; commit: string }, content: unknown) => digest(JSON.stringify({ app, content }));
 export async function files(root: string, prefix = ''): Promise<string[]> {
   const entries = await readdir(join(root, prefix), { withFileTypes: true });
   const nested = await Promise.all(entries.map(entry => entry.isDirectory() ? files(root, `${prefix}${entry.name}/`) : [`${prefix}${entry.name}`]));
@@ -51,12 +53,13 @@ export function pwaRelease(app: { version: string; commit: string }): Plugin {
       if (!shell.includes('index.html') || !shell.some(path => path.includes('hint.worker')) || !shell.some(path => path.includes('backup.worker')) || !shell.some(path => path.includes('raw-recovery.worker'))) throw new Error('Incomplete offline worker closure');
       // Bind worker behavior as well as emitted bytes. The meta insertion is excluded to avoid a hash cycle.
       const identity = await Promise.all(shell.map(async path => [path, digest(await readFile(join(output, path)))]));
-      const buildId = digest(JSON.stringify({ protocol: 1, themePacks, files: identity, workerInputs: await Promise.all(['src/lib/pwa/worker.ts', 'src/lib/pwa/policy.ts', 'vite.config.ts', 'tools/pwa/build.ts', 'tools/pwa/theme-packs.ts', 'package-lock.json'].map(async path => [path, digest(await readFile(path))])), marker: process.env.TOADOKU_RELEASE_MARKER ?? '' }));
+      const buildId = releaseBuildId(app, { protocol: 1, themePacks, files: identity, workerInputs: await Promise.all(['src/lib/pwa/worker.ts', 'src/lib/pwa/worker-compat.ts', 'src/lib/pwa/worker-leases.ts', 'src/lib/pwa/policy.ts', 'vite.config.ts', 'tools/pwa/build.ts', 'tools/pwa/theme-packs.ts', 'package-lock.json'].map(async path => [path, digest(await readFile(path))])), marker: process.env.TOADOKU_RELEASE_MARKER ?? '' });
       const index = (await readFile(join(output, 'index.html'), 'utf8')).replace('</head>', `<meta name="toadoku-build" content="${buildId}" /></head>`);
       await writeFile(join(output, 'index.html'), index);
       const inventory = await Promise.all(shell.map(async path => { const bytes = await readFile(join(output, path)); if (bytes.length > MAX_RESOURCE_BYTES) throw new Error(`Oversized shell resource: ${path}`); return { path, bytes: bytes.length, sha256: digest(bytes), integrity: integrity(bytes), mime: mime(path) }; }));
       const bytes = inventory.reduce((sum, file) => sum + file.bytes, 0);
-      const metadata = JSON.stringify({ protocol: 1, version: app.version, commit: app.commit, buildId, bytes, themePacks, files: inventory });
+      const metadata = JSON.stringify({ protocol: 1, updateProtocol: 2, storageProtocol: 1, version: app.version, commit: app.commit, buildId, bytes, themePacks, files: inventory });
+      if (Buffer.byteLength(metadata) > 128 * 1024) throw new Error('Offline inventory exceeds 128 KiB');
       assertCachedShellBudget(bytes, Buffer.byteLength(metadata));
       await writeFile(join(output, 'release.json'), metadata);
     } },

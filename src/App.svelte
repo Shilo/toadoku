@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
-  import { createPwaClient, type PwaClient } from './lib/pwa/client';
+  import { onMount, tick, untrack } from 'svelte';
+  import { createPwaClient, type PwaClient, type PwaStatus } from './lib/pwa/client';
+  import { updateCopy as updateMessages } from './lib/pwa/update-copy';
+  import { createUpdateGuard, createVisibilityGuard } from './lib/gameplay/app-guards';
   import { createInstallSupport, type InstallSupport } from './lib/pwa/install';
   import type { OfflineSupport } from './lib/offline/reserve';
   import Ellipsis from '@lucide/svelte/icons/ellipsis';
@@ -40,12 +42,21 @@
   let controller = $state.raw<GameController>();
   let pwa = $state.raw<PwaClient>(), install = $state.raw<InstallSupport>(), offline = $state.raw<OfflineSupport>();
   let offlineUnavailable = $state(false);
+  let delivery = $state.raw<PwaStatus>(), updateBusy = $state(false), updateProblem = $state(false);
+  let updateCancelable = $state(false), updateNavigating = $state(false), authorityAllowed = $state(true);
+  const updateGuard = createUpdateGuard(value => updateBusy = value);
+  const visibilityGuard = createVisibilityGuard(() => controller, () => document.hidden || disposed,
+    value => authorityAllowed = value);
+  const updateCopy = $derived(updateMessages[locale]);
+  const updateReady = $derived(delivery?.canReload === true && !!delivery.availableBuild);
+  const automaticAttempts = new Set<string>();
+  let lastAnnouncedUpdate: string | undefined;
+  let automaticWake = $state(0), automaticTimer: ReturnType<typeof setTimeout> | undefined;
   let offlinePromise: Promise<void> | undefined, offlineSequence = 0;
   let shellTimer: ReturnType<typeof setTimeout> | undefined, shellStarted = false;
   let gameState = $state.raw<GameState>({ owned: false, canStudy: false, busy: false, hintComputing: false, saveState: 'saved', completionEvent: 0 });
   let booting = $state(true), bootError = $state(false), actionBusy = $state(false), backupBusy = $state(false), historyClosing = $state(false);
   let puzzleLoadFailed = $state(false), startSequence = 0;
-  let checkingAuthority = $state(false);
   let announcement = $state(''), pendingStart = $state.raw<StartRequest>();
   let quickContinue = $state.raw<{ attemptId: string; generation: string; band: Band }>();
   let saveFailed = $state(false);
@@ -103,18 +114,25 @@
       width: layout.landscape ? layout.menuPanel.width : layout.width - menuMoreSize - 4 } : layout.menuPanel);
   const inGame = $derived(screen === 'board');
   const selected = $derived(gameState.attempt?.selection ?? 0);
-  const values = $derived(gameState.attempt ? getValues(gameState.attempt) : []);
+  // A time checkpoint or storage acknowledgement must not recompute 81 cells.
+  const boardDefinition = $derived(gameState.attempt?.definition);
+  const boardEntries = $derived(gameState.attempt?.entries);
+  const boardNotes = $derived(gameState.attempt?.notes);
+  const boardStatus = $derived(gameState.attempt?.status);
+  const notesMode = $derived(gameState.attempt?.notesMode ?? false);
+  const values = $derived(boardDefinition && boardEntries ? getValues({ definition: boardDefinition, entries: boardEntries }) : []);
+  const noteDigits = $derived(boardNotes?.map(mask => Array.from({length:9}, (_, i) => i + 1).filter(digit => mask & (1 << (digit - 1)))) ?? []);
   const conflicts = $derived(new Set(values.length ? findConflicts(values).flatMap(conflict => [...conflict.cells]) : []));
   const titleFloat = $derived(floatOffset(701, time, 'identity')), artFloat = $derived(floatOffset(702, time, 'identity'));
   const titleNameSize = $derived((layout.menuTitle.height - 19 * (appliedTheme?.tokens.typography.uiLineHeight ?? 1.15) - 4)
     / (appliedTheme?.tokens.typography.titleLineHeight ?? 1.05));
-  const sceneBlocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || gameState.busy);
-  const blocked = $derived(sceneBlocked || historyClosing || checkingAuthority || dialogLoading && route === 'more');
-  const closingBlocked = $derived(booting || actionBusy || checkingAuthority || gameState.busy && gameState.restorePhase !== 'staging' || historyClosing);
-  const studyPaused = $derived(!!gameState.restorePhase || overlay?.panel === 'pause');
+  const sceneBlocked = $derived(booting || actionBusy || backupBusy || recoveryBusy || updateBusy || gameState.busy);
+  const blocked = $derived(sceneBlocked || historyClosing || dialogLoading && route === 'more');
+  const closingBlocked = $derived(booting || actionBusy || updateBusy || gameState.busy && gameState.restorePhase !== 'staging' || historyClosing);
+  const studyPaused = $derived(updateBusy || !!gameState.restorePhase || overlay?.panel === 'pause');
   // Native modal dialogs make the scene inert. Only explicit pause/restore
   // obscures study; readable settings and tools keep active thinking time.
-  const boardVisible = $derived(!!gameState.attempt && gameState.owned);
+  const boardVisible = $derived(!!gameState.attempt && gameState.owned && authorityAllowed);
   const saveState = $derived(bootError ? 'unavailable' : gameState.problem?.startsWith('conflict') ? 'conflict' : gameState.saveState === 'pending' ? 'saving' : gameState.saveState);
   const hintProblem = $derived.by(() => {
     if (!gameState.problem?.startsWith('hint-unavailable:')) return undefined;
@@ -125,7 +143,58 @@
   const continueBand = $derived(gameState.attempt?.role === 'quick' && gameState.attempt.status === 'completed' &&
     quickContinue?.attemptId === gameState.attempt.id && quickContinue.generation === gameState.attempt.generation ? quickContinue.band : undefined);
 
-  $effect(() => { controller?.setView({ board: inGame, concealed: studyPaused, visible: documentVisible }); });
+  $effect(() => pwa?.subscribe(value => delivery = value));
+  $effect(() => {
+    updateCancelable = false;
+    if (updateBusy && !updateNavigating) { const timer = setTimeout(() => updateCancelable = true, 1000); return () => clearTimeout(timer); }
+  });
+  $effect(() => {
+    if (updateReady && delivery?.availableBuild !== lastAnnouncedUpdate) {
+      lastAnnouncedUpdate = delivery?.availableBuild; announcement = updateCopy.notice;
+    }
+  });
+  $effect(() => {
+    automaticWake;
+    const candidate = delivery?.availableBuild;
+    if (updateReady && candidate && route === 'menu' && !overlay && !blocked && !bootError && documentVisible &&
+        controller && !automaticAttempts.has(candidate)) {
+      untrack(() => { void applyUpdate(true); });
+    }
+  });
+  async function applyUpdate(automatic = false) {
+    const current = controller, candidate = delivery?.availableBuild, revision = routeRevision;
+    if (!current || !candidate || !updateReady || blocked || gameState.hintComputing) return;
+    // A burst of developer releases must not create an automatic reload loop.
+    if (automatic) {
+      try {
+        const last = Number(sessionStorage.getItem('toadoku:last-auto-update') ?? 0), elapsed = Date.now() - last;
+        if (elapsed >= 0 && elapsed < 60_000) {
+          clearTimeout(automaticTimer);
+          automaticTimer = setTimeout(() => { automaticWake++; }, 60_000 - elapsed);
+          return;
+        }
+      }
+      catch { return; } // A visible Update action remains available.
+      automaticAttempts.add(candidate);
+    }
+    updateProblem = false; updateNavigating = false;
+    const result = await updateGuard.run({
+      prepare: () => current.prepareReload(), confirm: async () => await pwa?.confirmUpdate(candidate) ?? false,
+      valid: () => !disposed && current === controller && revision === routeRevision && !document.hidden &&
+        (!automatic || route === 'menu' && !overlay),
+      navigate() {
+        if (automatic) sessionStorage.setItem('toadoku:last-auto-update', String(Date.now()));
+        // Resume after reload is explicit, so another window's writer is never stolen.
+        updateNavigating = true;
+        location.reload();
+      },
+      cancel: () => current.cancelReload(),
+    });
+    if (result === 'failed') updateProblem = true;
+  }
+  function cancelUpdate() { updateGuard.cancel(); }
+
+  $effect(() => { controller?.setView({ board: inGame, concealed: studyPaused, visible: documentVisible && authorityAllowed }); });
   $effect(() => {
     width; height; layout.landscape;
     const rect = (inGame ? dockElement : menuMoreButton)?.getBoundingClientRect();
@@ -180,6 +249,7 @@
   }
   function releaseOfflineSupport() { offlineSequence++; offline?.dispose(); offline = undefined; offlinePromise = undefined; }
   async function boot() {
+    visibilityGuard.invalidate(); authorityAllowed = true;
     cancelBackupOperation();
     const request = ++bootSequence;
     booting = true; bootError = false;
@@ -222,7 +292,7 @@
     const appearanceChanged = () => { systemDark = darkMedia.matches; };
     appearanceChanged(); darkMedia.addEventListener('change', appearanceChanged);
     refreshTheme();
-    return () => { disposed = true; clearTimeout(themeTimer); clearTimeout(themeStatusTimer); themeRuntime.dispose(); darkMedia.removeEventListener('change', appearanceChanged); bootSequence++; if (shellTimer) clearTimeout(shellTimer); releaseOfflineSupport(); pwa?.dispose(); install?.dispose(); cancelBackupOperation(); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
+    return () => { disposed = true; updateGuard.cancel(); visibilityGuard.invalidate(); clearTimeout(automaticTimer); clearTimeout(themeTimer); clearTimeout(themeStatusTimer); themeRuntime.dispose(); darkMedia.removeEventListener('change', appearanceChanged); bootSequence++; if (shellTimer) clearTimeout(shellTimer); releaseOfflineSupport(); pwa?.dispose(); install?.dispose(); cancelBackupOperation(); nav?.destroy(); stopMotion?.(); unsubscribe?.(); void controller?.dispose(); };
   });
   async function focusCell() {
     await tick(); if (route !== 'board' || !gameState.canStudy) return;
@@ -287,15 +357,15 @@
   async function closeDialog(reason: CloseReason) {
     if (closingBlocked || nav?.isClosing) return;
     if (overlay?.panel === 'backup' || recoveryBusy) cancelBackupOperation();
-    const paneId = overlay?.id;
-    if (inGame && controller) {
-      checkingAuthority = true;
-      try { await controller.checkAuthority(); } finally { checkingAuthority = false; }
-      if (overlay?.id !== paneId || gameState.restorePhase === 'activating') return;
+    if (inGame && controller && reason !== 'menu') {
+      const current = controller, focusAfterCheck = reason === 'tool' || reason === 'undo';
+      void visibilityGuard.show().then(() => {
+        if (focusAfterCheck && !disposed && controller === current && route === 'board' && authorityAllowed && gameState.canStudy) void focusCell();
+      });
     }
     focusReason = reason;
     if (overlay?.panel === 'hint') controller?.cancelHint();
-    if (reason === 'menu') { controller?.cancelHint(); controller?.cancelStart(); nav?.quit(); return; }
+    if (reason === 'menu') { visibilityGuard.invalidate(); controller?.cancelHint(); controller?.cancelStart(); nav?.quit(); return; }
     historyClosing = true;
     if (reason === 'tool' || reason === 'undo' || overlay?.panel === 'pause' || overlay?.panel === 'result') nav?.closeAll();
     else nav?.closeMore();
@@ -308,9 +378,11 @@
   }
   async function resume(role: Role, discardConflicted = false, nextBand?: Band) {
     if (blocked || !controller) return;
+    visibilityGuard.invalidate();
     const revision = routeRevision;
     const resumed = await (discardConflicted ? controller.resumeSaved(role) : controller.resume(role));
     if (resumed && revision === routeRevision && !disposed) {
+      authorityAllowed = true;
       if (role === 'quick') quickContinue = nextBand && controller.state.attempt?.status === 'completed'
         ? { attemptId: controller.state.attempt.id, generation: controller.state.attempt.generation, band: nextBand } : undefined;
       nav?.go('board');
@@ -320,6 +392,7 @@
   }
   async function start(request: StartRequest) {
     if (blocked || !controller) return;
+    visibilityGuard.invalidate();
     const revision = routeRevision, current = controller, operation = ++startSequence;
     const relevant = () => !disposed && controller === current && routeRevision === revision && operation === startSequence;
     puzzleLoadFailed = false;
@@ -327,7 +400,7 @@
     if (!relevant()) return;
     const started = await current.start(request);
     if (!relevant()) return;
-    if (started) { pendingStart = undefined; nav?.go('board'); }
+    if (started) { authorityAllowed = true; pendingStart = undefined; nav?.go('board'); }
     else puzzleLoadFailed = true;
   }
   function chooseQuick(band: Band) {
@@ -446,6 +519,11 @@
     } finally { if (request === backupSequence) backupBusy = false; }
   }
   function handleKey(event: KeyboardEvent) {
+    if (updateBusy) {
+      if (!updateCancelable) event.preventDefault();
+      else if (event.key === 'Escape') { event.preventDefault(); cancelUpdate(); }
+      return;
+    }
     keyboard = true;
     if (event.repeat && ['Enter',' '].includes(event.key) && (event.target as HTMLElement).tagName === 'BUTTON') { event.preventDefault(); return; }
     if (event.key === 'Escape' && route !== 'more') {
@@ -472,11 +550,17 @@
     element.addEventListener('mousedown', guard, true); element.addEventListener('click', guard, true);
     return () => { element.removeEventListener('mousedown', guard, true); element.removeEventListener('click', guard, true); };
   }
-  function visibility() { documentVisible = !document.hidden; if (documentVisible) refreshTheme(); else { clearTimeout(themeStatusTimer); offline?.cancel(); } }
-  async function pageShown() { refreshTheme(); if (controller?.state.attempt) await controller.checkAuthority(); documentVisible = !document.hidden; }
+  function visibility() {
+    documentVisible = !document.hidden;
+    // Start the lifecycle checkpoint inside the event, before the browser may freeze us.
+    if (documentVisible) { refreshTheme(); void visibilityGuard.show(); }
+    else { visibilityGuard.hide(); clearTimeout(themeStatusTimer); offline?.cancel(); }
+  }
+  function pageHidden() { documentVisible = false; visibilityGuard.hide(); }
+  function pageShown() { documentVisible = !document.hidden; refreshTheme(); void visibilityGuard.show(); }
 </script>
 
-<svelte:window onkeydown={handleKey} onpointerdown={() => keyboard = false} onpagehide={() => documentVisible = false} onpageshow={pageShown} onfocus={refreshTheme} />
+<svelte:window onkeydown={handleKey} onpointerdown={() => keyboard = false} onpagehide={pageHidden} onpageshow={pageShown} onfocus={refreshTheme} />
 <svelte:document onvisibilitychange={visibility} />
 <svelte:head><title>Toadoku</title><meta name="theme-color" content={appliedTheme?.tokens.water.deep ?? '#0D6267'} /></svelte:head>
 
@@ -488,8 +572,8 @@
       {#if boardVisible && gameState.attempt}
         <section class="board" aria-label={a.board} bind:this={boardElement} style={rectStyle(layout.board)}>
           {#each layout.cells as cell (cell.id)}
-            {@const clue = gameState.attempt.definition.givens[cell.id] !== '0'}
-            {@const notes = Array.from({length:9},(_, i) => i + 1).filter(digit => gameState.attempt!.notes[cell.id] & (1 << (digit - 1)))}
+            {@const clue = boardDefinition?.givens[cell.id] !== '0'}
+            {@const notes = noteDigits[cell.id] ?? []}
             <button class="cell" data-cell={cell.id} data-clue={clue} data-conflict={conflicts.has(cell.id)} aria-pressed={selected === cell.id}
               aria-label={`${copy.cell(cell.row + 1, cell.column + 1)}, ${clue ? c.clue : a.entry}: ${values[cell.id] || (notes.length ? `${c.notes} ${notes.join(' ')}` : c.empty)}${conflicts.has(cell.id) ? `, ${a.conflict}` : ''}`}
               tabindex={selected === cell.id ? 0 : -1} style={rectStyle({...cell.rect,x:cell.rect.x-layout.board.x,y:cell.rect.y-layout.board.y})}
@@ -509,9 +593,9 @@
       {/if}
       <nav class={['dock', { landscape: layout.landscape, 'single-row': layout.dockSingleRow }]} aria-label={a.board} bind:this={dockElement} style={`${rectStyle(layout.dock)};--key:${layout.dockSingleRow ? layout.dock.height : layout.keySize}px`}>
         {#each [1,2,3,4,5,6,7,8,9] as number (number)}
-          <button class="cream numeric" disabled={sceneBlocked || !boardVisible || gameState.attempt?.status !== 'playing'} aria-label={String(number)} onclick={() => dispatch({type:'enter',digit:number},true)}>{number}</button>
+          <button class="cream numeric" disabled={sceneBlocked || !boardVisible || boardStatus !== 'playing'} aria-label={String(number)} onclick={() => dispatch({type:'enter',digit:number},true)}>{number}</button>
         {/each}
-        <button class={['cream', 'more', {'has-state': !!saveBadge || gameState.attempt?.notesMode}]} bind:this={moreButton} aria-label={`${copy.more}${gameState.attempt?.notesMode ? `, ${c.notes}` : ''}${saveBadge ? `, ${saveBadge}` : ''}`} aria-haspopup="dialog" onclick={() => nav?.openMore()}><span class="more-symbols"><Ellipsis aria-hidden="true" size={saveBadge ? 20 : 28} />{#if gameState.attempt?.notesMode}<Pencil aria-hidden="true" size={12} />{/if}</span>{#if saveBadge}<span class="save-label"><span>{saveBadge}</span></span>{:else if gameState.attempt?.notesMode}<span class="notes-mode">{c.notes}</span>{/if}</button>
+        <button class={['cream', 'more', {'has-state': !!saveBadge || notesMode || updateReady}]} disabled={updateBusy} bind:this={moreButton} aria-label={`${copy.more}${notesMode ? `, ${c.notes}` : ''}${saveBadge ? `, ${saveBadge}` : ''}${updateReady ? `, ${updateCopy.notice}` : ''}`} aria-haspopup="dialog" onclick={() => nav?.openMore()}><span class="more-symbols"><Ellipsis aria-hidden="true" size={saveBadge || updateReady ? 20 : 28} />{#if notesMode}<Pencil aria-hidden="true" size={12} />{/if}</span>{#if saveBadge}<span class="save-label"><span>{saveBadge}</span></span>{:else if updateReady}<span class="notes-mode">{updateCopy.action}</span>{:else if notesMode}<span class="notes-mode">{c.notes}</span>{/if}</button>
       </nav>
     {:else}
       <section class="identity" aria-label="Toadoku">
@@ -542,7 +626,7 @@
           <button class="cream" onclick={() => {controller?.cancelStart();nav?.go('menu');}}>{copy.back}</button>
         {/if}
       </nav>
-      <button class="cream menu-more" bind:this={menuMoreButton} aria-label={copy.more} aria-haspopup="dialog" disabled={sceneBlocked || !controller} onclick={() => nav?.openMore()} style={`right:0;bottom:0;width:${menuMoreSize}px;height:${menuMoreSize}px`}><Ellipsis size={28} /></button>
+      <button class="cream menu-more" bind:this={menuMoreButton} aria-label={`${copy.more}${updateReady ? `, ${updateCopy.notice}` : ''}`} aria-haspopup="dialog" disabled={sceneBlocked || !controller} onclick={() => nav?.openMore()} style={`right:0;bottom:0;width:${menuMoreSize}px;height:${menuMoreSize}px`}><Ellipsis size={updateReady ? 20 : 28} />{#if updateReady}<span class="notes-mode">{updateCopy.action}</span>{/if}</button>
       {#if booting || gameState.busy}
         <p class="scene-status" role="status">{a.loading}</p>
       {:else if bootError}
@@ -560,7 +644,7 @@
   </div>
   {#if route === 'more' && overlay}
     {#if DialogComponent}
-    <DialogComponent view={overlay.panel} {inGame} {locale} {pwa} {install} {offline} {offlineUnavailable} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
+    <DialogComponent view={overlay.panel} {inGame} {locale} {pwa} {install} {offline} {offlineUnavailable} {updateReady} {updateProblem} onUpdate={() => applyUpdate()} attempt={gameState.canStudy || ['settings','restart','result'].includes(overlay.panel) ? gameState.attempt : undefined} replayAttempt={gameState.save?.attempts.find(attempt => attempt.role === 'replay')} profile={gameState.save?.profile} {preferences} preferencesAvailable={!!gameState.save}
       puzzleProblem={puzzleLoadFailed ? a.puzzleUnavailable : undefined} receipt={gameState.receipt} {continueBand} hint={gameState.canStudy ? gameState.hint : undefined} {hintProblem} busy={blocked || gameState.hintComputing} {closingBlocked} {saveState} {anchor} restorePreview={restorePreview?.summary} {restoreError} {exportError} {recoveryBusy} {recoveryProblem}
       {themeError} {automaticThemeInfo} activeThemeId={appliedTheme.id} onThemeRetry={refreshTheme}
       onCommand={command => dispatch(command)} onNavigate={navigatePanel} onClose={closeDialog} onPreference={changePreferences}
@@ -590,6 +674,12 @@
         <p>{a.reopenHelp}</p>
       {/if}
     </div>
+  {/if}
+  {#if updateBusy && !updateNavigating && updateCancelable}
+    <dialog aria-label={updateCopy.updating} {@attach loadingDialog} oncancel={event => { event.preventDefault(); cancelUpdate(); }}>
+      <p role="status">{updateCopy.updating}</p>
+      <button class="cream" onclick={cancelUpdate}>{updateCopy.cancel}</button>
+    </dialog>
   {/if}
   <div class="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 </main>

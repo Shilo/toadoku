@@ -114,15 +114,24 @@ try {
     original = await snapshot();
     report.stages.push({ name: 'focused-recovery-fixture', notesModeAndNoteCommitted: true });
   } else {
-  await sample('fresh-main-menu-no-recurring-save', 5300, 0);
+  await sample('fresh-main-menu-no-recurring-save', 10500, 0);
   await page.getByRole('button', { name: 'Quick Play', exact: true }).click();
   await page.getByRole('button', { name: 'Easy', exact: true }).click();
   await expect(page.locator('.cell')).toHaveCount(81);
   await page.waitForTimeout(100);
   original = await snapshot();
-  const idle = await sample('visible-thinking-16-seconds', 16000, 3);
-  assert(idle.slice(1).every((event, index) => event.at - idle[index].at >= 4500));
-  assert(current(await snapshot()).elapsedMs >= 15000);
+  await page.evaluate(() => {
+    window.__boardChanges = [];
+    window.__boardObserver = new MutationObserver(records => window.__boardChanges.push(...records.map(record => ({ type: record.type, attribute: record.attributeName }))));
+    window.__boardObserver.observe(document.querySelector('.board'), { subtree: true, childList: true, characterData: true, attributes: true,
+      attributeFilter: ['aria-label', 'aria-pressed', 'data-clue', 'data-conflict'] });
+  });
+  const idle = await sample('visible-thinking-31-seconds', 31000, 3);
+  assert(idle.slice(1).every((event, index) => event.at - idle[index].at >= 9500));
+  assert(current(await snapshot()).elapsedMs >= 30000);
+  const boardChanges = await page.evaluate(() => { window.__boardObserver.disconnect(); return window.__boardChanges; });
+  assert.equal(boardChanges.length, 0, 'Time-only saves changed board text, accessibility labels or cell states');
+  report.stages.push({ name: 'time-saves-do-not-refresh-board', changes: boardChanges });
 
   await more();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
@@ -137,7 +146,7 @@ try {
       frames++; requestAnimationFrame(frame);
     }
     const start = window.__saveAudit.length; frame();
-    await new Promise(done => setTimeout(done, 10500)); running = false;
+    await new Promise(done => setTimeout(done, 20500)); running = false;
     return { frames, states: [...states], transactions: window.__saveAudit.slice(start).filter(tx => tx.writes.some(write => write.store === 'attempts')) };
   });
   assert.equal(geometry.states.length, 1, 'Settings changed layout during routine saves');
@@ -181,7 +190,7 @@ try {
   await expect(page.locator('div.scene')).toHaveCSS('filter', 'blur(12px)');
   await page.waitForTimeout(100);
   const paused = current(await snapshot());
-  await sample('explicit-pause-no-recurring-save', 5300, 0);
+  await sample('explicit-pause-no-recurring-save', 10500, 0);
   assert.equal(current(await snapshot()).elapsedMs, paused.elapsedMs);
   await page.getByRole('button', { name: 'Resume', exact: true }).click();
   const boundaryBefore = current(await snapshot()).elapsedMs;
@@ -190,7 +199,7 @@ try {
   await expect(page.locator('div.scene')).toHaveCSS('filter', 'blur(12px)');
   await persisted(attempt => attempt.elapsedMs > boundaryBefore + 1000);
   const hiddenTime = current(await snapshot()).elapsedMs;
-  await sample('delivered-pagehide-no-recurring-save', 5300, 0);
+  await sample('delivered-pagehide-no-recurring-save', 10500, 0);
   assert.equal(current(await snapshot()).elapsedMs, hiddenTime);
   report.stages.push({ name: 'lifecycle-final-sub-five-second-sample', beforeElapsed: boundaryBefore, hiddenElapsed: hiddenTime, method: 'Synthetic pagehide/pageshow events; no claim about mobile event delivery or OS suspension.' });
   await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
@@ -199,7 +208,7 @@ try {
   await more(); await page.getByRole('button', { name: 'Main menu', exact: true }).click();
   await expect(page.locator('.menu-more')).toBeEnabled();
   await page.waitForTimeout(100);
-  await sample('main-menu-after-playing-no-recurring-save', 5300, 0);
+  await sample('main-menu-after-playing-no-recurring-save', 10500, 0);
   const beforeReopen = await snapshot();
   await page.close(); page = await context.newPage();
   await page.goto(host.origin + '/toadoku/'); await resume();
@@ -243,7 +252,7 @@ try {
   await page.bringToFront();
   const visibility = await page.evaluate(() => ({ hidden: document.hidden, online: navigator.onLine }));
   assert.equal(visibility.hidden, false, 'Old owner was not visible for automatic detection');
-  await expect(page.locator('.cell')).toHaveCount(0, { timeout: 7000 });
+  await expect(page.locator('.cell')).toHaveCount(0, { timeout: 12000 });
   const concealmentMs = performance.now() - takeoverAt;
   const winner = current(await snapshot(second));
   assert.equal(winner.id, oldOwner.id); assert(winner.writer.epoch > oldOwner.writer.epoch);

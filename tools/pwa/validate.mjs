@@ -10,6 +10,7 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const releaseBytes = await readFile(join(root, 'release.json'));
 const release = JSON.parse(releaseBytes.toString('utf8'));
 if (release.protocol !== 1 || !/^[a-f0-9]{64}$/.test(release.buildId)) throw new Error('Invalid release identity');
+if (release.updateProtocol !== 2 || release.storageProtocol !== 1) throw new Error('Unsupported update/storage compatibility protocol');
 if (release.themePacks || release.files.some(file => /\.woff2?$/.test(file.path))) {
   const policy = release.themePacks;
   const expectedThemes = Object.keys(OFFLINE_THEME_PACKS).sort();

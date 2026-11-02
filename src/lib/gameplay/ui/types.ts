@@ -14,6 +14,9 @@ export interface GameDialogProps {
   /** Distinguish the menu popover from gameplay, including when a saved attempt exists. */
   inGame?: boolean;
   pwa?: PwaClient;
+  updateReady?: boolean;
+  updateProblem?: boolean;
+  onUpdate?: () => Action;
   install?: InstallSupport;
   offline?: OfflineSupport;
   offlineUnavailable?: boolean;
