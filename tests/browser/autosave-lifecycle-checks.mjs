@@ -12,7 +12,8 @@ const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const fixture = 'tests/browser/fixtures/autosave-dense512.json';
 assert.equal(hash(await readFile(fixture)), '1bc26b438300479126d5d11c7562df111607aa0f05c4d7d9cc6d2f20b0cd4cba');
-const report = { commit: git('rev-parse', 'HEAD'), acceptedAppCommit: '29227c7',
+const report = { commit: git('rev-parse', 'HEAD'), acceptedAppCommit: '52b971d',
+  reusedBrowserRun: 'https://github.com/Shilo/toadoku/actions/runs/41421555994',
   environment: { os: os.release(), cpu: os.cpus()[0].model, cores: os.cpus().length, node: process.version,
     method: 'Serial isolated Ubuntu runner; six-times CPU slowdown is host-relative simulation, not phone evidence.' },
   run: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`, jobs: [], results: [] };
@@ -67,18 +68,18 @@ async function browser(label, script, args, resultPath) {
   report.results.push({ label, sha256: hash(await readFile(resultPath)), buildId: result.release?.buildId, stages: result.stages });
 }
 try {
-  // Reuse completed local unit/type/native gates against the exact verified runtime.
-  // This runner finishes only the production browser checks blocked by local RAM.
+  // The cache freshness fix gets fresh full logic/types and focused production checks.
+  // Reuse completed long-clock/inactive/recovery coverage for the unchanged save paths.
+  await run('types-svelte', ['node_modules/svelte-check/bin/svelte-check', '--tsconfig', './tsconfig.json']);
+  await run('types-node', ['node_modules/typescript/bin/tsc', '--noEmit', '-p', 'tsconfig.node.json']);
+  await run('units', ['tools/test.mjs', 'unit', '--maxWorkers=1']);
   await run('build', ['node_modules/vite/bin/vite.js', 'build']);
   await run('validate', ['tools/pwa/validate.mjs', 'dist']);
   await copyFile('dist/release.json', resolve(output, 'release.json'));
-  await browser('long-slow-phone', 'tests/browser/autosave-long-game.mjs', ['dist', 'remote-lifecycle-dense', '--restore-fixture=' + fixture],
+  await browser('rapid-slow-phone', 'tests/browser/autosave-long-game.mjs', ['dist', 'remote-lifecycle-dense', '--restore-fixture=' + fixture, '--rapid-only'],
     'prototypes/pwa-validation/autosave-long-game/remote-lifecycle-dense/results.json');
   await browser('readable-overlays', 'tests/browser/save-optimization.mjs', ['dist', 'remote-lifecycle-overlays', '--overlay-only'],
     'prototypes/pwa-validation/save-optimization-browser/remote-lifecycle-overlays/results.json');
-  await browser('recovery', 'tests/browser/save-optimization.mjs', ['dist', 'remote-lifecycle-recovery', '--recovery-only'],
-    'prototypes/pwa-validation/save-optimization-browser/remote-lifecycle-recovery/results.json');
-  await copyFile('prototypes/pwa-validation/save-optimization-browser/remote-lifecycle-recovery/emergency-recovery.json', resolve(output, 'emergency-recovery.json'));
   report.passed = true;
 } catch (error) { report.error = String(error); process.exitCode = 1; }
 finally {
