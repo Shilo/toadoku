@@ -218,12 +218,14 @@ try {
   const readinessStartedAt = await page.evaluate(() => performance.now());
   // Installation hashes and reads back the complete shell inside install.waitUntil.
   // Controller alone can be observed before activate.waitUntil has settled.
-  await page.waitForFunction(async () => {
+  // waitForFunction tests the Promise itself as truthy in this Playwright version.
+  // evaluate awaits it; expect.poll must retry its resolved Boolean instead.
+  await expect.poll(async () => page.evaluate(async () => {
     const registration = await navigator.serviceWorker.getRegistration();
-    return registration?.active?.state === 'activated' && !registration.installing && !registration.waiting
+    return Boolean(registration?.active?.state === 'activated' && !registration.installing && !registration.waiting
       && navigator.serviceWorker.controller?.state === 'activated'
-      && navigator.serviceWorker.controller.scriptURL === registration.active.scriptURL;
-  }, undefined, { polling: 100, timeout: 60000 });
+      && navigator.serviceWorker.controller.scriptURL === registration.active.scriptURL);
+  }), { intervals: [100], timeout: 60000 }).toBe(true);
   report.pwaReadiness = await page.evaluate(async startedAt => {
     const registration = await navigator.serviceWorker.getRegistration(), worker = registration.active;
     const activatedAt = performance.now();
