@@ -188,6 +188,11 @@ export function validateDisclosureAnswers(definition: Definition, disclosure: Di
     || Number(definition.solution[answer.cell]) !== answer.digit)) fail('disclosure-answer-ledger');
 }
 export function decodeAttempt(value: unknown): Attempt {
+  validateAttempt(value);
+  return structuredClone(value) as Attempt;
+}
+/** Validate an owned merge without making a second full copy of its Undo history. */
+function validateAttempt(value: unknown): void {
   const input = object(value); version(input.schemaVersion);
   fields(input, ['schemaVersion', 'id', 'generation', 'role', 'revision', 'commandSeq', 'logicalRevision', 'writer', 'definition', 'policy', 'binding', 'entries', 'notes', 'selection', 'notesMode', 'undo', 'elapsedMs', 'assistance', 'pendingDisclosure', 'status', 'scored', 'receiptId']);
   identifier(input.id); identifier(input.generation); role(input.role); integer(input.revision);
@@ -234,7 +239,6 @@ export function decodeAttempt(value: unknown): Attempt {
     }
     if (!changed.has(edit.cell as number)) return fail('undo-primary');
   }
-  return structuredClone(value) as Attempt;
 }
 
 /** Independent arithmetic at the persistence trust boundary, not a UI supplied score. */
@@ -328,5 +332,6 @@ export function mergeSnapshot(current: Attempt, next: Attempt): Attempt {
     used: current.assistance.used || next.assistance.used,
     exposed: [...new Set([...current.assistance.exposed, ...next.assistance.exposed])].sort((a, b) => a - b),
   };
-  return decodeAttempt(merged);
+  validateAttempt(merged);
+  return merged;
 }

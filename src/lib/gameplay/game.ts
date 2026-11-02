@@ -283,14 +283,16 @@ export class GameController {
     if (result.kind === 'changed') {
       // Real saves carry exact thinking time, so a timer write need not follow an edit.
       result.attempt = { ...result.attempt, elapsedMs: Math.max(result.attempt.elapsedMs, this.clock?.sample() ?? result.attempt.elapsedMs) };
-      const completed = result.attempt.status === 'playing' && this.solved(result.attempt);
+      const valuesChanged = result.attempt.logicalRevision !== previous.logicalRevision;
+      // Selection and manual notes cannot solve the board. Resume checks recovered games.
+      const completed = valuesChanged && result.attempt.status === 'playing' && this.solved(result.attempt);
       // Recognition is part of the final command, before queue callbacks or observers.
       // Storage latency is not thinking time and a failed save must never unfreeze it.
       if (completed) result.attempt = { ...result.attempt, status: 'pending-completion',
         elapsedMs: Math.max(result.attempt.elapsedMs, this.clock?.sample() ?? result.attempt.elapsedMs) };
       this.value.attempt = result.attempt;
-      if ((command.type === 'select' || result.attempt.logicalRevision !== previous.logicalRevision) && this.value.problem?.startsWith('hint-unavailable:')) this.value.problem = undefined;
-      if (result.attempt.logicalRevision !== previous.logicalRevision) { this.cancelHint(); this.value.hint = undefined; }
+      if ((command.type === 'select' || valuesChanged) && this.value.problem?.startsWith('hint-unavailable:')) this.value.problem = undefined;
+      if (valuesChanged) { this.cancelHint(); this.value.hint = undefined; }
       if (completed) { this.cancelHint(); this.value.hint = undefined; this.syncClock(); }
       this.queue!.enqueue(result.attempt, command.type === 'select'); this.scheduleCheckpoint(true); this.publish();
       if (completed) void this.finish();

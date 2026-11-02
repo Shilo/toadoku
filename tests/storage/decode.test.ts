@@ -4,6 +4,42 @@ import { attempt, receipt, solution } from './fixtures';
 import { runInNewContext } from 'node:vm';
 
 describe('strict storage snapshots', () => {
+  it('checks clue entries against a captured definition even if a caller getter changes', () => {
+    const value = attempt(), givens = value.definition.givens;
+    value.entries[1] = 1;
+    let reads = 0;
+    Object.defineProperty(value.definition, 'givens', { enumerable: true, get() {
+      reads++;
+      return reads === 3 ? `${givens[0]}0${givens.slice(2)}` : givens;
+    } });
+    expect(() => decodeAttempt(value)).toThrow('clue-entry-notes');
+  });
+  it('keeps decoded and merged long games detached, with the complete Undo chain checked', () => {
+    const current = attempt();
+    for (let index = 0; index < 512; index++) {
+      const beforeValue = current.entries[0], afterValue = index % 2 + 1;
+      current.entries[0] = afterValue;
+      current.undo.push({ cell: 0, changes: [{ cell: 0, beforeValue, afterValue, beforeNotes: 0, afterNotes: 0 }] });
+      current.commandSeq++; current.logicalRevision++;
+    }
+    const before = structuredClone(current), captured = decodeAttempt(current);
+    const next = { ...captured, commandSeq: captured.commandSeq + 1, elapsedMs: 10_000 };
+    const merged = mergeSnapshot(current, next);
+    expect(merged.undo).toHaveLength(512);
+    expect(merged.elapsedMs).toBe(10_000);
+    merged.undo[0].changes[0].beforeValue = 9;
+    merged.definition.attestation.recordSiblings.push('0'.repeat(64));
+    expect(current).toEqual(before);
+    expect(captured.undo).toEqual(before.undo);
+    expect(captured.definition).toEqual(before.definition);
+    captured.notes[0] = 511;
+    expect(current).toEqual(before);
+
+    const corrupt = { ...structuredClone(before), commandSeq: before.commandSeq + 1 };
+    corrupt.undo[0].changes[0].afterValue = 9;
+    expect(() => mergeSnapshot(current, corrupt)).toThrow('undo-chain');
+    expect(current).toEqual(before);
+  });
   it('validates indexed values independently of inherited array methods across realms', () => {
     class SpoofArray extends Array<number> {
       override map<U>(_callback: (value: number, index: number, array: number[]) => U): U[] { return Array(81).fill(0) as U[]; }
